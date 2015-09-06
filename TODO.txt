@@ -1,0 +1,16 @@
+High priority should happen by our meeting 9/7 11:30 am
+
+Billy:
+- basic git tutorial (medium priority)
+- advanced git turorial (low priority)
+- read through OCaml differences (medium priority)
+- remove my permissions (low priority)
+http://www.cs.cmu.edu/~help/afs/afs_quickref.html
+
+Ben:
+- make this file lol (high priority)
+- get it to compile (high priority)
+
+Both:
+- read and understand all starter code (high priority)
+- understand how the compiler is supposed to work (i.e. intermediate representations, what asssembly code should look like, how to incorporate starter code, etc) (medium priority)
