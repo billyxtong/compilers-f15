@@ -1,0 +1,13 @@
+# subversion directory
+rattata/.svn
+
+# other starter code
+rattata/lab1/haskell
+rattata/lab1/sml
+
+# emacs cruft
+*~
+/#*#
+
+# OCaml build files
+rattata/lab1/ocaml/_build/
