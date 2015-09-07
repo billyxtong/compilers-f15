@@ -1,5 +1,8 @@
-# subversion directory
-rattata/.svn
+# subversion stuff
+*.svn
+
+# other dot files
+*.merlin
 
 # other starter code
 rattata/lab1/haskell
@@ -9,5 +12,10 @@ rattata/lab1/sml
 *~
 /#*#
 
-# OCaml build files
-rattata/lab1/ocaml/_build/
+# OCaml build/other generated files/executables
+*_build/
+*_tags
+*top.native
+
+# not actually sure these are
+*bin

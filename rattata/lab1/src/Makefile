@@ -1,4 +1,4 @@
-SUBDIRS = util,parse,trans,type,codegen,top
+SUBDIRS = util,front_end/parse,front_end/trans,front_end/type,front_end/codegen,top
 LIBS = str
 MAIN = top
 
