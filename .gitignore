@@ -2,7 +2,7 @@
 *.svn
 
 # other dot files
-*.merlin
+#*.merlin
 
 # other starter code
 rattata/lab1/haskell
@@ -14,7 +14,7 @@ rattata/lab1/sml
 
 # OCaml build/other generated files/executables
 *_build/
-*_tags
+#*_tags
 *top.native
 
 # not actually sure these are
