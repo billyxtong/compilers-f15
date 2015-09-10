@@ -1,7 +1,7 @@
 type const = Int of int
 type instrName = InstrName of string
 
-type reg = EAX | ECX | EBX | EIX | EBP | RSP | BILLYLOOKUPTHEOTHERS
+type reg = RAX | RBX | RCX | RDX | RBP | RSP | RSI | RDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 type memAddr = reg * int
 
