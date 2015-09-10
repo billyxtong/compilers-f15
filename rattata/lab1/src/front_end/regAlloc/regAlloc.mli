@@ -8,4 +8,4 @@
  * Implements a "convenient munch" algorithm
  *)
 
-val codegen : Tree.stm list -> Assem.instr list
+val regAlloc : Tree.stm list -> FormatAssem.instr list

@@ -11,7 +11,7 @@
 open Core.Std
 
 module T = Tree
-module AS = Assem
+module AS = FormatAssem
 
 let munch_op = function
     T.ADD -> AS.ADD
@@ -54,6 +54,6 @@ let munch_stm = function
       munch_exp (AS.REG AS.EAX) e
   | _ -> assert false
 
-let rec codegen = function
+let rec regAlloc = function
     [] -> []
-  | stm::stms -> munch_stm stm @ codegen stms
+  | stm::stms -> munch_stm stm @ regAlloc stms
