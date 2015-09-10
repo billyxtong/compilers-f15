@@ -1,9 +1,6 @@
 # subversion stuff
 *.svn
 
-# other dot files
-#*.merlin
-
 # other starter code
 rattata/lab1/haskell
 rattata/lab1/sml
@@ -14,8 +11,12 @@ rattata/lab1/sml
 
 # OCaml build/other generated files/executables
 *_build/
-#*_tags
+*.cmi
+*.cmo
 *top.native
+
+# You get these when you compile the tests I guess
+*.s
 
 # not actually sure these are
 *bin
