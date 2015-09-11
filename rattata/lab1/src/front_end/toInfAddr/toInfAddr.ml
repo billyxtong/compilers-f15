@@ -1,11 +1,3 @@
-(* L1 Compiler
- * AST -> IR Translator
- * Author: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
- * Modified by: Alex Vaynberg <alv@andrew.cmu.edu>
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
- *)
-
 module A = Ast
 module T = Tree
 module S = Symbol.Map
@@ -47,4 +39,4 @@ let rec trans_stms env = function
       trans_stms env ((Mark.data marked_stm)::stms)
   | [] -> assert false                  (* There must be a return! *)
 
-let translate stms = trans_stms S.empty stms
+let toInfAddr stms = trans_stms S.empty stms

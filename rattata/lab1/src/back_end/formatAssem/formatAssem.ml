@@ -30,4 +30,33 @@ type instr =
   | DIRECTIVE of string
   | COMMENT of string
 
-val format : instr -> string
+(* functions that format assembly output *)
+
+let format_reg = function
+    EAX -> "%eax"
+
+let format_binop = function
+    ADD -> "+"
+  | SUB -> "-"
+  | MUL -> "*"
+  | DIV -> "/"
+  | MOD -> "%"
+
+let format_operand = function
+    IMM n  -> "$" ^ Int32.to_string n
+  | TEMP t -> Temp.name t
+  | REG r  -> format_reg r
+
+let formatAssem = function
+  | BINOP (oper, d, s1, s2) ->
+      "\t" ^ format_operand d
+      ^ " <-- " ^ format_operand s1
+      ^ " " ^ format_binop oper
+      ^ " " ^ format_operand s2 ^ "\n"
+  | MOV (d, s) ->
+      "\t" ^ format_operand d
+      ^ " <-- " ^ format_operand s ^ "\n"
+  | DIRECTIVE str ->
+      "\t" ^ str ^ "\n"
+  | COMMENT str ->
+      "\t" ^ "/* " ^ str ^ "*/\n"

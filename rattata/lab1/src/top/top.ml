@@ -43,26 +43,26 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only (
     say_if dump_ast (fun () -> Ast.Print.pp_program ast);
 
     (* Typecheck *)
-    say_if verbose (fun () -> "Checking...");
+    say_if verbose (fun () -> "Typecking...");
     TypeChecker.typecheck ast;
     if typecheck_only then exit 0;
 
-    (* Translate *)
-    say_if verbose (fun () -> "Translating...");
-    let ir = Trans.translate ast in
+    (* Convert Post-Elab AST to Infinte Addr *)
+    say_if verbose (fun () -> "converting to Infinite Address code");
+    let ir = ToInfAddr.toInfAddr ast in
     say_if dump_ir (fun () -> Tree.Print.pp_program ir);
 
-    (* Codegen *)
-    say_if verbose (fun () -> "Codegen...");
-    let assem = Codegen.codegen ir in
-    say_if dump_assem (fun () -> List.to_string ~f:Assem.format assem);
+    (* Allocate Registers *)
+    say_if verbose (fun () -> "Allocating Registers");
+    let assem = RegAlloc.regAlloc ir in
+    say_if dump_assem (fun () -> List.to_string ~f:FormatAssem.formatAssem assem);
 
     (* Add assembly header and footer *)
     let assem =
-      [Assem.DIRECTIVE(".file\t\"" ^ source ^ "\"")]
+      [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")]
       @ assem
-      @ [Assem.DIRECTIVE ".ident\t\"15-411 L1 reference compiler\""] in
-    let code = String.concat (List.map assem ~f:Assem.format) in
+      @ [FormatAssem.DIRECTIVE ".ident\t\"15-411 L1 reference compiler\""] in
+    let code = String.concat (List.map assem ~f:FormatAssem.formatAssem) in
 
     (* Output assembly *)
     let afname = (Filename.chop_extension source) ^ ".s" in
