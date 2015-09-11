@@ -13,7 +13,8 @@ type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinop = ADD of assemArg * assemLoc | MUL of assemArg * assemLoc
 type assemInstr = MOV of assemArg * assemLoc | BINOP of assemBinop | RETURN
-
+type assemProg = assemInstr list
+    
 (* Below here allows tmps, but also allows actual assembly instructions.
    Note: Because we allow actual assembly instructions, memory
    addresses are allowed. Memory addresses should not occur prior
@@ -23,20 +24,31 @@ type tmp = int
 type tmpAssemLoc = Tmp of tmp | AssemLocForTmp of assemLoc
 type tmpAssemArg = TmpAssemLoc of tmpAssemLoc | AssemArg of assemArg
 
-(* For Two Address Code *)
+(* Two Address Code *)
 type tmp2AddrBinop = Tmp2AddrAdd of tmpAssemArg * tmpAssemLoc
                    | Tmp2AddrMul of tmpAssemArg * tmpAssemLoc
 type tmp2AddrInstr = Tmp2AddrMov of tmpAssemArg * tmpAssemLoc
                    | Tmp2AddrBinop of tmp2AddrBinop
                    | Tmp2AddrReturn of tmpAssemArg
+type tmp2AddrProg = tmp2AddrInstr list
 
-(* For Three Address Code *)
+(* Three Address Code *)
 type tmp3AddrBinop = Tmp3AddrAdd of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
                    | Tmp3AddrMul of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
 type tmp3AddrInstr = Tmp3AddrMov of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn of tmpAssemArg
-(* TODO For Inf Address Code (any number of operands on right hand side *)
+type tmp3AddrProg = tmp3AddrInstr list
+
+(* Inf Address Code (any number of operands on right hand side *)
+type tmpExpr = TmpAssemArg of tmpAssemArg
+             | TmpInfAddrBinop of tmpInfAddrBinop
+and tmpInfAddrBinop = TmpInfAddrAdd of tmpExpr * tmpExpr *  tmpAssemLoc
+                    | TmpInfAddrMul of tmpExpr * tmpExpr *  tmpAssemLoc
+type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmpAssemLoc
+                    | TmpInfAddrBinop of tmpInfAddrBinop
+                    | TmpInfAddrReturn of tmpExpr   
+type tmpInfAddrProg = tmpInfAddrInstr list
 
 (* Post-Elab AST
    A restriced grammar from the Pre-Elab AST. See the elaboration
@@ -45,7 +57,7 @@ type ident = string * c0type
 type expr = ConstExpr of const | Ident of ident | ASTbinop of expr * astBinop * expr
 and assignStmt = ident * expr 
 and astBinop = ASTplus | ASTminus | ASTtimes | ASTdiv | ASTmod
-type stmt = Decl of ident | AssignStmt of assignStmt
+type stmt = Decl of ident | AssignStmt of assignStmt | Return of expr
 type elabAST = stmt list
 
 (* Pre-Elab AST
