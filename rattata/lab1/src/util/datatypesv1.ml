@@ -1,4 +1,6 @@
 type c0type = INT | PTR (* will add more eventually *)
+ (* the int is the actual value, which we can do because everything
+    are ints in C0 (I think?) *)
 type const = int * c0type
 
 type reg = RAX | RBX | RCX | RDX | RBP | RSP | RSI | RDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
@@ -40,14 +42,22 @@ type tmp3AddrInstr = Tmp3AddrMov of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
 type ident = string * c0type
-type expr = ConstExpr
-and assignSmt = ident * expr | Ident of ident | ASTbinop of expr * astBinop * expr
+type expr = ConstExpr of const | Ident of ident | ASTbinop of expr * astBinop * expr
+and assignStmt = ident * expr 
 and astBinop = ASTplus | ASTminus | ASTtimes | ASTdiv | ASTmod
 type stmt = Decl of ident | AssignStmt of assignStmt
 type elabAST = stmt list
 
-(* Pre-Elab AST *)
-    (*
-type stmt = Decl of ident | AssignStmt of assignStmt
-type preElabAST = stmt list
-*)
+(* Pre-Elab AST
+   Unfortunately, we have to wrap everything in different
+   constructors here, in order to keep in separate from
+   Post-Elab AST *)
+type leftHandIdent = Ident of ident | ParenWrapIdent of leftHandIdent
+type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
+type preElabExpr = ParenWrapExpr of expr | PreElabConstExpr of const
+                 | IdentExpr of ident
+                 | PreElabBinop of preElabExpr * astBinop * preElabExpr
+                 | UnaryMinus of preElabExpr
+type preElabStmt = PreElabDecl of ident | SimpAssign of assignStmt
+                 | PreElabReturn of preElabExpr
+type preElabAST = preElabStmt list
