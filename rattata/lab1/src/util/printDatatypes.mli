@@ -1,11 +1,13 @@
-val toString : const -> string
-val toString : instrName -> string
-val toString : reg -> string
-val toString : memAddr -> string (* should I break this down more? *)
-val toString : assemArg -> string
-val toString : assemArgs -> string
-val toString : assemInstr -> string
-val toString : temp -> string
-val toString : tmpAssemArg -> string
-val toString : tmpAssemArgs -> string
-val toString : tmpTwoAddrInstr -> string
+open Datatypesv1
+
+val constToString : const -> string
+val instrNameToString : instrName -> string
+val regToString : reg -> string
+val memAddrToString : memAddr -> string (* should I break this down more? *)
+val assemArgToString : assemArg -> string
+val assemArgsToString : assemArgs -> string
+val assemInstrToString : assemInstr -> string
+val tmpToString : tmp -> string
+val tmpAssemArgToString : tmpAssemArg -> string
+val tmpAssemArgsToString : tmpAssemArgs -> string
+val tmpTwoAddrInstrToString : tmpTwoAddrInstr -> string

@@ -1,8 +1,11 @@
-fun toString (Int(c) : const) = string_of_int c
+open Datatypesv1
+open String
 
-fun toString (InstrName(s) : instrName) = s
+let constToString (Int(c) : const) = string_of_int c
 
-fun toString (r : reg) = 
+let instrNameToString (InstrName(s) : instrName) = s
+
+let regToString (r : reg) = 
   match r with
         RAX -> "rax"
       | RBX -> "rbx"
@@ -21,33 +24,34 @@ fun toString (r : reg) =
       | R14 -> "r14"
       | R15 -> "r15"
 
-fun toString ((r, i) : memAddr) = concat([string_of_int(i); "("; toString(r); ")"])
+let memAddrToString ((register, instr) : memAddr) = concat "" [string_of_int(instr); "("; regToString(register); ")"]
 
-fun toString (a : assemArg) = 
-  match a with
-        Reg(r) -> toString(r)
-      | MemAddr(m) -> toString(m)
-      | Const(c) -> toString(c)
+let assemArgToString (arg : assemArg) = 
+  match arg with
+        Reg(r) -> regToString(r)
+      | MemAddr(register, instr) -> memAddrToString(register, instr)
+      | Const(c) -> constToString(c)
 
-fun toString(As : assemArgs) = 
-  match As with
+let assemArgsToString(args : assemArgs) = 
+  match args with
         NONE -> "none"
-      | Arg(arg) -> toString(arg)
-      | SrcDest(s,d) -> concat([toString(s); ", "; toString(d)])
+      | Arg(arg) -> assemArgToString(arg)
+      | SrcDest(src, dest) -> concat "" [assemArgToString(src); ", "; assemArgToString(dest)]
 
-fun toString((i, args) : assemInstr) = concat([toString(i); " "; toString(args)])
+let assemInstrToString((instr, args) : assemInstr) = concat "" [instrNameToString(instr); " "; assemArgsToString(args)]
 
-fun toString(t : tmp) = string_of_int t
+let tmpToString(t : tmp) = string_of_int t
 
-fun toString(tmpArg : tmpAssemArg) = 
+let tmpAssemArgToString(tmpArg : tmpAssemArg) = 
   match tmpArg with
-        Tmp(tmp) -> toString(tmp)
-      | AssemArg(arg) -> toString(arg)
+        Tmp(tmp) -> tmpToString(tmp)
+      | AssemArg(arg) -> assemArgToString(arg)
 
-fun toString(ts : tmpAssemArgs) = 
+let tmpAssemArgsToString(ts : tmpAssemArgs) = 
   match ts with
         TmpNONE -> "none"
-      | TmpArg(tmpArg) -> toString(tmpArg)
-      | TmpSrcDest(tmpSrc, tmpDest) -> concat([toString(tmpSrc); " "; toString(tmpDest)])
+      | TmpArg(tmpArg) -> tmpAssemArgToString(tmpArg)
+      | TmpSrcDest(tmpSrc, tmpDest) -> concat "" [tmpAssemArgToString(tmpSrc); " "; tmpAssemArgToString(tmpDest)]
 
-fun toString((instr, tmpArgs) : tmpTwoAddrInstr) = concat([toString(instr); " "; toString(tmpArgs)])
+let tmpTwoAddrInstrToString((instr, tmpArgs) : tmpTwoAddrInstr) = concat "" [instrNameToString(instr); " "; 
+                                                                              tmpAssemArgsToString(tmpArgs)]
