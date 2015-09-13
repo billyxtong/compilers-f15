@@ -35,7 +35,7 @@ type tmp2AddrProg = tmp2AddrInstr list
 (* Three Address Code *)
 type tmp3AddrBinop = Tmp3AddrAdd of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
                    | Tmp3AddrMul of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
-type tmp3AddrInstr = Tmp3AddrMov of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
+type tmp3AddrInstr = Tmp3AddrMov of tmpAssemArg *  tmpAssemLoc
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn of tmpAssemArg
 type tmp3AddrProg = tmp3AddrInstr list

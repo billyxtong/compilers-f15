@@ -7,6 +7,8 @@
  *)
 
 open Core.Std
+open Datatypesv1
+open PrintDatatypes
 
 let say = prerr_endline
 let newline = prerr_newline
@@ -29,6 +31,23 @@ let say_if flag s =
 
 let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only () =
   try
+    
+    let c0Type = PTR in  
+    let c = (4, c0Type) in print_endline (constToString(c));
+    (*let s = InstrName("movl") in print_endline (instrNameToString(s));*)
+    let r1 = RAX in print_endline (regToString(r1));
+    let r2 = RCX in
+    let offset = 8 in print_endline (memAddrToString(r2, offset));
+    let testReg1 = Reg(RSI) in print_endline (assemLocToString(testReg1));
+    let testAssemLoc1 = MemAddr(RBX, 8) in
+    let testAssemArg1 = Const(8, INT) in
+    print_endline (assemBinopToString(ADD(testAssemArg1, testAssemLoc1)));
+    let testAssemLoc2 = MemAddr(RCX, 16) in
+    let testAssemArg2 = AssemLoc(Reg(RAX)) in
+    print_endline (assemInstrToString(MOV(testAssemArg2, testAssemLoc2)));
+
+
+    
     let source = match files with
     | [] -> say "Error: no input file provided"; raise EXIT
     | [filename] -> filename
