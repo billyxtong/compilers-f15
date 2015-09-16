@@ -1,0 +1,17 @@
+//test return -16
+int main () {
+  int x1 = 23;
+  int x2 = 31;
+  int x3 = 45;
+  int x4 = 56;
+  int x5 = 60;
+  int x6 = 78;
+  int x7 = 89;
+  int x8;
+
+  x1 = 10; x2 = 12; x3 = 14; x4 = 16;
+  x5 = 18; x6 = 20; x7 = 22; x8 = 24;
+
+  return (x8 / 10) - (x7 % 10) - (x6 / 10) - (x5 % 10) - (x4 / 10) - (x3 % 10) - (x2 / 10) - (x1 % 10);
+  return 4;
+}

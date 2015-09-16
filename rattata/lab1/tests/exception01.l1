@@ -1,0 +1,5 @@
+//test div-by-zero
+int main () {
+  int TMAX = 2147483647;
+  return (TMAX + 1) / -1;
+}
