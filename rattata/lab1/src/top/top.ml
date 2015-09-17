@@ -32,32 +32,6 @@ let say_if flag s =
 let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only () =
   try
    
-    (* assembly instructions for program: int main () { int x = 8; int y = 9; return x * y; }*) 
-    let testInstr1 = MOV(AssemLoc(Reg(RSP)), Reg(RBP)) in
-    let testInstr2 = MOV(Const(8, INT), MemAddr(RBP, -8)) in
-    let testInstr3 = MOV(Const(9, INT), MemAddr(RBP, -4)) in
-    let testInstr4 = MOV(AssemLoc(MemAddr(RBP, -8)), Reg(RAX)) in
-    let testInstr5 = BINOP(MUL(AssemLoc(MemAddr(RBP, -4)), Reg(RAX))) in
-    let testInstr6 = RETURN in
-    print_endline (assemProgToString([testInstr1; testInstr2; testInstr3; testInstr4; testInstr5; testInstr6]));
-    (* 2-address fibonacci, return fib(4) *)
-    let testTmpInstr0 = Tmp2AddrMov(AssemArg(Const(0, INT)), Tmp(0)) in
-    let testTmpInstr1 = Tmp2AddrMov(AssemArg(Const(1, INT)), Tmp(1)) in
-    let testTmpInstr2 = Tmp2AddrMov(TmpAssemLoc(Tmp(0)), Tmp(2)) in
-    let testTmpInstr3 = Tmp2AddrBinop(Tmp2AddrAdd(TmpAssemLoc(Tmp(1)), Tmp(2))) in
-    let testTmpInstr4 = Tmp2AddrMov(TmpAssemLoc(Tmp(1)), Tmp(3)) in
-    let testTmpInstr5 = Tmp2AddrBinop(Tmp2AddrAdd(TmpAssemLoc(Tmp(2)), Tmp(3))) in
-    let testTmpInstr6 = Tmp2AddrMov(TmpAssemLoc(Tmp(2)), Tmp(4)) in
-    let testTmpInstr7 = Tmp2AddrBinop(Tmp2AddrAdd(TmpAssemLoc(Tmp(3)), Tmp(4))) in
-    let testTmpInstr8 = Tmp2AddrReturn(TmpAssemLoc(Tmp(4))) in
-    print_endline (tmp2AddrProgToString([testTmpInstr0; testTmpInstr1; testTmpInstr2; testTmpInstr3; 
-                                         testTmpInstr4; testTmpInstr5; testTmpInstr6; testTmpInstr7; testTmpInstr8]));
-    (* 3-address fibonacci, return fact(2) *)
-    let testTmpInstr1 = Tmp3AddrMov(AssemArg(Const(1, INT)), Tmp(1)) in
-    let testTmpInstr2 = Tmp3AddrMov(AssemArg(Const(2, INT)), Tmp(2)) in
-    let testTmpInstr3 = Tmp3AddrBinop(Tmp3AddrMul(TmpAssemLoc(Tmp(1)), TmpAssemLoc(Tmp(2)), Tmp(3))) in
-    print_endline (tmp3AddrProgToString([testTmpInstr1; testTmpInstr2; testTmpInstr3]));
-    
     let source = match files with
     | [] -> say "Error: no input file provided"; raise EXIT
     | [filename] -> filename
@@ -106,3 +80,33 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only (
   | e -> prerr_string (Exn.to_string e); exit 1
 
 let () = Command.run (Command.basic ~summary:"L1 compiler" spec main)
+
+
+(*
+       (* assembly instructions for program: int main () { int x = 8; int y = 9; return x * y; }*) 
+    let testInstr1 = MOV(AssemLoc(Reg(RSP)), Reg(RBP)) in
+    let testInstr2 = MOV(Const(8, INT), MemAddr(RBP, -8)) in
+    let testInstr3 = MOV(Const(9, INT), MemAddr(RBP, -4)) in
+    let testInstr4 = MOV(AssemLoc(MemAddr(RBP, -8)), Reg(RAX)) in
+    let testInstr5 = BINOP(MUL(AssemLoc(MemAddr(RBP, -4)), Reg(RAX))) in
+    let testInstr6 = RETURN in
+    print_endline (assemProgToString([testInstr1; testInstr2; testInstr3; testInstr4; testInstr5; testInstr6]));
+    (* 2-address fibonacci, return fib(4) *)
+    let testTmpInstr0 = Tmp2AddrMov(AssemArg(Const(0, INT)), Tmp(0)) in
+    let testTmpInstr1 = Tmp2AddrMov(AssemArg(Const(1, INT)), Tmp(1)) in
+    let testTmpInstr2 = Tmp2AddrMov(TmpAssemLoc(Tmp(0)), Tmp(2)) in
+    let testTmpInstr3 = Tmp2AddrBinop(Tmp2AddrAdd(TmpAssemLoc(Tmp(1)), Tmp(2))) in
+    let testTmpInstr4 = Tmp2AddrMov(TmpAssemLoc(Tmp(1)), Tmp(3)) in
+    let testTmpInstr5 = Tmp2AddrBinop(Tmp2AddrAdd(TmpAssemLoc(Tmp(2)), Tmp(3))) in
+    let testTmpInstr6 = Tmp2AddrMov(TmpAssemLoc(Tmp(2)), Tmp(4)) in
+    let testTmpInstr7 = Tmp2AddrBinop(Tmp2AddrAdd(TmpAssemLoc(Tmp(3)), Tmp(4))) in
+    let testTmpInstr8 = Tmp2AddrReturn(TmpAssemLoc(Tmp(4))) in
+    print_endline (tmp2AddrProgToString([testTmpInstr0; testTmpInstr1; testTmpInstr2; testTmpInstr3; 
+                                         testTmpInstr4; testTmpInstr5; testTmpInstr6; testTmpInstr7; testTmpInstr8]));
+    (* 3-address fibonacci, return fact(2) *)
+    let testTmpInstr1 = Tmp3AddrMov(AssemArg(Const(1, INT)), Tmp(1)) in
+    let testTmpInstr2 = Tmp3AddrMov(AssemArg(Const(2, INT)), Tmp(2)) in
+    let testTmpInstr3 = Tmp3AddrBinop(Tmp3AddrMul(TmpAssemLoc(Tmp(1)), TmpAssemLoc(Tmp(2)), Tmp(3))) in
+    print_endline (tmp3AddrProgToString([testTmpInstr1; testTmpInstr2; testTmpInstr3]));
+    
+*)
