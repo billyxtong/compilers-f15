@@ -17,9 +17,12 @@ let binopTo2Addr dest = function
        let t = Tmp(Temp.create()) in
        let op = match b with
            Tree.ADD -> Tmp2AddrBinop(Tmp2AddrAdd(arg2, t))
+        |  Tree.SUB -> Tmp2AddrBinop(Tmp2AddrSub(arg2, t))
         |  Tree.MUL -> Tmp2AddrBinop(Tmp2AddrMul(arg2, t))
+        |  Tree.DIV -> Tmp2AddrBinop(Tmp2AddrDiv(arg2, t))
+        |  Tree.MOD -> Tmp2AddrBinop(Tmp2AddrMod(arg2, t))
                     in
-       Tmp2AddrMov(arg1, t):: op::
+       Tmp2AddrMov(arg1, t)::op::
        [Tmp2AddrMov(TmpAssemLoc t, dest)]
 
 (* val instrTo2Addr: Tree.stm -> tmp2AddrInstr list *)

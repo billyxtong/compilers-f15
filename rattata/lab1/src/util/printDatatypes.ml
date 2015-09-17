@@ -69,10 +69,24 @@ let tmpAssemArgToString(tmpArg : tmpAssemArg) =
 
 let tmp2AddrBinopToString(tmp2binop : tmp2AddrBinop) =
   match tmp2binop with
-        Tmp2AddrAdd(tmpsrc, tmpdest) -> concat "" [tmpAssemLocToString(tmpdest); " <-- "; 
-                                                    tmpAssemLocToString(tmpdest); " + "; tmpAssemArgToString(tmpsrc)]
+        Tmp2AddrAdd(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- "; 
+            tmpAssemLocToString(tmpdest); " + ";
+            tmpAssemArgToString(tmpsrc)]
+      | Tmp2AddrSub(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- ";
+            tmpAssemLocToString(tmpdest); " - ";
+            tmpAssemArgToString(tmpsrc)]
       | Tmp2AddrMul(tmpsrc, tmpdest) -> concat "" [tmpAssemLocToString(tmpdest); " <-- "; 
                                                     tmpAssemLocToString(tmpdest); " * "; tmpAssemArgToString(tmpsrc)]
+      | Tmp2AddrDiv(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- ";
+            tmpAssemLocToString(tmpdest); " / ";
+            tmpAssemArgToString(tmpsrc)]
+      | Tmp2AddrMod(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- ";
+            tmpAssemLocToString(tmpdest); " % ";
+            tmpAssemArgToString(tmpsrc)]
 
 let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) = 
   match tmp2instr with

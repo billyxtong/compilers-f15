@@ -27,7 +27,10 @@ type tmpAssemArg = TmpAssemLoc of tmpAssemLoc | AssemArg of assemArg
 
 (* Two Address Code *)
 type tmp2AddrBinop = Tmp2AddrAdd of tmpAssemArg * tmpAssemLoc
+                   | Tmp2AddrSub of tmpAssemArg * tmpAssemLoc
                    | Tmp2AddrMul of tmpAssemArg * tmpAssemLoc
+                   | Tmp2AddrDiv of tmpAssemArg * tmpAssemLoc
+                   | Tmp2AddrMod of tmpAssemArg * tmpAssemLoc    
 type tmp2AddrInstr = Tmp2AddrMov of tmpAssemArg * tmpAssemLoc
                    | Tmp2AddrBinop of tmp2AddrBinop
                    | Tmp2AddrReturn of tmpAssemArg
