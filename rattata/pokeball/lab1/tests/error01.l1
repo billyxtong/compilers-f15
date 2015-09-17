@@ -1,0 +1,8 @@
+//test error
+int main() {
+  int f0 = 0;
+  int f1 = 1;
+  int f2 = f0 + f1;
+  /* int f3 = f2 + f1; */
+  return f3;
+}
