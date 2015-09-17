@@ -25,11 +25,12 @@ let spec =
   +> flag "--dump-ir" no_arg ~doc:" Pretty print the IR"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
+  +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
 
 let say_if flag s =
   if flag then say (s ()) else ()
 
-let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only () =
+let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_2Addr() =
   try
    
     let source = match files with
@@ -57,8 +58,10 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only (
 
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers");
-    let threeAddr = To3Addr.to3Addr ir in threeAddr; exit 1
+    let threeAddr = To3Addr.to3Addr ir in threeAddr;
 
+    let twoAddr = To2Addr.to2Addr threeAddr in
+    say_if dump_2Addr (fun () -> (tmp2AddrProgToString twoAddr));
     (* Add assembly header and footer *)
     (* let assem = *)
     (*   [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")] *)
