@@ -1,7 +1,11 @@
-(* This step takes InfAddr code to 3Addr code. Currently, I'm taking
-   the starter code's original InfAddr datatype as in put.
-   Eventually, I will convert everything to use our InfAddr datatype,
-   and then I will write another function that takes that as input
-   (which is what we'll actually use). *)
+(* L1 Compiler
+ * Assembly Code Generator for FAKE assembly
+ * Author: Alex Vaynberg <alv@andrew.cmu.edu>
+ * Based on code by: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
+ * Modified: Frank Pfenning <fp@cs.cmu.edu>
+ * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
+ *
+ * Implements a "convenient munch" algorithm
+ *)
 
-val to3AddrFromTheirInfAddr: Tree.stm list -> Datatypesv1.tmp3AddrProg
+val to3Addr : Tree.stm list -> FormatAssem.instr list

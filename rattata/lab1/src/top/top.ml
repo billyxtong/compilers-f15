@@ -57,7 +57,7 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only (
 
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers");
-    let assem = RegAlloc.regAlloc ir in
+    let assem = To3Addr.to3Addr ir in
     say_if dump_assem (fun () -> List.to_string ~f:FormatAssem.formatAssem assem);
 
     (* Add assembly header and footer *)

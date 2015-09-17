@@ -1,38 +1,59 @@
-open Datatypesv1
-(* until we switch to using only our datatypes, be careful
-   of namespace collisions: i.e., we have an exp in Datatypesv1
-   but there's also a Tree.exp *)
+(* L1 Compiler
+ * Assembly Code Generator for FAKE assembly
+ * Author: Alex Vaynberg <alv@andrew.cmu.edu>
+ * Based on code by: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
+ * Modified: Frank Pfenning <fp@cs.cmu.edu>
+ * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
+ *
+ * Implements a "convenient munch" algorithm
+ *)
 
-(* Start using tmps with numbers after what have already been
-   used in generating InfAddr. There's definitely a better
-   way to do this. *)
-let next_tmp_num = Temp.counter;;
+open Core.Std
 
-(* Return the next tmp, and update next_tmp_num *)
-let newTmp (): tmp =
-   let result = !next_tmp_num in
-   let () = next_tmp_num := !next_tmp_num + 1 in
-   result
+module T = Tree
+module AS = FormatAssem
 
-(* Returns the statement list, and what tmp the expression
-   is ending up in *)
-let expTo3Addr (e: Tree.exp):
-  (tmp3AddrInstr list * tmpAssemLoc) =
-   match e with
-      CONST(x) -> let t = newTmp() in
-       (* currently need Int32.to_int because our datatype
-          uses int, not int32. Maybe change this? *)
-                  ([Tmp3AddrMov(AssemArg(Const(Int32.to_int x,
-                                               INT)),
-                                Tmp(newTmp()))],
-                   Tmp(t))
-    | TEMP(t) -> ([], Tmp(t))
-  
-let stmtTo3Addr (stm: Tree.stm): tmp3AddrInstr list =
-   match stm with
-     RETURN(e) -> []
-   | MOVE(e1, e2) -> []
-  
+let munch_op = function
+    T.ADD -> AS.ADD
+  | T.SUB -> AS.SUB
+  | T.MUL -> AS.MUL
+  | T.DIV -> AS.DIV
+  | T.MOD -> AS.MOD
 
-let to3AddrFromTheirInfAddr (infAddrStmts: Tree.stm list):
-   tmp3AddrProg = [] 
+(* munch_exp : AS.operand -> T.exp -> AS.instr list *)
+(* munch_exp d e
+ * generates instructions to achieve d <- e
+ * d must be TEMP(t) or REG(r)
+ *)
+let rec munch_exp d = function
+    T.CONST n -> [AS.MOV (d, AS.IMM n)]
+  | T.TEMP t -> [AS.MOV(d, AS.TEMP t)]
+  | T.BINOP (binop, e1, e2) ->
+      munch_binop d (binop, e1, e2)
+
+(* munch_binop : AS.operand -> T.binop * T.exp * T.exp -> AS.instr list *)
+(* munch_binop d (binop, e1, e2)
+ * generates instruction to achieve d <- e1 binop e2
+ * d must be TEMP(t) or REG(r)
+ *)
+and munch_binop d (binop, e1, e2) =
+    let operator = munch_op binop
+    and t1 = AS.TEMP (Temp.create ())
+    and t2 = AS.TEMP (Temp.create ()) in
+    munch_exp t1 e1
+    @ munch_exp t2 e2
+    @ [AS.BINOP (operator, d, t1, t2)]
+
+
+(* munch_stm : T.stm -> AS.instr list *)
+(* munch_stm stm generates code to execute stm *)
+let munch_stm = function
+    T.MOVE (T.TEMP t1, e2) -> munch_exp (AS.TEMP t1) e2
+  | T.RETURN e ->
+      (* return e is implemented as %eax <- e *)
+      munch_exp (AS.REG AS.EAX) e
+  | _ -> assert false
+
+let rec to3Addr = function
+    [] -> []
+  | stm::stms -> munch_stm stm @ to3Addr stms
