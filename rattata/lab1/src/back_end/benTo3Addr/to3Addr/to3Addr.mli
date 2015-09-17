@@ -4,4 +4,4 @@
    and then I will write another function that takes that as input
    (which is what we'll actually use). *)
 
-val to3AddrFromTheirInfAddr: Tree.stm list -> Datatypesv1.tmp3AddrProg
+val to3Addr: Tree.stm list -> Datatypesv1.tmp3AddrProg

@@ -57,22 +57,21 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only (
 
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers");
-    let assem = To3Addr.to3Addr ir in
-    say_if dump_assem (fun () -> List.to_string ~f:FormatAssem.formatAssem assem);
+    let threeAddr = To3Addr.to3Addr ir in threeAddr; exit 1
 
     (* Add assembly header and footer *)
-    let assem =
-      [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")]
-      @ assem
-      @ [FormatAssem.DIRECTIVE ".ident\t\"15-411 L1 reference compiler\""] in
-    let code = String.concat (List.map assem ~f:FormatAssem.formatAssem) in
+    (* let assem = *)
+    (*   [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")] *)
+    (*   @ assem *)
+    (*   @ [FormatAssem.DIRECTIVE ".ident\t\"15-411 L1 reference compiler\""] in *)
+    (* let code = String.concat (List.map assem ~f:FormatAssem.formatAssem) in *)
 
     (* Output assembly *)
-    let afname = (Filename.chop_extension source) ^ ".s" in
-    say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
+  (*   let afname = (Filename.chop_extension source) ^ ".s" in *)
+  (*   say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ..."); *)
 
-    Out_channel.with_file afname
-      ~f:(fun afstream -> output_string afstream code)
+  (*   Out_channel.with_file afname *)
+  (*     ~f:(fun afstream -> output_string afstream code) *)
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1
   | EXIT -> exit 1

@@ -8,4 +8,4 @@
  * Implements a "convenient munch" algorithm
  *)
 
-val to3Addr : Tree.stm list -> FormatAssem.instr list
+val to3Addr : Tree.stm list -> Tree.stm list
