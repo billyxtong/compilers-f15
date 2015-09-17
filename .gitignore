@@ -1,6 +1,3 @@
-# subversion stuff
-*.svn
-
 # other starter code
 rattata/lab1/haskell
 rattata/lab1/sml
