@@ -46,7 +46,6 @@ type tmpExpr = TmpAssemArg of tmpAssemArg
 and tmpInfAddrBinop = TmpInfAddrAdd of tmpExpr * tmpExpr *  tmpAssemLoc
                     | TmpInfAddrMul of tmpExpr * tmpExpr *  tmpAssemLoc
 type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmpAssemLoc
-                    | TmpInfAddrBinop of tmpInfAddrBinop
                     | TmpInfAddrReturn of tmpExpr   
 type tmpInfAddrProg = tmpInfAddrInstr list
 
