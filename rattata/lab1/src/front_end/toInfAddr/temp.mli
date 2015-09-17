@@ -8,7 +8,7 @@
 
 open Core.Std
 
-type t
+type t = int
 
 include Comparable.S with type t := t
 
@@ -16,5 +16,6 @@ val reset : unit -> unit              (* resets temp numbering *)
 val create : unit -> t             (* returns a unique new temp *)
 val name : t -> string             (* returns the name of a temp *)
 val compare : t -> t -> int     (* comparison function *)
+val counter: int ref
 
 val format : Format.formatter -> t -> unit

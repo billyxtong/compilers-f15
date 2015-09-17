@@ -1,6 +1,7 @@
 type c0type = INT | PTR (* will add more eventually *)
  (* the int is the actual value, which we can do because everything
     are ints in C0 (I think?) *)
+(* use int or int32? *)              
 type const = int * c0type
 
 type reg = RAX | RBX | RCX | RDX | RBP | RSP | RSI | RDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
