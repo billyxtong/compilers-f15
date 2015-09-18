@@ -8,6 +8,7 @@ type reg = EAX | EBX | ECX | EDX | EBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 |
 type memAddr = reg * int
 
 (* These are for actual assembly instructions. Tmps are not allowed. *)
+
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinop = ADD of assemArg * assemLoc
@@ -35,24 +36,17 @@ type assemProgWonky = assemInstrWonky list
    something) *)
 type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
+type tmpBinop = TmpAdd | TmpMul | TmpSub | TmpDiv | TmpMod
 
 (* Two Address Code *)
-type tmp2AddrBinop = Tmp2AddrAdd of tmpArg * tmp
-                   | Tmp2AddrSub of tmpArg * tmp
-                   | Tmp2AddrMul of tmpArg * tmp
-                   | Tmp2AddrDiv of tmpArg * tmp
-                   | Tmp2AddrMod of tmpArg * tmp    
+type tmp2AddrBinop = tmpBinop * tmpArg * tmp
 type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
                    | Tmp2AddrReturn of tmpArg
 type tmp2AddrProg = tmp2AddrInstr list
 
 (* Three Address Code *)
-type tmp3AddrBinop = Tmp3AddrAdd of tmpArg * tmpArg *  tmp
-                   | Tmp3AddrMul of tmpArg * tmpArg *  tmp
-                   | Tmp3AddrSub of tmpArg * tmpArg *  tmp
-                   | Tmp3AddrDiv of tmpArg * tmpArg *  tmp
-                   | Tmp3AddrMod of tmpArg * tmpArg *  tmp
+type tmp3AddrBinop = tmpBinop * tmpArg * tmpArg *  tmp
 type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn of tmpArg
@@ -61,11 +55,7 @@ type tmp3AddrProg = tmp3AddrInstr list
 (* Inf Address Code (any number of operands on right hand side *)
 type tmpExpr = TmpAssemArg of tmpArg
              | TmpInfAddrBinop of tmpInfAddrBinop
-and tmpInfAddrBinop = TmpInfAddrAdd of tmpExpr * tmpExpr *  tmp
-                    | TmpInfAddrMul of tmpExpr * tmpExpr *  tmp
-                    | TmpInfAddrSub of tmpExpr * tmpExpr *  tmp
-                    | TmpInfAddrDiv of tmpExpr * tmpExpr *  tmp
-                    | TmpInfAddrMod of tmpExpr * tmpExpr *  tmp
+and tmpInfAddrBinop = tmpBinop * tmpExpr * tmpExpr *  tmp
 type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmp
                     | TmpInfAddrReturn of tmpExpr   
 type tmpInfAddrProg = tmpInfAddrInstr list
