@@ -6,6 +6,7 @@ open Datatypesv1
 let toTmpArg = function
     Tree.CONST x -> TmpConst (Int32.to_int x)
   | Tree.TEMP t -> TmpLoc (Tmp t)
+  | _ -> failwith "Can only convert consts and tmps to tmpArg\n"
     
 (* val binopTo2Addr: Tree.exp -> tmp2AddrInstr list
    Tree.exp must be a binop *)
@@ -29,19 +30,22 @@ let binopTo2Addr dest = function
 (* A lot of redundant code at the moment but oh well.
    it will be better when I'm not converting from their
    datatype *)
+(* Tree.MOVE is destination-source, which is annoying >:( *)       
 let instrTo2Addr = function
-    Tree.RETURN arg ->
+  Tree.RETURN Tree.BINOP (b, e1, e2) ->
+     let t = Tmp(Temp.create()) in
+     binopTo2Addr t (b, e1, e2) @ [Tmp2AddrReturn
+                                     (TmpLoc t)]
+  | Tree.RETURN arg ->
        [Tmp2AddrReturn (toTmpArg arg)]
-  | Tree.RETURN Tree.BINOP (b, e1, e2) ->
-      let t = Tmp(Temp.create()) in
-      binopTo2Addr t (b, e1, e2) @ [Tmp2AddrReturn
-                                      (TmpLoc t)]
-  | Tree.MOVE (dest, Tree.BINOP (b, e1, e2)) ->
-      let TmpLoc our_dest = toTmpArg dest in
+  | Tree.MOVE (Tree.TEMP dest, Tree.BINOP (b, e1, e2)) ->
+      let our_dest = Tmp dest in
       binopTo2Addr our_dest (b, e1, e2)
-  | Tree.MOVE (dest, src) ->
-      let TmpLoc our_dest = toTmpArg dest in
+  | Tree.MOVE (Tree.TEMP dest, src) ->
+      let our_dest = Tmp dest in
       [Tmp2AddrMov (toTmpArg src, our_dest)]
+  | Tree.MOVE _ ->
+      failwith "Constants and binops cannot be desinations\n"
          
 (* val to2Addr: Tree.stm list -> tmp2AddrProg *)
 let rec to2Addr = function
