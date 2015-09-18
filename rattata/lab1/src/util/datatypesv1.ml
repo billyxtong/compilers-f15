@@ -12,7 +12,9 @@ type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinop = ADD of assemArg * assemLoc
                 | MUL of assemArg * assemLoc
+                | SUB of assemArg * assemLoc
                 | FAKEDIV of assemArg * assemLoc
+                | FAKEMOD of assemArg * assemLoc
 type assemInstr = MOV of assemArg * assemLoc | BINOP of assemBinop
                 | RETURN
 type assemProg = assemInstr list
@@ -48,6 +50,9 @@ type tmp2AddrProg = tmp2AddrInstr list
 (* Three Address Code *)
 type tmp3AddrBinop = Tmp3AddrAdd of tmpArg * tmpArg *  tmp
                    | Tmp3AddrMul of tmpArg * tmpArg *  tmp
+                   | Tmp3AddrSub of tmpArg * tmpArg *  tmp
+                   | Tmp3AddrDiv of tmpArg * tmpArg *  tmp
+                   | Tmp3AddrMod of tmpArg * tmpArg *  tmp
 type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn of tmpArg
@@ -58,6 +63,9 @@ type tmpExpr = TmpAssemArg of tmpArg
              | TmpInfAddrBinop of tmpInfAddrBinop
 and tmpInfAddrBinop = TmpInfAddrAdd of tmpExpr * tmpExpr *  tmp
                     | TmpInfAddrMul of tmpExpr * tmpExpr *  tmp
+                    | TmpInfAddrSub of tmpExpr * tmpExpr *  tmp
+                    | TmpInfAddrDiv of tmpExpr * tmpExpr *  tmp
+                    | TmpInfAddrMod of tmpExpr * tmpExpr *  tmp
 type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmp
                     | TmpInfAddrReturn of tmpExpr   
 type tmpInfAddrProg = tmpInfAddrInstr list
