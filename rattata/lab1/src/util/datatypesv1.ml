@@ -12,7 +12,9 @@ type memAddr = reg * int
 (* These are for actual assembly instructions. Tmps are not allowed. *)
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
-type assemBinop = ADD of assemArg * assemLoc | MUL of assemArg * assemLoc
+type assemBinop = ADD of assemArg * assemLoc
+                | MUL of assemArg * assemLoc
+                | FAKEDIV of assemArg * assemLoc
 type assemInstr = MOV of assemArg * assemLoc | BINOP of assemBinop
                 | RETURN
 type assemProg = assemInstr list
@@ -24,7 +26,7 @@ type assemProg = assemInstr list
 type assemInstrWonky = AssemInstr of assemInstr
                    | CDQ (* needed for idiv *)
                    | IDIV of assemArg
-type assemProgWithWonky = assemInstrWonky list
+type assemProgWonky = assemInstrWonky list
 
 (* Below here allows tmps, but also allows actual assembly instructions.
    Note: Because we allow actual assembly instructions, memory
