@@ -94,27 +94,35 @@ let tmpArgToString(tArg : tmpArg) =
         TmpLoc(t) -> tmpToString(t)
       | TmpConst(c) -> constToString(c)
 
+let tmpBinopToString(binop) = 
+  match binop with
+        TmpAdd -> " + "
+      | TmpSub -> " - "
+      | TmpMul -> " * "
+      | TmpDiv -> " / "
+      | TmpMod -> " % "
+
 let tmp2AddrBinopToString(tmp2binop : tmp2AddrBinop) =
   match tmp2binop with
-        Tmp2AddrAdd(arg, temp) ->
+        Tmp2AddrAdd(binop, arg, temp) ->
             concat "" [tmpToString(temp); " <-- "; 
-            tmpToString(temp); " + ";
+            tmpToString(temp); tmpBinopToString(binop);
             tmpArgToString(arg)]
-      | Tmp2AddrSub(arg, temp) ->
+      | Tmp2AddrSub(binop, arg, temp) ->
             concat "" [tmpToString(temp); " <-- ";
-            tmpToString(temp); " - ";
+            tmpToString(temp); tmpBinopToString(binop);
             tmpArgToString(arg)]
-      | Tmp2AddrMul(arg, temp) -> 
+      | Tmp2AddrMul(binop, arg, temp) -> 
             concat "" [tmpToString(temp); " <-- "; 
-            tmpToString(temp); " * "; 
+            tmpToString(temp); tmpBinopToString(binop); 
             tmpArgToString(arg)]
-      | Tmp2AddrDiv(arg, temp) ->
+      | Tmp2AddrDiv(binop, arg, temp) ->
             concat "" [tmpToString(temp); " <-- ";
-            tmpToString(temp); " / ";
+            tmpToString(temp); tmpBinopToString(binop);
             tmpArgToString(arg)]
-      | Tmp2AddrMod(arg, temp) ->
+      | Tmp2AddrMod(binop, arg, temp) ->
             concat "" [tmpToString(temp); " <-- ";
-            tmpToString(temp); " % ";
+            tmpToString(temp); tmpBinopToString(binop);
             tmpArgToString(arg)]
 
 let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) = 
@@ -132,25 +140,25 @@ let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
 
 let tmp3AddrBinopToString(tmp3binop : tmp3AddrBinop) =
   match tmp3binop with
-        Tmp3AddrAdd(arg1, arg2, temp) -> 
+        Tmp3AddrAdd(binop, arg1, arg2, temp) -> 
             concat "" [tmpToString(temp); " <-- "; 
-            tmpArgToString(arg1); " + "; 
+            tmpArgToString(arg1); tmpBinopToString(binop); 
             tmpArgToString(arg2)]
-      | Tmp3AddrSub(arg1, arg2, temp) -> 
+      | Tmp3AddrSub(binop, arg1, arg2, temp) -> 
             concat "" [tmpToString(temp); " <-- "; 
-            tmpArgToString(arg1); " - "; 
+            tmpArgToString(arg1); tmpBinopToString(binop); 
             tmpArgToString(arg2)]
-      | Tmp3AddrMul(arg1, arg2, temp) -> 
+      | Tmp3AddrMul(binop, arg1, arg2, temp) -> 
             concat "" [tmpToString(temp); " <-- "; 
-            tmpArgToString(arg1); " * "; 
+            tmpArgToString(arg1); tmpBinopToString(binop); 
             tmpArgToString(arg2)]
-      | Tmp3AddrDiv(arg1, arg2, temp) -> 
+      | Tmp3AddrDiv(binop, arg1, arg2, temp) -> 
             concat "" [tmpToString(temp); " <-- "; 
-            tmpArgToString(arg1); " / "; 
+            tmpArgToString(arg1); tmpBinopToString(binop); 
             tmpArgToString(arg2)]
-      | Tmp3AddrMod(arg1, arg2, temp) -> 
+      | Tmp3AddrMod(binop, arg1, arg2, temp) -> 
             concat "" [tmpToString(temp); " <-- "; 
-            tmpArgToString(arg1); " % "; 
+            tmpArgToString(arg1); tmpBinopToString(binop); 
             tmpArgToString(arg2)]
 
 let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) = 
