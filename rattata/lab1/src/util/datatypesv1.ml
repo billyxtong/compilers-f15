@@ -14,52 +14,51 @@ type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinop = ADD of assemArg * assemLoc | MUL of assemArg * assemLoc
 type assemInstr = MOV of assemArg * assemLoc | BINOP of assemBinop
-                | RETURN | CDQ | IDIV of assemArg
+                | RETURN
 type assemProg = assemInstr list
-    
+
+(* Assembly Code with wonky instructions (i.e. idiv, etc) *)
+(* This comes after 2Addr in the pipeline, but needs to be below
+   here so that they can refer to 2AddrInstrs (since this is a
+   strict superset of normal 2Addr *)
+type assemInstrWonky = AssemInstr of assemInstr
+                   | CDQ (* needed for idiv *)
+                   | IDIV of assemArg
+type assemProgWithWonky = assemInstrWonky list
+
 (* Below here allows tmps, but also allows actual assembly instructions.
    Note: Because we allow actual assembly instructions, memory
    addresses are allowed. Memory addresses should not occur prior
    to register allocation, at least not in L1 (unless I'm missing
    something) *)
-type tmp = int
-type tmpAssemLoc = Tmp of tmp | AssemLocForTmp of assemLoc
-type tmpAssemArg = TmpAssemLoc of tmpAssemLoc | AssemArg of assemArg
+type tmp = Tmp of int
+type tmpArg = TmpLoc of tmp | TmpConst of const
 
 (* Two Address Code *)
-type tmp2AddrBinop = Tmp2AddrAdd of tmpAssemArg * tmpAssemLoc
-                   | Tmp2AddrSub of tmpAssemArg * tmpAssemLoc
-                   | Tmp2AddrMul of tmpAssemArg * tmpAssemLoc
-                   | Tmp2AddrDiv of tmpAssemArg * tmpAssemLoc
-                   | Tmp2AddrMod of tmpAssemArg * tmpAssemLoc    
-type tmp2AddrInstr = Tmp2AddrMov of tmpAssemArg * tmpAssemLoc
+type tmp2AddrBinop = Tmp2AddrAdd of tmpArg * tmp
+                   | Tmp2AddrSub of tmpArg * tmp
+                   | Tmp2AddrMul of tmpArg * tmp
+                   | Tmp2AddrDiv of tmpArg * tmp
+                   | Tmp2AddrMod of tmpArg * tmp    
+type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
-                   | Tmp2AddrReturn of tmpAssemArg
+                   | Tmp2AddrReturn of tmpArg
 type tmp2AddrProg = tmp2AddrInstr list
 
-(* Two Address Code with wonky instructions (i.e. idiv, etc) *)
-(* This comes after 2Addr in the pipeline, but needs to be below
-   here so that they can refer to 2AddrInstrs (since this is a
-   strict superset of normal 2Addr *)
-type tmpWonkyInstr = Tmp2AddrInstr of tmp2AddrInstr
-                   | TmpCDQ (* needed for idiv *)
-                   | TmpIDIV of tmpAssemArg
-type tmpWonkyProg = tmpWonkyInstr list
-
 (* Three Address Code *)
-type tmp3AddrBinop = Tmp3AddrAdd of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
-                   | Tmp3AddrMul of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
-type tmp3AddrInstr = Tmp3AddrMov of tmpAssemArg *  tmpAssemLoc
+type tmp3AddrBinop = Tmp3AddrAdd of tmpArg * tmpArg *  tmp
+                   | Tmp3AddrMul of tmpArg * tmpArg *  tmp
+type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
                    | Tmp3AddrBinop of tmp3AddrBinop
-                   | Tmp3AddrReturn of tmpAssemArg
+                   | Tmp3AddrReturn of tmpArg
 type tmp3AddrProg = tmp3AddrInstr list
 
 (* Inf Address Code (any number of operands on right hand side *)
-type tmpExpr = TmpAssemArg of tmpAssemArg
+type tmpExpr = TmpAssemArg of tmpArg
              | TmpInfAddrBinop of tmpInfAddrBinop
-and tmpInfAddrBinop = TmpInfAddrAdd of tmpExpr * tmpExpr *  tmpAssemLoc
-                    | TmpInfAddrMul of tmpExpr * tmpExpr *  tmpAssemLoc
-type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmpAssemLoc
+and tmpInfAddrBinop = TmpInfAddrAdd of tmpExpr * tmpExpr *  tmp
+                    | TmpInfAddrMul of tmpExpr * tmpExpr *  tmp
+type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmp
                     | TmpInfAddrReturn of tmpExpr   
 type tmpInfAddrProg = tmpInfAddrInstr list
 
