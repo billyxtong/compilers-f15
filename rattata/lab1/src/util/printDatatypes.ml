@@ -15,7 +15,7 @@ let regToString (r : reg) =
       | ECX -> "%ecx"
       | EDX -> "%edx"
       | EBP -> "%ebp"
-      | ESP -> "%esp"
+      | RSP -> "%rsp"
       | ESI -> "%esi"
       | EDI -> "%edi"
       | R8  -> "%r8"
@@ -26,8 +26,6 @@ let regToString (r : reg) =
       | R13 -> "%r13"
       | R14 -> "%r14"
       | R15 -> "%r15"
-      | EAX -> "%eax"
-      | EDX -> "%edx"
 
 let memAddrToString ((register, offset) : memAddr) = concat "" [string_of_int(offset); "("; regToString(register); ")"]
 

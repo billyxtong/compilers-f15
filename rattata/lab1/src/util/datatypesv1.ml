@@ -4,7 +4,7 @@ type c0type = INT | PTR (* will add more eventually *)
 (* use int or int32? *)              
 type const = int * c0type
 
-type reg = EAX | EBX | ECX | EDX | EBP | ESP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
+type reg = EAX | EBX | ECX | EDX | EBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 (* the int is the memory offest from the register *)
 type memAddr = reg * int
@@ -37,7 +37,7 @@ type tmp2AddrInstr = Tmp2AddrMov of tmpAssemArg * tmpAssemLoc
                    | Tmp2AddrReturn of tmpAssemArg
 type tmp2AddrProg = tmp2AddrInstr list
 
-(* Two Address Code with wonky instrucionts (i.e. idiv, etc) *)
+(* Two Address Code with wonky instructions (i.e. idiv, etc) *)
 (* This comes after 2Addr in the pipeline, but needs to be below
    here so that they can refer to 2AddrInstrs (since this is a
    strict superset of normal 2Addr *)
