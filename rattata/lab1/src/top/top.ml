@@ -27,11 +27,12 @@ let spec =
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
   +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
+  +> flag "--dump-wonky" no_arg ~doc:" Pretty print the two address code"
 
 let say_if flag s =
   if flag then say (s ()) else ()
 
-let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr () =
+let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_wonky () =
   try
    
     let source = match files with
@@ -57,13 +58,24 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     let ir = ToInfAddr.toInfAddr ast in
     say_if dump_ir (fun () -> Tree.Print.pp_program ir);
 
-    (* Allocate Registers *)
+    (* Convert Inf Addr (arbitrarily nested right hand side)
+       to three address *)
     say_if verbose (fun () -> "Allocating Registers");
     let threeAddr = To3Addr.to3Addr ir in
     say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 
+    (* Three address to Two address *)
     let twoAddr = To2Addr.to2Addr threeAddr in
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
+
+    (* Account for wonky instructions that require specific
+       registers, like idiv *)
+    let wonky2Addr = ToWonky2Addr.toWonky2Addr twoAddr in
+    say_if dump_wonky (fun () -> tmpWonkyProgToString wonky2Addr);
+    
+    (* Allocate Registers  TODO *)
+
+    
     (* Add assembly header and footer *)
     (* let assem = *)
     (*   [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")] *)

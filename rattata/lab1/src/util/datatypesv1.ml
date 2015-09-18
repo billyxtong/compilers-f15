@@ -4,7 +4,7 @@ type c0type = INT | PTR (* will add more eventually *)
 (* use int or int32? *)              
 type const = int * c0type
 
-type reg = RAX | RBX | RCX | RDX | RBP | RSP | RSI | RDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
+type reg = RAX | RBX | RCX | RDX | RBP | RSP | RSI | RDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15 | EAX | EDX
 
 (* the int is the memory offest from the register *)
 type memAddr = reg * int
@@ -13,7 +13,8 @@ type memAddr = reg * int
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinop = ADD of assemArg * assemLoc | MUL of assemArg * assemLoc
-type assemInstr = MOV of assemArg * assemLoc | BINOP of assemBinop | RETURN
+type assemInstr = MOV of assemArg * assemLoc | BINOP of assemBinop
+                | RETURN | CDQ | IDIV of assemArg
 type assemProg = assemInstr list
     
 (* Below here allows tmps, but also allows actual assembly instructions.
@@ -35,6 +36,15 @@ type tmp2AddrInstr = Tmp2AddrMov of tmpAssemArg * tmpAssemLoc
                    | Tmp2AddrBinop of tmp2AddrBinop
                    | Tmp2AddrReturn of tmpAssemArg
 type tmp2AddrProg = tmp2AddrInstr list
+
+(* Two Address Code with wonky instrucionts (i.e. idiv, etc) *)
+(* This comes after 2Addr in the pipeline, but needs to be below
+   here so that they can refer to 2AddrInstrs (since this is a
+   strict superset of normal 2Addr *)
+type tmpWonkyInstr = Tmp2AddrInstr of tmp2AddrInstr
+                   | TmpCDQ (* needed for idiv *)
+                   | TmpIDIV of tmpAssemArg
+type tmpWonkyProg = tmpWonkyInstr list
 
 (* Three Address Code *)
 type tmp3AddrBinop = Tmp3AddrAdd of tmpAssemArg * tmpAssemArg *  tmpAssemLoc
