@@ -7,7 +7,14 @@ let toTmpArg = function
     Tree.CONST x -> TmpConst (Int32.to_int x)
   | Tree.TEMP t -> TmpLoc (Tmp t)
   | _ -> failwith "Can only convert consts and tmps to tmpArg\n"
-    
+
+let theirBinopToOurs = function
+    Tree.ADD -> TmpAdd
+  | Tree.SUB -> TmpSub
+  | Tree.MUL -> TmpMul
+  | Tree.DIV -> TmpDiv
+  | Tree.MOD -> TmpMod
+
 (* val binopTo2Addr: Tree.exp -> tmp2AddrInstr list
    Tree.exp must be a binop *)
 (* MAKE SURE YOU GET THE ORDER RIGHT FOR NON-COMMUTATIVE OPS *)
@@ -16,13 +23,7 @@ let binopTo2Addr dest = function
        let arg1 = toTmpArg e1 in
        let arg2 = toTmpArg e2 in
        let t = Tmp(Temp.create()) in
-       let op = match b with
-           Tree.ADD -> Tmp2AddrBinop(Tmp2AddrAdd(arg2, t))
-        |  Tree.SUB -> Tmp2AddrBinop(Tmp2AddrSub(arg2, t))
-        |  Tree.MUL -> Tmp2AddrBinop(Tmp2AddrMul(arg2, t))
-        |  Tree.DIV -> Tmp2AddrBinop(Tmp2AddrDiv(arg2, t))
-        |  Tree.MOD -> Tmp2AddrBinop(Tmp2AddrMod(arg2, t))
-                    in
+       let op = Tmp2AddrBinop(theirBinopToOurs b, arg2, t) in
        Tmp2AddrMov(arg1, t)::op::
        [Tmp2AddrMov(TmpLoc t, dest)]
 
