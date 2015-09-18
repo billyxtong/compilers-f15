@@ -10,14 +10,14 @@ let constToString ((i, t) : const) = concat "" [string_of_int(i); " of type "; c
 
 let regToString (r : reg) = 
   match r with
-        RAX -> "%rax"
-      | RBX -> "%rbx"
-      | RCX -> "%rcx"
-      | RDX -> "%rdx"
-      | RBP -> "%rbp"
-      | RSP -> "%rsp"
-      | RSI -> "%rsi"
-      | RDI -> "%rdi"
+        EAX -> "%eax"
+      | EBX -> "%ebx"
+      | ECX -> "%ecx"
+      | EDX -> "%edx"
+      | EBP -> "%ebp"
+      | ESP -> "%esp"
+      | ESI -> "%esi"
+      | EDI -> "%edi"
       | R8  -> "%r8"
       | R9  -> "%r9"
       | R10 -> "%r10"

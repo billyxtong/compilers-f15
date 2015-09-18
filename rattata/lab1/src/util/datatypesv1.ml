@@ -4,7 +4,7 @@ type c0type = INT | PTR (* will add more eventually *)
 (* use int or int32? *)              
 type const = int * c0type
 
-type reg = RAX | RBX | RCX | RDX | RBP | RSP | RSI | RDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
+type reg = EAX | EBX | ECX | EDX | EBP | ESP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 (* the int is the memory offest from the register *)
 type memAddr = reg * int
