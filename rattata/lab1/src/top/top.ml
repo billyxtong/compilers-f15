@@ -25,11 +25,14 @@ let spec =
   +> flag "--dump-ir" no_arg ~doc:" Pretty print the IR"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
+  +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
+  +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
+  +> flag "--dump-wonky" no_arg ~doc:" Pretty print the two address code"
 
 let say_if flag s =
   if flag then say (s ()) else ()
 
-let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only () =
+let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_wonky () =
   try
    
     let source = match files with
@@ -55,24 +58,37 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only (
     let ir = ToInfAddr.toInfAddr ast in
     say_if dump_ir (fun () -> Tree.Print.pp_program ir);
 
-    (* Allocate Registers *)
+    (* Convert Inf Addr (arbitrarily nested right hand side)
+       to three address *)
     say_if verbose (fun () -> "Allocating Registers");
-    let assem = To3Addr.to3Addr ir in
-    say_if dump_assem (fun () -> List.to_string ~f:FormatAssem.formatAssem assem);
+    let threeAddr = To3Addr.to3Addr ir in
+    say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 
+    (* Three address to Two address *)
+    let twoAddr = To2Addr.to2Addr threeAddr in
+    say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
+
+    (* Account for wonky instructions that require specific
+       registers, like idiv *)
+    let wonky2Addr = ToWonky2Addr.toWonky2Addr twoAddr in
+    say_if dump_wonky (fun () -> tmpWonkyProgToString wonky2Addr);
+    
+    (* Allocate Registers  TODO *)
+
+    
     (* Add assembly header and footer *)
-    let assem =
-      [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")]
-      @ assem
-      @ [FormatAssem.DIRECTIVE ".ident\t\"15-411 L1 reference compiler\""] in
-    let code = String.concat (List.map assem ~f:FormatAssem.formatAssem) in
+    (* let assem = *)
+    (*   [FormatAssem.DIRECTIVE(".file\t\"" ^ source ^ "\"")] *)
+    (*   @ assem *)
+    (*   @ [FormatAssem.DIRECTIVE ".ident\t\"15-411 L1 reference compiler\""] in *)
+    (* let code = String.concat (List.map assem ~f:FormatAssem.formatAssem) in *)
 
     (* Output assembly *)
-    let afname = (Filename.chop_extension source) ^ ".s" in
-    say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
+  (*   let afname = (Filename.chop_extension source) ^ ".s" in *)
+  (*   say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ..."); *)
 
-    Out_channel.with_file afname
-      ~f:(fun afstream -> output_string afstream code)
+  (*   Out_channel.with_file afname *)
+  (*     ~f:(fun afstream -> output_string afstream code) *)
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1
   | EXIT -> exit 1

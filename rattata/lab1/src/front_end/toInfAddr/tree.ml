@@ -13,6 +13,7 @@ type exp =
   | TEMP of Temp.t
   | BINOP of binop * exp * exp
 and stm =
+  (* move is destination source here, which is annoying *)
     MOVE of exp * exp
   | RETURN of exp
 

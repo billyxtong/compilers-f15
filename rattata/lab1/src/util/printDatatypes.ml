@@ -26,6 +26,8 @@ let regToString (r : reg) =
       | R13 -> "%r13"
       | R14 -> "%r14"
       | R15 -> "%r15"
+      | EAX -> "%eax"
+      | EDX -> "%edx"
 
 let memAddrToString ((register, offset) : memAddr) = concat "" [string_of_int(offset); "("; regToString(register); ")"]
 
@@ -46,9 +48,14 @@ let assemBinopToString(binop : assemBinop) =
 
 let assemInstrToString(instr : assemInstr) = 
   match instr with
-        MOV(src, dest) -> concat "" ["movl "; assemArgToString(src); ", "; assemLocToString(dest)]
+        MOV(src, dest) ->
+           concat "" ["movl "; assemArgToString(src); ", ";
+                      assemLocToString(dest)]
       | BINOP(binop) -> assemBinopToString(binop)
       | RETURN -> "ret"
+      | IDIV(divisor) ->
+           concat "" ["idiv "; assemArgToString(divisor)]
+      | CDQ -> "cdq"
 
 let assemProgToString(assemprog : assemProg) = 
   concat "\n" (List.map assemInstrToString assemprog)
@@ -69,10 +76,24 @@ let tmpAssemArgToString(tmpArg : tmpAssemArg) =
 
 let tmp2AddrBinopToString(tmp2binop : tmp2AddrBinop) =
   match tmp2binop with
-        Tmp2AddrAdd(tmpsrc, tmpdest) -> concat "" [tmpAssemLocToString(tmpdest); " <-- "; 
-                                                    tmpAssemLocToString(tmpdest); " + "; tmpAssemArgToString(tmpsrc)]
+        Tmp2AddrAdd(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- "; 
+            tmpAssemLocToString(tmpdest); " + ";
+            tmpAssemArgToString(tmpsrc)]
+      | Tmp2AddrSub(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- ";
+            tmpAssemLocToString(tmpdest); " - ";
+            tmpAssemArgToString(tmpsrc)]
       | Tmp2AddrMul(tmpsrc, tmpdest) -> concat "" [tmpAssemLocToString(tmpdest); " <-- "; 
                                                     tmpAssemLocToString(tmpdest); " * "; tmpAssemArgToString(tmpsrc)]
+      | Tmp2AddrDiv(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- ";
+            tmpAssemLocToString(tmpdest); " / ";
+            tmpAssemArgToString(tmpsrc)]
+      | Tmp2AddrMod(tmpsrc, tmpdest) ->
+            concat "" [tmpAssemLocToString(tmpdest); " <-- ";
+            tmpAssemLocToString(tmpdest); " % ";
+            tmpAssemArgToString(tmpsrc)]
 
 let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) = 
   match tmp2instr with
@@ -80,8 +101,18 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
       | Tmp2AddrBinop(tmpbinop) -> tmp2AddrBinopToString(tmpbinop)
       | Tmp2AddrReturn(tmparg) -> concat "" ["return "; tmpAssemArgToString(tmparg)]
 
-let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) = 
-  concat "\n" (List.map tmp2AddrInstrToString tmp2addrprog)
+let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
+  (* We want a newline at the end *)
+  concat "\n" (List.map tmp2AddrInstrToString tmp2addrprog) ^ "\n"
+
+let tmpWonkyInstrToString(wonkyinstr: tmpWonkyInstr) =
+   match wonkyinstr with
+      Tmp2AddrInstr(instr) -> tmp2AddrInstrToString instr
+    | TmpCDQ -> "cdq"
+    | TmpIDIV(tmpArg) -> concat "" ["idiv "; tmpAssemArgToString tmpArg]
+
+let tmpWonkyProgToString (wonkyprog: tmpWonkyProg) = 
+  concat "\n" (List.map tmpWonkyInstrToString wonkyprog) ^ "\n"
 
 let tmp3AddrBinopToString(tmp3binop : tmp3AddrBinop) =
   match tmp3binop with

@@ -1,0 +1,2 @@
+- I'm going to use the append (@) operator: make sure this is linear time, not quadratic. I think it's fine, because the starter code uses it.
+- generating way too many move instructions in to2Addr :P
