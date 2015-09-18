@@ -68,13 +68,14 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     let twoAddr = To2Addr.to2Addr threeAddr in
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
-    (* Account for wonky instructions that require specific
-       registers, like idiv *)
-    let wonky2Addr = ToWonky2Addr.toWonky2Addr twoAddr in
-    say_if dump_wonky (fun () -> tmpWonkyProgToString wonky2Addr);
     
     (* Allocate Registers  TODO *)
 
+    (* Account for wonky instructions that require specific
+       registers, like idiv *)
+    (* let wonkyAssem = ToWonkyAssem.toWonkyAssem assem in *)
+    (* say_if dump_wonky (fun () -> assemProgWonkyToString *)
+    (*                       wonkyAssem); *)
     
     (* Add assembly header and footer *)
     (* let assem = *)
