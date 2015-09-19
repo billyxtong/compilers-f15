@@ -7,7 +7,7 @@
    probably want to incorporate them here too. *)
 (* open Datatypesv1 *)
 open Hashtbl
-    
+
 type vertex = int
 (* a set of neighbors *)  
 type neighbors = (vertex, unit) Hashtbl.t
@@ -21,20 +21,24 @@ type graph = (vertex, neighbors) Hashtbl.t
 let expectedNumNeighs = 5
 let expectedNumVerts = 10
 
-let emptyGraph () = create expectedNumVerts
+let emptyGraph () : graph = create expectedNumVerts
 
-let getNeighbors g v1 =
-     match find_all g v1 with (* list of bindings of v1 *)
+let getNeighbors g v =
+     match find_all g v with (* list of bindings of v *)
          x1::x2::_ -> failwith "one vertex should not have\
-                        multiple sets of neighbors"
+                        multiple sets of neighbors\n"
        | [] -> None
        | x::[] -> Some x
 
+let initVertex g v =
+    match getNeighbors g v with
+       None -> add g v (create expectedNumNeighs)
+     | Some _ -> ()
+
 let addDirectedEdge g (v1, v2) =
+    let () = initVertex g v1 in
     match getNeighbors g v1 with
-        None -> let newNeighs = create expectedNumNeighs in
-                let _ = add g v1 newNeighs in
-                add newNeighs v2 ()
+        None -> failwith "Just initialized vertex, what?\n"
       | Some neighs -> add neighs v2 ()
 
 let addEdge g (v1, v2) =

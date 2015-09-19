@@ -7,6 +7,12 @@ type graph
 
 val emptyGraph: unit -> graph
 
+(* Initializes an empty set of neighbors for a vertex if
+   none exists, otherwise does nothing. *)
+(* Note: this doesn't have to be called before addEdge, as
+   addEdge calls this. *)
+val initVertex: graph -> vertex -> unit
+
 val addEdge: graph -> (vertex * vertex) -> unit
 
 val hasEdge: graph -> (vertex * vertex) -> bool
