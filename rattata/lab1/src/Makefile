@@ -1,4 +1,4 @@
-SUBDIRS = top,util,front_end/parse,front_end/toInfAddr,front_end/typeChecker,back_end/formatAssem,back_end/regAlloc,back_end/to3Addr,back_end/to2Addr,back_end/toWonky2Addr
+SUBDIRS = top,util,front_end/parse,front_end/toInfAddr,front_end/typeChecker,back_end/formatAssem,back_end/regAlloc,back_end/to3Addr,back_end/to2Addr,back_end/toWonkyAssem
 LIBS = str
 MAIN = top
 
