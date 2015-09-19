@@ -1,26 +1,35 @@
-open Core.Std.Hashtbl
+open Core.Std
 open REF
 open Datatypesv1
 
-let leftHandTmp (instr : tmp2AddrInstr) =
+(* adds a temp to the set of temps *)
+let addTmpToSet (instr : tmp2AddrInstr) (S : "tmp set") =
   match instr with
-        Tmp2AddrMov(arg, temp) -> temp
-      | Tmp2AddrBinop(arg, temp, binop) -> temp
-      | Tmp2AddrReturn(retVal) -> ()
+        Tmp2AddrMov(arg, temp) -> "add temp to set"
+      | Tmp2AddrBinop(binop, arg, temp) -> "add temp to set" 
+      | Tmp2AddrReturn(retVal) -> (match retVal with
+                                         TmpLoc(tmp) -> "add temp to set"
+                                       | Const(c) -> "do nothing")
 
-let rec regAlloc (L : tmp2AddrProg) =
-  (* step 1: find out how many temps/registers we have with the exception of eax and edx, used for idiv *)
-  (* step 2: if more than 13, move RSP down by 4*(# spilled temps) bytes *)
-  (* step 3: assign 13 temps to registers (or however many registers aren't used in wonky instructions) *)
-  (* remember: no memory -> memory instructions *)
+(* maps a temp to a register and puts the pair in our hashtable *)
+let rec mapTmpToReg (L : reg list) (S : "tmp set") (H : tmp hashtbl) =
+  match (L, S) with
+      | (x::L',s::S') -> let (add H (Reg(x)) s) in mapTmpsToRegs L' S' H
+      | ([], S') -> ()
+      | (_, []) -> ()
 
-  (* step 1: start stepping through L. Each time a new temp is discovered, assign it to a register (up to 12) by
-   * having a hash table of type (tmp, assemLoc). Once we run out of registers, start assigning memory addresses 
-   * by moving RSP down by 4 bytes each time we need a new one *)
+(* maps a temp to a memory address and puts the pair in our hashtable *)
+let rec mapTmpToMemAddr (S : "tmp set") (H : tmp hashtbl) (offset : int ref) =
+  match S with
+        [] -> ()
+      | s::S' -> let (add H s (MemAddr(RSP, offset))) 
+                 and offset := !offset + 4 
+                 in mapTmpToMemAddr S' H offset
 
-  let tbl = create 200 in (* hash table holding all our mappings of tmps to memory addresses/registers *)
-  let regCount = ref 0 in (* counter for the number of registers we've already allocated to tmps *)
-  List.iter (let f (instr : wonkyInstr) = match instr with Tmp2AddrInstr(t) -> (match t with
-                                                                                            )
-                                                         | _ -> ) 
-  
+let rec regAlloc (instrList : tmp2AddrProg) =
+  let tempSet = "initialize empty set of temps"
+  (* list of 12 registers. Not sure if EBP is allowed to be used*)
+  and regList = [EBX; ECX; ESI; EDI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  (* iterate through prog, add all temps to set of temps *)
+  List.iter (addTmpToSet i tempSet) instrList
+  Set.iter (mapTmpToReg regList tempS)  

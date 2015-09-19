@@ -67,7 +67,6 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     (* Three address to Two address *)
     let twoAddr = To2Addr.to2Addr threeAddr in
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
-
     
     (* Allocate Registers  TODO *)
 
