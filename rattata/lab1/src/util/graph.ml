@@ -7,6 +7,7 @@
    probably want to incorporate them here too. *)
 (* open Datatypesv1 *)
 open Hashtbl
+module PQ = Core.Std.Heap
 
 type vertex = int
 (* a set of neighbors *)  
@@ -77,7 +78,46 @@ let greedilyColor g ordering =
     let coloring = create expectedNumVerts in
     let _ = greedilyColorActual g ordering coloring in
     coloring
-                 
+
+(* increment the weight of a particular vertex *)
+let incrWt wts_pq v =
+    match PQ.find wts_pq (fun (u, _) -> u = v) with
+       None -> () (* this vertex may have already been
+                     removed from the PQ *)
+     | Some (_, wt) -> PQ.add wts_pq (v, wt + 1)
+
+let rec process_vert g wts_pq processed_verts v =
+   match find_all processed_verts v with
+     [] -> let () = add processed_verts v () in
+        (* haven't seen this one yet, process it *)
+        (match getNeighbors g v with
+          None -> v::actualMaxCardSearch g wts_pq processed_verts
+        | Some neighs -> let () = iter
+                (fun u -> fun _ -> incrWt wts_pq u) neighs in
+                 v::actualMaxCardSearch g wts_pq processed_verts)
+   | _ -> actualMaxCardSearch g wts_pq processed_verts
+
+(* pop off the max wt vertex, increment neighbors,
+   add it to the ordering and recurse *)
+and actualMaxCardSearch (g:graph) wts_pq processed_verts =
+  if length processed_verts = length g then [] else
+    (* if we've processed all the vertices, we're done *)
+    match PQ.pop wts_pq with
+        None -> failwith "I don't think we should ever\
+                  reach this case, because we should have\
+                  terminated from the if statement\n"
+      | Some (v, _) -> process_vert g wts_pq processed_verts v
+                
+let maxCardSearch (g:graph) start_v =
+    let pq_elems =
+       fold (fun v -> fun _ -> fun acc -> (v, 0)::acc) g [] in
+    let cmp (_, wt1) (_, wt2) = wt2 - wt1 in
+    (* wt2 - wt1 because we actually want a max-heap here *)
+    let wts_pq = PQ.of_list pq_elems cmp in
+    actualMaxCardSearch g wts_pq (create (length g))
+    
+    
+
 let g = emptyGraph();;
 let _ = addEdge g (0,1);;
 let _ = addEdge g (1,2);;
