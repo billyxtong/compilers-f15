@@ -6,12 +6,13 @@ val regToString : reg -> string
 val memAddrToString : memAddr -> string
 val assemLocToString : assemLoc -> string
 val assemArgToString : assemArg -> string
-val assemBinopToString : binop -> string
+val binopToString : binop -> string
 val assemBinopInstrToString : assemBinopInstr -> string
 val assemInstrToString : assemInstr -> string
 val assemProgToString : assemProg -> string
 val assemInstrWonkyToString : assemInstrWonky -> string
 val assemProgWonkyToString : assemProgWonky -> string
+val tmpBinopToString : tmpBinop -> string
 val tmpToString : tmp -> string
 val tmpArgToString : tmpArg -> string
 val tmp2AddrBinopToString : tmp2AddrBinop -> string

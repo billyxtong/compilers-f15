@@ -41,7 +41,7 @@ let assemArgToString (arg : assemArg) =
         AssemLoc(loc) -> assemLocToString(loc)
       | Const(c) -> constToString(c)
 
-let assemBinopToString (op: binop) =
+let binopToString (op: binop) =
   match op with
         ADD -> "addl "
       | SUB -> "subl "
@@ -50,7 +50,7 @@ let assemBinopToString (op: binop) =
       | FAKEMOD -> "fakemod "
 
 let assemBinopInstrToString((op, src, dest) : assemBinopInstr) = 
-    concat "" [assemBinopToString op; assemArgToString(src); ", "; 
+    concat "" [binopToString op; assemArgToString(src); ", "; 
                assemLocToString(dest)]
 
 let assemInstrToString(instr : assemInstr) = 
@@ -76,6 +76,14 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
 let assemProgWonkyToString(wonkyAssemProg : assemProgWonky) = 
   concat "\n" (List.map assemInstrWonkyToString wonkyAssemProg) ^ "\n"
 
+let tmpBinopToString (op: tmpBinop) =
+  match op with
+        TmpBinop ADD -> " + "
+      | TmpBinop SUB -> " - "
+      | TmpBinop MUL -> " * "
+      | TmpBinop FAKEDIV -> "/ "
+      | TmpBinop FAKEMOD -> "% "
+
 let tmpToString(Tmp(t) : tmp) = concat "" ["t"; string_of_int t]
 
 let tmpArgToString(tArg : tmpArg) = 
@@ -83,13 +91,6 @@ let tmpArgToString(tArg : tmpArg) =
         TmpLoc(t) -> tmpToString(t)
       | TmpConst(c) -> constToString(c)
 
-let tmpBinopToString(binop) = 
-  match binop with
-        TmpAdd -> " + "
-      | TmpSub -> " - "
-      | TmpMul -> " * "
-      | TmpDiv -> " / "
-      | TmpMod -> " % "
 
 let tmp2AddrBinopToString((binop, arg, temp) : tmp2AddrBinop) =
     concat "" [tmpToString(temp); " <-- "; 

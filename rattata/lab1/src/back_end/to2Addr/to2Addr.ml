@@ -9,11 +9,11 @@ let toTmpArg = function
   | _ -> failwith "Can only convert consts and tmps to tmpArg\n"
 
 let theirBinopToOurs = function
-    Tree.ADD -> TmpAdd
-  | Tree.SUB -> TmpSub
-  | Tree.MUL -> TmpMul
-  | Tree.DIV -> TmpDiv
-  | Tree.MOD -> TmpMod
+    Tree.ADD -> TmpBinop ADD
+  | Tree.SUB -> TmpBinop SUB
+  | Tree.MUL -> TmpBinop MUL
+  | Tree.DIV -> TmpBinop FAKEDIV
+  | Tree.MOD -> TmpBinop FAKEMOD
 
 (* val binopTo2Addr: Tree.exp -> tmp2AddrInstr list
    Tree.exp must be a binop *)

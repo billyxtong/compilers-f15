@@ -33,7 +33,7 @@ type assemProgWonky = assemInstrWonky list
    something) *)
 type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
-type tmpBinop = TmpAdd | TmpMul | TmpSub | TmpDiv | TmpMod
+type tmpBinop = TmpBinop of binop
 
 (* Two Address Code *)
 type tmp2AddrBinop = tmpBinop * tmpArg * tmp
@@ -61,9 +61,8 @@ type tmpInfAddrProg = tmpInfAddrInstr list
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
 type ident = string * c0type
-type expr = ConstExpr of const | Ident of ident | ASTbinop of expr * astBinop * expr
+type expr = ConstExpr of const | Ident of ident | ASTBinop of expr * tmpBinop * expr
 and assignStmt = ident * expr 
-and astBinop = ASTplus | ASTminus | ASTtimes | ASTdiv | ASTmod
 type stmt = Decl of ident | AssignStmt of assignStmt | Return of expr
 type elabAST = stmt list
 
@@ -75,7 +74,7 @@ type leftHandIdent = Ident of ident | ParenWrapIdent of leftHandIdent
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = ParenWrapExpr of expr | PreElabConstExpr of const
                  | IdentExpr of ident
-                 | PreElabBinop of preElabExpr * astBinop * preElabExpr
+                 | PreElabBinop of preElabExpr * tmpBinop * preElabExpr
                  | UnaryMinus of preElabExpr
 type preElabStmt = PreElabDecl of ident | SimpAssign of assignStmt
                  | PreElabReturn of preElabExpr
