@@ -2,30 +2,38 @@ open Hashtbl
 open Datatypesv1
 open PrintDatatypes
 
+
 let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
                        (regList : reg list) (offset : int ref) =
   match instrList with
         [] -> ()
-      | instr :: prog -> (match regList with
+      | instr :: prog ->
+        (match regList with
                                 [] -> (match instr with
                                              Tmp2AddrMov(arg,dest) -> 
-                                               (try (let _ = find tbl dest in ()) with
+                                               (try (let _ = find tbl dest in
+                                                     putInHashTable prog tbl [] offset)
+                                                with
                                                     Not_found -> (let () = (add tbl dest (MemAddr(RSP, !offset))) in
                                                                   let () = (offset := !offset + 4) in
                                                                   putInHashTable prog tbl [] offset))
                                            | Tmp2AddrBinop(binop,arg,dest) -> 
-                                               (try (let _ = find tbl dest in ()) with
+                                               (try (let _ = find tbl dest in
+                                                    putInHashTable prog tbl [] offset)
+                                                with
                                                     Not_found -> (let () = (add tbl dest (MemAddr(RSP, !offset))) in
                                                                   let () = (offset := !offset + 4) in
                                                                   putInHashTable prog tbl [] offset))
                                            | Tmp2AddrReturn(arg) -> ())
                               | r :: newRegList -> (match instr with
                                              Tmp2AddrMov(arg,dest) -> 
-                                               (try (let _ = find tbl dest in ()) with
+                                               (try (let _ = find tbl dest
+                                                     in putInHashTable prog tbl newRegList offset) with
                                                     Not_found -> let () = add tbl dest (Reg(r)) in
                                                                  putInHashTable prog tbl newRegList offset)
                                            | Tmp2AddrBinop(binop,arg,dest) -> 
-                                               (try (let _ = find tbl dest in ()) with
+                                               (try (let _ = find tbl dest
+                                                     in putInHashTable prog tbl newRegList offset) with
                                                     Not_found -> let () = add tbl dest (Reg(r)) in
                                                                  putInHashTable prog tbl newRegList offset)
                                            | Tmp2AddrReturn(arg) -> ()))
