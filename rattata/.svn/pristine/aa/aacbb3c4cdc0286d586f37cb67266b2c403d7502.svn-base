@@ -1,0 +1,1255 @@
+"util/mark.ml" 12 275 279 "util/mark.ml" 12 275 282
+type(
+  int * int -> string
+)
+ident(
+  def pos "util/mark.ml" 16 393 393 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 13 294 299 "util/mark.ml" 13 294 302
+type(
+  int
+)
+ident(
+  def row "util/mark.ml" 13 294 312 "util/mark.ml" 13 294 329
+)
+"util/mark.ml" 13 294 304 "util/mark.ml" 13 294 305
+type(
+  int
+)
+"util/mark.ml" 13 294 299 "util/mark.ml" 13 294 305
+type(
+  int * int
+)
+"util/mark.ml" 13 294 312 "util/mark.ml" 13 294 325
+type(
+  int -> string
+)
+ident(
+  ext_ref Pervasives.string_of_int
+)
+"util/mark.ml" 13 294 326 "util/mark.ml" 13 294 329
+type(
+  int
+)
+ident(
+  int_ref row "util/mark.ml" 13 294 299 "util/mark.ml" 13 294 302
+)
+"util/mark.ml" 13 294 312 "util/mark.ml" 13 294 329
+call(
+  tail
+)
+type(
+  string
+)
+"util/mark.ml" 14 330 335 "util/mark.ml" 14 330 338
+type(
+  int
+)
+ident(
+  def row "util/mark.ml" 14 330 348 "util/mark.ml" 14 330 391
+)
+"util/mark.ml" 14 330 340 "util/mark.ml" 14 330 343
+type(
+  int
+)
+ident(
+  def col "util/mark.ml" 14 330 348 "util/mark.ml" 14 330 391
+)
+"util/mark.ml" 14 330 335 "util/mark.ml" 14 330 343
+type(
+  int * int
+)
+"util/mark.ml" 14 330 348 "util/mark.ml" 14 330 361
+type(
+  int -> string
+)
+ident(
+  ext_ref Pervasives.string_of_int
+)
+"util/mark.ml" 14 330 362 "util/mark.ml" 14 330 365
+type(
+  int
+)
+ident(
+  int_ref row "util/mark.ml" 14 330 335 "util/mark.ml" 14 330 338
+)
+"util/mark.ml" 14 330 348 "util/mark.ml" 14 330 365
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 14 330 366 "util/mark.ml" 14 330 367
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"util/mark.ml" 14 330 368 "util/mark.ml" 14 330 371
+type(
+  string
+)
+"util/mark.ml" 14 330 372 "util/mark.ml" 14 330 373
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"util/mark.ml" 14 330 374 "util/mark.ml" 14 330 387
+type(
+  int -> string
+)
+ident(
+  ext_ref Pervasives.string_of_int
+)
+"util/mark.ml" 14 330 388 "util/mark.ml" 14 330 391
+type(
+  int
+)
+ident(
+  int_ref col "util/mark.ml" 14 330 340 "util/mark.ml" 14 330 343
+)
+"util/mark.ml" 14 330 374 "util/mark.ml" 14 330 391
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 14 330 368 "util/mark.ml" 14 330 391
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 14 330 348 "util/mark.ml" 14 330 391
+call(
+  tail
+)
+type(
+  string
+)
+"util/mark.ml" 12 275 285 "util/mark.ml" 14 330 391
+type(
+  int * int -> string
+)
+"util/mark.ml" 16 393 397 "util/mark.ml" 16 393 401
+type(
+  (int * int) * (int * int) * string -> string
+)
+ident(
+  def show "util/mark.ml" 18 451 451 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 16 393 403 "util/mark.ml" 16 393 404
+type(
+  int * int
+)
+ident(
+  def l "util/mark.ml" 16 393 417 "util/mark.ml" 16 393 449
+)
+"util/mark.ml" 16 393 406 "util/mark.ml" 16 393 407
+type(
+  int * int
+)
+ident(
+  def r "util/mark.ml" 16 393 417 "util/mark.ml" 16 393 449
+)
+"util/mark.ml" 16 393 409 "util/mark.ml" 16 393 413
+type(
+  string
+)
+ident(
+  def file "util/mark.ml" 16 393 417 "util/mark.ml" 16 393 449
+)
+"util/mark.ml" 16 393 403 "util/mark.ml" 16 393 413
+type(
+  (int * int) * (int * int) * string
+)
+"util/mark.ml" 16 393 417 "util/mark.ml" 16 393 421
+type(
+  string
+)
+ident(
+  int_ref file "util/mark.ml" 16 393 409 "util/mark.ml" 16 393 413
+)
+"util/mark.ml" 16 393 422 "util/mark.ml" 16 393 423
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"util/mark.ml" 16 393 424 "util/mark.ml" 16 393 427
+type(
+  string
+)
+"util/mark.ml" 16 393 428 "util/mark.ml" 16 393 429
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"util/mark.ml" 16 393 430 "util/mark.ml" 16 393 433
+type(
+  int * int -> string
+)
+ident(
+  int_ref pos "util/mark.ml" 12 275 279 "util/mark.ml" 12 275 282
+)
+"util/mark.ml" 16 393 434 "util/mark.ml" 16 393 435
+type(
+  int * int
+)
+ident(
+  int_ref l "util/mark.ml" 16 393 403 "util/mark.ml" 16 393 404
+)
+"util/mark.ml" 16 393 430 "util/mark.ml" 16 393 435
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 16 393 436 "util/mark.ml" 16 393 437
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"util/mark.ml" 16 393 438 "util/mark.ml" 16 393 441
+type(
+  string
+)
+"util/mark.ml" 16 393 442 "util/mark.ml" 16 393 443
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"util/mark.ml" 16 393 444 "util/mark.ml" 16 393 447
+type(
+  int * int -> string
+)
+ident(
+  int_ref pos "util/mark.ml" 12 275 279 "util/mark.ml" 12 275 282
+)
+"util/mark.ml" 16 393 448 "util/mark.ml" 16 393 449
+type(
+  int * int
+)
+ident(
+  int_ref r "util/mark.ml" 16 393 406 "util/mark.ml" 16 393 407
+)
+"util/mark.ml" 16 393 444 "util/mark.ml" 16 393 449
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 16 393 438 "util/mark.ml" 16 393 449
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 16 393 430 "util/mark.ml" 16 393 449
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 16 393 424 "util/mark.ml" 16 393 449
+call(
+  stack
+)
+type(
+  string
+)
+"util/mark.ml" 16 393 417 "util/mark.ml" 16 393 449
+call(
+  tail
+)
+type(
+  string
+)
+"util/mark.ml" 16 393 402 "util/mark.ml" 16 393 449
+type(
+  (int * int) * (int * int) * string -> string
+)
+"util/mark.ml" 20 485 489 "util/mark.ml" 20 485 493
+type(
+  'a * 'b -> 'a * 'b option
+)
+ident(
+  def mark "util/mark.ml" 21 515 515 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 20 485 495 "util/mark.ml" 20 485 496
+type(
+  'a
+)
+ident(
+  def d "util/mark.ml" 20 485 504 "util/mark.ml" 20 485 513
+)
+"util/mark.ml" 20 485 498 "util/mark.ml" 20 485 499
+type(
+  'b
+)
+ident(
+  def e "util/mark.ml" 20 485 504 "util/mark.ml" 20 485 513
+)
+"util/mark.ml" 20 485 495 "util/mark.ml" 20 485 499
+type(
+  'a * 'b
+)
+"util/mark.ml" 20 485 504 "util/mark.ml" 20 485 505
+type(
+  'a
+)
+ident(
+  int_ref d "util/mark.ml" 20 485 495 "util/mark.ml" 20 485 496
+)
+"util/mark.ml" 20 485 512 "util/mark.ml" 20 485 513
+type(
+  'b
+)
+ident(
+  int_ref e "util/mark.ml" 20 485 498 "util/mark.ml" 20 485 499
+)
+"util/mark.ml" 20 485 507 "util/mark.ml" 20 485 513
+type(
+  'b option
+)
+"util/mark.ml" 20 485 504 "util/mark.ml" 20 485 513
+type(
+  'a * 'b option
+)
+"util/mark.ml" 20 485 494 "util/mark.ml" 20 485 514
+type(
+  'a * 'b -> 'a * 'b option
+)
+"util/mark.ml" 21 515 519 "util/mark.ml" 21 515 524
+type(
+  'a -> 'a
+)
+ident(
+  def mark' "util/mark.ml" 22 531 531 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 21 515 525 "util/mark.ml" 21 515 526
+type(
+  'a
+)
+ident(
+  def x "util/mark.ml" 21 515 529 "util/mark.ml" 21 515 530
+)
+"util/mark.ml" 21 515 529 "util/mark.ml" 21 515 530
+type(
+  'a
+)
+ident(
+  int_ref x "util/mark.ml" 21 515 525 "util/mark.ml" 21 515 526
+)
+"util/mark.ml" 21 515 525 "util/mark.ml" 21 515 530
+type(
+  'a -> 'a
+)
+"util/mark.ml" 22 531 535 "util/mark.ml" 22 531 540
+type(
+  'a -> 'a * 'b option
+)
+ident(
+  def naked "util/mark.ml" 24 556 556 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 22 531 541 "util/mark.ml" 22 531 542
+type(
+  'a
+)
+ident(
+  def d "util/mark.ml" 22 531 546 "util/mark.ml" 22 531 553
+)
+"util/mark.ml" 22 531 546 "util/mark.ml" 22 531 547
+type(
+  'a
+)
+ident(
+  int_ref d "util/mark.ml" 22 531 541 "util/mark.ml" 22 531 542
+)
+"util/mark.ml" 22 531 549 "util/mark.ml" 22 531 553
+type(
+  'b option
+)
+"util/mark.ml" 22 531 546 "util/mark.ml" 22 531 553
+type(
+  'a * 'b option
+)
+"util/mark.ml" 22 531 541 "util/mark.ml" 22 531 554
+type(
+  'a -> 'a * 'b option
+)
+"util/mark.ml" 24 556 560 "util/mark.ml" 24 556 564
+type(
+  'a * 'b -> 'a
+)
+ident(
+  def data "util/mark.ml" 25 571 571 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 24 556 567 "util/mark.ml" 24 556 570
+type(
+  'a * 'b -> 'a
+)
+ident(
+  ext_ref Pervasives.fst
+)
+"util/mark.ml" 25 571 575 "util/mark.ml" 25 571 578
+type(
+  'a * 'b -> 'b
+)
+ident(
+  def ext "util/mark.ml" 27 586 586 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 25 571 581 "util/mark.ml" 25 571 584
+type(
+  'a * 'b -> 'b
+)
+ident(
+  ext_ref Pervasives.snd
+)
+"util/mark.ml" 27 586 590 "util/mark.ml" 27 586 596
+type(
+  ('a * 'b) * ('a * 'b) -> 'a * 'b
+)
+ident(
+  def extmin "util/mark.ml" 32 703 703 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 27 586 599 "util/mark.ml" 27 586 601
+type(
+  'a
+)
+ident(
+  def l1 "util/mark.ml" 28 620 622 "util/mark.ml" 30 684 701
+)
+"util/mark.ml" 27 586 603 "util/mark.ml" 27 586 605
+type(
+  'b
+)
+ident(
+  def c1 "util/mark.ml" 28 620 622 "util/mark.ml" 30 684 701
+)
+"util/mark.ml" 27 586 599 "util/mark.ml" 27 586 605
+type(
+  'a * 'b
+)
+"util/mark.ml" 27 586 609 "util/mark.ml" 27 586 611
+type(
+  'a
+)
+ident(
+  def l2 "util/mark.ml" 28 620 622 "util/mark.ml" 30 684 701
+)
+"util/mark.ml" 27 586 613 "util/mark.ml" 27 586 615
+type(
+  'b
+)
+ident(
+  def c2 "util/mark.ml" 28 620 622 "util/mark.ml" 30 684 701
+)
+"util/mark.ml" 27 586 609 "util/mark.ml" 27 586 615
+type(
+  'a * 'b
+)
+"util/mark.ml" 27 586 598 "util/mark.ml" 27 586 616
+type(
+  ('a * 'b) * ('a * 'b)
+)
+"util/mark.ml" 28 620 625 "util/mark.ml" 28 620 627
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 27 586 599 "util/mark.ml" 27 586 601
+)
+"util/mark.ml" 28 620 628 "util/mark.ml" 28 620 629
+type(
+  'a -> 'a -> bool
+)
+ident(
+  ext_ref Pervasives.( < )
+)
+"util/mark.ml" 28 620 630 "util/mark.ml" 28 620 632
+type(
+  'a
+)
+ident(
+  int_ref l2 "util/mark.ml" 27 586 609 "util/mark.ml" 27 586 611
+)
+"util/mark.ml" 28 620 625 "util/mark.ml" 28 620 632
+type(
+  bool
+)
+"util/mark.ml" 28 620 639 "util/mark.ml" 28 620 641
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 27 586 599 "util/mark.ml" 27 586 601
+)
+"util/mark.ml" 28 620 643 "util/mark.ml" 28 620 645
+type(
+  'b
+)
+ident(
+  int_ref c1 "util/mark.ml" 27 586 603 "util/mark.ml" 27 586 605
+)
+"util/mark.ml" 28 620 639 "util/mark.ml" 28 620 645
+type(
+  'a * 'b
+)
+"util/mark.ml" 29 652 657 "util/mark.ml" 29 652 659
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 27 586 599 "util/mark.ml" 27 586 601
+)
+"util/mark.ml" 29 652 660 "util/mark.ml" 29 652 661
+type(
+  'a -> 'a -> bool
+)
+ident(
+  ext_ref Pervasives.( > )
+)
+"util/mark.ml" 29 652 662 "util/mark.ml" 29 652 664
+type(
+  'a
+)
+ident(
+  int_ref l2 "util/mark.ml" 27 586 609 "util/mark.ml" 27 586 611
+)
+"util/mark.ml" 29 652 657 "util/mark.ml" 29 652 664
+type(
+  bool
+)
+"util/mark.ml" 29 652 671 "util/mark.ml" 29 652 673
+type(
+  'a
+)
+ident(
+  int_ref l2 "util/mark.ml" 27 586 609 "util/mark.ml" 27 586 611
+)
+"util/mark.ml" 29 652 675 "util/mark.ml" 29 652 677
+type(
+  'b
+)
+ident(
+  int_ref c2 "util/mark.ml" 27 586 613 "util/mark.ml" 27 586 615
+)
+"util/mark.ml" 29 652 671 "util/mark.ml" 29 652 677
+type(
+  'a * 'b
+)
+"util/mark.ml" 30 684 687 "util/mark.ml" 30 684 689
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 27 586 599 "util/mark.ml" 27 586 601
+)
+"util/mark.ml" 30 684 691 "util/mark.ml" 30 684 694
+type(
+  'b -> 'b -> 'b
+)
+ident(
+  ext_ref Pervasives.min
+)
+"util/mark.ml" 30 684 695 "util/mark.ml" 30 684 697
+type(
+  'b
+)
+ident(
+  int_ref c1 "util/mark.ml" 27 586 603 "util/mark.ml" 27 586 605
+)
+"util/mark.ml" 30 684 698 "util/mark.ml" 30 684 700
+type(
+  'b
+)
+ident(
+  int_ref c2 "util/mark.ml" 27 586 613 "util/mark.ml" 27 586 615
+)
+"util/mark.ml" 30 684 691 "util/mark.ml" 30 684 700
+call(
+  stack
+)
+type(
+  'b
+)
+"util/mark.ml" 30 684 687 "util/mark.ml" 30 684 700
+type(
+  'a * 'b
+)
+"util/mark.ml" 29 652 654 "util/mark.ml" 30 684 701
+type(
+  'a * 'b
+)
+"util/mark.ml" 28 620 622 "util/mark.ml" 30 684 701
+type(
+  'a * 'b
+)
+"util/mark.ml" 27 586 597 "util/mark.ml" 30 684 701
+type(
+  ('a * 'b) * ('a * 'b) -> 'a * 'b
+)
+"util/mark.ml" 32 703 707 "util/mark.ml" 32 703 713
+type(
+  ('a * 'b) * ('a * 'b) -> 'a * 'b
+)
+ident(
+  def extmax "util/mark.ml" 37 820 820 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 32 703 716 "util/mark.ml" 32 703 718
+type(
+  'a
+)
+ident(
+  def l1 "util/mark.ml" 33 737 739 "util/mark.ml" 35 801 818
+)
+"util/mark.ml" 32 703 720 "util/mark.ml" 32 703 722
+type(
+  'b
+)
+ident(
+  def c1 "util/mark.ml" 33 737 739 "util/mark.ml" 35 801 818
+)
+"util/mark.ml" 32 703 716 "util/mark.ml" 32 703 722
+type(
+  'a * 'b
+)
+"util/mark.ml" 32 703 726 "util/mark.ml" 32 703 728
+type(
+  'a
+)
+ident(
+  def l2 "util/mark.ml" 33 737 739 "util/mark.ml" 35 801 818
+)
+"util/mark.ml" 32 703 730 "util/mark.ml" 32 703 732
+type(
+  'b
+)
+ident(
+  def c2 "util/mark.ml" 33 737 739 "util/mark.ml" 35 801 818
+)
+"util/mark.ml" 32 703 726 "util/mark.ml" 32 703 732
+type(
+  'a * 'b
+)
+"util/mark.ml" 32 703 715 "util/mark.ml" 32 703 733
+type(
+  ('a * 'b) * ('a * 'b)
+)
+"util/mark.ml" 33 737 742 "util/mark.ml" 33 737 744
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 32 703 716 "util/mark.ml" 32 703 718
+)
+"util/mark.ml" 33 737 745 "util/mark.ml" 33 737 746
+type(
+  'a -> 'a -> bool
+)
+ident(
+  ext_ref Pervasives.( > )
+)
+"util/mark.ml" 33 737 747 "util/mark.ml" 33 737 749
+type(
+  'a
+)
+ident(
+  int_ref l2 "util/mark.ml" 32 703 726 "util/mark.ml" 32 703 728
+)
+"util/mark.ml" 33 737 742 "util/mark.ml" 33 737 749
+type(
+  bool
+)
+"util/mark.ml" 33 737 756 "util/mark.ml" 33 737 758
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 32 703 716 "util/mark.ml" 32 703 718
+)
+"util/mark.ml" 33 737 760 "util/mark.ml" 33 737 762
+type(
+  'b
+)
+ident(
+  int_ref c1 "util/mark.ml" 32 703 720 "util/mark.ml" 32 703 722
+)
+"util/mark.ml" 33 737 756 "util/mark.ml" 33 737 762
+type(
+  'a * 'b
+)
+"util/mark.ml" 34 769 774 "util/mark.ml" 34 769 776
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 32 703 716 "util/mark.ml" 32 703 718
+)
+"util/mark.ml" 34 769 777 "util/mark.ml" 34 769 778
+type(
+  'a -> 'a -> bool
+)
+ident(
+  ext_ref Pervasives.( < )
+)
+"util/mark.ml" 34 769 779 "util/mark.ml" 34 769 781
+type(
+  'a
+)
+ident(
+  int_ref l2 "util/mark.ml" 32 703 726 "util/mark.ml" 32 703 728
+)
+"util/mark.ml" 34 769 774 "util/mark.ml" 34 769 781
+type(
+  bool
+)
+"util/mark.ml" 34 769 788 "util/mark.ml" 34 769 790
+type(
+  'a
+)
+ident(
+  int_ref l2 "util/mark.ml" 32 703 726 "util/mark.ml" 32 703 728
+)
+"util/mark.ml" 34 769 792 "util/mark.ml" 34 769 794
+type(
+  'b
+)
+ident(
+  int_ref c2 "util/mark.ml" 32 703 730 "util/mark.ml" 32 703 732
+)
+"util/mark.ml" 34 769 788 "util/mark.ml" 34 769 794
+type(
+  'a * 'b
+)
+"util/mark.ml" 35 801 804 "util/mark.ml" 35 801 806
+type(
+  'a
+)
+ident(
+  int_ref l1 "util/mark.ml" 32 703 716 "util/mark.ml" 32 703 718
+)
+"util/mark.ml" 35 801 808 "util/mark.ml" 35 801 811
+type(
+  'b -> 'b -> 'b
+)
+ident(
+  ext_ref Pervasives.max
+)
+"util/mark.ml" 35 801 812 "util/mark.ml" 35 801 814
+type(
+  'b
+)
+ident(
+  int_ref c1 "util/mark.ml" 32 703 720 "util/mark.ml" 32 703 722
+)
+"util/mark.ml" 35 801 815 "util/mark.ml" 35 801 817
+type(
+  'b
+)
+ident(
+  int_ref c2 "util/mark.ml" 32 703 730 "util/mark.ml" 32 703 732
+)
+"util/mark.ml" 35 801 808 "util/mark.ml" 35 801 817
+call(
+  stack
+)
+type(
+  'b
+)
+"util/mark.ml" 35 801 804 "util/mark.ml" 35 801 817
+type(
+  'a * 'b
+)
+"util/mark.ml" 34 769 771 "util/mark.ml" 35 801 818
+type(
+  'a * 'b
+)
+"util/mark.ml" 33 737 739 "util/mark.ml" 35 801 818
+type(
+  'a * 'b
+)
+"util/mark.ml" 32 703 714 "util/mark.ml" 35 801 818
+type(
+  ('a * 'b) * ('a * 'b) -> 'a * 'b
+)
+"util/mark.ml" 37 820 828 "util/mark.ml" 37 820 832
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list ->
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+ident(
+  def wrap "util/mark.ml" 37 820 820 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 38 844 848 "util/mark.ml" 38 844 850
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list
+)
+"util/mark.ml" 38 844 857 "util/mark.ml" 38 844 861
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 39 862 866 "util/mark.ml" 39 862 867
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+ident(
+  def e "util/mark.ml" 39 862 875 "util/mark.ml" 39 862 876
+)
+"util/mark.ml" 39 862 869 "util/mark.ml" 39 862 871
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list
+)
+"util/mark.ml" 39 862 866 "util/mark.ml" 39 862 871
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list
+)
+"util/mark.ml" 39 862 875 "util/mark.ml" 39 862 876
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+ident(
+  int_ref e "util/mark.ml" 39 862 866 "util/mark.ml" 39 862 867
+)
+"util/mark.ml" 40 877 881 "util/mark.ml" 40 877 882
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+ident(
+  def e "util/mark.ml" 40 877 890 "util/mark.ml" 48 1139 1164
+)
+"util/mark.ml" 40 877 884 "util/mark.ml" 40 877 886
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list
+)
+ident(
+  def el "util/mark.ml" 40 877 890 "util/mark.ml" 48 1139 1164
+)
+"util/mark.ml" 40 877 881 "util/mark.ml" 40 877 886
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list
+)
+"util/mark.ml" 40 877 896 "util/mark.ml" 40 877 900
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list ->
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+ident(
+  int_ref wrap "util/mark.ml" 37 820 828 "util/mark.ml" 37 820 832
+)
+"util/mark.ml" 40 877 901 "util/mark.ml" 40 877 903
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list
+)
+ident(
+  int_ref el "util/mark.ml" 40 877 884 "util/mark.ml" 40 877 886
+)
+"util/mark.ml" 40 877 896 "util/mark.ml" 40 877 903
+call(
+  stack
+)
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 41 909 915 "util/mark.ml" 41 909 919
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 41 909 923 "util/mark.ml" 41 909 927
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 42 928 941 "util/mark.ml" 42 928 944
+type(
+  'a * 'b
+)
+ident(
+  def el1 "util/mark.ml" 43 966 974 "util/mark.ml" 48 1139 1164
+)
+"util/mark.ml" 42 928 946 "util/mark.ml" 42 928 949
+type(
+  'c * 'd
+)
+ident(
+  def el2 "util/mark.ml" 43 966 974 "util/mark.ml" 48 1139 1164
+)
+"util/mark.ml" 42 928 951 "util/mark.ml" 42 928 954
+type(
+  'e
+)
+ident(
+  def elf "util/mark.ml" 43 966 974 "util/mark.ml" 48 1139 1164
+)
+"util/mark.ml" 42 928 941 "util/mark.ml" 42 928 954
+type(
+  ('a * 'b) * ('c * 'd) * 'e
+)
+"util/mark.ml" 42 928 940 "util/mark.ml" 42 928 961
+type(
+  ('a * 'b) * ('c * 'd) * 'e
+)
+ident(
+  def e' "util/mark.ml" 43 966 974 "util/mark.ml" 48 1139 1164
+)
+"util/mark.ml" 42 928 934 "util/mark.ml" 42 928 962
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 43 966 980 "util/mark.ml" 43 966 981
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+ident(
+  int_ref e "util/mark.ml" 40 877 881 "util/mark.ml" 40 877 882
+)
+"util/mark.ml" 44 987 1003 "util/mark.ml" 44 987 1005
+type(
+  'a * 'b
+)
+ident(
+  def e1 "util/mark.ml" 45 1018 1030 "util/mark.ml" 47 1117 1138
+)
+"util/mark.ml" 44 987 1007 "util/mark.ml" 44 987 1009
+type(
+  'c * 'd
+)
+ident(
+  def e2 "util/mark.ml" 45 1018 1030 "util/mark.ml" 47 1117 1138
+)
+"util/mark.ml" 44 987 1011 "util/mark.ml" 44 987 1013
+type(
+  'e
+)
+ident(
+  def ef "util/mark.ml" 45 1018 1030 "util/mark.ml" 47 1117 1138
+)
+"util/mark.ml" 44 987 997 "util/mark.ml" 44 987 1014
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+type(
+  ('a * 'b) * ('c * 'd) * 'e
+)
+"util/mark.ml" 45 1018 1033 "util/mark.ml" 45 1018 1040
+type(
+  'e -> 'e -> int
+)
+ident(
+  ext_ref Pervasives.compare
+)
+"util/mark.ml" 45 1018 1041 "util/mark.ml" 45 1018 1043
+type(
+  'e
+)
+ident(
+  int_ref ef "util/mark.ml" 44 987 1011 "util/mark.ml" 44 987 1013
+)
+"util/mark.ml" 45 1018 1044 "util/mark.ml" 45 1018 1047
+type(
+  'e
+)
+ident(
+  int_ref elf "util/mark.ml" 42 928 951 "util/mark.ml" 42 928 954
+)
+"util/mark.ml" 45 1018 1033 "util/mark.ml" 45 1018 1047
+type(
+  int
+)
+"util/mark.ml" 45 1018 1048 "util/mark.ml" 45 1018 1049
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( = )
+)
+"util/mark.ml" 45 1018 1050 "util/mark.ml" 45 1018 1051
+type(
+  int
+)
+"util/mark.ml" 45 1018 1033 "util/mark.ml" 45 1018 1051
+type(
+  bool
+)
+"util/mark.ml" 46 1057 1077 "util/mark.ml" 46 1057 1083
+type(
+  ('a * 'b) * ('a * 'b) -> 'a * 'b
+)
+ident(
+  int_ref extmin "util/mark.ml" 27 586 590 "util/mark.ml" 27 586 596
+)
+"util/mark.ml" 46 1057 1085 "util/mark.ml" 46 1057 1087
+type(
+  'a * 'b
+)
+ident(
+  int_ref e1 "util/mark.ml" 44 987 1003 "util/mark.ml" 44 987 1005
+)
+"util/mark.ml" 46 1057 1089 "util/mark.ml" 46 1057 1092
+type(
+  'a * 'b
+)
+ident(
+  int_ref el1 "util/mark.ml" 42 928 941 "util/mark.ml" 42 928 944
+)
+"util/mark.ml" 46 1057 1085 "util/mark.ml" 46 1057 1092
+type(
+  ('a * 'b) * ('a * 'b)
+)
+"util/mark.ml" 46 1057 1077 "util/mark.ml" 46 1057 1093
+call(
+  stack
+)
+type(
+  'a * 'b
+)
+"util/mark.ml" 46 1057 1095 "util/mark.ml" 46 1057 1101
+type(
+  ('c * 'd) * ('c * 'd) -> 'c * 'd
+)
+ident(
+  int_ref extmax "util/mark.ml" 32 703 707 "util/mark.ml" 32 703 713
+)
+"util/mark.ml" 46 1057 1103 "util/mark.ml" 46 1057 1105
+type(
+  'c * 'd
+)
+ident(
+  int_ref e2 "util/mark.ml" 44 987 1007 "util/mark.ml" 44 987 1009
+)
+"util/mark.ml" 46 1057 1107 "util/mark.ml" 46 1057 1110
+type(
+  'c * 'd
+)
+ident(
+  int_ref el2 "util/mark.ml" 42 928 946 "util/mark.ml" 42 928 949
+)
+"util/mark.ml" 46 1057 1103 "util/mark.ml" 46 1057 1110
+type(
+  ('c * 'd) * ('c * 'd)
+)
+"util/mark.ml" 46 1057 1095 "util/mark.ml" 46 1057 1111
+call(
+  stack
+)
+type(
+  'c * 'd
+)
+"util/mark.ml" 46 1057 1113 "util/mark.ml" 46 1057 1115
+type(
+  'e
+)
+ident(
+  int_ref ef "util/mark.ml" 44 987 1011 "util/mark.ml" 44 987 1013
+)
+"util/mark.ml" 46 1057 1071 "util/mark.ml" 46 1057 1116
+type(
+  ('a * 'b) * ('c * 'd) * 'e
+)
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 47 1117 1134 "util/mark.ml" 47 1117 1138
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 45 1018 1030 "util/mark.ml" 47 1117 1138
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 48 1139 1149 "util/mark.ml" 48 1139 1153
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 48 1139 1162 "util/mark.ml" 48 1139 1164
+type(
+  ('a * 'b) * ('c * 'd) * 'e
+)
+ident(
+  int_ref e' "util/mark.ml" 42 928 940 "util/mark.ml" 42 928 961
+)
+"util/mark.ml" 48 1139 1157 "util/mark.ml" 48 1139 1164
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 43 966 974 "util/mark.ml" 48 1139 1164
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 40 877 890 "util/mark.ml" 48 1139 1164
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 37 820 835 "util/mark.ml" 48 1139 1164
+type(
+  (('a * 'b) * ('c * 'd) * 'e) option list ->
+  (('a * 'b) * ('c * 'd) * 'e) option
+)
+"util/mark.ml" 50 1166 1170 "util/mark.ml" 50 1166 1173
+type(
+  ('a -> 'b) -> 'a * 'c -> 'b * 'c
+)
+ident(
+  def map "util/mark.ml" 51 1194 1194 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 50 1166 1174 "util/mark.ml" 50 1166 1175
+type(
+  'a -> 'b
+)
+ident(
+  def f "util/mark.ml" 50 1166 1176 "util/mark.ml" 50 1166 1193
+)
+"util/mark.ml" 50 1166 1177 "util/mark.ml" 50 1166 1178
+type(
+  'a
+)
+ident(
+  def d "util/mark.ml" 50 1166 1186 "util/mark.ml" 50 1166 1192
+)
+"util/mark.ml" 50 1166 1180 "util/mark.ml" 50 1166 1181
+type(
+  'c
+)
+ident(
+  def e "util/mark.ml" 50 1166 1186 "util/mark.ml" 50 1166 1192
+)
+"util/mark.ml" 50 1166 1177 "util/mark.ml" 50 1166 1181
+type(
+  'a * 'c
+)
+"util/mark.ml" 50 1166 1186 "util/mark.ml" 50 1166 1187
+type(
+  'a -> 'b
+)
+ident(
+  int_ref f "util/mark.ml" 50 1166 1174 "util/mark.ml" 50 1166 1175
+)
+"util/mark.ml" 50 1166 1188 "util/mark.ml" 50 1166 1189
+type(
+  'a
+)
+ident(
+  int_ref d "util/mark.ml" 50 1166 1177 "util/mark.ml" 50 1166 1178
+)
+"util/mark.ml" 50 1166 1186 "util/mark.ml" 50 1166 1189
+call(
+  stack
+)
+type(
+  'b
+)
+"util/mark.ml" 50 1166 1191 "util/mark.ml" 50 1166 1192
+type(
+  'c
+)
+ident(
+  int_ref e "util/mark.ml" 50 1166 1180 "util/mark.ml" 50 1166 1181
+)
+"util/mark.ml" 50 1166 1186 "util/mark.ml" 50 1166 1192
+type(
+  'b * 'c
+)
+"util/mark.ml" 50 1166 1176 "util/mark.ml" 50 1166 1193
+type(
+  'a * 'c -> 'b * 'c
+)
+"util/mark.ml" 50 1166 1174 "util/mark.ml" 50 1166 1193
+type(
+  ('a -> 'b) -> 'a * 'c -> 'b * 'c
+)
+"util/mark.ml" 51 1194 1198 "util/mark.ml" 51 1194 1202
+type(
+  ('a * 'b -> 'c) -> 'a * 'b -> 'c * 'b
+)
+ident(
+  def map' "util/mark.ml" 51 1194 1229 "util/mark.ml" 1 0 -1
+)
+"util/mark.ml" 51 1194 1203 "util/mark.ml" 51 1194 1204
+type(
+  'a * 'b -> 'c
+)
+ident(
+  def f "util/mark.ml" 51 1194 1205 "util/mark.ml" 51 1194 1229
+)
+"util/mark.ml" 51 1194 1207 "util/mark.ml" 51 1194 1208
+type(
+  'a
+)
+ident(
+  def d "util/mark.ml" 51 1194 1222 "util/mark.ml" 51 1194 1228
+)
+"util/mark.ml" 51 1194 1210 "util/mark.ml" 51 1194 1211
+type(
+  'b
+)
+ident(
+  def e "util/mark.ml" 51 1194 1222 "util/mark.ml" 51 1194 1228
+)
+"util/mark.ml" 51 1194 1207 "util/mark.ml" 51 1194 1211
+type(
+  'a * 'b
+)
+"util/mark.ml" 51 1194 1206 "util/mark.ml" 51 1194 1217
+type(
+  'a * 'b
+)
+ident(
+  def m "util/mark.ml" 51 1194 1222 "util/mark.ml" 51 1194 1228
+)
+"util/mark.ml" 51 1194 1222 "util/mark.ml" 51 1194 1223
+type(
+  'a * 'b -> 'c
+)
+ident(
+  int_ref f "util/mark.ml" 51 1194 1203 "util/mark.ml" 51 1194 1204
+)
+"util/mark.ml" 51 1194 1224 "util/mark.ml" 51 1194 1225
+type(
+  'a * 'b
+)
+ident(
+  int_ref m "util/mark.ml" 51 1194 1206 "util/mark.ml" 51 1194 1217
+)
+"util/mark.ml" 51 1194 1222 "util/mark.ml" 51 1194 1225
+call(
+  stack
+)
+type(
+  'c
+)
+"util/mark.ml" 51 1194 1227 "util/mark.ml" 51 1194 1228
+type(
+  'b
+)
+ident(
+  int_ref e "util/mark.ml" 51 1194 1210 "util/mark.ml" 51 1194 1211
+)
+"util/mark.ml" 51 1194 1222 "util/mark.ml" 51 1194 1228
+type(
+  'c * 'b
+)
+"util/mark.ml" 51 1194 1205 "util/mark.ml" 51 1194 1229
+type(
+  'a * 'b -> 'c * 'b
+)
+"util/mark.ml" 51 1194 1203 "util/mark.ml" 51 1194 1229
+type(
+  ('a * 'b -> 'c) -> 'a * 'b -> 'c * 'b
+)

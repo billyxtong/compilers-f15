@@ -1,0 +1,409 @@
+"util/errorMsg.ml" 11 257 261 "util/errorMsg.ml" 11 257 270
+type(
+  bool ref
+)
+ident(
+  def anyErrors "util/errorMsg.ml" 13 284 284 "util/errorMsg.ml" 1 0 -1
+)
+"util/errorMsg.ml" 11 257 273 "util/errorMsg.ml" 11 257 276
+type(
+  bool -> bool ref
+)
+ident(
+  ext_ref Pervasives.ref
+)
+"util/errorMsg.ml" 11 257 277 "util/errorMsg.ml" 11 257 282
+type(
+  bool
+)
+"util/errorMsg.ml" 11 257 273 "util/errorMsg.ml" 11 257 282
+type(
+  bool ref
+)
+"util/errorMsg.ml" 13 284 288 "util/errorMsg.ml" 13 284 293
+type(
+  unit -> unit
+)
+ident(
+  def reset "util/errorMsg.ml" 15 319 319 "util/errorMsg.ml" 1 0 -1
+)
+"util/errorMsg.ml" 13 284 294 "util/errorMsg.ml" 13 284 296
+type(
+  unit
+)
+"util/errorMsg.ml" 13 284 299 "util/errorMsg.ml" 13 284 308
+type(
+  bool ref
+)
+ident(
+  int_ref anyErrors "util/errorMsg.ml" 11 257 261 "util/errorMsg.ml" 11 257 270
+)
+"util/errorMsg.ml" 13 284 312 "util/errorMsg.ml" 13 284 317
+type(
+  bool
+)
+"util/errorMsg.ml" 13 284 299 "util/errorMsg.ml" 13 284 317
+type(
+  unit
+)
+type(
+  bool ref -> bool -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"util/errorMsg.ml" 13 284 294 "util/errorMsg.ml" 13 284 317
+type(
+  unit -> unit
+)
+"util/errorMsg.ml" 15 319 323 "util/errorMsg.ml" 15 319 326
+type(
+  string -> Mark.ext option -> string -> unit
+)
+ident(
+  def msg "util/errorMsg.ml" 22 496 496 "util/errorMsg.ml" 1 0 -1
+)
+"util/errorMsg.ml" 15 319 327 "util/errorMsg.ml" 15 319 330
+type(
+  string
+)
+ident(
+  def str "util/errorMsg.ml" 15 319 331 "util/errorMsg.ml" 20 439 494
+)
+"util/errorMsg.ml" 15 319 331 "util/errorMsg.ml" 15 319 334
+type(
+  Mark.ext option
+)
+ident(
+  def ext "util/errorMsg.ml" 15 319 335 "util/errorMsg.ml" 20 439 494
+)
+"util/errorMsg.ml" 15 319 335 "util/errorMsg.ml" 15 319 339
+type(
+  string
+)
+ident(
+  def note "util/errorMsg.ml" 16 342 344 "util/errorMsg.ml" 20 439 494
+)
+"util/errorMsg.ml" 16 342 344 "util/errorMsg.ml" 16 342 353
+type(
+  bool ref
+)
+ident(
+  int_ref anyErrors "util/errorMsg.ml" 11 257 261 "util/errorMsg.ml" 11 257 270
+)
+"util/errorMsg.ml" 16 342 357 "util/errorMsg.ml" 16 342 361
+type(
+  bool
+)
+"util/errorMsg.ml" 16 342 344 "util/errorMsg.ml" 16 342 361
+type(
+  unit
+)
+type(
+  bool ref -> bool -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"util/errorMsg.ml" 17 363 372 "util/errorMsg.ml" 17 363 375
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "util/errorMsg.ml" 15 319 331 "util/errorMsg.ml" 15 319 334
+)
+"util/errorMsg.ml" 18 381 385 "util/errorMsg.ml" 18 381 389
+type(
+  Mark.ext option
+)
+"util/errorMsg.ml" 18 381 393 "util/errorMsg.ml" 18 381 395
+type(
+  unit
+)
+"util/errorMsg.ml" 19 396 405 "util/errorMsg.ml" 19 396 406
+type(
+  Mark.ext
+)
+ident(
+  def x "util/errorMsg.ml" 19 396 410 "util/errorMsg.ml" 19 396 436
+)
+"util/errorMsg.ml" 19 396 400 "util/errorMsg.ml" 19 396 406
+type(
+  Mark.ext option
+)
+"util/errorMsg.ml" 19 396 410 "util/errorMsg.ml" 19 396 422
+type(
+  string -> unit
+)
+ident(
+  ext_ref Pervasives.print_string
+)
+"util/errorMsg.ml" 19 396 424 "util/errorMsg.ml" 19 396 433
+type(
+  Mark.ext -> string
+)
+ident(
+  ext_ref Mark.show
+)
+"util/errorMsg.ml" 19 396 434 "util/errorMsg.ml" 19 396 435
+type(
+  Mark.ext
+)
+ident(
+  int_ref x "util/errorMsg.ml" 19 396 405 "util/errorMsg.ml" 19 396 406
+)
+"util/errorMsg.ml" 19 396 424 "util/errorMsg.ml" 19 396 435
+call(
+  stack
+)
+type(
+  string
+)
+"util/errorMsg.ml" 19 396 410 "util/errorMsg.ml" 19 396 436
+call(
+  stack
+)
+type(
+  unit
+)
+"util/errorMsg.ml" 17 363 366 "util/errorMsg.ml" 19 396 436
+type(
+  unit
+)
+"util/errorMsg.ml" 20 439 441 "util/errorMsg.ml" 20 439 450
+type(
+  string Core.Std.List.t -> f:(string -> unit) -> unit
+)
+ident(
+  ext_ref Core.Std.List.iter
+)
+"util/errorMsg.ml" 20 439 452 "util/errorMsg.ml" 20 439 455
+type(
+  string
+)
+"util/errorMsg.ml" 20 439 457 "util/errorMsg.ml" 20 439 460
+type(
+  string
+)
+ident(
+  int_ref str "util/errorMsg.ml" 15 319 327 "util/errorMsg.ml" 15 319 330
+)
+"util/errorMsg.ml" 20 439 462 "util/errorMsg.ml" 20 439 465
+type(
+  string
+)
+"util/errorMsg.ml" 20 439 467 "util/errorMsg.ml" 20 439 471
+type(
+  string
+)
+ident(
+  int_ref note "util/errorMsg.ml" 15 319 335 "util/errorMsg.ml" 15 319 339
+)
+"util/errorMsg.ml" 20 439 473 "util/errorMsg.ml" 20 439 477
+type(
+  string
+)
+type(
+  string list
+)
+"util/errorMsg.ml" 20 439 467 "util/errorMsg.ml" 20 439 477
+type(
+  string list
+)
+"util/errorMsg.ml" 20 439 462 "util/errorMsg.ml" 20 439 477
+type(
+  string list
+)
+"util/errorMsg.ml" 20 439 457 "util/errorMsg.ml" 20 439 477
+type(
+  string list
+)
+"util/errorMsg.ml" 20 439 452 "util/errorMsg.ml" 20 439 477
+type(
+  string Core.Std.List.t
+)
+"util/errorMsg.ml" 20 439 451 "util/errorMsg.ml" 20 439 478
+type(
+  string list
+)
+"util/errorMsg.ml" 20 439 482 "util/errorMsg.ml" 20 439 494
+type(
+  string -> unit
+)
+ident(
+  ext_ref Pervasives.print_string
+)
+"util/errorMsg.ml" 20 439 441 "util/errorMsg.ml" 20 439 494
+call(
+  tail
+)
+type(
+  unit
+)
+"util/errorMsg.ml" 17 363 366 "util/errorMsg.ml" 20 439 494
+type(
+  unit
+)
+"util/errorMsg.ml" 16 342 344 "util/errorMsg.ml" 20 439 494
+type(
+  unit
+)
+"util/errorMsg.ml" 15 319 335 "util/errorMsg.ml" 20 439 494
+type(
+  string -> unit
+)
+"util/errorMsg.ml" 15 319 331 "util/errorMsg.ml" 20 439 494
+type(
+  Mark.ext option -> string -> unit
+)
+"util/errorMsg.ml" 15 319 327 "util/errorMsg.ml" 20 439 494
+type(
+  string -> Mark.ext option -> string -> unit
+)
+"util/errorMsg.ml" 22 496 500 "util/errorMsg.ml" 22 496 505
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  def error "util/errorMsg.ml" 26 562 562 "util/errorMsg.ml" 1 0 -1
+)
+"util/errorMsg.ml" 22 496 506 "util/errorMsg.ml" 22 496 509
+type(
+  Mark.ext option
+)
+ident(
+  def ext "util/errorMsg.ml" 22 496 510 "util/errorMsg.ml" 24 538 560
+)
+"util/errorMsg.ml" 22 496 510 "util/errorMsg.ml" 22 496 514
+type(
+  string
+)
+ident(
+  def note "util/errorMsg.ml" 23 517 519 "util/errorMsg.ml" 24 538 560
+)
+"util/errorMsg.ml" 23 517 519 "util/errorMsg.ml" 23 517 528
+type(
+  bool ref
+)
+ident(
+  int_ref anyErrors "util/errorMsg.ml" 11 257 261 "util/errorMsg.ml" 11 257 270
+)
+"util/errorMsg.ml" 23 517 532 "util/errorMsg.ml" 23 517 536
+type(
+  bool
+)
+"util/errorMsg.ml" 23 517 519 "util/errorMsg.ml" 23 517 536
+type(
+  unit
+)
+type(
+  bool ref -> bool -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"util/errorMsg.ml" 24 538 540 "util/errorMsg.ml" 24 538 543
+type(
+  string -> Mark.ext option -> string -> unit
+)
+ident(
+  int_ref msg "util/errorMsg.ml" 15 319 323 "util/errorMsg.ml" 15 319 326
+)
+"util/errorMsg.ml" 24 538 544 "util/errorMsg.ml" 24 538 551
+type(
+  string
+)
+"util/errorMsg.ml" 24 538 552 "util/errorMsg.ml" 24 538 555
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "util/errorMsg.ml" 22 496 506 "util/errorMsg.ml" 22 496 509
+)
+"util/errorMsg.ml" 24 538 556 "util/errorMsg.ml" 24 538 560
+type(
+  string
+)
+ident(
+  int_ref note "util/errorMsg.ml" 22 496 510 "util/errorMsg.ml" 22 496 514
+)
+"util/errorMsg.ml" 24 538 540 "util/errorMsg.ml" 24 538 560
+call(
+  tail
+)
+type(
+  unit
+)
+"util/errorMsg.ml" 23 517 519 "util/errorMsg.ml" 24 538 560
+type(
+  unit
+)
+"util/errorMsg.ml" 22 496 510 "util/errorMsg.ml" 24 538 560
+type(
+  string -> unit
+)
+"util/errorMsg.ml" 22 496 506 "util/errorMsg.ml" 24 538 560
+type(
+  Mark.ext option -> string -> unit
+)
+"util/errorMsg.ml" 26 562 566 "util/errorMsg.ml" 26 562 570
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  def warn "util/errorMsg.ml" 28 606 606 "util/errorMsg.ml" 1 0 -1
+)
+"util/errorMsg.ml" 26 562 571 "util/errorMsg.ml" 26 562 574
+type(
+  Mark.ext option
+)
+ident(
+  def ext "util/errorMsg.ml" 26 562 575 "util/errorMsg.ml" 26 562 604
+)
+"util/errorMsg.ml" 26 562 575 "util/errorMsg.ml" 26 562 579
+type(
+  string
+)
+ident(
+  def note "util/errorMsg.ml" 26 562 582 "util/errorMsg.ml" 26 562 604
+)
+"util/errorMsg.ml" 26 562 582 "util/errorMsg.ml" 26 562 585
+type(
+  string -> Mark.ext option -> string -> unit
+)
+ident(
+  int_ref msg "util/errorMsg.ml" 15 319 323 "util/errorMsg.ml" 15 319 326
+)
+"util/errorMsg.ml" 26 562 586 "util/errorMsg.ml" 26 562 595
+type(
+  string
+)
+"util/errorMsg.ml" 26 562 596 "util/errorMsg.ml" 26 562 599
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "util/errorMsg.ml" 26 562 571 "util/errorMsg.ml" 26 562 574
+)
+"util/errorMsg.ml" 26 562 600 "util/errorMsg.ml" 26 562 604
+type(
+  string
+)
+ident(
+  int_ref note "util/errorMsg.ml" 26 562 575 "util/errorMsg.ml" 26 562 579
+)
+"util/errorMsg.ml" 26 562 582 "util/errorMsg.ml" 26 562 604
+call(
+  tail
+)
+type(
+  unit
+)
+"util/errorMsg.ml" 26 562 575 "util/errorMsg.ml" 26 562 604
+type(
+  string -> unit
+)
+"util/errorMsg.ml" 26 562 571 "util/errorMsg.ml" 26 562 604
+type(
+  Mark.ext option -> string -> unit
+)

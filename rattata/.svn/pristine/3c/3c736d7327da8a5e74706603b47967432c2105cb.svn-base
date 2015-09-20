@@ -1,0 +1,2835 @@
+"front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  def start "front_end/parse/c0Lexer.mll" 26 662 662 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 25 630 642 "front_end/parse/c0Lexer.mll" 25 630 661
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  ext_ref Lexing.lexeme_start
+)
+"front_end/parse/c0Lexer.mll" 26 662 666 "front_end/parse/c0Lexer.mll" 26 662 671
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  def l_end "front_end/parse/c0Lexer.mll" 27 692 692 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 26 662 674 "front_end/parse/c0Lexer.mll" 26 662 691
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  ext_ref Lexing.lexeme_end
+)
+"front_end/parse/c0Lexer.mll" 27 692 696 "front_end/parse/c0Lexer.mll" 27 692 700
+type(
+  Lexing.lexbuf -> string
+)
+ident(
+  def text "front_end/parse/c0Lexer.mll" 29 718 718 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 27 692 703 "front_end/parse/c0Lexer.mll" 27 692 716
+type(
+  Lexing.lexbuf -> string
+)
+ident(
+  ext_ref Lexing.lexeme
+)
+"front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+type(
+  int ref
+)
+ident(
+  def commentLevel "front_end/parse/c0Lexer.mll" 30 743 743 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 29 718 737 "front_end/parse/c0Lexer.mll" 29 718 740
+type(
+  int -> int ref
+)
+ident(
+  ext_ref Pervasives.ref
+)
+"front_end/parse/c0Lexer.mll" 29 718 741 "front_end/parse/c0Lexer.mll" 29 718 742
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 29 718 737 "front_end/parse/c0Lexer.mll" 29 718 742
+type(
+  int ref
+)
+"front_end/parse/c0Lexer.mll" 30 743 747 "front_end/parse/c0Lexer.mll" 30 743 757
+type(
+  int ref
+)
+ident(
+  def commentPos "front_end/parse/c0Lexer.mll" 32 767 767 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 30 743 760 "front_end/parse/c0Lexer.mll" 30 743 763
+type(
+  int -> int ref
+)
+ident(
+  ext_ref Pervasives.ref
+)
+"front_end/parse/c0Lexer.mll" 30 743 764 "front_end/parse/c0Lexer.mll" 30 743 765
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 30 743 760 "front_end/parse/c0Lexer.mll" 30 743 765
+type(
+  int ref
+)
+"front_end/parse/c0Lexer.mll" 32 767 771 "front_end/parse/c0Lexer.mll" 32 767 783
+type(
+  Lexing.lexbuf -> unit
+)
+ident(
+  def enterComment "front_end/parse/c0Lexer.mll" 36 861 861 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 32 767 784 "front_end/parse/c0Lexer.mll" 32 767 790
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.mll" 33 793 795 "front_end/parse/c0Lexer.mll" 34 831 859
+)
+"front_end/parse/c0Lexer.mll" 33 793 795 "front_end/parse/c0Lexer.mll" 33 793 807
+type(
+  int ref
+)
+ident(
+  int_ref commentLevel "front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+)
+"front_end/parse/c0Lexer.mll" 33 793 812 "front_end/parse/c0Lexer.mll" 33 793 824
+type(
+  int ref
+)
+ident(
+  int_ref commentLevel "front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+)
+"front_end/parse/c0Lexer.mll" 33 793 811 "front_end/parse/c0Lexer.mll" 33 793 824
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"front_end/parse/c0Lexer.mll" 33 793 825 "front_end/parse/c0Lexer.mll" 33 793 826
+type(
+  int -> int -> int
+)
+ident(
+  ext_ref Pervasives.( + )
+)
+"front_end/parse/c0Lexer.mll" 33 793 827 "front_end/parse/c0Lexer.mll" 33 793 828
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 33 793 811 "front_end/parse/c0Lexer.mll" 33 793 828
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 33 793 795 "front_end/parse/c0Lexer.mll" 33 793 828
+type(
+  unit
+)
+type(
+  int ref -> int -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"front_end/parse/c0Lexer.mll" 34 831 833 "front_end/parse/c0Lexer.mll" 34 831 843
+type(
+  int ref
+)
+ident(
+  int_ref commentPos "front_end/parse/c0Lexer.mll" 30 743 747 "front_end/parse/c0Lexer.mll" 30 743 757
+)
+"front_end/parse/c0Lexer.mll" 34 831 847 "front_end/parse/c0Lexer.mll" 34 831 852
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 34 831 853 "front_end/parse/c0Lexer.mll" 34 831 859
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 32 767 784 "front_end/parse/c0Lexer.mll" 32 767 790
+)
+"front_end/parse/c0Lexer.mll" 34 831 847 "front_end/parse/c0Lexer.mll" 34 831 859
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 34 831 833 "front_end/parse/c0Lexer.mll" 34 831 859
+type(
+  unit
+)
+type(
+  int ref -> int -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"front_end/parse/c0Lexer.mll" 33 793 795 "front_end/parse/c0Lexer.mll" 34 831 859
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 32 767 784 "front_end/parse/c0Lexer.mll" 34 831 859
+type(
+  Lexing.lexbuf -> unit
+)
+"front_end/parse/c0Lexer.mll" 36 861 865 "front_end/parse/c0Lexer.mll" 36 861 876
+type(
+  unit -> bool
+)
+ident(
+  def exitComment "front_end/parse/c0Lexer.mll" 40 941 941 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 36 861 877 "front_end/parse/c0Lexer.mll" 36 861 879
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 37 882 884 "front_end/parse/c0Lexer.mll" 37 882 896
+type(
+  int ref
+)
+ident(
+  int_ref commentLevel "front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+)
+"front_end/parse/c0Lexer.mll" 37 882 901 "front_end/parse/c0Lexer.mll" 37 882 913
+type(
+  int ref
+)
+ident(
+  int_ref commentLevel "front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+)
+"front_end/parse/c0Lexer.mll" 37 882 900 "front_end/parse/c0Lexer.mll" 37 882 913
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"front_end/parse/c0Lexer.mll" 37 882 914 "front_end/parse/c0Lexer.mll" 37 882 915
+type(
+  int -> int -> int
+)
+ident(
+  ext_ref Pervasives.( - )
+)
+"front_end/parse/c0Lexer.mll" 37 882 916 "front_end/parse/c0Lexer.mll" 37 882 917
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 37 882 900 "front_end/parse/c0Lexer.mll" 37 882 917
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 37 882 884 "front_end/parse/c0Lexer.mll" 37 882 917
+type(
+  unit
+)
+type(
+  int ref -> int -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"front_end/parse/c0Lexer.mll" 38 920 923 "front_end/parse/c0Lexer.mll" 38 920 935
+type(
+  int ref
+)
+ident(
+  int_ref commentLevel "front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+)
+"front_end/parse/c0Lexer.mll" 38 920 922 "front_end/parse/c0Lexer.mll" 38 920 935
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"front_end/parse/c0Lexer.mll" 38 920 936 "front_end/parse/c0Lexer.mll" 38 920 937
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( = )
+)
+"front_end/parse/c0Lexer.mll" 38 920 938 "front_end/parse/c0Lexer.mll" 38 920 939
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 38 920 922 "front_end/parse/c0Lexer.mll" 38 920 939
+type(
+  bool
+)
+"front_end/parse/c0Lexer.mll" 37 882 884 "front_end/parse/c0Lexer.mll" 38 920 939
+type(
+  bool
+)
+"front_end/parse/c0Lexer.mll" 36 861 877 "front_end/parse/c0Lexer.mll" 38 920 939
+type(
+  unit -> bool
+)
+"front_end/parse/c0Lexer.mll" 40 941 945 "front_end/parse/c0Lexer.mll" 40 941 954
+type(
+  string -> Lexing.lexbuf -> T.token
+)
+ident(
+  def decnumber "front_end/parse/c0Lexer.mll" 49 1261 1261 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 40 941 955 "front_end/parse/c0Lexer.mll" 40 941 956
+type(
+  string
+)
+ident(
+  def s "front_end/parse/c0Lexer.mll" 40 941 957 "front_end/parse/c0Lexer.mll" 47 1234 1259
+)
+"front_end/parse/c0Lexer.mll" 40 941 957 "front_end/parse/c0Lexer.mll" 40 941 963
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.mll" 41 966 968 "front_end/parse/c0Lexer.mll" 47 1234 1259
+)
+"front_end/parse/c0Lexer.mll" 42 972 988 "front_end/parse/c0Lexer.mll" 42 972 1003
+type(
+  string -> Core.Std.Int32.t
+)
+ident(
+  ext_ref Core.Std.Int32.of_string
+)
+"front_end/parse/c0Lexer.mll" 42 972 1008 "front_end/parse/c0Lexer.mll" 42 972 1009
+type(
+  string
+)
+ident(
+  int_ref s "front_end/parse/c0Lexer.mll" 40 941 955 "front_end/parse/c0Lexer.mll" 40 941 956
+)
+"front_end/parse/c0Lexer.mll" 42 972 1010 "front_end/parse/c0Lexer.mll" 42 972 1011
+type(
+  string -> string -> bool
+)
+ident(
+  ext_ref Pervasives.( = )
+)
+"front_end/parse/c0Lexer.mll" 42 972 1012 "front_end/parse/c0Lexer.mll" 42 972 1024
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 42 972 1008 "front_end/parse/c0Lexer.mll" 42 972 1024
+type(
+  bool
+)
+"front_end/parse/c0Lexer.mll" 42 972 1030 "front_end/parse/c0Lexer.mll" 42 972 1042
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 43 1043 1081 "front_end/parse/c0Lexer.mll" 43 1043 1082
+type(
+  string
+)
+ident(
+  int_ref s "front_end/parse/c0Lexer.mll" 40 941 955 "front_end/parse/c0Lexer.mll" 40 941 956
+)
+"front_end/parse/c0Lexer.mll" 42 972 1005 "front_end/parse/c0Lexer.mll" 43 1043 1082
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 42 972 988 "front_end/parse/c0Lexer.mll" 43 1043 1083
+call(
+  stack
+)
+type(
+  Core.Std.Int32.t
+)
+"front_end/parse/c0Lexer.mll" 42 972 976 "front_end/parse/c0Lexer.mll" 43 1043 1084
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 44 1085 1100 "front_end/parse/c0Lexer.mll" 44 1085 1101
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 44 1085 1092 "front_end/parse/c0Lexer.mll" 44 1085 1101
+type(
+  exn
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1109 "front_end/parse/c0Lexer.mll" 45 1105 1123
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1125 "front_end/parse/c0Lexer.mll" 45 1105 1139
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1141 "front_end/parse/c0Lexer.mll" 45 1105 1146
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1147 "front_end/parse/c0Lexer.mll" 45 1105 1153
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 40 941 957 "front_end/parse/c0Lexer.mll" 40 941 963
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1141 "front_end/parse/c0Lexer.mll" 45 1105 1153
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1155 "front_end/parse/c0Lexer.mll" 45 1105 1160
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref l_end "front_end/parse/c0Lexer.mll" 26 662 666 "front_end/parse/c0Lexer.mll" 26 662 671
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1161 "front_end/parse/c0Lexer.mll" 45 1105 1167
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 40 941 957 "front_end/parse/c0Lexer.mll" 40 941 963
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1155 "front_end/parse/c0Lexer.mll" 45 1105 1167
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1141 "front_end/parse/c0Lexer.mll" 45 1105 1167
+type(
+  int * int
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1125 "front_end/parse/c0Lexer.mll" 45 1105 1168
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1177 "front_end/parse/c0Lexer.mll" 46 1170 1211
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1212 "front_end/parse/c0Lexer.mll" 46 1170 1213
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1214 "front_end/parse/c0Lexer.mll" 46 1170 1218
+type(
+  Lexing.lexbuf -> string
+)
+ident(
+  int_ref text "front_end/parse/c0Lexer.mll" 27 692 696 "front_end/parse/c0Lexer.mll" 27 692 700
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1219 "front_end/parse/c0Lexer.mll" 46 1170 1225
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 40 941 957 "front_end/parse/c0Lexer.mll" 40 941 963
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1214 "front_end/parse/c0Lexer.mll" 46 1170 1225
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1226 "front_end/parse/c0Lexer.mll" 46 1170 1227
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1228 "front_end/parse/c0Lexer.mll" 46 1170 1231
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1214 "front_end/parse/c0Lexer.mll" 46 1170 1231
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 46 1170 1177 "front_end/parse/c0Lexer.mll" 46 1170 1231
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1109 "front_end/parse/c0Lexer.mll" 46 1170 1232
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 47 1234 1249 "front_end/parse/c0Lexer.mll" 47 1234 1259
+type(
+  Core.Std.Int32.t
+)
+ident(
+  ext_ref Core.Std.Int32.zero
+)
+"front_end/parse/c0Lexer.mll" 47 1234 1238 "front_end/parse/c0Lexer.mll" 47 1234 1259
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 45 1105 1109 "front_end/parse/c0Lexer.mll" 47 1234 1259
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 41 966 968 "front_end/parse/c0Lexer.mll" 47 1234 1259
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 40 941 957 "front_end/parse/c0Lexer.mll" 47 1234 1259
+type(
+  Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.mll" 40 941 955 "front_end/parse/c0Lexer.mll" 47 1234 1259
+type(
+  string -> Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.mll" 49 1261 1265 "front_end/parse/c0Lexer.mll" 49 1261 1274
+type(
+  string -> Lexing.lexbuf -> T.token
+)
+ident(
+  def hexnumber "front_end/parse/c0Lexer.mll" 57 1503 1503 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 49 1261 1275 "front_end/parse/c0Lexer.mll" 49 1261 1276
+type(
+  string
+)
+ident(
+  def s "front_end/parse/c0Lexer.mll" 49 1261 1277 "front_end/parse/c0Lexer.mll" 55 1476 1501
+)
+"front_end/parse/c0Lexer.mll" 49 1261 1277 "front_end/parse/c0Lexer.mll" 49 1261 1283
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.mll" 50 1286 1288 "front_end/parse/c0Lexer.mll" 55 1476 1501
+)
+"front_end/parse/c0Lexer.mll" 51 1292 1308 "front_end/parse/c0Lexer.mll" 51 1292 1323
+type(
+  string -> Core.Std.Int32.t
+)
+ident(
+  ext_ref Core.Std.Int32.of_string
+)
+"front_end/parse/c0Lexer.mll" 51 1292 1324 "front_end/parse/c0Lexer.mll" 51 1292 1325
+type(
+  string
+)
+ident(
+  int_ref s "front_end/parse/c0Lexer.mll" 49 1261 1275 "front_end/parse/c0Lexer.mll" 49 1261 1276
+)
+"front_end/parse/c0Lexer.mll" 51 1292 1308 "front_end/parse/c0Lexer.mll" 51 1292 1325
+call(
+  stack
+)
+type(
+  Core.Std.Int32.t
+)
+"front_end/parse/c0Lexer.mll" 51 1292 1296 "front_end/parse/c0Lexer.mll" 51 1292 1326
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 52 1327 1342 "front_end/parse/c0Lexer.mll" 52 1327 1343
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 52 1327 1334 "front_end/parse/c0Lexer.mll" 52 1327 1343
+type(
+  exn
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1351 "front_end/parse/c0Lexer.mll" 53 1347 1365
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1367 "front_end/parse/c0Lexer.mll" 53 1347 1381
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1383 "front_end/parse/c0Lexer.mll" 53 1347 1388
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1389 "front_end/parse/c0Lexer.mll" 53 1347 1395
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 49 1261 1277 "front_end/parse/c0Lexer.mll" 49 1261 1283
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1383 "front_end/parse/c0Lexer.mll" 53 1347 1395
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1397 "front_end/parse/c0Lexer.mll" 53 1347 1402
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref l_end "front_end/parse/c0Lexer.mll" 26 662 666 "front_end/parse/c0Lexer.mll" 26 662 671
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1403 "front_end/parse/c0Lexer.mll" 53 1347 1409
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 49 1261 1277 "front_end/parse/c0Lexer.mll" 49 1261 1283
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1397 "front_end/parse/c0Lexer.mll" 53 1347 1409
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1383 "front_end/parse/c0Lexer.mll" 53 1347 1409
+type(
+  int * int
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1367 "front_end/parse/c0Lexer.mll" 53 1347 1410
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1419 "front_end/parse/c0Lexer.mll" 54 1412 1453
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1454 "front_end/parse/c0Lexer.mll" 54 1412 1455
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1456 "front_end/parse/c0Lexer.mll" 54 1412 1460
+type(
+  Lexing.lexbuf -> string
+)
+ident(
+  int_ref text "front_end/parse/c0Lexer.mll" 27 692 696 "front_end/parse/c0Lexer.mll" 27 692 700
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1461 "front_end/parse/c0Lexer.mll" 54 1412 1467
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.mll" 49 1261 1277 "front_end/parse/c0Lexer.mll" 49 1261 1283
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1456 "front_end/parse/c0Lexer.mll" 54 1412 1467
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1468 "front_end/parse/c0Lexer.mll" 54 1412 1469
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1470 "front_end/parse/c0Lexer.mll" 54 1412 1473
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1456 "front_end/parse/c0Lexer.mll" 54 1412 1473
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 54 1412 1419 "front_end/parse/c0Lexer.mll" 54 1412 1473
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1351 "front_end/parse/c0Lexer.mll" 54 1412 1474
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 55 1476 1491 "front_end/parse/c0Lexer.mll" 55 1476 1501
+type(
+  Core.Std.Int32.t
+)
+ident(
+  ext_ref Core.Std.Int32.zero
+)
+"front_end/parse/c0Lexer.mll" 55 1476 1480 "front_end/parse/c0Lexer.mll" 55 1476 1501
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 53 1347 1351 "front_end/parse/c0Lexer.mll" 55 1476 1501
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 50 1286 1288 "front_end/parse/c0Lexer.mll" 55 1476 1501
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 49 1261 1277 "front_end/parse/c0Lexer.mll" 55 1476 1501
+type(
+  Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.mll" 49 1261 1275 "front_end/parse/c0Lexer.mll" 55 1476 1501
+type(
+  string -> Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.mll" 57 1503 1507 "front_end/parse/c0Lexer.mll" 57 1503 1510
+type(
+  unit -> T.token
+)
+ident(
+  def eof "front_end/parse/c0Lexer.ml" 66 1683 1683 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.mll" 57 1503 1511 "front_end/parse/c0Lexer.mll" 57 1503 1513
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1523 "front_end/parse/c0Lexer.mll" 58 1516 1535
+type(
+  int ref
+)
+ident(
+  int_ref commentLevel "front_end/parse/c0Lexer.mll" 29 718 722 "front_end/parse/c0Lexer.mll" 29 718 734
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1522 "front_end/parse/c0Lexer.mll" 58 1516 1535
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1536 "front_end/parse/c0Lexer.mll" 58 1516 1537
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( > )
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1538 "front_end/parse/c0Lexer.mll" 58 1516 1539
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1522 "front_end/parse/c0Lexer.mll" 58 1516 1539
+type(
+  bool
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1549 "front_end/parse/c0Lexer.mll" 59 1545 1563
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1565 "front_end/parse/c0Lexer.mll" 59 1545 1579
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1582 "front_end/parse/c0Lexer.mll" 59 1545 1592
+type(
+  int ref
+)
+ident(
+  int_ref commentPos "front_end/parse/c0Lexer.mll" 30 743 747 "front_end/parse/c0Lexer.mll" 30 743 757
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1581 "front_end/parse/c0Lexer.mll" 59 1545 1592
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1595 "front_end/parse/c0Lexer.mll" 59 1545 1605
+type(
+  int ref
+)
+ident(
+  int_ref commentPos "front_end/parse/c0Lexer.mll" 30 743 747 "front_end/parse/c0Lexer.mll" 30 743 757
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1594 "front_end/parse/c0Lexer.mll" 59 1545 1605
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1581 "front_end/parse/c0Lexer.mll" 59 1545 1605
+type(
+  int * int
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1565 "front_end/parse/c0Lexer.mll" 59 1545 1606
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Lexer.mll" 60 1608 1614 "front_end/parse/c0Lexer.mll" 60 1608 1636
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 59 1545 1549 "front_end/parse/c0Lexer.mll" 60 1608 1636
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1519 "front_end/parse/c0Lexer.mll" 60 1608 1636
+type(
+  unit
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 61 1639 1641 "front_end/parse/c0Lexer.mll" 61 1639 1646
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 58 1516 1519 "front_end/parse/c0Lexer.mll" 61 1639 1646
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 57 1503 1511 "front_end/parse/c0Lexer.mll" 61 1639 1646
+type(
+  unit -> T.token
+)
+"front_end/parse/c0Lexer.ml" 66 1683 1687 "front_end/parse/c0Lexer.ml" 66 1683 1705
+type(
+  Lexing.lex_tables
+)
+ident(
+  def __ocaml_lex_tables "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 68 1731 1734 "front_end/parse/c0Lexer.ml" 84 2851 2896
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 86 2922 2925 "front_end/parse/c0Lexer.ml" 102 4042 4087
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 104 4113 4116 "front_end/parse/c0Lexer.ml" 120 5233 5278
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 122 5302 5305 "front_end/parse/c0Lexer.ml" 1042 69702 69731
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1044 69755 69758 "front_end/parse/c0Lexer.ml" 1964 134155 134184
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1966 134212 134215 "front_end/parse/c0Lexer.ml" 1966 134212 134217
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1968 134248 134251 "front_end/parse/c0Lexer.ml" 1968 134248 134253
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1970 134284 134287 "front_end/parse/c0Lexer.ml" 1970 134284 134289
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1972 134318 134321 "front_end/parse/c0Lexer.ml" 1972 134318 134323
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1974 134352 134355 "front_end/parse/c0Lexer.ml" 1974 134352 134357
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 1976 134380 134383 "front_end/parse/c0Lexer.ml" 1976 134380 134385
+type(
+  string
+)
+"front_end/parse/c0Lexer.ml" 66 1683 1708 "front_end/parse/c0Lexer.ml" 1977 134387 134388
+type(
+  Lexing.lex_tables
+)
+"front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  def initial "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 1979 134390 134406 "front_end/parse/c0Lexer.ml" 1979 134390 134412
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.ml" 1980 134415 134419 "front_end/parse/c0Lexer.ml" 1980 134415 134451
+)
+"front_end/parse/c0Lexer.ml" 1980 134415 134419 "front_end/parse/c0Lexer.ml" 1980 134415 134442
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  int_ref __ocaml_lex_initial_rec "front_end/parse/c0Lexer.ml" 1981 134452 134456 "front_end/parse/c0Lexer.ml" 1981 134452 134479
+)
+"front_end/parse/c0Lexer.ml" 1980 134415 134443 "front_end/parse/c0Lexer.ml" 1980 134415 134449
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1979 134390 134406 "front_end/parse/c0Lexer.ml" 1979 134390 134412
+)
+"front_end/parse/c0Lexer.ml" 1980 134415 134450 "front_end/parse/c0Lexer.ml" 1980 134415 134451
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 1980 134415 134419 "front_end/parse/c0Lexer.ml" 1980 134415 134451
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 1979 134390 134406 "front_end/parse/c0Lexer.ml" 1980 134415 134451
+type(
+  Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.ml" 1981 134452 134456 "front_end/parse/c0Lexer.ml" 1981 134452 134479
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  def __ocaml_lex_initial_rec "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134487 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+)
+"front_end/parse/c0Lexer.ml" 1981 134452 134487 "front_end/parse/c0Lexer.ml" 1981 134452 134504
+type(
+  int
+)
+ident(
+  def __ocaml_lex_state "front_end/parse/c0Lexer.ml" 1982 134507 134509 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+)
+"front_end/parse/c0Lexer.ml" 1982 134507 134515 "front_end/parse/c0Lexer.ml" 1982 134507 134528
+type(
+  Lexing.lex_tables -> int -> Lexing.lexbuf -> int
+)
+ident(
+  ext_ref Lexing.engine
+)
+"front_end/parse/c0Lexer.ml" 1982 134507 134529 "front_end/parse/c0Lexer.ml" 1982 134507 134547
+type(
+  Lexing.lex_tables
+)
+ident(
+  int_ref __ocaml_lex_tables "front_end/parse/c0Lexer.ml" 66 1683 1687 "front_end/parse/c0Lexer.ml" 66 1683 1705
+)
+"front_end/parse/c0Lexer.ml" 1982 134507 134548 "front_end/parse/c0Lexer.ml" 1982 134507 134565
+type(
+  int
+)
+ident(
+  int_ref __ocaml_lex_state "front_end/parse/c0Lexer.ml" 1981 134452 134487 "front_end/parse/c0Lexer.ml" 1981 134452 134504
+)
+"front_end/parse/c0Lexer.ml" 1982 134507 134566 "front_end/parse/c0Lexer.ml" 1982 134507 134572
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 1982 134507 134515 "front_end/parse/c0Lexer.ml" 1982 134507 134572
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 1983 134578 134586 "front_end/parse/c0Lexer.ml" 1983 134578 134587
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 73 134626 134644 "front_end/parse/c0Lexer.mll" 73 134626 134651
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref initial "front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+)
+"front_end/parse/c0Lexer.mll" 73 134626 134652 "front_end/parse/c0Lexer.mll" 73 134626 134658
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 73 134626 134644 "front_end/parse/c0Lexer.mll" 73 134626 134658
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 1988 134698 134702 "front_end/parse/c0Lexer.ml" 1988 134698 134703
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134760 "front_end/parse/c0Lexer.mll" 74 134742 134778
+type(
+  int -> unit
+)
+ident(
+  ext_ref ParseState.newline
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134780 "front_end/parse/c0Lexer.mll" 74 134742 134785
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134786 "front_end/parse/c0Lexer.mll" 74 134742 134792
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134780 "front_end/parse/c0Lexer.mll" 74 134742 134792
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134760 "front_end/parse/c0Lexer.mll" 74 134742 134793
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134795 "front_end/parse/c0Lexer.mll" 74 134742 134802
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref initial "front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134803 "front_end/parse/c0Lexer.mll" 74 134742 134809
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134795 "front_end/parse/c0Lexer.mll" 74 134742 134809
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 74 134742 134760 "front_end/parse/c0Lexer.mll" 74 134742 134809
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 1993 134849 134853 "front_end/parse/c0Lexer.ml" 1993 134849 134854
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 76 134893 134911 "front_end/parse/c0Lexer.mll" 76 134893 134919
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 1998 134959 134963 "front_end/parse/c0Lexer.ml" 1998 134959 134964
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 77 135003 135021 "front_end/parse/c0Lexer.mll" 77 135003 135029
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2003 135069 135073 "front_end/parse/c0Lexer.ml" 2003 135069 135074
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 78 135113 135131 "front_end/parse/c0Lexer.mll" 78 135113 135139
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2008 135179 135183 "front_end/parse/c0Lexer.ml" 2008 135179 135184
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 79 135223 135241 "front_end/parse/c0Lexer.mll" 79 135223 135249
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2013 135289 135293 "front_end/parse/c0Lexer.ml" 2013 135289 135294
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 81 135333 135351 "front_end/parse/c0Lexer.mll" 81 135333 135357
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2018 135397 135401 "front_end/parse/c0Lexer.ml" 2018 135397 135402
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 83 135441 135459 "front_end/parse/c0Lexer.mll" 83 135441 135467
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2023 135507 135511 "front_end/parse/c0Lexer.ml" 2023 135507 135512
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 84 135551 135569 "front_end/parse/c0Lexer.mll" 84 135551 135577
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2028 135617 135621 "front_end/parse/c0Lexer.ml" 2028 135617 135622
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 85 135661 135679 "front_end/parse/c0Lexer.mll" 85 135661 135688
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2033 135728 135732 "front_end/parse/c0Lexer.ml" 2033 135728 135734
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 86 135773 135791 "front_end/parse/c0Lexer.mll" 86 135773 135799
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2038 135839 135843 "front_end/parse/c0Lexer.ml" 2038 135839 135845
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 87 135884 135902 "front_end/parse/c0Lexer.mll" 87 135884 135911
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2043 135951 135955 "front_end/parse/c0Lexer.ml" 2043 135951 135957
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 88 135996 136014 "front_end/parse/c0Lexer.mll" 88 135996 136025
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2048 136065 136069 "front_end/parse/c0Lexer.ml" 2048 136065 136071
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 90 136110 136128 "front_end/parse/c0Lexer.mll" 90 136110 136134
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2053 136174 136178 "front_end/parse/c0Lexer.ml" 2053 136174 136180
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 91 136219 136237 "front_end/parse/c0Lexer.mll" 91 136219 136244
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2058 136284 136288 "front_end/parse/c0Lexer.ml" 2058 136284 136290
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 92 136329 136347 "front_end/parse/c0Lexer.mll" 92 136329 136353
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2063 136393 136397 "front_end/parse/c0Lexer.ml" 2063 136393 136399
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 93 136438 136456 "front_end/parse/c0Lexer.mll" 93 136438 136463
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2068 136503 136507 "front_end/parse/c0Lexer.ml" 2068 136503 136509
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 94 136548 136566 "front_end/parse/c0Lexer.mll" 94 136548 136575
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2073 136615 136619 "front_end/parse/c0Lexer.ml" 2073 136615 136621
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 96 136660 136680 "front_end/parse/c0Lexer.mll" 96 136660 136692
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2078 136732 136736 "front_end/parse/c0Lexer.ml" 2078 136732 136738
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 97 136777 136797 "front_end/parse/c0Lexer.mll" 97 136777 136809
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2083 136849 136853 "front_end/parse/c0Lexer.ml" 2083 136849 136855
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 98 136894 136914 "front_end/parse/c0Lexer.mll" 98 136894 136926
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2088 136966 136970 "front_end/parse/c0Lexer.ml" 2088 136966 136972
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 99 137011 137031 "front_end/parse/c0Lexer.mll" 99 137011 137043
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2093 137083 137087 "front_end/parse/c0Lexer.ml" 2093 137083 137089
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 100 137129 137149 "front_end/parse/c0Lexer.mll" 100 137129 137161
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2098 137201 137205 "front_end/parse/c0Lexer.ml" 2098 137201 137207
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 101 137247 137267 "front_end/parse/c0Lexer.mll" 101 137247 137279
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2103 137319 137323 "front_end/parse/c0Lexer.ml" 2103 137319 137325
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 102 137365 137385 "front_end/parse/c0Lexer.mll" 102 137365 137397
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2108 137437 137441 "front_end/parse/c0Lexer.ml" 2108 137437 137443
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 103 137483 137503 "front_end/parse/c0Lexer.mll" 103 137483 137515
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2113 137555 137559 "front_end/parse/c0Lexer.ml" 2113 137555 137561
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 104 137601 137621 "front_end/parse/c0Lexer.mll" 104 137601 137633
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2118 137673 137677 "front_end/parse/c0Lexer.ml" 2118 137673 137679
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 105 137719 137739 "front_end/parse/c0Lexer.mll" 105 137719 137751
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2123 137791 137795 "front_end/parse/c0Lexer.ml" 2123 137791 137797
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 106 137837 137857 "front_end/parse/c0Lexer.mll" 106 137837 137869
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2128 137909 137913 "front_end/parse/c0Lexer.ml" 2128 137909 137915
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 107 137955 137975 "front_end/parse/c0Lexer.mll" 107 137955 137987
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2133 138027 138031 "front_end/parse/c0Lexer.ml" 2133 138027 138033
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 108 138073 138093 "front_end/parse/c0Lexer.mll" 108 138073 138105
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2138 138145 138149 "front_end/parse/c0Lexer.ml" 2138 138145 138151
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 109 138191 138211 "front_end/parse/c0Lexer.mll" 109 138191 138223
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2143 138263 138267 "front_end/parse/c0Lexer.ml" 2143 138263 138269
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 110 138309 138329 "front_end/parse/c0Lexer.mll" 110 138309 138341
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2148 138381 138385 "front_end/parse/c0Lexer.ml" 2148 138381 138387
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 111 138427 138447 "front_end/parse/c0Lexer.mll" 111 138427 138459
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2153 138499 138503 "front_end/parse/c0Lexer.ml" 2153 138499 138505
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 112 138545 138565 "front_end/parse/c0Lexer.mll" 112 138545 138577
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2158 138617 138621 "front_end/parse/c0Lexer.ml" 2158 138617 138623
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 113 138663 138683 "front_end/parse/c0Lexer.mll" 113 138663 138695
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2163 138735 138739 "front_end/parse/c0Lexer.ml" 2163 138735 138741
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 114 138781 138801 "front_end/parse/c0Lexer.mll" 114 138781 138813
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2168 138853 138857 "front_end/parse/c0Lexer.ml" 2168 138853 138859
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 116 138899 138917 "front_end/parse/c0Lexer.mll" 116 138899 138925
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2173 138965 138969 "front_end/parse/c0Lexer.ml" 2173 138965 138971
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 117 139011 139029 "front_end/parse/c0Lexer.mll" 117 139011 139034
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2178 139074 139078 "front_end/parse/c0Lexer.ml" 2178 139074 139080
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 118 139120 139138 "front_end/parse/c0Lexer.mll" 118 139120 139144
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2183 139184 139188 "front_end/parse/c0Lexer.ml" 2183 139184 139190
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 120 139234 139248 "front_end/parse/c0Lexer.mll" 120 139234 139249
+type(
+  string
+)
+ident(
+  def n "front_end/parse/c0Lexer.mll" 120 139407 139425 "front_end/parse/c0Lexer.mll" 120 139407 139443
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139288 "front_end/parse/c0Lexer.ml" 2188 139286 139305
+type(
+  Lexing.lexbuf -> int -> int -> string
+)
+ident(
+  ext_ref Lexing.sub_lexeme
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139306 "front_end/parse/c0Lexer.ml" 2188 139286 139312
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139313 "front_end/parse/c0Lexer.ml" 2188 139286 139319
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139313 "front_end/parse/c0Lexer.ml" 2188 139286 139340
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139341 "front_end/parse/c0Lexer.ml" 2188 139286 139347
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139341 "front_end/parse/c0Lexer.ml" 2188 139286 139367
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2188 139286 139288 "front_end/parse/c0Lexer.ml" 2188 139286 139367
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 120 139407 139425 "front_end/parse/c0Lexer.mll" 120 139407 139434
+type(
+  string -> Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref decnumber "front_end/parse/c0Lexer.mll" 40 941 945 "front_end/parse/c0Lexer.mll" 40 941 954
+)
+"front_end/parse/c0Lexer.mll" 120 139407 139435 "front_end/parse/c0Lexer.mll" 120 139407 139436
+type(
+  string
+)
+ident(
+  int_ref n "front_end/parse/c0Lexer.mll" 120 139234 139248 "front_end/parse/c0Lexer.mll" 120 139234 139249
+)
+"front_end/parse/c0Lexer.mll" 120 139407 139437 "front_end/parse/c0Lexer.mll" 120 139407 139443
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 120 139407 139425 "front_end/parse/c0Lexer.mll" 120 139407 139443
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2184 139194 139194 "front_end/parse/c0Lexer.ml" 120 139407 139445
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2193 139483 139487 "front_end/parse/c0Lexer.ml" 2193 139483 139489
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 121 139533 139547 "front_end/parse/c0Lexer.mll" 121 139533 139548
+type(
+  string
+)
+ident(
+  def n "front_end/parse/c0Lexer.mll" 121 139706 139724 "front_end/parse/c0Lexer.mll" 121 139706 139742
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139587 "front_end/parse/c0Lexer.ml" 2198 139585 139604
+type(
+  Lexing.lexbuf -> int -> int -> string
+)
+ident(
+  ext_ref Lexing.sub_lexeme
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139605 "front_end/parse/c0Lexer.ml" 2198 139585 139611
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139612 "front_end/parse/c0Lexer.ml" 2198 139585 139618
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139612 "front_end/parse/c0Lexer.ml" 2198 139585 139639
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139640 "front_end/parse/c0Lexer.ml" 2198 139585 139646
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139640 "front_end/parse/c0Lexer.ml" 2198 139585 139666
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2198 139585 139587 "front_end/parse/c0Lexer.ml" 2198 139585 139666
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 121 139706 139724 "front_end/parse/c0Lexer.mll" 121 139706 139733
+type(
+  string -> Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref hexnumber "front_end/parse/c0Lexer.mll" 49 1261 1265 "front_end/parse/c0Lexer.mll" 49 1261 1274
+)
+"front_end/parse/c0Lexer.mll" 121 139706 139734 "front_end/parse/c0Lexer.mll" 121 139706 139735
+type(
+  string
+)
+ident(
+  int_ref n "front_end/parse/c0Lexer.mll" 121 139533 139547 "front_end/parse/c0Lexer.mll" 121 139533 139548
+)
+"front_end/parse/c0Lexer.mll" 121 139706 139736 "front_end/parse/c0Lexer.mll" 121 139706 139742
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 121 139706 139724 "front_end/parse/c0Lexer.mll" 121 139706 139742
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2194 139493 139493 "front_end/parse/c0Lexer.ml" 121 139706 139744
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2203 139782 139786 "front_end/parse/c0Lexer.ml" 2203 139782 139788
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 123 139832 139842 "front_end/parse/c0Lexer.mll" 123 139832 139846
+type(
+  string
+)
+ident(
+  def name "front_end/parse/c0Lexer.mll" 123 140004 140022 "front_end/parse/c0Lexer.mll" 123 140004 140063
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139885 "front_end/parse/c0Lexer.ml" 2208 139883 139902
+type(
+  Lexing.lexbuf -> int -> int -> string
+)
+ident(
+  ext_ref Lexing.sub_lexeme
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139903 "front_end/parse/c0Lexer.ml" 2208 139883 139909
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139910 "front_end/parse/c0Lexer.ml" 2208 139883 139916
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139910 "front_end/parse/c0Lexer.ml" 2208 139883 139937
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139938 "front_end/parse/c0Lexer.ml" 2208 139883 139944
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139938 "front_end/parse/c0Lexer.ml" 2208 139883 139964
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2208 139883 139885 "front_end/parse/c0Lexer.ml" 2208 139883 139964
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140026 "front_end/parse/c0Lexer.mll" 123 140004 140028
+type(
+  Symbol.t
+)
+ident(
+  def id "front_end/parse/c0Lexer.mll" 123 140004 140053 "front_end/parse/c0Lexer.mll" 123 140004 140063
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140031 "front_end/parse/c0Lexer.mll" 123 140004 140044
+type(
+  string -> Symbol.t
+)
+ident(
+  ext_ref Symbol.symbol
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140045 "front_end/parse/c0Lexer.mll" 123 140004 140049
+type(
+  string
+)
+ident(
+  int_ref name "front_end/parse/c0Lexer.mll" 123 139832 139842 "front_end/parse/c0Lexer.mll" 123 139832 139846
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140031 "front_end/parse/c0Lexer.mll" 123 140004 140049
+call(
+  stack
+)
+type(
+  Symbol.t
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140061 "front_end/parse/c0Lexer.mll" 123 140004 140063
+type(
+  Symbol.t
+)
+ident(
+  int_ref id "front_end/parse/c0Lexer.mll" 123 140004 140026 "front_end/parse/c0Lexer.mll" 123 140004 140028
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140053 "front_end/parse/c0Lexer.mll" 123 140004 140063
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 123 140004 140022 "front_end/parse/c0Lexer.mll" 123 140004 140063
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2204 139792 139792 "front_end/parse/c0Lexer.ml" 123 140004 140065
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2213 140103 140107 "front_end/parse/c0Lexer.ml" 2213 140103 140109
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140167 "front_end/parse/c0Lexer.mll" 125 140149 140179
+type(
+  Lexing.lexbuf -> unit
+)
+ident(
+  int_ref enterComment "front_end/parse/c0Lexer.mll" 32 767 771 "front_end/parse/c0Lexer.mll" 32 767 783
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140180 "front_end/parse/c0Lexer.mll" 125 140149 140186
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140167 "front_end/parse/c0Lexer.mll" 125 140149 140186
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140188 "front_end/parse/c0Lexer.mll" 125 140149 140195
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment "front_end/parse/c0Lexer.ml" 2249 141194 141198 "front_end/parse/c0Lexer.ml" 2249 141194 141205
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140196 "front_end/parse/c0Lexer.mll" 125 140149 140202
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140188 "front_end/parse/c0Lexer.mll" 125 140149 140202
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 125 140149 140167 "front_end/parse/c0Lexer.mll" 125 140149 140202
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2218 140242 140246 "front_end/parse/c0Lexer.ml" 2218 140242 140248
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140306 "front_end/parse/c0Lexer.mll" 126 140288 140320
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140322 "front_end/parse/c0Lexer.mll" 126 140288 140336
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140338 "front_end/parse/c0Lexer.mll" 126 140288 140343
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140344 "front_end/parse/c0Lexer.mll" 126 140288 140350
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140338 "front_end/parse/c0Lexer.mll" 126 140288 140350
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140352 "front_end/parse/c0Lexer.mll" 126 140288 140357
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140358 "front_end/parse/c0Lexer.mll" 126 140288 140364
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140352 "front_end/parse/c0Lexer.mll" 126 140288 140364
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140338 "front_end/parse/c0Lexer.mll" 126 140288 140364
+type(
+  int * int
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140322 "front_end/parse/c0Lexer.mll" 126 140288 140365
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Lexer.mll" 127 140367 140387 "front_end/parse/c0Lexer.mll" 127 140367 140408
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140306 "front_end/parse/c0Lexer.mll" 127 140367 140408
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 127 140367 140410 "front_end/parse/c0Lexer.mll" 127 140367 140417
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref initial "front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+)
+"front_end/parse/c0Lexer.mll" 127 140367 140418 "front_end/parse/c0Lexer.mll" 127 140367 140424
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 127 140367 140410 "front_end/parse/c0Lexer.mll" 127 140367 140424
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 126 140288 140306 "front_end/parse/c0Lexer.mll" 127 140367 140424
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2224 140464 140468 "front_end/parse/c0Lexer.ml" 2224 140464 140470
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 129 140510 140528 "front_end/parse/c0Lexer.mll" 129 140510 140540
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment_line "front_end/parse/c0Lexer.ml" 2276 142058 142062 "front_end/parse/c0Lexer.ml" 2276 142058 142074
+)
+"front_end/parse/c0Lexer.mll" 129 140510 140541 "front_end/parse/c0Lexer.mll" 129 140510 140547
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 129 140510 140528 "front_end/parse/c0Lexer.mll" 129 140510 140547
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2229 140587 140591 "front_end/parse/c0Lexer.ml" 2229 140587 140593
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 130 140633 140651 "front_end/parse/c0Lexer.mll" 130 140633 140663
+type(
+  T.token
+)
+type(
+  bool
+)
+"front_end/parse/c0Lexer.ml" 2234 140703 140707 "front_end/parse/c0Lexer.ml" 2234 140703 140709
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 131 140749 140767 "front_end/parse/c0Lexer.mll" 131 140749 140770
+type(
+  unit -> T.token
+)
+ident(
+  int_ref eof "front_end/parse/c0Lexer.mll" 57 1503 1507 "front_end/parse/c0Lexer.mll" 57 1503 1510
+)
+"front_end/parse/c0Lexer.mll" 131 140749 140771 "front_end/parse/c0Lexer.mll" 131 140749 140773
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 131 140749 140767 "front_end/parse/c0Lexer.mll" 131 140749 140773
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2239 140813 140817 "front_end/parse/c0Lexer.ml" 2239 140813 140819
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140877 "front_end/parse/c0Lexer.mll" 132 140859 140891
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140893 "front_end/parse/c0Lexer.mll" 132 140859 140907
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140909 "front_end/parse/c0Lexer.mll" 132 140859 140914
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140915 "front_end/parse/c0Lexer.mll" 132 140859 140921
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140909 "front_end/parse/c0Lexer.mll" 132 140859 140921
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140923 "front_end/parse/c0Lexer.mll" 132 140859 140928
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140929 "front_end/parse/c0Lexer.mll" 132 140859 140935
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140923 "front_end/parse/c0Lexer.mll" 132 140859 140935
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140909 "front_end/parse/c0Lexer.mll" 132 140859 140935
+type(
+  int * int
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140893 "front_end/parse/c0Lexer.mll" 132 140859 140936
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140959 "front_end/parse/c0Lexer.mll" 133 140938 140982
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140983 "front_end/parse/c0Lexer.mll" 133 140938 140984
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140985 "front_end/parse/c0Lexer.mll" 133 140938 140989
+type(
+  Lexing.lexbuf -> string
+)
+ident(
+  int_ref text "front_end/parse/c0Lexer.mll" 27 692 696 "front_end/parse/c0Lexer.mll" 27 692 700
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140990 "front_end/parse/c0Lexer.mll" 133 140938 140996
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140985 "front_end/parse/c0Lexer.mll" 133 140938 140996
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140997 "front_end/parse/c0Lexer.mll" 133 140938 140998
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140999 "front_end/parse/c0Lexer.mll" 133 140938 141003
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140985 "front_end/parse/c0Lexer.mll" 133 140938 141003
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 133 140938 140959 "front_end/parse/c0Lexer.mll" 133 140938 141003
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140877 "front_end/parse/c0Lexer.mll" 133 140938 141004
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 134 141006 141024 "front_end/parse/c0Lexer.mll" 134 141006 141031
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref initial "front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+)
+"front_end/parse/c0Lexer.mll" 134 141006 141032 "front_end/parse/c0Lexer.mll" 134 141006 141038
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.mll" 134 141006 141024 "front_end/parse/c0Lexer.mll" 134 141006 141038
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 132 140859 140877 "front_end/parse/c0Lexer.mll" 134 141006 141038
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2246 141078 141082 "front_end/parse/c0Lexer.ml" 2246 141078 141099
+type(
+  int
+)
+ident(
+  def __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2246 141078 141103 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+)
+"front_end/parse/c0Lexer.ml" 2246 141078 141103 "front_end/parse/c0Lexer.ml" 2246 141078 141109
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2246 141078 141103 "front_end/parse/c0Lexer.ml" 2246 141078 141128
+type(
+  Lexing.lexbuf -> unit
+)
+"front_end/parse/c0Lexer.ml" 2246 141078 141129 "front_end/parse/c0Lexer.ml" 2246 141078 141135
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2246 141078 141103 "front_end/parse/c0Lexer.ml" 2246 141078 141135
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.ml" 2247 141138 141144 "front_end/parse/c0Lexer.ml" 2247 141138 141167
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  int_ref __ocaml_lex_initial_rec "front_end/parse/c0Lexer.ml" 1981 134452 134456 "front_end/parse/c0Lexer.ml" 1981 134452 134479
+)
+"front_end/parse/c0Lexer.ml" 2247 141138 141168 "front_end/parse/c0Lexer.ml" 2247 141138 141174
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 1981 134452 134486
+)
+"front_end/parse/c0Lexer.ml" 2247 141138 141175 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+type(
+  int
+)
+ident(
+  int_ref __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2246 141078 141082 "front_end/parse/c0Lexer.ml" 2246 141078 141099
+)
+"front_end/parse/c0Lexer.ml" 2247 141138 141144 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2246 141078 141103 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 1982 134507 134509 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 1981 134452 134487 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+type(
+  int -> T.token
+)
+"front_end/parse/c0Lexer.ml" 1981 134452 134480 "front_end/parse/c0Lexer.ml" 2247 141138 141192
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+"front_end/parse/c0Lexer.ml" 2249 141194 141198 "front_end/parse/c0Lexer.ml" 2249 141194 141205
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  def comment "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 2249 141194 141206 "front_end/parse/c0Lexer.ml" 2249 141194 141212
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.ml" 2250 141215 141219 "front_end/parse/c0Lexer.ml" 2250 141215 141253
+)
+"front_end/parse/c0Lexer.ml" 2250 141215 141219 "front_end/parse/c0Lexer.ml" 2250 141215 141242
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  int_ref __ocaml_lex_comment_rec "front_end/parse/c0Lexer.ml" 2251 141254 141258 "front_end/parse/c0Lexer.ml" 2251 141254 141281
+)
+"front_end/parse/c0Lexer.ml" 2250 141215 141243 "front_end/parse/c0Lexer.ml" 2250 141215 141249
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2249 141194 141206 "front_end/parse/c0Lexer.ml" 2249 141194 141212
+)
+"front_end/parse/c0Lexer.ml" 2250 141215 141250 "front_end/parse/c0Lexer.ml" 2250 141215 141253
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2250 141215 141219 "front_end/parse/c0Lexer.ml" 2250 141215 141253
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2249 141194 141206 "front_end/parse/c0Lexer.ml" 2250 141215 141253
+type(
+  Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.ml" 2251 141254 141258 "front_end/parse/c0Lexer.ml" 2251 141254 141281
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  def __ocaml_lex_comment_rec "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141289 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+)
+"front_end/parse/c0Lexer.ml" 2251 141254 141289 "front_end/parse/c0Lexer.ml" 2251 141254 141306
+type(
+  int
+)
+ident(
+  def __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2252 141309 141311 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+)
+"front_end/parse/c0Lexer.ml" 2252 141309 141317 "front_end/parse/c0Lexer.ml" 2252 141309 141330
+type(
+  Lexing.lex_tables -> int -> Lexing.lexbuf -> int
+)
+ident(
+  ext_ref Lexing.engine
+)
+"front_end/parse/c0Lexer.ml" 2252 141309 141331 "front_end/parse/c0Lexer.ml" 2252 141309 141349
+type(
+  Lexing.lex_tables
+)
+ident(
+  int_ref __ocaml_lex_tables "front_end/parse/c0Lexer.ml" 66 1683 1687 "front_end/parse/c0Lexer.ml" 66 1683 1705
+)
+"front_end/parse/c0Lexer.ml" 2252 141309 141350 "front_end/parse/c0Lexer.ml" 2252 141309 141367
+type(
+  int
+)
+ident(
+  int_ref __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2251 141254 141289 "front_end/parse/c0Lexer.ml" 2251 141254 141306
+)
+"front_end/parse/c0Lexer.ml" 2252 141309 141368 "front_end/parse/c0Lexer.ml" 2252 141309 141374
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.ml" 2252 141309 141317 "front_end/parse/c0Lexer.ml" 2252 141309 141374
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2253 141380 141388 "front_end/parse/c0Lexer.ml" 2253 141380 141389
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141446 "front_end/parse/c0Lexer.mll" 138 141429 141458
+type(
+  Lexing.lexbuf -> unit
+)
+ident(
+  int_ref enterComment "front_end/parse/c0Lexer.mll" 32 767 771 "front_end/parse/c0Lexer.mll" 32 767 783
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141459 "front_end/parse/c0Lexer.mll" 138 141429 141465
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141446 "front_end/parse/c0Lexer.mll" 138 141429 141465
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141467 "front_end/parse/c0Lexer.mll" 138 141429 141474
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment "front_end/parse/c0Lexer.ml" 2249 141194 141198 "front_end/parse/c0Lexer.ml" 2249 141194 141205
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141475 "front_end/parse/c0Lexer.mll" 138 141429 141481
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141467 "front_end/parse/c0Lexer.mll" 138 141429 141481
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 138 141429 141446 "front_end/parse/c0Lexer.mll" 138 141429 141481
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2258 141521 141525 "front_end/parse/c0Lexer.ml" 2258 141521 141526
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141587 "front_end/parse/c0Lexer.mll" 139 141566 141598
+type(
+  unit -> bool
+)
+ident(
+  int_ref exitComment "front_end/parse/c0Lexer.mll" 36 861 865 "front_end/parse/c0Lexer.mll" 36 861 876
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141599 "front_end/parse/c0Lexer.mll" 139 141566 141601
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141587 "front_end/parse/c0Lexer.mll" 139 141566 141601
+type(
+  bool
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141607 "front_end/parse/c0Lexer.mll" 139 141566 141614
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref initial "front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141620 "front_end/parse/c0Lexer.mll" 139 141566 141627
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment "front_end/parse/c0Lexer.ml" 2249 141194 141198 "front_end/parse/c0Lexer.ml" 2249 141194 141205
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141584 "front_end/parse/c0Lexer.mll" 139 141566 141627
+type(
+  Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141629 "front_end/parse/c0Lexer.mll" 139 141566 141635
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.mll" 139 141566 141583 "front_end/parse/c0Lexer.mll" 139 141566 141635
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2263 141675 141679 "front_end/parse/c0Lexer.ml" 2263 141675 141680
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141737 "front_end/parse/c0Lexer.mll" 140 141720 141755
+type(
+  int -> unit
+)
+ident(
+  ext_ref ParseState.newline
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141757 "front_end/parse/c0Lexer.mll" 140 141720 141762
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141763 "front_end/parse/c0Lexer.mll" 140 141720 141769
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141757 "front_end/parse/c0Lexer.mll" 140 141720 141769
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141737 "front_end/parse/c0Lexer.mll" 140 141720 141770
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141772 "front_end/parse/c0Lexer.mll" 140 141720 141779
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment "front_end/parse/c0Lexer.ml" 2249 141194 141198 "front_end/parse/c0Lexer.ml" 2249 141194 141205
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141780 "front_end/parse/c0Lexer.mll" 140 141720 141786
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141772 "front_end/parse/c0Lexer.mll" 140 141720 141786
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 140 141720 141737 "front_end/parse/c0Lexer.mll" 140 141720 141786
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2268 141826 141830 "front_end/parse/c0Lexer.ml" 2268 141826 141831
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 141 141871 141888 "front_end/parse/c0Lexer.mll" 141 141871 141895
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment "front_end/parse/c0Lexer.ml" 2249 141194 141198 "front_end/parse/c0Lexer.ml" 2249 141194 141205
+)
+"front_end/parse/c0Lexer.mll" 141 141871 141896 "front_end/parse/c0Lexer.mll" 141 141871 141902
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.mll" 141 141871 141888 "front_end/parse/c0Lexer.mll" 141 141871 141902
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2273 141942 141946 "front_end/parse/c0Lexer.ml" 2273 141942 141963
+type(
+  int
+)
+ident(
+  def __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2273 141942 141967 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+)
+"front_end/parse/c0Lexer.ml" 2273 141942 141967 "front_end/parse/c0Lexer.ml" 2273 141942 141973
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.ml" 2273 141942 141967 "front_end/parse/c0Lexer.ml" 2273 141942 141992
+type(
+  Lexing.lexbuf -> unit
+)
+"front_end/parse/c0Lexer.ml" 2273 141942 141993 "front_end/parse/c0Lexer.ml" 2273 141942 141999
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.ml" 2273 141942 141967 "front_end/parse/c0Lexer.ml" 2273 141942 141999
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.ml" 2274 142002 142008 "front_end/parse/c0Lexer.ml" 2274 142002 142031
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  int_ref __ocaml_lex_comment_rec "front_end/parse/c0Lexer.ml" 2251 141254 141258 "front_end/parse/c0Lexer.ml" 2251 141254 141281
+)
+"front_end/parse/c0Lexer.ml" 2274 142002 142032 "front_end/parse/c0Lexer.ml" 2274 142002 142038
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2251 141254 141288
+)
+"front_end/parse/c0Lexer.ml" 2274 142002 142039 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+type(
+  int
+)
+ident(
+  int_ref __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2273 141942 141946 "front_end/parse/c0Lexer.ml" 2273 141942 141963
+)
+"front_end/parse/c0Lexer.ml" 2274 142002 142008 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2273 141942 141967 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2252 141309 141311 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2251 141254 141289 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+type(
+  int -> T.token
+)
+"front_end/parse/c0Lexer.ml" 2251 141254 141282 "front_end/parse/c0Lexer.ml" 2274 142002 142056
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+"front_end/parse/c0Lexer.ml" 2276 142058 142062 "front_end/parse/c0Lexer.ml" 2276 142058 142074
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  def comment_line "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 2276 142058 142075 "front_end/parse/c0Lexer.ml" 2276 142058 142081
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.ml" 2277 142084 142088 "front_end/parse/c0Lexer.ml" 2277 142084 142127
+)
+"front_end/parse/c0Lexer.ml" 2277 142084 142088 "front_end/parse/c0Lexer.ml" 2277 142084 142116
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  int_ref __ocaml_lex_comment_line_rec "front_end/parse/c0Lexer.ml" 2278 142128 142132 "front_end/parse/c0Lexer.ml" 2278 142128 142160
+)
+"front_end/parse/c0Lexer.ml" 2277 142084 142117 "front_end/parse/c0Lexer.ml" 2277 142084 142123
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2276 142058 142075 "front_end/parse/c0Lexer.ml" 2276 142058 142081
+)
+"front_end/parse/c0Lexer.ml" 2277 142084 142124 "front_end/parse/c0Lexer.ml" 2277 142084 142127
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2277 142084 142088 "front_end/parse/c0Lexer.ml" 2277 142084 142127
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2276 142058 142075 "front_end/parse/c0Lexer.ml" 2277 142084 142127
+type(
+  Lexing.lexbuf -> T.token
+)
+"front_end/parse/c0Lexer.ml" 2278 142128 142132 "front_end/parse/c0Lexer.ml" 2278 142128 142160
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  def __ocaml_lex_comment_line_rec "front_end/parse/c0Lexer.ml" 1979 134390 134390 "front_end/parse/c0Lexer.ml" 1 0 -1
+)
+"front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142168 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+)
+"front_end/parse/c0Lexer.ml" 2278 142128 142168 "front_end/parse/c0Lexer.ml" 2278 142128 142185
+type(
+  int
+)
+ident(
+  def __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2279 142188 142190 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+)
+"front_end/parse/c0Lexer.ml" 2279 142188 142196 "front_end/parse/c0Lexer.ml" 2279 142188 142209
+type(
+  Lexing.lex_tables -> int -> Lexing.lexbuf -> int
+)
+ident(
+  ext_ref Lexing.engine
+)
+"front_end/parse/c0Lexer.ml" 2279 142188 142210 "front_end/parse/c0Lexer.ml" 2279 142188 142228
+type(
+  Lexing.lex_tables
+)
+ident(
+  int_ref __ocaml_lex_tables "front_end/parse/c0Lexer.ml" 66 1683 1687 "front_end/parse/c0Lexer.ml" 66 1683 1705
+)
+"front_end/parse/c0Lexer.ml" 2279 142188 142229 "front_end/parse/c0Lexer.ml" 2279 142188 142246
+type(
+  int
+)
+ident(
+  int_ref __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2278 142128 142168 "front_end/parse/c0Lexer.ml" 2278 142128 142185
+)
+"front_end/parse/c0Lexer.ml" 2279 142188 142247 "front_end/parse/c0Lexer.ml" 2279 142188 142253
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.ml" 2279 142188 142196 "front_end/parse/c0Lexer.ml" 2279 142188 142253
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.ml" 2280 142259 142267 "front_end/parse/c0Lexer.ml" 2280 142259 142268
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142325 "front_end/parse/c0Lexer.mll" 145 142308 142343
+type(
+  int -> unit
+)
+ident(
+  ext_ref ParseState.newline
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142345 "front_end/parse/c0Lexer.mll" 145 142308 142350
+type(
+  Lexing.lexbuf -> int
+)
+ident(
+  int_ref start "front_end/parse/c0Lexer.mll" 25 630 634 "front_end/parse/c0Lexer.mll" 25 630 639
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142351 "front_end/parse/c0Lexer.mll" 145 142308 142357
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142345 "front_end/parse/c0Lexer.mll" 145 142308 142357
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142325 "front_end/parse/c0Lexer.mll" 145 142308 142358
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142360 "front_end/parse/c0Lexer.mll" 145 142308 142367
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref initial "front_end/parse/c0Lexer.ml" 1979 134390 134398 "front_end/parse/c0Lexer.ml" 1979 134390 134405
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142368 "front_end/parse/c0Lexer.mll" 145 142308 142374
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142360 "front_end/parse/c0Lexer.mll" 145 142308 142374
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.mll" 145 142308 142325 "front_end/parse/c0Lexer.mll" 145 142308 142374
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2285 142414 142418 "front_end/parse/c0Lexer.ml" 2285 142414 142419
+type(
+  int
+)
+"front_end/parse/c0Lexer.mll" 146 142459 142476 "front_end/parse/c0Lexer.mll" 146 142459 142488
+type(
+  Lexing.lexbuf -> T.token
+)
+ident(
+  int_ref comment_line "front_end/parse/c0Lexer.ml" 2276 142058 142062 "front_end/parse/c0Lexer.ml" 2276 142058 142074
+)
+"front_end/parse/c0Lexer.mll" 146 142459 142489 "front_end/parse/c0Lexer.mll" 146 142459 142495
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.mll" 146 142459 142476 "front_end/parse/c0Lexer.mll" 146 142459 142495
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2290 142535 142539 "front_end/parse/c0Lexer.ml" 2290 142535 142556
+type(
+  int
+)
+ident(
+  def __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2290 142535 142560 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+)
+"front_end/parse/c0Lexer.ml" 2290 142535 142560 "front_end/parse/c0Lexer.ml" 2290 142535 142566
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.ml" 2290 142535 142560 "front_end/parse/c0Lexer.ml" 2290 142535 142585
+type(
+  Lexing.lexbuf -> unit
+)
+"front_end/parse/c0Lexer.ml" 2290 142535 142586 "front_end/parse/c0Lexer.ml" 2290 142535 142592
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.ml" 2290 142535 142560 "front_end/parse/c0Lexer.ml" 2290 142535 142592
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/parse/c0Lexer.ml" 2291 142595 142601 "front_end/parse/c0Lexer.ml" 2291 142595 142629
+type(
+  Lexing.lexbuf -> int -> T.token
+)
+ident(
+  int_ref __ocaml_lex_comment_line_rec "front_end/parse/c0Lexer.ml" 2278 142128 142132 "front_end/parse/c0Lexer.ml" 2278 142128 142160
+)
+"front_end/parse/c0Lexer.ml" 2291 142595 142630 "front_end/parse/c0Lexer.ml" 2291 142595 142636
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2278 142128 142167
+)
+"front_end/parse/c0Lexer.ml" 2291 142595 142637 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+type(
+  int
+)
+ident(
+  int_ref __ocaml_lex_state "front_end/parse/c0Lexer.ml" 2290 142535 142539 "front_end/parse/c0Lexer.ml" 2290 142535 142556
+)
+"front_end/parse/c0Lexer.ml" 2291 142595 142601 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+call(
+  tail
+)
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2290 142535 142560 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2279 142188 142190 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+type(
+  T.token
+)
+"front_end/parse/c0Lexer.ml" 2278 142128 142168 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+type(
+  int -> T.token
+)
+"front_end/parse/c0Lexer.ml" 2278 142128 142161 "front_end/parse/c0Lexer.ml" 2291 142595 142654
+type(
+  Lexing.lexbuf -> int -> T.token
+)

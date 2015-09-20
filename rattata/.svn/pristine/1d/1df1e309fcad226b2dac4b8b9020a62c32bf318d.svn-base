@@ -1,0 +1,324 @@
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 23 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 31
+type(
+  Datatypesv1.assemLoc
+)
+ident(
+  def spillReg "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 56 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 1 0 -1
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 38 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 55
+type(
+  Datatypesv1.reg
+)
+ident(
+  ext_ref RegAlloc.spillReg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 34 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 55
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 60 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 74
+type(
+  Datatypesv1.assemInstr -> Datatypesv1.assemInstr list
+)
+ident(
+  def handleOneInstr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 541 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 1 0 -1
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 76 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 81
+type(
+  Datatypesv1.assemInstr
+)
+ident(
+  def instr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 95 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 539
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 6 115 125 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 6 115 130
+type(
+  Datatypesv1.assemInstr
+)
+ident(
+  int_ref instr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 76 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 81
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 165 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 171
+type(
+  Datatypesv1.memAddr
+)
+ident(
+  def memSrc "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 207 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 306
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 157 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 171
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 148 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 172
+type(
+  Datatypesv1.assemArg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 182 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 189
+type(
+  Datatypesv1.memAddr
+)
+ident(
+  def memDest "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 207 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 306
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 174 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 189
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 144 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 190
+type(
+  Datatypesv1.assemInstr
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 229 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 235
+type(
+  Datatypesv1.memAddr
+)
+ident(
+  int_ref memSrc "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 165 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 171
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 221 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 235
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 211 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 236
+type(
+  Datatypesv1.assemArg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 238 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 246
+type(
+  Datatypesv1.assemLoc
+)
+ident(
+  int_ref spillReg "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 23 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 31
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 207 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 247
+type(
+  Datatypesv1.assemInstr
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 276 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 284
+type(
+  Datatypesv1.assemLoc
+)
+ident(
+  int_ref spillReg "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 23 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 4 19 31
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 267 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 284
+type(
+  Datatypesv1.assemArg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 294 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 301
+type(
+  Datatypesv1.memAddr
+)
+ident(
+  int_ref memDest "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 182 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 7 136 189
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 286 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 301
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 263 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 302
+type(
+  Datatypesv1.assemInstr
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 304 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 306
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 263 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 306
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 8 194 207 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 9 250 306
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 321 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 323
+type(
+  Datatypesv1.binop
+)
+ident(
+  def op "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 371 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 373
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 342 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 348
+type(
+  Datatypesv1.memAddr
+)
+ident(
+  def memSrc "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 371 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 373
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 334 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 348
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 325 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 349
+type(
+  Datatypesv1.assemArg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 359 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 366
+type(
+  Datatypesv1.memAddr
+)
+ident(
+  def memDest "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 371 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 373
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 351 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 366
+type(
+  Datatypesv1.assemLoc
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 315 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 367
+type(
+  Datatypesv1.assemInstr
+)
+type(
+  Datatypesv1.assemBinopInstr
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 371 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 10 307 373
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 513 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 523
+type(
+  Datatypesv1.assemInstr
+)
+ident(
+  def otherInstr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 528 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 538
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 528 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 538
+type(
+  Datatypesv1.assemInstr
+)
+ident(
+  int_ref otherInstr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 513 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 523
+)
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 527 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 539
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 6 115 119 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 539
+type(
+  Datatypesv1.assemInstr list
+)
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 75 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 13 505 539
+type(
+  Datatypesv1.assemInstr -> Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 549 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 567
+type(
+  Datatypesv1.assemProg -> Datatypesv1.assemProg
+)
+ident(
+  def removeMemMemInstrs "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 541 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 1 0 -1
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 569 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 573
+type(
+  Datatypesv1.assemProg
+)
+ident(
+  def prog "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 586 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 16 600 610 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 16 600 614
+type(
+  Datatypesv1.assemProg
+)
+ident(
+  int_ref prog "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 569 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 573
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 17 620 627 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 17 620 629
+type(
+  Datatypesv1.assemProg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 17 620 633 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 17 620 635
+type(
+  Datatypesv1.assemProg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 643 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 648
+type(
+  Datatypesv1.assemInstr
+)
+ident(
+  def instr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 660 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 650 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 656
+type(
+  Datatypesv1.assemInstr list
+)
+ident(
+  def instrs "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 660 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 643 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 656
+type(
+  Datatypesv1.assemProg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 660 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 674
+type(
+  Datatypesv1.assemInstr -> Datatypesv1.assemInstr list
+)
+ident(
+  int_ref handleOneInstr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 60 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 5 56 74
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 675 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 680
+type(
+  Datatypesv1.assemInstr
+)
+ident(
+  int_ref instr "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 643 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 648
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 660 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 680
+call(
+  stack
+)
+type(
+  Datatypesv1.assemInstr list
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 705 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 706
+type(
+  Datatypesv1.assemInstr list ->
+  Datatypesv1.assemProg -> Datatypesv1.assemProg
+)
+ident(
+  ext_ref Pervasives.( @ )
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 707 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 725
+type(
+  Datatypesv1.assemProg -> Datatypesv1.assemProg
+)
+ident(
+  int_ref removeMemMemInstrs "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 549 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 567
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 726 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+type(
+  Datatypesv1.assemProg
+)
+ident(
+  int_ref instrs "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 650 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 656
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 707 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+call(
+  stack
+)
+type(
+  Datatypesv1.assemProg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 18 636 660 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+call(
+  tail
+)
+type(
+  Datatypesv1.assemProg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 16 600 604 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+type(
+  Datatypesv1.assemProg
+)
+type(
+  Datatypesv1.assemProg
+)
+"back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 15 541 568 "back_end/removeMemMemInstrs/removeMemMemInstrs.ml" 19 681 732
+type(
+  Datatypesv1.assemProg -> Datatypesv1.assemProg
+)

@@ -1,0 +1,3996 @@
+"front_end/parse/c0Parser.ml" 48 531 539 "front_end/parse/c0Parser.ml" 48 531 550
+type(
+  string -> unit
+)
+ident(
+  ext_ref Parsing.parse_error
+)
+"front_end/parse/c0Parser.mly" 20 1031 1035 "front_end/parse/c0Parser.mly" 20 1031 1039
+type(
+  int * int -> int * int
+)
+ident(
+  def ploc "front_end/parse/c0Parser.mly" 22 1104 1104 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.mly" 20 1031 1041 "front_end/parse/c0Parser.mly" 20 1031 1045
+type(
+  int
+)
+ident(
+  def left "front_end/parse/c0Parser.mly" 21 1056 1058 "front_end/parse/c0Parser.mly" 21 1056 1103
+)
+"front_end/parse/c0Parser.mly" 20 1031 1047 "front_end/parse/c0Parser.mly" 20 1031 1052
+type(
+  int
+)
+ident(
+  def right "front_end/parse/c0Parser.mly" 21 1056 1058 "front_end/parse/c0Parser.mly" 21 1056 1103
+)
+"front_end/parse/c0Parser.mly" 20 1031 1041 "front_end/parse/c0Parser.mly" 20 1031 1052
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 21 1056 1058 "front_end/parse/c0Parser.mly" 21 1056 1075
+type(
+  int -> int
+)
+ident(
+  ext_ref Parsing.rhs_start
+)
+"front_end/parse/c0Parser.mly" 21 1056 1076 "front_end/parse/c0Parser.mly" 21 1056 1080
+type(
+  int
+)
+ident(
+  int_ref left "front_end/parse/c0Parser.mly" 20 1031 1041 "front_end/parse/c0Parser.mly" 20 1031 1045
+)
+"front_end/parse/c0Parser.mly" 21 1056 1058 "front_end/parse/c0Parser.mly" 21 1056 1080
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 21 1056 1082 "front_end/parse/c0Parser.mly" 21 1056 1097
+type(
+  int -> int
+)
+ident(
+  ext_ref Parsing.rhs_end
+)
+"front_end/parse/c0Parser.mly" 21 1056 1098 "front_end/parse/c0Parser.mly" 21 1056 1103
+type(
+  int
+)
+ident(
+  int_ref right "front_end/parse/c0Parser.mly" 20 1031 1047 "front_end/parse/c0Parser.mly" 20 1031 1052
+)
+"front_end/parse/c0Parser.mly" 21 1056 1082 "front_end/parse/c0Parser.mly" 21 1056 1103
+call(
+  stack
+)
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 21 1056 1058 "front_end/parse/c0Parser.mly" 21 1056 1103
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 20 1031 1040 "front_end/parse/c0Parser.mly" 21 1056 1103
+type(
+  int * int -> int * int
+)
+"front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  def mark "front_end/parse/c0Parser.mly" 24 1196 1196 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.mly" 22 1104 1113 "front_end/parse/c0Parser.mly" 22 1104 1114
+type(
+  A.exp
+)
+ident(
+  def e "front_end/parse/c0Parser.mly" 22 1104 1115 "front_end/parse/c0Parser.mly" 23 1131 1195
+)
+"front_end/parse/c0Parser.mly" 22 1104 1116 "front_end/parse/c0Parser.mly" 22 1104 1120
+type(
+  int
+)
+ident(
+  def left "front_end/parse/c0Parser.mly" 23 1131 1133 "front_end/parse/c0Parser.mly" 23 1131 1195
+)
+"front_end/parse/c0Parser.mly" 22 1104 1122 "front_end/parse/c0Parser.mly" 22 1104 1127
+type(
+  int
+)
+ident(
+  def right "front_end/parse/c0Parser.mly" 23 1131 1133 "front_end/parse/c0Parser.mly" 23 1131 1195
+)
+"front_end/parse/c0Parser.mly" 22 1104 1116 "front_end/parse/c0Parser.mly" 22 1104 1127
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 23 1131 1143 "front_end/parse/c0Parser.mly" 23 1131 1153
+type(
+  A.exp * Mark.ext option -> A.exp Mark.marked
+)
+ident(
+  ext_ref Mark.mark'
+)
+"front_end/parse/c0Parser.mly" 23 1131 1155 "front_end/parse/c0Parser.mly" 23 1131 1156
+type(
+  A.exp
+)
+ident(
+  int_ref e "front_end/parse/c0Parser.mly" 22 1104 1113 "front_end/parse/c0Parser.mly" 22 1104 1114
+)
+"front_end/parse/c0Parser.mly" 23 1131 1158 "front_end/parse/c0Parser.mly" 23 1131 1172
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Parser.mly" 23 1131 1174 "front_end/parse/c0Parser.mly" 23 1131 1178
+type(
+  int * int -> int * int
+)
+ident(
+  int_ref ploc "front_end/parse/c0Parser.mly" 20 1031 1035 "front_end/parse/c0Parser.mly" 20 1031 1039
+)
+"front_end/parse/c0Parser.mly" 23 1131 1180 "front_end/parse/c0Parser.mly" 23 1131 1184
+type(
+  int
+)
+ident(
+  int_ref left "front_end/parse/c0Parser.mly" 22 1104 1116 "front_end/parse/c0Parser.mly" 22 1104 1120
+)
+"front_end/parse/c0Parser.mly" 23 1131 1186 "front_end/parse/c0Parser.mly" 23 1131 1191
+type(
+  int
+)
+ident(
+  int_ref right "front_end/parse/c0Parser.mly" 22 1104 1122 "front_end/parse/c0Parser.mly" 22 1104 1127
+)
+"front_end/parse/c0Parser.mly" 23 1131 1180 "front_end/parse/c0Parser.mly" 23 1131 1191
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 23 1131 1174 "front_end/parse/c0Parser.mly" 23 1131 1192
+call(
+  stack
+)
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 23 1131 1158 "front_end/parse/c0Parser.mly" 23 1131 1193
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Parser.mly" 23 1131 1155 "front_end/parse/c0Parser.mly" 23 1131 1193
+type(
+  A.exp * Mark.ext option
+)
+"front_end/parse/c0Parser.mly" 23 1131 1143 "front_end/parse/c0Parser.mly" 23 1131 1194
+call(
+  stack
+)
+type(
+  A.exp Mark.marked
+)
+"front_end/parse/c0Parser.mly" 23 1131 1133 "front_end/parse/c0Parser.mly" 23 1131 1195
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 22 1104 1115 "front_end/parse/c0Parser.mly" 23 1131 1195
+type(
+  int * int -> A.exp
+)
+"front_end/parse/c0Parser.mly" 22 1104 1113 "front_end/parse/c0Parser.mly" 23 1131 1195
+type(
+  A.exp -> int * int -> A.exp
+)
+"front_end/parse/c0Parser.mly" 24 1196 1200 "front_end/parse/c0Parser.mly" 24 1196 1205
+type(
+  A.stm -> int * int -> A.stm
+)
+ident(
+  def marks "front_end/parse/c0Parser.mly" 31 1446 1446 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.mly" 24 1196 1206 "front_end/parse/c0Parser.mly" 24 1196 1207
+type(
+  A.stm
+)
+ident(
+  def e "front_end/parse/c0Parser.mly" 24 1196 1208 "front_end/parse/c0Parser.mly" 25 1224 1289
+)
+"front_end/parse/c0Parser.mly" 24 1196 1209 "front_end/parse/c0Parser.mly" 24 1196 1213
+type(
+  int
+)
+ident(
+  def left "front_end/parse/c0Parser.mly" 25 1224 1226 "front_end/parse/c0Parser.mly" 25 1224 1289
+)
+"front_end/parse/c0Parser.mly" 24 1196 1215 "front_end/parse/c0Parser.mly" 24 1196 1220
+type(
+  int
+)
+ident(
+  def right "front_end/parse/c0Parser.mly" 25 1224 1226 "front_end/parse/c0Parser.mly" 25 1224 1289
+)
+"front_end/parse/c0Parser.mly" 24 1196 1209 "front_end/parse/c0Parser.mly" 24 1196 1220
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 25 1224 1237 "front_end/parse/c0Parser.mly" 25 1224 1247
+type(
+  A.stm * Mark.ext option -> A.stm Mark.marked
+)
+ident(
+  ext_ref Mark.mark'
+)
+"front_end/parse/c0Parser.mly" 25 1224 1249 "front_end/parse/c0Parser.mly" 25 1224 1250
+type(
+  A.stm
+)
+ident(
+  int_ref e "front_end/parse/c0Parser.mly" 24 1196 1206 "front_end/parse/c0Parser.mly" 24 1196 1207
+)
+"front_end/parse/c0Parser.mly" 25 1224 1252 "front_end/parse/c0Parser.mly" 25 1224 1266
+type(
+  int * int -> Mark.ext option
+)
+ident(
+  ext_ref ParseState.ext
+)
+"front_end/parse/c0Parser.mly" 25 1224 1268 "front_end/parse/c0Parser.mly" 25 1224 1272
+type(
+  int * int -> int * int
+)
+ident(
+  int_ref ploc "front_end/parse/c0Parser.mly" 20 1031 1035 "front_end/parse/c0Parser.mly" 20 1031 1039
+)
+"front_end/parse/c0Parser.mly" 25 1224 1274 "front_end/parse/c0Parser.mly" 25 1224 1278
+type(
+  int
+)
+ident(
+  int_ref left "front_end/parse/c0Parser.mly" 24 1196 1209 "front_end/parse/c0Parser.mly" 24 1196 1213
+)
+"front_end/parse/c0Parser.mly" 25 1224 1280 "front_end/parse/c0Parser.mly" 25 1224 1285
+type(
+  int
+)
+ident(
+  int_ref right "front_end/parse/c0Parser.mly" 24 1196 1215 "front_end/parse/c0Parser.mly" 24 1196 1220
+)
+"front_end/parse/c0Parser.mly" 25 1224 1274 "front_end/parse/c0Parser.mly" 25 1224 1285
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 25 1224 1268 "front_end/parse/c0Parser.mly" 25 1224 1286
+call(
+  stack
+)
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 25 1224 1252 "front_end/parse/c0Parser.mly" 25 1224 1287
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/parse/c0Parser.mly" 25 1224 1249 "front_end/parse/c0Parser.mly" 25 1224 1287
+type(
+  A.stm * Mark.ext option
+)
+"front_end/parse/c0Parser.mly" 25 1224 1237 "front_end/parse/c0Parser.mly" 25 1224 1288
+call(
+  stack
+)
+type(
+  A.stm Mark.marked
+)
+"front_end/parse/c0Parser.mly" 25 1224 1226 "front_end/parse/c0Parser.mly" 25 1224 1289
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.mly" 24 1196 1208 "front_end/parse/c0Parser.mly" 25 1224 1289
+type(
+  int * int -> A.stm
+)
+"front_end/parse/c0Parser.mly" 24 1196 1206 "front_end/parse/c0Parser.mly" 25 1224 1289
+type(
+  A.stm -> int * int -> A.stm
+)
+"front_end/parse/c0Parser.mly" 31 1446 1450 "front_end/parse/c0Parser.mly" 31 1446 1462
+type(
+  A.ident * A.oper option * A.exp -> int * int -> A.stm
+)
+ident(
+  def expand_asnop "front_end/parse/c0Parser.ml" 87 1702 1702 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.mly" 31 1446 1463 "front_end/parse/c0Parser.mly" 31 1446 1464
+type(
+  A.ident * A.oper option * A.exp
+)
+ident(
+  def a "front_end/parse/c0Parser.mly" 31 1446 1465 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 31 1446 1465 "front_end/parse/c0Parser.mly" 31 1446 1466
+type(
+  int * int
+)
+ident(
+  def b "front_end/parse/c0Parser.mly" 32 1469 1471 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 32 1469 1477 "front_end/parse/c0Parser.mly" 32 1469 1478
+type(
+  A.ident * A.oper option * A.exp
+)
+ident(
+  int_ref a "front_end/parse/c0Parser.mly" 31 1446 1463 "front_end/parse/c0Parser.mly" 31 1446 1464
+)
+"front_end/parse/c0Parser.mly" 32 1469 1480 "front_end/parse/c0Parser.mly" 32 1469 1481
+type(
+  int * int
+)
+ident(
+  int_ref b "front_end/parse/c0Parser.mly" 31 1446 1465 "front_end/parse/c0Parser.mly" 31 1446 1466
+)
+"front_end/parse/c0Parser.mly" 32 1469 1477 "front_end/parse/c0Parser.mly" 32 1469 1481
+type(
+  (A.ident * A.oper option * A.exp) * (int * int)
+)
+"front_end/parse/c0Parser.mly" 33 1487 1492 "front_end/parse/c0Parser.mly" 33 1487 1494
+type(
+  A.ident
+)
+ident(
+  def id "front_end/parse/c0Parser.mly" 34 1525 1531 "front_end/parse/c0Parser.mly" 34 1525 1548
+)
+"front_end/parse/c0Parser.mly" 33 1487 1496 "front_end/parse/c0Parser.mly" 33 1487 1500
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.mly" 33 1487 1502 "front_end/parse/c0Parser.mly" 33 1487 1505
+type(
+  A.exp
+)
+ident(
+  def exp "front_end/parse/c0Parser.mly" 34 1525 1531 "front_end/parse/c0Parser.mly" 34 1525 1548
+)
+"front_end/parse/c0Parser.mly" 33 1487 1492 "front_end/parse/c0Parser.mly" 33 1487 1505
+type(
+  A.ident * A.oper option * A.exp
+)
+"front_end/parse/c0Parser.mly" 33 1487 1509 "front_end/parse/c0Parser.mly" 33 1487 1513
+type(
+  int
+)
+ident(
+  def left "front_end/parse/c0Parser.mly" 34 1525 1531 "front_end/parse/c0Parser.mly" 34 1525 1548
+)
+"front_end/parse/c0Parser.mly" 33 1487 1515 "front_end/parse/c0Parser.mly" 33 1487 1520
+type(
+  int
+)
+ident(
+  def right "front_end/parse/c0Parser.mly" 34 1525 1531 "front_end/parse/c0Parser.mly" 34 1525 1548
+)
+"front_end/parse/c0Parser.mly" 33 1487 1509 "front_end/parse/c0Parser.mly" 33 1487 1520
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 33 1487 1491 "front_end/parse/c0Parser.mly" 33 1487 1521
+type(
+  (A.ident * A.oper option * A.exp) * (int * int)
+)
+"front_end/parse/c0Parser.mly" 34 1525 1540 "front_end/parse/c0Parser.mly" 34 1525 1542
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/parse/c0Parser.mly" 33 1487 1492 "front_end/parse/c0Parser.mly" 33 1487 1494
+)
+"front_end/parse/c0Parser.mly" 34 1525 1544 "front_end/parse/c0Parser.mly" 34 1525 1547
+type(
+  A.exp
+)
+ident(
+  int_ref exp "front_end/parse/c0Parser.mly" 33 1487 1502 "front_end/parse/c0Parser.mly" 33 1487 1505
+)
+"front_end/parse/c0Parser.mly" 34 1525 1531 "front_end/parse/c0Parser.mly" 34 1525 1548
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.mly" 35 1549 1554 "front_end/parse/c0Parser.mly" 35 1549 1556
+type(
+  A.ident
+)
+ident(
+  def id "front_end/parse/c0Parser.mly" 36 1592 1598 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 35 1549 1563 "front_end/parse/c0Parser.mly" 35 1549 1567
+type(
+  A.oper
+)
+ident(
+  def oper "front_end/parse/c0Parser.mly" 36 1592 1598 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 35 1549 1558 "front_end/parse/c0Parser.mly" 35 1549 1567
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.mly" 35 1549 1569 "front_end/parse/c0Parser.mly" 35 1549 1572
+type(
+  A.exp
+)
+ident(
+  def exp "front_end/parse/c0Parser.mly" 36 1592 1598 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 35 1549 1554 "front_end/parse/c0Parser.mly" 35 1549 1572
+type(
+  A.ident * A.oper option * A.exp
+)
+"front_end/parse/c0Parser.mly" 35 1549 1576 "front_end/parse/c0Parser.mly" 35 1549 1580
+type(
+  int
+)
+ident(
+  def left "front_end/parse/c0Parser.mly" 36 1592 1598 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 35 1549 1582 "front_end/parse/c0Parser.mly" 35 1549 1587
+type(
+  int
+)
+ident(
+  def right "front_end/parse/c0Parser.mly" 36 1592 1598 "front_end/parse/c0Parser.mly" 36 1592 1665
+)
+"front_end/parse/c0Parser.mly" 35 1549 1576 "front_end/parse/c0Parser.mly" 35 1549 1587
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 35 1549 1553 "front_end/parse/c0Parser.mly" 35 1549 1588
+type(
+  (A.ident * A.oper option * A.exp) * (int * int)
+)
+"front_end/parse/c0Parser.mly" 36 1592 1607 "front_end/parse/c0Parser.mly" 36 1592 1609
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/parse/c0Parser.mly" 35 1549 1554 "front_end/parse/c0Parser.mly" 35 1549 1556
+)
+"front_end/parse/c0Parser.mly" 36 1592 1611 "front_end/parse/c0Parser.mly" 36 1592 1615
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 36 1592 1626 "front_end/parse/c0Parser.mly" 36 1592 1630
+type(
+  A.oper
+)
+ident(
+  int_ref oper "front_end/parse/c0Parser.mly" 35 1549 1563 "front_end/parse/c0Parser.mly" 35 1549 1567
+)
+"front_end/parse/c0Parser.mly" 36 1592 1639 "front_end/parse/c0Parser.mly" 36 1592 1641
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/parse/c0Parser.mly" 35 1549 1554 "front_end/parse/c0Parser.mly" 35 1549 1556
+)
+"front_end/parse/c0Parser.mly" 36 1592 1633 "front_end/parse/c0Parser.mly" 36 1592 1642
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 36 1592 1644 "front_end/parse/c0Parser.mly" 36 1592 1647
+type(
+  A.exp
+)
+ident(
+  int_ref exp "front_end/parse/c0Parser.mly" 35 1549 1569 "front_end/parse/c0Parser.mly" 35 1549 1572
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 36 1592 1633 "front_end/parse/c0Parser.mly" 36 1592 1647
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 36 1592 1632 "front_end/parse/c0Parser.mly" 36 1592 1648
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 36 1592 1617 "front_end/parse/c0Parser.mly" 36 1592 1649
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 36 1592 1652 "front_end/parse/c0Parser.mly" 36 1592 1656
+type(
+  int
+)
+ident(
+  int_ref left "front_end/parse/c0Parser.mly" 35 1549 1576 "front_end/parse/c0Parser.mly" 35 1549 1580
+)
+"front_end/parse/c0Parser.mly" 36 1592 1658 "front_end/parse/c0Parser.mly" 36 1592 1663
+type(
+  int
+)
+ident(
+  int_ref right "front_end/parse/c0Parser.mly" 35 1549 1582 "front_end/parse/c0Parser.mly" 35 1549 1587
+)
+"front_end/parse/c0Parser.mly" 36 1592 1652 "front_end/parse/c0Parser.mly" 36 1592 1663
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 36 1592 1611 "front_end/parse/c0Parser.mly" 36 1592 1664
+call(
+  stack
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 36 1592 1598 "front_end/parse/c0Parser.mly" 36 1592 1665
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.mly" 32 1469 1471 "front_end/parse/c0Parser.mly" 36 1592 1665
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.mly" 31 1446 1465 "front_end/parse/c0Parser.mly" 36 1592 1665
+type(
+  int * int -> A.stm
+)
+"front_end/parse/c0Parser.mly" 31 1446 1463 "front_end/parse/c0Parser.mly" 36 1592 1665
+type(
+  A.ident * A.oper option * A.exp -> int * int -> A.stm
+)
+"front_end/parse/c0Parser.ml" 87 1702 1706 "front_end/parse/c0Parser.ml" 87 1702 1720
+type(
+  int array
+)
+ident(
+  def yytransl_const "front_end/parse/c0Parser.ml" 131 2530 2530 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 88 1726 1730 "front_end/parse/c0Parser.ml" 88 1726 1731
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 89 1743 1745 "front_end/parse/c0Parser.ml" 89 1743 1748
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 90 1763 1765 "front_end/parse/c0Parser.ml" 90 1763 1768
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 91 1784 1786 "front_end/parse/c0Parser.ml" 91 1784 1789
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 92 1800 1802 "front_end/parse/c0Parser.ml" 92 1800 1805
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 93 1818 1820 "front_end/parse/c0Parser.ml" 93 1818 1823
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 94 1837 1839 "front_end/parse/c0Parser.ml" 94 1837 1842
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 95 1854 1856 "front_end/parse/c0Parser.ml" 95 1854 1859
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 96 1876 1878 "front_end/parse/c0Parser.ml" 96 1876 1881
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 97 1895 1897 "front_end/parse/c0Parser.ml" 97 1895 1900
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 98 1915 1917 "front_end/parse/c0Parser.ml" 98 1915 1920
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 99 1933 1935 "front_end/parse/c0Parser.ml" 99 1933 1938
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 100 1952 1954 "front_end/parse/c0Parser.ml" 100 1952 1957
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 101 1970 1972 "front_end/parse/c0Parser.ml" 101 1970 1975
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 102 1989 1991 "front_end/parse/c0Parser.ml" 102 1989 1994
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 103 2012 2014 "front_end/parse/c0Parser.ml" 103 2012 2017
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 104 2030 2032 "front_end/parse/c0Parser.ml" 104 2030 2035
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 105 2048 2050 "front_end/parse/c0Parser.ml" 105 2048 2053
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 106 2066 2068 "front_end/parse/c0Parser.ml" 106 2066 2071
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 107 2086 2088 "front_end/parse/c0Parser.ml" 107 2086 2091
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 108 2104 2106 "front_end/parse/c0Parser.ml" 108 2104 2109
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 109 2124 2126 "front_end/parse/c0Parser.ml" 109 2124 2129
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 110 2141 2143 "front_end/parse/c0Parser.ml" 110 2141 2146
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 111 2159 2161 "front_end/parse/c0Parser.ml" 111 2159 2164
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 112 2177 2179 "front_end/parse/c0Parser.ml" 112 2177 2182
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 113 2196 2198 "front_end/parse/c0Parser.ml" 113 2196 2201
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 114 2214 2216 "front_end/parse/c0Parser.ml" 114 2214 2219
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 115 2233 2235 "front_end/parse/c0Parser.ml" 115 2233 2238
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 116 2254 2256 "front_end/parse/c0Parser.ml" 116 2254 2259
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 117 2274 2276 "front_end/parse/c0Parser.ml" 117 2274 2279
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 118 2294 2296 "front_end/parse/c0Parser.ml" 118 2294 2299
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 119 2315 2317 "front_end/parse/c0Parser.ml" 119 2315 2320
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 120 2335 2337 "front_end/parse/c0Parser.ml" 120 2335 2340
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 121 2356 2358 "front_end/parse/c0Parser.ml" 121 2356 2361
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 122 2379 2381 "front_end/parse/c0Parser.ml" 122 2379 2384
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 123 2399 2401 "front_end/parse/c0Parser.ml" 123 2399 2404
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 124 2419 2421 "front_end/parse/c0Parser.ml" 124 2419 2424
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 125 2439 2441 "front_end/parse/c0Parser.ml" 125 2439 2444
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 126 2459 2461 "front_end/parse/c0Parser.ml" 126 2459 2464
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 127 2478 2480 "front_end/parse/c0Parser.ml" 127 2478 2483
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 128 2497 2499 "front_end/parse/c0Parser.ml" 128 2497 2502
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 129 2521 2525 "front_end/parse/c0Parser.ml" 129 2521 2526
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 87 1702 1723 "front_end/parse/c0Parser.ml" 129 2521 2528
+type(
+  int array
+)
+"front_end/parse/c0Parser.ml" 131 2530 2534 "front_end/parse/c0Parser.ml" 131 2530 2548
+type(
+  int array
+)
+ident(
+  def yytransl_block "front_end/parse/c0Parser.ml" 137 2626 2626 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 132 2554 2556 "front_end/parse/c0Parser.ml" 132 2554 2559
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 133 2576 2578 "front_end/parse/c0Parser.ml" 133 2576 2581
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 134 2598 2600 "front_end/parse/c0Parser.ml" 134 2598 2603
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 135 2617 2621 "front_end/parse/c0Parser.ml" 135 2617 2622
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 131 2530 2551 "front_end/parse/c0Parser.ml" 135 2617 2624
+type(
+  int array
+)
+"front_end/parse/c0Parser.ml" 137 2626 2630 "front_end/parse/c0Parser.ml" 137 2626 2635
+type(
+  string
+)
+ident(
+  def yylhs "front_end/parse/c0Parser.ml" 144 2924 2924 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 137 2626 2638 "front_end/parse/c0Parser.ml" 142 2913 2922
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 144 2924 2928 "front_end/parse/c0Parser.ml" 144 2924 2933
+type(
+  string
+)
+ident(
+  def yylen "front_end/parse/c0Parser.ml" 151 3222 3222 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 144 2924 2936 "front_end/parse/c0Parser.ml" 149 3211 3220
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 151 3222 3226 "front_end/parse/c0Parser.ml" 151 3222 3234
+type(
+  string
+)
+ident(
+  def yydefred "front_end/parse/c0Parser.ml" 161 3753 3753 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 151 3222 3237 "front_end/parse/c0Parser.ml" 159 3710 3751
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 161 3753 3757 "front_end/parse/c0Parser.ml" 161 3753 3764
+type(
+  string
+)
+ident(
+  def yydgoto "front_end/parse/c0Parser.ml" 165 3855 3855 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 161 3753 3767 "front_end/parse/c0Parser.ml" 163 3844 3853
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 165 3855 3859 "front_end/parse/c0Parser.ml" 165 3855 3867
+type(
+  string
+)
+ident(
+  def yysindex "front_end/parse/c0Parser.ml" 175 4386 4386 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 165 3855 3870 "front_end/parse/c0Parser.ml" 173 4343 4384
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 175 4386 4390 "front_end/parse/c0Parser.ml" 175 4386 4398
+type(
+  string
+)
+ident(
+  def yyrindex "front_end/parse/c0Parser.ml" 185 4917 4917 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 175 4386 4401 "front_end/parse/c0Parser.ml" 183 4874 4915
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 185 4917 4921 "front_end/parse/c0Parser.ml" 185 4917 4929
+type(
+  string
+)
+ident(
+  def yygindex "front_end/parse/c0Parser.ml" 189 5020 5020 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 185 4917 4932 "front_end/parse/c0Parser.ml" 187 5009 5018
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 189 5020 5024 "front_end/parse/c0Parser.ml" 189 5020 5035
+type(
+  int
+)
+ident(
+  def yytablesize "front_end/parse/c0Parser.ml" 190 5041 5041 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 189 5020 5038 "front_end/parse/c0Parser.ml" 189 5020 5040
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 190 5041 5045 "front_end/parse/c0Parser.ml" 190 5041 5052
+type(
+  string
+)
+ident(
+  def yytable "front_end/parse/c0Parser.ml" 202 5727 5727 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 190 5041 5055 "front_end/parse/c0Parser.ml" 200 5660 5725
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 202 5727 5731 "front_end/parse/c0Parser.ml" 202 5727 5738
+type(
+  string
+)
+ident(
+  def yycheck "front_end/parse/c0Parser.ml" 214 6413 6413 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 202 5727 5741 "front_end/parse/c0Parser.ml" 212 6346 6411
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 214 6413 6417 "front_end/parse/c0Parser.ml" 214 6413 6430
+type(
+  string
+)
+ident(
+  def yynames_const "front_end/parse/c0Parser.ml" 258 6990 6990 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 214 6413 6433 "front_end/parse/c0Parser.ml" 256 6985 6988
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 258 6990 6994 "front_end/parse/c0Parser.ml" 258 6990 7007
+type(
+  string
+)
+ident(
+  def yynames_block "front_end/parse/c0Parser.ml" 264 7063 7063 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 258 6990 7010 "front_end/parse/c0Parser.ml" 262 7058 7061
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 264 7063 7067 "front_end/parse/c0Parser.ml" 264 7063 7072
+type(
+  (Parsing.parser_env -> Obj.t) array
+)
+ident(
+  def yyact "front_end/parse/c0Parser.ml" 493 15541 15541 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 265 7078 7085 "front_end/parse/c0Parser.ml" 265 7078 7086
+type(
+  Parsing.parser_env
+)
+"front_end/parse/c0Parser.ml" 265 7078 7090 "front_end/parse/c0Parser.ml" 265 7078 7098
+type(
+  string -> Obj.t
+)
+ident(
+  ext_ref Pervasives.failwith
+)
+"front_end/parse/c0Parser.ml" 265 7078 7099 "front_end/parse/c0Parser.ml" 265 7078 7107
+type(
+  string
+)
+"front_end/parse/c0Parser.ml" 265 7078 7090 "front_end/parse/c0Parser.ml" 265 7078 7107
+call(
+  tail
+)
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 265 7078 7085 "front_end/parse/c0Parser.ml" 265 7078 7107
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 266 7109 7116 "front_end/parse/c0Parser.ml" 266 7109 7133
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 267 7137 7141 "front_end/parse/c0Parser.ml" 272 7343 7373
+)
+"front_end/parse/c0Parser.ml" 267 7137 7145 "front_end/parse/c0Parser.ml" 267 7137 7147
+type(
+  A.stm list
+)
+ident(
+  def _6 "front_end/parse/c0Parser.ml" 268 7201 7205 "front_end/parse/c0Parser.ml" 272 7343 7373
+)
+"front_end/parse/c0Parser.ml" 267 7137 7151 "front_end/parse/c0Parser.ml" 267 7137 7167
+type(
+  Parsing.parser_env -> int -> A.stm list
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 267 7137 7168 "front_end/parse/c0Parser.ml" 267 7137 7185
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 266 7109 7116 "front_end/parse/c0Parser.ml" 266 7109 7133
+)
+"front_end/parse/c0Parser.ml" 267 7137 7186 "front_end/parse/c0Parser.ml" 267 7137 7187
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 267 7137 7151 "front_end/parse/c0Parser.ml" 267 7137 7187
+call(
+  stack
+)
+type(
+  A.stm list
+)
+type(
+  A.stm list
+)
+"front_end/parse/c0Parser.ml" 268 7201 7205 "front_end/parse/c0Parser.ml" 268 7201 7213
+type(
+  Ast.stm list -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 79 7251 7302 "front_end/parse/c0Parser.mly" 79 7251 7304
+type(
+  Ast.stm list
+)
+type(
+  A.stm list
+)
+ident(
+  int_ref _6 "front_end/parse/c0Parser.ml" 267 7137 7145 "front_end/parse/c0Parser.ml" 267 7137 7147
+)
+"front_end/parse/c0Parser.ml" 268 7201 7205 "front_end/parse/c0Parser.ml" 272 7343 7373
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 267 7137 7141 "front_end/parse/c0Parser.ml" 272 7343 7373
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 266 7109 7116 "front_end/parse/c0Parser.ml" 272 7343 7373
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 273 7375 7382 "front_end/parse/c0Parser.ml" 273 7375 7399
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 274 7403 7407 "front_end/parse/c0Parser.ml" 278 7528 7552
+)
+"front_end/parse/c0Parser.ml" 274 7403 7407 "front_end/parse/c0Parser.ml" 274 7403 7415
+type(
+  A.stm list -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 83 7453 7487 "front_end/parse/c0Parser.mly" 83 7453 7489
+type(
+  A.stm list
+)
+type(
+  A.stm list
+)
+"front_end/parse/c0Parser.ml" 274 7403 7407 "front_end/parse/c0Parser.ml" 278 7528 7552
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 273 7375 7382 "front_end/parse/c0Parser.ml" 278 7528 7552
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 279 7554 7561 "front_end/parse/c0Parser.ml" 279 7554 7578
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 280 7582 7586 "front_end/parse/c0Parser.ml" 286 7838 7862
+)
+"front_end/parse/c0Parser.ml" 280 7582 7590 "front_end/parse/c0Parser.ml" 280 7582 7592
+type(
+  A.stm
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 281 7645 7649 "front_end/parse/c0Parser.ml" 286 7838 7862
+)
+"front_end/parse/c0Parser.ml" 280 7582 7596 "front_end/parse/c0Parser.ml" 280 7582 7612
+type(
+  Parsing.parser_env -> int -> A.stm
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 280 7582 7613 "front_end/parse/c0Parser.ml" 280 7582 7630
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 279 7554 7561 "front_end/parse/c0Parser.ml" 279 7554 7578
+)
+"front_end/parse/c0Parser.ml" 280 7582 7631 "front_end/parse/c0Parser.ml" 280 7582 7632
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 280 7582 7596 "front_end/parse/c0Parser.ml" 280 7582 7632
+call(
+  stack
+)
+type(
+  A.stm
+)
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.ml" 281 7645 7653 "front_end/parse/c0Parser.ml" 281 7645 7655
+type(
+  A.stm list
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 282 7709 7713 "front_end/parse/c0Parser.ml" 286 7838 7862
+)
+"front_end/parse/c0Parser.ml" 281 7645 7659 "front_end/parse/c0Parser.ml" 281 7645 7675
+type(
+  Parsing.parser_env -> int -> A.stm list
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 281 7645 7676 "front_end/parse/c0Parser.ml" 281 7645 7693
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 279 7554 7561 "front_end/parse/c0Parser.ml" 279 7554 7578
+)
+"front_end/parse/c0Parser.ml" 281 7645 7694 "front_end/parse/c0Parser.ml" 281 7645 7695
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 281 7645 7659 "front_end/parse/c0Parser.ml" 281 7645 7695
+call(
+  stack
+)
+type(
+  A.stm list
+)
+type(
+  A.stm list
+)
+"front_end/parse/c0Parser.ml" 282 7709 7713 "front_end/parse/c0Parser.ml" 282 7709 7721
+type(
+  A.stm list -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 84 7759 7793 "front_end/parse/c0Parser.mly" 84 7759 7795
+type(
+  A.stm
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 280 7582 7590 "front_end/parse/c0Parser.ml" 280 7582 7592
+)
+"front_end/parse/c0Parser.mly" 84 7759 7797 "front_end/parse/c0Parser.mly" 84 7759 7799
+type(
+  A.stm list
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 281 7645 7653 "front_end/parse/c0Parser.ml" 281 7645 7655
+)
+"front_end/parse/c0Parser.mly" 84 7759 7793 "front_end/parse/c0Parser.mly" 84 7759 7799
+type(
+  A.stm list
+)
+type(
+  A.stm list
+)
+"front_end/parse/c0Parser.ml" 282 7709 7713 "front_end/parse/c0Parser.ml" 286 7838 7862
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 281 7645 7649 "front_end/parse/c0Parser.ml" 286 7838 7862
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 280 7582 7586 "front_end/parse/c0Parser.ml" 286 7838 7862
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 279 7554 7561 "front_end/parse/c0Parser.ml" 286 7838 7862
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 287 7864 7871 "front_end/parse/c0Parser.ml" 287 7864 7888
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 288 7892 7896 "front_end/parse/c0Parser.ml" 293 8106 8129
+)
+"front_end/parse/c0Parser.ml" 288 7892 7900 "front_end/parse/c0Parser.ml" 288 7892 7902
+type(
+  A.decl
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 289 7955 7959 "front_end/parse/c0Parser.ml" 293 8106 8129
+)
+"front_end/parse/c0Parser.ml" 288 7892 7906 "front_end/parse/c0Parser.ml" 288 7892 7922
+type(
+  Parsing.parser_env -> int -> A.decl
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 288 7892 7923 "front_end/parse/c0Parser.ml" 288 7892 7940
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 287 7864 7871 "front_end/parse/c0Parser.ml" 287 7864 7888
+)
+"front_end/parse/c0Parser.ml" 288 7892 7941 "front_end/parse/c0Parser.ml" 288 7892 7942
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 288 7892 7906 "front_end/parse/c0Parser.ml" 288 7892 7942
+call(
+  stack
+)
+type(
+  A.decl
+)
+type(
+  A.decl
+)
+"front_end/parse/c0Parser.ml" 289 7955 7959 "front_end/parse/c0Parser.ml" 289 7955 7967
+type(
+  A.stm -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 88 8005 8040 "front_end/parse/c0Parser.mly" 88 8005 8045
+type(
+  A.stm -> int * int -> A.stm
+)
+ident(
+  int_ref marks "front_end/parse/c0Parser.mly" 24 1196 1200 "front_end/parse/c0Parser.mly" 24 1196 1205
+)
+"front_end/parse/c0Parser.mly" 88 8005 8057 "front_end/parse/c0Parser.mly" 88 8005 8059
+type(
+  A.decl
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 288 7892 7900 "front_end/parse/c0Parser.ml" 288 7892 7902
+)
+"front_end/parse/c0Parser.mly" 88 8005 8047 "front_end/parse/c0Parser.mly" 88 8005 8059
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.mly" 88 8005 8062 "front_end/parse/c0Parser.mly" 88 8005 8063
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 88 8005 8065 "front_end/parse/c0Parser.mly" 88 8005 8066
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 88 8005 8062 "front_end/parse/c0Parser.mly" 88 8005 8066
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 88 8005 8040 "front_end/parse/c0Parser.mly" 88 8005 8067
+call(
+  tail
+)
+type(
+  A.stm
+)
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.ml" 289 7955 7959 "front_end/parse/c0Parser.ml" 293 8106 8129
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 288 7892 7896 "front_end/parse/c0Parser.ml" 293 8106 8129
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 287 7864 7871 "front_end/parse/c0Parser.ml" 293 8106 8129
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 294 8131 8138 "front_end/parse/c0Parser.ml" 294 8131 8155
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 295 8159 8163 "front_end/parse/c0Parser.ml" 300 8361 8384
+)
+"front_end/parse/c0Parser.ml" 295 8159 8167 "front_end/parse/c0Parser.ml" 295 8159 8169
+type(
+  A.stm
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 296 8222 8226 "front_end/parse/c0Parser.ml" 300 8361 8384
+)
+"front_end/parse/c0Parser.ml" 295 8159 8173 "front_end/parse/c0Parser.ml" 295 8159 8189
+type(
+  Parsing.parser_env -> int -> A.stm
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 295 8159 8190 "front_end/parse/c0Parser.ml" 295 8159 8207
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 294 8131 8138 "front_end/parse/c0Parser.ml" 294 8131 8155
+)
+"front_end/parse/c0Parser.ml" 295 8159 8208 "front_end/parse/c0Parser.ml" 295 8159 8209
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 295 8159 8173 "front_end/parse/c0Parser.ml" 295 8159 8209
+call(
+  stack
+)
+type(
+  A.stm
+)
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.ml" 296 8222 8226 "front_end/parse/c0Parser.ml" 296 8222 8234
+type(
+  A.stm -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 89 8272 8307 "front_end/parse/c0Parser.mly" 89 8272 8312
+type(
+  A.stm -> int * int -> A.stm
+)
+ident(
+  int_ref marks "front_end/parse/c0Parser.mly" 24 1196 1200 "front_end/parse/c0Parser.mly" 24 1196 1205
+)
+"front_end/parse/c0Parser.mly" 89 8272 8313 "front_end/parse/c0Parser.mly" 89 8272 8315
+type(
+  A.stm
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 295 8159 8167 "front_end/parse/c0Parser.ml" 295 8159 8169
+)
+"front_end/parse/c0Parser.mly" 89 8272 8317 "front_end/parse/c0Parser.mly" 89 8272 8318
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 89 8272 8320 "front_end/parse/c0Parser.mly" 89 8272 8321
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 89 8272 8317 "front_end/parse/c0Parser.mly" 89 8272 8321
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 89 8272 8307 "front_end/parse/c0Parser.mly" 89 8272 8322
+call(
+  tail
+)
+type(
+  A.stm
+)
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.ml" 296 8222 8226 "front_end/parse/c0Parser.ml" 300 8361 8384
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 295 8159 8163 "front_end/parse/c0Parser.ml" 300 8361 8384
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 294 8131 8138 "front_end/parse/c0Parser.ml" 300 8361 8384
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 301 8386 8393 "front_end/parse/c0Parser.ml" 301 8386 8410
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 302 8414 8418 "front_end/parse/c0Parser.ml" 307 8626 8649
+)
+"front_end/parse/c0Parser.ml" 302 8414 8422 "front_end/parse/c0Parser.ml" 302 8414 8424
+type(
+  A.exp
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 303 8476 8480 "front_end/parse/c0Parser.ml" 307 8626 8649
+)
+"front_end/parse/c0Parser.ml" 302 8414 8428 "front_end/parse/c0Parser.ml" 302 8414 8444
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 302 8414 8445 "front_end/parse/c0Parser.ml" 302 8414 8462
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 301 8386 8393 "front_end/parse/c0Parser.ml" 301 8386 8410
+)
+"front_end/parse/c0Parser.ml" 302 8414 8463 "front_end/parse/c0Parser.ml" 302 8414 8464
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 302 8414 8428 "front_end/parse/c0Parser.ml" 302 8414 8464
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 303 8476 8480 "front_end/parse/c0Parser.ml" 303 8476 8488
+type(
+  A.stm -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 90 8526 8561 "front_end/parse/c0Parser.mly" 90 8526 8566
+type(
+  A.stm -> int * int -> A.stm
+)
+ident(
+  int_ref marks "front_end/parse/c0Parser.mly" 24 1196 1200 "front_end/parse/c0Parser.mly" 24 1196 1205
+)
+"front_end/parse/c0Parser.mly" 90 8526 8577 "front_end/parse/c0Parser.mly" 90 8526 8579
+type(
+  A.exp
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 302 8414 8422 "front_end/parse/c0Parser.ml" 302 8414 8424
+)
+"front_end/parse/c0Parser.mly" 90 8526 8568 "front_end/parse/c0Parser.mly" 90 8526 8579
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.mly" 90 8526 8582 "front_end/parse/c0Parser.mly" 90 8526 8583
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 90 8526 8585 "front_end/parse/c0Parser.mly" 90 8526 8586
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 90 8526 8582 "front_end/parse/c0Parser.mly" 90 8526 8586
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 90 8526 8561 "front_end/parse/c0Parser.mly" 90 8526 8587
+call(
+  tail
+)
+type(
+  A.stm
+)
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.ml" 303 8476 8480 "front_end/parse/c0Parser.ml" 307 8626 8649
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 302 8414 8418 "front_end/parse/c0Parser.ml" 307 8626 8649
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 301 8386 8393 "front_end/parse/c0Parser.ml" 307 8626 8649
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 308 8651 8658 "front_end/parse/c0Parser.ml" 308 8651 8675
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 309 8679 8683 "front_end/parse/c0Parser.ml" 314 8879 8902
+)
+"front_end/parse/c0Parser.ml" 309 8679 8687 "front_end/parse/c0Parser.ml" 309 8679 8689
+type(
+  Symbol.t
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 310 8745 8749 "front_end/parse/c0Parser.ml" 314 8879 8902
+)
+"front_end/parse/c0Parser.ml" 309 8679 8693 "front_end/parse/c0Parser.ml" 309 8679 8709
+type(
+  Parsing.parser_env -> int -> Symbol.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 309 8679 8710 "front_end/parse/c0Parser.ml" 309 8679 8727
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 308 8651 8658 "front_end/parse/c0Parser.ml" 308 8651 8675
+)
+"front_end/parse/c0Parser.ml" 309 8679 8728 "front_end/parse/c0Parser.ml" 309 8679 8729
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 309 8679 8693 "front_end/parse/c0Parser.ml" 309 8679 8729
+call(
+  stack
+)
+type(
+  Symbol.t
+)
+type(
+  Symbol.t
+)
+"front_end/parse/c0Parser.ml" 310 8745 8749 "front_end/parse/c0Parser.ml" 310 8745 8757
+type(
+  A.decl -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 94 8795 8838 "front_end/parse/c0Parser.mly" 94 8795 8840
+type(
+  A.ident
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 309 8679 8687 "front_end/parse/c0Parser.ml" 309 8679 8689
+)
+"front_end/parse/c0Parser.mly" 94 8795 8829 "front_end/parse/c0Parser.mly" 94 8795 8840
+type(
+  A.decl
+)
+type(
+  A.decl
+)
+"front_end/parse/c0Parser.ml" 310 8745 8749 "front_end/parse/c0Parser.ml" 314 8879 8902
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 309 8679 8683 "front_end/parse/c0Parser.ml" 314 8879 8902
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 308 8651 8658 "front_end/parse/c0Parser.ml" 314 8879 8902
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 315 8904 8911 "front_end/parse/c0Parser.ml" 315 8904 8928
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 316 8932 8936 "front_end/parse/c0Parser.ml" 322 9198 9221
+)
+"front_end/parse/c0Parser.ml" 316 8932 8940 "front_end/parse/c0Parser.ml" 316 8932 8942
+type(
+  Symbol.t
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 317 8998 9002 "front_end/parse/c0Parser.ml" 322 9198 9221
+)
+"front_end/parse/c0Parser.ml" 316 8932 8946 "front_end/parse/c0Parser.ml" 316 8932 8962
+type(
+  Parsing.parser_env -> int -> Symbol.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 316 8932 8963 "front_end/parse/c0Parser.ml" 316 8932 8980
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 315 8904 8911 "front_end/parse/c0Parser.ml" 315 8904 8928
+)
+"front_end/parse/c0Parser.ml" 316 8932 8981 "front_end/parse/c0Parser.ml" 316 8932 8982
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 316 8932 8946 "front_end/parse/c0Parser.ml" 316 8932 8982
+call(
+  stack
+)
+type(
+  Symbol.t
+)
+type(
+  Symbol.t
+)
+"front_end/parse/c0Parser.ml" 317 8998 9006 "front_end/parse/c0Parser.ml" 317 8998 9008
+type(
+  A.exp
+)
+ident(
+  def _4 "front_end/parse/c0Parser.ml" 318 9060 9064 "front_end/parse/c0Parser.ml" 322 9198 9221
+)
+"front_end/parse/c0Parser.ml" 317 8998 9012 "front_end/parse/c0Parser.ml" 317 8998 9028
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 317 8998 9029 "front_end/parse/c0Parser.ml" 317 8998 9046
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 315 8904 8911 "front_end/parse/c0Parser.ml" 315 8904 8928
+)
+"front_end/parse/c0Parser.ml" 317 8998 9047 "front_end/parse/c0Parser.ml" 317 8998 9048
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 317 8998 9012 "front_end/parse/c0Parser.ml" 317 8998 9048
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 318 9060 9064 "front_end/parse/c0Parser.ml" 318 9060 9072
+type(
+  A.decl -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 95 9110 9152 "front_end/parse/c0Parser.mly" 95 9110 9154
+type(
+  A.ident
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 316 8932 8940 "front_end/parse/c0Parser.ml" 316 8932 8942
+)
+"front_end/parse/c0Parser.mly" 95 9110 9156 "front_end/parse/c0Parser.mly" 95 9110 9158
+type(
+  A.exp
+)
+ident(
+  int_ref _4 "front_end/parse/c0Parser.ml" 317 8998 9006 "front_end/parse/c0Parser.ml" 317 8998 9008
+)
+"front_end/parse/c0Parser.mly" 95 9110 9144 "front_end/parse/c0Parser.mly" 95 9110 9159
+type(
+  A.decl
+)
+type(
+  A.decl
+)
+"front_end/parse/c0Parser.ml" 318 9060 9064 "front_end/parse/c0Parser.ml" 322 9198 9221
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 317 8998 9002 "front_end/parse/c0Parser.ml" 322 9198 9221
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 316 8932 8936 "front_end/parse/c0Parser.ml" 322 9198 9221
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 315 8904 8911 "front_end/parse/c0Parser.ml" 322 9198 9221
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 323 9223 9230 "front_end/parse/c0Parser.ml" 323 9223 9247
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 324 9251 9255 "front_end/parse/c0Parser.ml" 328 9405 9428
+)
+"front_end/parse/c0Parser.ml" 324 9251 9255 "front_end/parse/c0Parser.ml" 324 9251 9263
+type(
+  A.decl -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 96 9301 9345 "front_end/parse/c0Parser.mly" 96 9301 9358
+type(
+  string -> A.ident
+)
+ident(
+  ext_ref Symbol.symbol
+)
+"front_end/parse/c0Parser.mly" 96 9301 9359 "front_end/parse/c0Parser.mly" 96 9301 9365
+type(
+  string
+)
+"front_end/parse/c0Parser.mly" 96 9301 9345 "front_end/parse/c0Parser.mly" 96 9301 9365
+call(
+  stack
+)
+type(
+  A.ident
+)
+"front_end/parse/c0Parser.mly" 96 9301 9335 "front_end/parse/c0Parser.mly" 96 9301 9366
+type(
+  A.decl
+)
+type(
+  A.decl
+)
+"front_end/parse/c0Parser.ml" 324 9251 9255 "front_end/parse/c0Parser.ml" 328 9405 9428
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 323 9223 9230 "front_end/parse/c0Parser.ml" 328 9405 9428
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 329 9430 9437 "front_end/parse/c0Parser.ml" 329 9430 9454
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 330 9458 9462 "front_end/parse/c0Parser.ml" 335 9676 9699
+)
+"front_end/parse/c0Parser.ml" 330 9458 9466 "front_end/parse/c0Parser.ml" 330 9458 9468
+type(
+  A.exp
+)
+ident(
+  def _4 "front_end/parse/c0Parser.ml" 331 9520 9524 "front_end/parse/c0Parser.ml" 335 9676 9699
+)
+"front_end/parse/c0Parser.ml" 330 9458 9472 "front_end/parse/c0Parser.ml" 330 9458 9488
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 330 9458 9489 "front_end/parse/c0Parser.ml" 330 9458 9506
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 329 9430 9437 "front_end/parse/c0Parser.ml" 329 9430 9454
+)
+"front_end/parse/c0Parser.ml" 330 9458 9507 "front_end/parse/c0Parser.ml" 330 9458 9508
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 330 9458 9472 "front_end/parse/c0Parser.ml" 330 9458 9508
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 331 9520 9524 "front_end/parse/c0Parser.ml" 331 9520 9532
+type(
+  A.decl -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 97 9570 9612 "front_end/parse/c0Parser.mly" 97 9570 9625
+type(
+  string -> A.ident
+)
+ident(
+  ext_ref Symbol.symbol
+)
+"front_end/parse/c0Parser.mly" 97 9570 9626 "front_end/parse/c0Parser.mly" 97 9570 9632
+type(
+  string
+)
+"front_end/parse/c0Parser.mly" 97 9570 9612 "front_end/parse/c0Parser.mly" 97 9570 9632
+call(
+  stack
+)
+type(
+  A.ident
+)
+"front_end/parse/c0Parser.mly" 97 9570 9634 "front_end/parse/c0Parser.mly" 97 9570 9636
+type(
+  A.exp
+)
+ident(
+  int_ref _4 "front_end/parse/c0Parser.ml" 330 9458 9466 "front_end/parse/c0Parser.ml" 330 9458 9468
+)
+"front_end/parse/c0Parser.mly" 97 9570 9604 "front_end/parse/c0Parser.mly" 97 9570 9637
+type(
+  A.decl
+)
+type(
+  A.decl
+)
+"front_end/parse/c0Parser.ml" 331 9520 9524 "front_end/parse/c0Parser.ml" 335 9676 9699
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 330 9458 9462 "front_end/parse/c0Parser.ml" 335 9676 9699
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 329 9430 9437 "front_end/parse/c0Parser.ml" 335 9676 9699
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 336 9701 9708 "front_end/parse/c0Parser.ml" 336 9701 9725
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 337 9729 9733 "front_end/parse/c0Parser.ml" 344 10077 10100
+)
+"front_end/parse/c0Parser.ml" 337 9729 9737 "front_end/parse/c0Parser.ml" 337 9729 9739
+type(
+  A.ident
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 338 9794 9798 "front_end/parse/c0Parser.ml" 344 10077 10100
+)
+"front_end/parse/c0Parser.ml" 337 9729 9743 "front_end/parse/c0Parser.ml" 337 9729 9759
+type(
+  Parsing.parser_env -> int -> A.ident
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 337 9729 9760 "front_end/parse/c0Parser.ml" 337 9729 9777
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 336 9701 9708 "front_end/parse/c0Parser.ml" 336 9701 9725
+)
+"front_end/parse/c0Parser.ml" 337 9729 9778 "front_end/parse/c0Parser.ml" 337 9729 9779
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 337 9729 9743 "front_end/parse/c0Parser.ml" 337 9729 9779
+call(
+  stack
+)
+type(
+  A.ident
+)
+type(
+  A.ident
+)
+"front_end/parse/c0Parser.ml" 338 9794 9802 "front_end/parse/c0Parser.ml" 338 9794 9804
+type(
+  A.oper option
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 339 9858 9862 "front_end/parse/c0Parser.ml" 344 10077 10100
+)
+"front_end/parse/c0Parser.ml" 338 9794 9808 "front_end/parse/c0Parser.ml" 338 9794 9824
+type(
+  Parsing.parser_env -> int -> A.oper option
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 338 9794 9825 "front_end/parse/c0Parser.ml" 338 9794 9842
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 336 9701 9708 "front_end/parse/c0Parser.ml" 336 9701 9725
+)
+"front_end/parse/c0Parser.ml" 338 9794 9843 "front_end/parse/c0Parser.ml" 338 9794 9844
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 338 9794 9808 "front_end/parse/c0Parser.ml" 338 9794 9844
+call(
+  stack
+)
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 339 9858 9866 "front_end/parse/c0Parser.ml" 339 9858 9868
+type(
+  A.exp
+)
+ident(
+  def _3 "front_end/parse/c0Parser.ml" 340 9920 9924 "front_end/parse/c0Parser.ml" 344 10077 10100
+)
+"front_end/parse/c0Parser.ml" 339 9858 9872 "front_end/parse/c0Parser.ml" 339 9858 9888
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 339 9858 9889 "front_end/parse/c0Parser.ml" 339 9858 9906
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 336 9701 9708 "front_end/parse/c0Parser.ml" 336 9701 9725
+)
+"front_end/parse/c0Parser.ml" 339 9858 9907 "front_end/parse/c0Parser.ml" 339 9858 9908
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 339 9858 9872 "front_end/parse/c0Parser.ml" 339 9858 9908
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 340 9920 9924 "front_end/parse/c0Parser.ml" 340 9920 9932
+type(
+  A.stm -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 101 9971 10006 "front_end/parse/c0Parser.mly" 101 9971 10018
+type(
+  A.ident * A.oper option * A.exp -> int * int -> A.stm
+)
+ident(
+  int_ref expand_asnop "front_end/parse/c0Parser.mly" 31 1446 1450 "front_end/parse/c0Parser.mly" 31 1446 1462
+)
+"front_end/parse/c0Parser.mly" 101 9971 10020 "front_end/parse/c0Parser.mly" 101 9971 10022
+type(
+  A.ident
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 337 9729 9737 "front_end/parse/c0Parser.ml" 337 9729 9739
+)
+"front_end/parse/c0Parser.mly" 101 9971 10024 "front_end/parse/c0Parser.mly" 101 9971 10026
+type(
+  A.oper option
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 338 9794 9802 "front_end/parse/c0Parser.ml" 338 9794 9804
+)
+"front_end/parse/c0Parser.mly" 101 9971 10028 "front_end/parse/c0Parser.mly" 101 9971 10030
+type(
+  A.exp
+)
+ident(
+  int_ref _3 "front_end/parse/c0Parser.ml" 339 9858 9866 "front_end/parse/c0Parser.ml" 339 9858 9868
+)
+"front_end/parse/c0Parser.mly" 101 9971 10020 "front_end/parse/c0Parser.mly" 101 9971 10030
+type(
+  A.ident * A.oper option * A.exp
+)
+"front_end/parse/c0Parser.mly" 101 9971 10033 "front_end/parse/c0Parser.mly" 101 9971 10034
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 101 9971 10036 "front_end/parse/c0Parser.mly" 101 9971 10037
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 101 9971 10033 "front_end/parse/c0Parser.mly" 101 9971 10037
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 101 9971 10006 "front_end/parse/c0Parser.mly" 101 9971 10038
+call(
+  tail
+)
+type(
+  A.stm
+)
+type(
+  A.stm
+)
+"front_end/parse/c0Parser.ml" 340 9920 9924 "front_end/parse/c0Parser.ml" 344 10077 10100
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 339 9858 9862 "front_end/parse/c0Parser.ml" 344 10077 10100
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 338 9794 9798 "front_end/parse/c0Parser.ml" 344 10077 10100
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 337 9729 9733 "front_end/parse/c0Parser.ml" 344 10077 10100
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 336 9701 9708 "front_end/parse/c0Parser.ml" 344 10077 10100
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 345 10102 10109 "front_end/parse/c0Parser.ml" 345 10102 10126
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 346 10130 10134 "front_end/parse/c0Parser.ml" 351 10322 10347
+)
+"front_end/parse/c0Parser.ml" 346 10130 10138 "front_end/parse/c0Parser.ml" 346 10130 10140
+type(
+  Symbol.t
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 347 10196 10200 "front_end/parse/c0Parser.ml" 351 10322 10347
+)
+"front_end/parse/c0Parser.ml" 346 10130 10144 "front_end/parse/c0Parser.ml" 346 10130 10160
+type(
+  Parsing.parser_env -> int -> Symbol.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 346 10130 10161 "front_end/parse/c0Parser.ml" 346 10130 10178
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 345 10102 10109 "front_end/parse/c0Parser.ml" 345 10102 10126
+)
+"front_end/parse/c0Parser.ml" 346 10130 10179 "front_end/parse/c0Parser.ml" 346 10130 10180
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 346 10130 10144 "front_end/parse/c0Parser.ml" 346 10130 10180
+call(
+  stack
+)
+type(
+  Symbol.t
+)
+type(
+  Symbol.t
+)
+"front_end/parse/c0Parser.ml" 347 10196 10200 "front_end/parse/c0Parser.ml" 347 10196 10208
+type(
+  A.ident -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 105 10247 10281 "front_end/parse/c0Parser.mly" 105 10247 10283
+type(
+  A.ident
+)
+type(
+  A.ident
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 346 10130 10138 "front_end/parse/c0Parser.ml" 346 10130 10140
+)
+"front_end/parse/c0Parser.ml" 347 10196 10200 "front_end/parse/c0Parser.ml" 351 10322 10347
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 346 10130 10134 "front_end/parse/c0Parser.ml" 351 10322 10347
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 345 10102 10109 "front_end/parse/c0Parser.ml" 351 10322 10347
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 352 10349 10356 "front_end/parse/c0Parser.ml" 352 10349 10373
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 353 10377 10381 "front_end/parse/c0Parser.ml" 357 10521 10546
+)
+"front_end/parse/c0Parser.ml" 353 10377 10381 "front_end/parse/c0Parser.ml" 353 10377 10389
+type(
+  A.ident -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 106 10428 10462 "front_end/parse/c0Parser.mly" 106 10428 10475
+type(
+  string -> A.ident
+)
+ident(
+  ext_ref Symbol.symbol
+)
+"front_end/parse/c0Parser.mly" 106 10428 10476 "front_end/parse/c0Parser.mly" 106 10428 10482
+type(
+  string
+)
+"front_end/parse/c0Parser.mly" 106 10428 10462 "front_end/parse/c0Parser.mly" 106 10428 10482
+call(
+  tail
+)
+type(
+  A.ident
+)
+type(
+  A.ident
+)
+"front_end/parse/c0Parser.ml" 353 10377 10381 "front_end/parse/c0Parser.ml" 357 10521 10546
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 352 10349 10356 "front_end/parse/c0Parser.ml" 357 10521 10546
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 358 10548 10555 "front_end/parse/c0Parser.ml" 358 10548 10572
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 359 10576 10580 "front_end/parse/c0Parser.ml" 364 10767 10792
+)
+"front_end/parse/c0Parser.ml" 359 10576 10584 "front_end/parse/c0Parser.ml" 359 10576 10586
+type(
+  A.ident
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 360 10641 10645 "front_end/parse/c0Parser.ml" 364 10767 10792
+)
+"front_end/parse/c0Parser.ml" 359 10576 10590 "front_end/parse/c0Parser.ml" 359 10576 10606
+type(
+  Parsing.parser_env -> int -> A.ident
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 359 10576 10607 "front_end/parse/c0Parser.ml" 359 10576 10624
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 358 10548 10555 "front_end/parse/c0Parser.ml" 358 10548 10572
+)
+"front_end/parse/c0Parser.ml" 359 10576 10625 "front_end/parse/c0Parser.ml" 359 10576 10626
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 359 10576 10590 "front_end/parse/c0Parser.ml" 359 10576 10626
+call(
+  stack
+)
+type(
+  A.ident
+)
+type(
+  A.ident
+)
+"front_end/parse/c0Parser.ml" 360 10641 10645 "front_end/parse/c0Parser.ml" 360 10641 10653
+type(
+  A.ident -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 107 10692 10726 "front_end/parse/c0Parser.mly" 107 10692 10728
+type(
+  A.ident
+)
+type(
+  A.ident
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 359 10576 10584 "front_end/parse/c0Parser.ml" 359 10576 10586
+)
+"front_end/parse/c0Parser.ml" 360 10641 10645 "front_end/parse/c0Parser.ml" 364 10767 10792
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 359 10576 10580 "front_end/parse/c0Parser.ml" 364 10767 10792
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 358 10548 10555 "front_end/parse/c0Parser.ml" 364 10767 10792
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 365 10794 10801 "front_end/parse/c0Parser.ml" 365 10794 10818
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 366 10822 10826 "front_end/parse/c0Parser.ml" 371 11011 11033
+)
+"front_end/parse/c0Parser.ml" 366 10822 10830 "front_end/parse/c0Parser.ml" 366 10822 10832
+type(
+  A.exp
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 367 10884 10888 "front_end/parse/c0Parser.ml" 371 11011 11033
+)
+"front_end/parse/c0Parser.ml" 366 10822 10836 "front_end/parse/c0Parser.ml" 366 10822 10852
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 366 10822 10853 "front_end/parse/c0Parser.ml" 366 10822 10870
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 365 10794 10801 "front_end/parse/c0Parser.ml" 365 10794 10818
+)
+"front_end/parse/c0Parser.ml" 366 10822 10871 "front_end/parse/c0Parser.ml" 366 10822 10872
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 366 10822 10836 "front_end/parse/c0Parser.ml" 366 10822 10872
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 367 10884 10888 "front_end/parse/c0Parser.ml" 367 10884 10896
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 111 10935 10970 "front_end/parse/c0Parser.mly" 111 10935 10972
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 366 10822 10830 "front_end/parse/c0Parser.ml" 366 10822 10832
+)
+"front_end/parse/c0Parser.ml" 367 10884 10888 "front_end/parse/c0Parser.ml" 371 11011 11033
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 366 10822 10826 "front_end/parse/c0Parser.ml" 371 11011 11033
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 365 10794 10801 "front_end/parse/c0Parser.ml" 371 11011 11033
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 372 11035 11042 "front_end/parse/c0Parser.ml" 372 11035 11059
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 373 11063 11067 "front_end/parse/c0Parser.ml" 378 11257 11279
+)
+"front_end/parse/c0Parser.ml" 373 11063 11071 "front_end/parse/c0Parser.ml" 373 11063 11073
+type(
+  A.exp
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 374 11130 11134 "front_end/parse/c0Parser.ml" 378 11257 11279
+)
+"front_end/parse/c0Parser.ml" 373 11063 11077 "front_end/parse/c0Parser.ml" 373 11063 11093
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 373 11063 11094 "front_end/parse/c0Parser.ml" 373 11063 11111
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 372 11035 11042 "front_end/parse/c0Parser.ml" 372 11035 11059
+)
+"front_end/parse/c0Parser.ml" 373 11063 11112 "front_end/parse/c0Parser.ml" 373 11063 11113
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 373 11063 11077 "front_end/parse/c0Parser.ml" 373 11063 11113
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 374 11130 11134 "front_end/parse/c0Parser.ml" 374 11130 11142
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 112 11181 11216 "front_end/parse/c0Parser.mly" 112 11181 11218
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 373 11063 11071 "front_end/parse/c0Parser.ml" 373 11063 11073
+)
+"front_end/parse/c0Parser.ml" 374 11130 11134 "front_end/parse/c0Parser.ml" 378 11257 11279
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 373 11063 11067 "front_end/parse/c0Parser.ml" 378 11257 11279
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 372 11035 11042 "front_end/parse/c0Parser.ml" 378 11257 11279
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 379 11281 11288 "front_end/parse/c0Parser.ml" 379 11281 11305
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 380 11309 11313 "front_end/parse/c0Parser.ml" 384 11476 11498
+)
+"front_end/parse/c0Parser.ml" 380 11309 11313 "front_end/parse/c0Parser.ml" 380 11309 11321
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 113 11360 11395 "front_end/parse/c0Parser.mly" 113 11360 11399
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 113 11360 11408 "front_end/parse/c0Parser.mly" 113 11360 11421
+type(
+  string -> A.ident
+)
+ident(
+  ext_ref Symbol.symbol
+)
+"front_end/parse/c0Parser.mly" 113 11360 11422 "front_end/parse/c0Parser.mly" 113 11360 11428
+type(
+  string
+)
+"front_end/parse/c0Parser.mly" 113 11360 11408 "front_end/parse/c0Parser.mly" 113 11360 11428
+call(
+  stack
+)
+type(
+  A.ident
+)
+"front_end/parse/c0Parser.mly" 113 11360 11401 "front_end/parse/c0Parser.mly" 113 11360 11429
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 113 11360 11432 "front_end/parse/c0Parser.mly" 113 11360 11433
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 113 11360 11435 "front_end/parse/c0Parser.mly" 113 11360 11436
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 113 11360 11432 "front_end/parse/c0Parser.mly" 113 11360 11436
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 113 11360 11395 "front_end/parse/c0Parser.mly" 113 11360 11437
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 380 11309 11313 "front_end/parse/c0Parser.ml" 384 11476 11498
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 379 11281 11288 "front_end/parse/c0Parser.ml" 384 11476 11498
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 385 11500 11507 "front_end/parse/c0Parser.ml" 385 11500 11524
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 386 11528 11532 "front_end/parse/c0Parser.ml" 391 11741 11763
+)
+"front_end/parse/c0Parser.ml" 386 11528 11536 "front_end/parse/c0Parser.ml" 386 11528 11538
+type(
+  Symbol.t
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 387 11594 11598 "front_end/parse/c0Parser.ml" 391 11741 11763
+)
+"front_end/parse/c0Parser.ml" 386 11528 11542 "front_end/parse/c0Parser.ml" 386 11528 11558
+type(
+  Parsing.parser_env -> int -> Symbol.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 386 11528 11559 "front_end/parse/c0Parser.ml" 386 11528 11576
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 385 11500 11507 "front_end/parse/c0Parser.ml" 385 11500 11524
+)
+"front_end/parse/c0Parser.ml" 386 11528 11577 "front_end/parse/c0Parser.ml" 386 11528 11578
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 386 11528 11542 "front_end/parse/c0Parser.ml" 386 11528 11578
+call(
+  stack
+)
+type(
+  Symbol.t
+)
+type(
+  Symbol.t
+)
+"front_end/parse/c0Parser.ml" 387 11594 11598 "front_end/parse/c0Parser.ml" 387 11594 11606
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 114 11645 11680 "front_end/parse/c0Parser.mly" 114 11645 11684
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 114 11645 11692 "front_end/parse/c0Parser.mly" 114 11645 11694
+type(
+  A.ident
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 386 11528 11536 "front_end/parse/c0Parser.ml" 386 11528 11538
+)
+"front_end/parse/c0Parser.mly" 114 11645 11686 "front_end/parse/c0Parser.mly" 114 11645 11694
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 114 11645 11697 "front_end/parse/c0Parser.mly" 114 11645 11698
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 114 11645 11700 "front_end/parse/c0Parser.mly" 114 11645 11701
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 114 11645 11697 "front_end/parse/c0Parser.mly" 114 11645 11701
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 114 11645 11680 "front_end/parse/c0Parser.mly" 114 11645 11702
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 387 11594 11598 "front_end/parse/c0Parser.ml" 391 11741 11763
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 386 11528 11532 "front_end/parse/c0Parser.ml" 391 11741 11763
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 385 11500 11507 "front_end/parse/c0Parser.ml" 391 11741 11763
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 392 11765 11772 "front_end/parse/c0Parser.ml" 392 11765 11789
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 393 11793 11797 "front_end/parse/c0Parser.ml" 399 12082 12104
+)
+"front_end/parse/c0Parser.ml" 393 11793 11801 "front_end/parse/c0Parser.ml" 393 11793 11803
+type(
+  A.exp
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 394 11855 11859 "front_end/parse/c0Parser.ml" 399 12082 12104
+)
+"front_end/parse/c0Parser.ml" 393 11793 11807 "front_end/parse/c0Parser.ml" 393 11793 11823
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 393 11793 11824 "front_end/parse/c0Parser.ml" 393 11793 11841
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 392 11765 11772 "front_end/parse/c0Parser.ml" 392 11765 11789
+)
+"front_end/parse/c0Parser.ml" 393 11793 11842 "front_end/parse/c0Parser.ml" 393 11793 11843
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 393 11793 11807 "front_end/parse/c0Parser.ml" 393 11793 11843
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 394 11855 11863 "front_end/parse/c0Parser.ml" 394 11855 11865
+type(
+  A.exp
+)
+ident(
+  def _3 "front_end/parse/c0Parser.ml" 395 11917 11921 "front_end/parse/c0Parser.ml" 399 12082 12104
+)
+"front_end/parse/c0Parser.ml" 394 11855 11869 "front_end/parse/c0Parser.ml" 394 11855 11885
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 394 11855 11886 "front_end/parse/c0Parser.ml" 394 11855 11903
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 392 11765 11772 "front_end/parse/c0Parser.ml" 392 11765 11789
+)
+"front_end/parse/c0Parser.ml" 394 11855 11904 "front_end/parse/c0Parser.ml" 394 11855 11905
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 394 11855 11869 "front_end/parse/c0Parser.ml" 394 11855 11905
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 395 11917 11921 "front_end/parse/c0Parser.ml" 395 11917 11929
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 115 11968 12003 "front_end/parse/c0Parser.mly" 115 11968 12007
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 115 11968 12018 "front_end/parse/c0Parser.mly" 115 11968 12024
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 115 11968 12027 "front_end/parse/c0Parser.mly" 115 11968 12029
+type(
+  A.exp
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 393 11793 11801 "front_end/parse/c0Parser.ml" 393 11793 11803
+)
+"front_end/parse/c0Parser.mly" 115 11968 12031 "front_end/parse/c0Parser.mly" 115 11968 12033
+type(
+  A.exp
+)
+ident(
+  int_ref _3 "front_end/parse/c0Parser.ml" 394 11855 11863 "front_end/parse/c0Parser.ml" 394 11855 11865
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 115 11968 12027 "front_end/parse/c0Parser.mly" 115 11968 12033
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 115 11968 12026 "front_end/parse/c0Parser.mly" 115 11968 12034
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 115 11968 12009 "front_end/parse/c0Parser.mly" 115 11968 12035
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 115 11968 12038 "front_end/parse/c0Parser.mly" 115 11968 12039
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 115 11968 12041 "front_end/parse/c0Parser.mly" 115 11968 12042
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 115 11968 12038 "front_end/parse/c0Parser.mly" 115 11968 12042
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 115 11968 12003 "front_end/parse/c0Parser.mly" 115 11968 12043
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 395 11917 11921 "front_end/parse/c0Parser.ml" 399 12082 12104
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 394 11855 11859 "front_end/parse/c0Parser.ml" 399 12082 12104
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 393 11793 11797 "front_end/parse/c0Parser.ml" 399 12082 12104
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 392 11765 11772 "front_end/parse/c0Parser.ml" 399 12082 12104
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 400 12106 12113 "front_end/parse/c0Parser.ml" 400 12106 12130
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 401 12134 12138 "front_end/parse/c0Parser.ml" 407 12424 12446
+)
+"front_end/parse/c0Parser.ml" 401 12134 12142 "front_end/parse/c0Parser.ml" 401 12134 12144
+type(
+  A.exp
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 402 12196 12200 "front_end/parse/c0Parser.ml" 407 12424 12446
+)
+"front_end/parse/c0Parser.ml" 401 12134 12148 "front_end/parse/c0Parser.ml" 401 12134 12164
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 401 12134 12165 "front_end/parse/c0Parser.ml" 401 12134 12182
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 400 12106 12113 "front_end/parse/c0Parser.ml" 400 12106 12130
+)
+"front_end/parse/c0Parser.ml" 401 12134 12183 "front_end/parse/c0Parser.ml" 401 12134 12184
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 401 12134 12148 "front_end/parse/c0Parser.ml" 401 12134 12184
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 402 12196 12204 "front_end/parse/c0Parser.ml" 402 12196 12206
+type(
+  A.exp
+)
+ident(
+  def _3 "front_end/parse/c0Parser.ml" 403 12258 12262 "front_end/parse/c0Parser.ml" 407 12424 12446
+)
+"front_end/parse/c0Parser.ml" 402 12196 12210 "front_end/parse/c0Parser.ml" 402 12196 12226
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 402 12196 12227 "front_end/parse/c0Parser.ml" 402 12196 12244
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 400 12106 12113 "front_end/parse/c0Parser.ml" 400 12106 12130
+)
+"front_end/parse/c0Parser.ml" 402 12196 12245 "front_end/parse/c0Parser.ml" 402 12196 12246
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 402 12196 12210 "front_end/parse/c0Parser.ml" 402 12196 12246
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 403 12258 12262 "front_end/parse/c0Parser.ml" 403 12258 12270
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 116 12309 12344 "front_end/parse/c0Parser.mly" 116 12309 12348
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 116 12309 12359 "front_end/parse/c0Parser.mly" 116 12309 12366
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 116 12309 12369 "front_end/parse/c0Parser.mly" 116 12309 12371
+type(
+  A.exp
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 401 12134 12142 "front_end/parse/c0Parser.ml" 401 12134 12144
+)
+"front_end/parse/c0Parser.mly" 116 12309 12373 "front_end/parse/c0Parser.mly" 116 12309 12375
+type(
+  A.exp
+)
+ident(
+  int_ref _3 "front_end/parse/c0Parser.ml" 402 12196 12204 "front_end/parse/c0Parser.ml" 402 12196 12206
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 116 12309 12369 "front_end/parse/c0Parser.mly" 116 12309 12375
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 116 12309 12368 "front_end/parse/c0Parser.mly" 116 12309 12376
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 116 12309 12350 "front_end/parse/c0Parser.mly" 116 12309 12377
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 116 12309 12380 "front_end/parse/c0Parser.mly" 116 12309 12381
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 116 12309 12383 "front_end/parse/c0Parser.mly" 116 12309 12384
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 116 12309 12380 "front_end/parse/c0Parser.mly" 116 12309 12384
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 116 12309 12344 "front_end/parse/c0Parser.mly" 116 12309 12385
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 403 12258 12262 "front_end/parse/c0Parser.ml" 407 12424 12446
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 402 12196 12200 "front_end/parse/c0Parser.ml" 407 12424 12446
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 401 12134 12138 "front_end/parse/c0Parser.ml" 407 12424 12446
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 400 12106 12113 "front_end/parse/c0Parser.ml" 407 12424 12446
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 408 12448 12455 "front_end/parse/c0Parser.ml" 408 12448 12472
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 409 12476 12480 "front_end/parse/c0Parser.ml" 415 12766 12788
+)
+"front_end/parse/c0Parser.ml" 409 12476 12484 "front_end/parse/c0Parser.ml" 409 12476 12486
+type(
+  A.exp
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 410 12538 12542 "front_end/parse/c0Parser.ml" 415 12766 12788
+)
+"front_end/parse/c0Parser.ml" 409 12476 12490 "front_end/parse/c0Parser.ml" 409 12476 12506
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 409 12476 12507 "front_end/parse/c0Parser.ml" 409 12476 12524
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 408 12448 12455 "front_end/parse/c0Parser.ml" 408 12448 12472
+)
+"front_end/parse/c0Parser.ml" 409 12476 12525 "front_end/parse/c0Parser.ml" 409 12476 12526
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 409 12476 12490 "front_end/parse/c0Parser.ml" 409 12476 12526
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 410 12538 12546 "front_end/parse/c0Parser.ml" 410 12538 12548
+type(
+  A.exp
+)
+ident(
+  def _3 "front_end/parse/c0Parser.ml" 411 12600 12604 "front_end/parse/c0Parser.ml" 415 12766 12788
+)
+"front_end/parse/c0Parser.ml" 410 12538 12552 "front_end/parse/c0Parser.ml" 410 12538 12568
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 410 12538 12569 "front_end/parse/c0Parser.ml" 410 12538 12586
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 408 12448 12455 "front_end/parse/c0Parser.ml" 408 12448 12472
+)
+"front_end/parse/c0Parser.ml" 410 12538 12587 "front_end/parse/c0Parser.ml" 410 12538 12588
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 410 12538 12552 "front_end/parse/c0Parser.ml" 410 12538 12588
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 411 12600 12604 "front_end/parse/c0Parser.ml" 411 12600 12612
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 117 12651 12686 "front_end/parse/c0Parser.mly" 117 12651 12690
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 117 12651 12701 "front_end/parse/c0Parser.mly" 117 12651 12708
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 117 12651 12711 "front_end/parse/c0Parser.mly" 117 12651 12713
+type(
+  A.exp
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 409 12476 12484 "front_end/parse/c0Parser.ml" 409 12476 12486
+)
+"front_end/parse/c0Parser.mly" 117 12651 12715 "front_end/parse/c0Parser.mly" 117 12651 12717
+type(
+  A.exp
+)
+ident(
+  int_ref _3 "front_end/parse/c0Parser.ml" 410 12538 12546 "front_end/parse/c0Parser.ml" 410 12538 12548
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 117 12651 12711 "front_end/parse/c0Parser.mly" 117 12651 12717
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 117 12651 12710 "front_end/parse/c0Parser.mly" 117 12651 12718
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 117 12651 12692 "front_end/parse/c0Parser.mly" 117 12651 12719
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 117 12651 12722 "front_end/parse/c0Parser.mly" 117 12651 12723
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 117 12651 12725 "front_end/parse/c0Parser.mly" 117 12651 12726
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 117 12651 12722 "front_end/parse/c0Parser.mly" 117 12651 12726
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 117 12651 12686 "front_end/parse/c0Parser.mly" 117 12651 12727
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 411 12600 12604 "front_end/parse/c0Parser.ml" 415 12766 12788
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 410 12538 12542 "front_end/parse/c0Parser.ml" 415 12766 12788
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 409 12476 12480 "front_end/parse/c0Parser.ml" 415 12766 12788
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 408 12448 12455 "front_end/parse/c0Parser.ml" 415 12766 12788
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 416 12790 12797 "front_end/parse/c0Parser.ml" 416 12790 12814
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 417 12818 12822 "front_end/parse/c0Parser.ml" 424 13149 13171
+)
+"front_end/parse/c0Parser.ml" 417 12818 12826 "front_end/parse/c0Parser.ml" 417 12818 12828
+type(
+  A.exp
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 418 12880 12884 "front_end/parse/c0Parser.ml" 424 13149 13171
+)
+"front_end/parse/c0Parser.ml" 417 12818 12832 "front_end/parse/c0Parser.ml" 417 12818 12848
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 417 12818 12849 "front_end/parse/c0Parser.ml" 417 12818 12866
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 416 12790 12797 "front_end/parse/c0Parser.ml" 416 12790 12814
+)
+"front_end/parse/c0Parser.ml" 417 12818 12867 "front_end/parse/c0Parser.ml" 417 12818 12868
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 417 12818 12832 "front_end/parse/c0Parser.ml" 417 12818 12868
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 418 12880 12888 "front_end/parse/c0Parser.ml" 418 12880 12890
+type(
+  A.exp
+)
+ident(
+  def _3 "front_end/parse/c0Parser.ml" 419 12942 12946 "front_end/parse/c0Parser.ml" 424 13149 13171
+)
+"front_end/parse/c0Parser.ml" 418 12880 12894 "front_end/parse/c0Parser.ml" 418 12880 12910
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 418 12880 12911 "front_end/parse/c0Parser.ml" 418 12880 12928
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 416 12790 12797 "front_end/parse/c0Parser.ml" 416 12790 12814
+)
+"front_end/parse/c0Parser.ml" 418 12880 12929 "front_end/parse/c0Parser.ml" 418 12880 12930
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 418 12880 12894 "front_end/parse/c0Parser.ml" 418 12880 12930
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 419 12942 12946 "front_end/parse/c0Parser.ml" 419 12942 12954
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 118 12993 13028 "front_end/parse/c0Parser.mly" 118 12993 13032
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 118 12993 13043 "front_end/parse/c0Parser.mly" 118 12993 13054
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 118 12993 13057 "front_end/parse/c0Parser.mly" 118 12993 13059
+type(
+  A.exp
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 417 12818 12826 "front_end/parse/c0Parser.ml" 417 12818 12828
+)
+"front_end/parse/c0Parser.mly" 118 12993 13061 "front_end/parse/c0Parser.mly" 118 12993 13063
+type(
+  A.exp
+)
+ident(
+  int_ref _3 "front_end/parse/c0Parser.ml" 418 12880 12888 "front_end/parse/c0Parser.ml" 418 12880 12890
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 118 12993 13057 "front_end/parse/c0Parser.mly" 118 12993 13063
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 118 12993 13056 "front_end/parse/c0Parser.mly" 118 12993 13064
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 118 12993 13034 "front_end/parse/c0Parser.mly" 118 12993 13065
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 119 13067 13105 "front_end/parse/c0Parser.mly" 119 13067 13106
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 119 13067 13108 "front_end/parse/c0Parser.mly" 119 13067 13109
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 119 13067 13105 "front_end/parse/c0Parser.mly" 119 13067 13109
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 118 12993 13028 "front_end/parse/c0Parser.mly" 119 13067 13110
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 419 12942 12946 "front_end/parse/c0Parser.ml" 424 13149 13171
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 418 12880 12884 "front_end/parse/c0Parser.ml" 424 13149 13171
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 417 12818 12822 "front_end/parse/c0Parser.ml" 424 13149 13171
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 416 12790 12797 "front_end/parse/c0Parser.ml" 424 13149 13171
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 425 13173 13180 "front_end/parse/c0Parser.ml" 425 13173 13197
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 426 13201 13205 "front_end/parse/c0Parser.ml" 432 13492 13514
+)
+"front_end/parse/c0Parser.ml" 426 13201 13209 "front_end/parse/c0Parser.ml" 426 13201 13211
+type(
+  A.exp
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 427 13263 13267 "front_end/parse/c0Parser.ml" 432 13492 13514
+)
+"front_end/parse/c0Parser.ml" 426 13201 13215 "front_end/parse/c0Parser.ml" 426 13201 13231
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 426 13201 13232 "front_end/parse/c0Parser.ml" 426 13201 13249
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 425 13173 13180 "front_end/parse/c0Parser.ml" 425 13173 13197
+)
+"front_end/parse/c0Parser.ml" 426 13201 13250 "front_end/parse/c0Parser.ml" 426 13201 13251
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 426 13201 13215 "front_end/parse/c0Parser.ml" 426 13201 13251
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 427 13263 13271 "front_end/parse/c0Parser.ml" 427 13263 13273
+type(
+  A.exp
+)
+ident(
+  def _3 "front_end/parse/c0Parser.ml" 428 13325 13329 "front_end/parse/c0Parser.ml" 432 13492 13514
+)
+"front_end/parse/c0Parser.ml" 427 13263 13277 "front_end/parse/c0Parser.ml" 427 13263 13293
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 427 13263 13294 "front_end/parse/c0Parser.ml" 427 13263 13311
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 425 13173 13180 "front_end/parse/c0Parser.ml" 425 13173 13197
+)
+"front_end/parse/c0Parser.ml" 427 13263 13312 "front_end/parse/c0Parser.ml" 427 13263 13313
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 427 13263 13277 "front_end/parse/c0Parser.ml" 427 13263 13313
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 428 13325 13329 "front_end/parse/c0Parser.ml" 428 13325 13337
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 120 13376 13411 "front_end/parse/c0Parser.mly" 120 13376 13415
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 120 13376 13426 "front_end/parse/c0Parser.mly" 120 13376 13434
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 120 13376 13437 "front_end/parse/c0Parser.mly" 120 13376 13439
+type(
+  A.exp
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 426 13201 13209 "front_end/parse/c0Parser.ml" 426 13201 13211
+)
+"front_end/parse/c0Parser.mly" 120 13376 13441 "front_end/parse/c0Parser.mly" 120 13376 13443
+type(
+  A.exp
+)
+ident(
+  int_ref _3 "front_end/parse/c0Parser.ml" 427 13263 13271 "front_end/parse/c0Parser.ml" 427 13263 13273
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 120 13376 13437 "front_end/parse/c0Parser.mly" 120 13376 13443
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 120 13376 13436 "front_end/parse/c0Parser.mly" 120 13376 13444
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 120 13376 13417 "front_end/parse/c0Parser.mly" 120 13376 13445
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 120 13376 13448 "front_end/parse/c0Parser.mly" 120 13376 13449
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 120 13376 13451 "front_end/parse/c0Parser.mly" 120 13376 13452
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 120 13376 13448 "front_end/parse/c0Parser.mly" 120 13376 13452
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 120 13376 13411 "front_end/parse/c0Parser.mly" 120 13376 13453
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 428 13325 13329 "front_end/parse/c0Parser.ml" 432 13492 13514
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 427 13263 13267 "front_end/parse/c0Parser.ml" 432 13492 13514
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 426 13201 13205 "front_end/parse/c0Parser.ml" 432 13492 13514
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 425 13173 13180 "front_end/parse/c0Parser.ml" 432 13492 13514
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 433 13516 13523 "front_end/parse/c0Parser.ml" 433 13516 13540
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 434 13544 13548 "front_end/parse/c0Parser.ml" 439 13771 13793
+)
+"front_end/parse/c0Parser.ml" 434 13544 13552 "front_end/parse/c0Parser.ml" 434 13544 13554
+type(
+  A.exp
+)
+ident(
+  def _2 "front_end/parse/c0Parser.ml" 435 13606 13610 "front_end/parse/c0Parser.ml" 439 13771 13793
+)
+"front_end/parse/c0Parser.ml" 434 13544 13558 "front_end/parse/c0Parser.ml" 434 13544 13574
+type(
+  Parsing.parser_env -> int -> A.exp
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 434 13544 13575 "front_end/parse/c0Parser.ml" 434 13544 13592
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 433 13516 13523 "front_end/parse/c0Parser.ml" 433 13516 13540
+)
+"front_end/parse/c0Parser.ml" 434 13544 13593 "front_end/parse/c0Parser.ml" 434 13544 13594
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 434 13544 13558 "front_end/parse/c0Parser.ml" 434 13544 13594
+call(
+  stack
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 435 13606 13610 "front_end/parse/c0Parser.ml" 435 13606 13618
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 121 13657 13692 "front_end/parse/c0Parser.mly" 121 13657 13696
+type(
+  A.exp -> int * int -> A.exp
+)
+ident(
+  int_ref mark "front_end/parse/c0Parser.mly" 22 1104 1108 "front_end/parse/c0Parser.mly" 22 1104 1112
+)
+"front_end/parse/c0Parser.mly" 121 13657 13707 "front_end/parse/c0Parser.mly" 121 13657 13717
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 121 13657 13720 "front_end/parse/c0Parser.mly" 121 13657 13722
+type(
+  A.exp
+)
+ident(
+  int_ref _2 "front_end/parse/c0Parser.ml" 434 13544 13552 "front_end/parse/c0Parser.ml" 434 13544 13554
+)
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 121 13657 13719 "front_end/parse/c0Parser.mly" 121 13657 13723
+type(
+  A.exp list
+)
+"front_end/parse/c0Parser.mly" 121 13657 13698 "front_end/parse/c0Parser.mly" 121 13657 13724
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.mly" 121 13657 13727 "front_end/parse/c0Parser.mly" 121 13657 13728
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 121 13657 13730 "front_end/parse/c0Parser.mly" 121 13657 13731
+type(
+  int
+)
+"front_end/parse/c0Parser.mly" 121 13657 13727 "front_end/parse/c0Parser.mly" 121 13657 13731
+type(
+  int * int
+)
+"front_end/parse/c0Parser.mly" 121 13657 13692 "front_end/parse/c0Parser.mly" 121 13657 13732
+call(
+  tail
+)
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 435 13606 13610 "front_end/parse/c0Parser.ml" 439 13771 13793
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 434 13544 13548 "front_end/parse/c0Parser.ml" 439 13771 13793
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 433 13516 13523 "front_end/parse/c0Parser.ml" 439 13771 13793
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 440 13795 13802 "front_end/parse/c0Parser.ml" 440 13795 13819
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 441 13823 13827 "front_end/parse/c0Parser.ml" 446 14014 14041
+)
+"front_end/parse/c0Parser.ml" 441 13823 13831 "front_end/parse/c0Parser.ml" 441 13823 13833
+type(
+  Core.Std.Int32.t
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 442 13888 13892 "front_end/parse/c0Parser.ml" 446 14014 14041
+)
+"front_end/parse/c0Parser.ml" 441 13823 13837 "front_end/parse/c0Parser.ml" 441 13823 13853
+type(
+  Parsing.parser_env -> int -> Core.Std.Int32.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 441 13823 13854 "front_end/parse/c0Parser.ml" 441 13823 13871
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 440 13795 13802 "front_end/parse/c0Parser.ml" 440 13795 13819
+)
+"front_end/parse/c0Parser.ml" 441 13823 13872 "front_end/parse/c0Parser.ml" 441 13823 13873
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 441 13823 13837 "front_end/parse/c0Parser.ml" 441 13823 13873
+call(
+  stack
+)
+type(
+  Core.Std.Int32.t
+)
+type(
+  Core.Std.Int32.t
+)
+"front_end/parse/c0Parser.ml" 442 13888 13892 "front_end/parse/c0Parser.ml" 442 13888 13900
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 125 13939 13973 "front_end/parse/c0Parser.mly" 125 13939 13975
+type(
+  Core.Std.Int32.t
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 441 13823 13831 "front_end/parse/c0Parser.ml" 441 13823 13833
+)
+"front_end/parse/c0Parser.mly" 125 13939 13962 "front_end/parse/c0Parser.mly" 125 13939 13975
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 442 13888 13892 "front_end/parse/c0Parser.ml" 446 14014 14041
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 441 13823 13827 "front_end/parse/c0Parser.ml" 446 14014 14041
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 440 13795 13802 "front_end/parse/c0Parser.ml" 446 14014 14041
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 447 14043 14050 "front_end/parse/c0Parser.ml" 447 14043 14067
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 448 14071 14075 "front_end/parse/c0Parser.ml" 453 14262 14289
+)
+"front_end/parse/c0Parser.ml" 448 14071 14079 "front_end/parse/c0Parser.ml" 448 14071 14081
+type(
+  Core.Std.Int32.t
+)
+ident(
+  def _1 "front_end/parse/c0Parser.ml" 449 14136 14140 "front_end/parse/c0Parser.ml" 453 14262 14289
+)
+"front_end/parse/c0Parser.ml" 448 14071 14085 "front_end/parse/c0Parser.ml" 448 14071 14101
+type(
+  Parsing.parser_env -> int -> Core.Std.Int32.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 448 14071 14102 "front_end/parse/c0Parser.ml" 448 14071 14119
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 447 14043 14050 "front_end/parse/c0Parser.ml" 447 14043 14067
+)
+"front_end/parse/c0Parser.ml" 448 14071 14120 "front_end/parse/c0Parser.ml" 448 14071 14121
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 448 14071 14085 "front_end/parse/c0Parser.ml" 448 14071 14121
+call(
+  stack
+)
+type(
+  Core.Std.Int32.t
+)
+type(
+  Core.Std.Int32.t
+)
+"front_end/parse/c0Parser.ml" 449 14136 14140 "front_end/parse/c0Parser.ml" 449 14136 14148
+type(
+  A.exp -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 126 14187 14221 "front_end/parse/c0Parser.mly" 126 14187 14223
+type(
+  Core.Std.Int32.t
+)
+ident(
+  int_ref _1 "front_end/parse/c0Parser.ml" 448 14071 14079 "front_end/parse/c0Parser.ml" 448 14071 14081
+)
+"front_end/parse/c0Parser.mly" 126 14187 14210 "front_end/parse/c0Parser.mly" 126 14187 14223
+type(
+  A.exp
+)
+type(
+  A.exp
+)
+"front_end/parse/c0Parser.ml" 449 14136 14140 "front_end/parse/c0Parser.ml" 453 14262 14289
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 448 14071 14075 "front_end/parse/c0Parser.ml" 453 14262 14289
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 447 14043 14050 "front_end/parse/c0Parser.ml" 453 14262 14289
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 454 14291 14298 "front_end/parse/c0Parser.ml" 454 14291 14315
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 455 14319 14323 "front_end/parse/c0Parser.ml" 459 14447 14471
+)
+"front_end/parse/c0Parser.ml" 455 14319 14323 "front_end/parse/c0Parser.ml" 455 14319 14331
+type(
+  A.oper option -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 130 14370 14404 "front_end/parse/c0Parser.mly" 130 14370 14408
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 455 14319 14323 "front_end/parse/c0Parser.ml" 459 14447 14471
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 454 14291 14298 "front_end/parse/c0Parser.ml" 459 14447 14471
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 460 14473 14480 "front_end/parse/c0Parser.ml" 460 14473 14497
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 461 14501 14505 "front_end/parse/c0Parser.ml" 465 14636 14660
+)
+"front_end/parse/c0Parser.ml" 461 14501 14505 "front_end/parse/c0Parser.ml" 461 14501 14513
+type(
+  A.oper option -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 131 14552 14591 "front_end/parse/c0Parser.mly" 131 14552 14597
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 131 14552 14586 "front_end/parse/c0Parser.mly" 131 14552 14597
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 461 14501 14505 "front_end/parse/c0Parser.ml" 465 14636 14660
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 460 14473 14480 "front_end/parse/c0Parser.ml" 465 14636 14660
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 466 14662 14669 "front_end/parse/c0Parser.ml" 466 14662 14686
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 467 14690 14694 "front_end/parse/c0Parser.ml" 471 14826 14850
+)
+"front_end/parse/c0Parser.ml" 467 14690 14694 "front_end/parse/c0Parser.ml" 467 14690 14702
+type(
+  A.oper option -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 132 14741 14780 "front_end/parse/c0Parser.mly" 132 14741 14787
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 132 14741 14775 "front_end/parse/c0Parser.mly" 132 14741 14787
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 467 14690 14694 "front_end/parse/c0Parser.ml" 471 14826 14850
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 466 14662 14669 "front_end/parse/c0Parser.ml" 471 14826 14850
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 472 14852 14859 "front_end/parse/c0Parser.ml" 472 14852 14876
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 473 14880 14884 "front_end/parse/c0Parser.ml" 477 15016 15040
+)
+"front_end/parse/c0Parser.ml" 473 14880 14884 "front_end/parse/c0Parser.ml" 473 14880 14892
+type(
+  A.oper option -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 133 14931 14970 "front_end/parse/c0Parser.mly" 133 14931 14977
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 133 14931 14965 "front_end/parse/c0Parser.mly" 133 14931 14977
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 473 14880 14884 "front_end/parse/c0Parser.ml" 477 15016 15040
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 472 14852 14859 "front_end/parse/c0Parser.ml" 477 15016 15040
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 478 15042 15049 "front_end/parse/c0Parser.ml" 478 15042 15066
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 479 15070 15074 "front_end/parse/c0Parser.ml" 483 15210 15234
+)
+"front_end/parse/c0Parser.ml" 479 15070 15074 "front_end/parse/c0Parser.ml" 479 15070 15082
+type(
+  A.oper option -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 134 15121 15160 "front_end/parse/c0Parser.mly" 134 15121 15171
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 134 15121 15155 "front_end/parse/c0Parser.mly" 134 15121 15171
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 479 15070 15074 "front_end/parse/c0Parser.ml" 483 15210 15234
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 478 15042 15049 "front_end/parse/c0Parser.ml" 483 15210 15234
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 484 15236 15243 "front_end/parse/c0Parser.ml" 484 15236 15260
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 485 15264 15268 "front_end/parse/c0Parser.ml" 489 15401 15425
+)
+"front_end/parse/c0Parser.ml" 485 15264 15268 "front_end/parse/c0Parser.ml" 485 15264 15276
+type(
+  A.oper option -> Obj.t
+)
+ident(
+  ext_ref Obj.repr
+)
+"front_end/parse/c0Parser.mly" 135 15315 15354 "front_end/parse/c0Parser.mly" 135 15315 15362
+type(
+  A.oper
+)
+"front_end/parse/c0Parser.mly" 135 15315 15349 "front_end/parse/c0Parser.mly" 135 15315 15362
+type(
+  A.oper option
+)
+type(
+  A.oper option
+)
+"front_end/parse/c0Parser.ml" 485 15264 15268 "front_end/parse/c0Parser.ml" 489 15401 15425
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 484 15236 15243 "front_end/parse/c0Parser.ml" 489 15401 15425
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 491 15447 15454 "front_end/parse/c0Parser.ml" 491 15447 15471
+type(
+  Parsing.parser_env
+)
+ident(
+  def __caml_parser_env "front_end/parse/c0Parser.ml" 491 15447 15475 "front_end/parse/c0Parser.ml" 491 15447 15536
+)
+"front_end/parse/c0Parser.ml" 491 15447 15475 "front_end/parse/c0Parser.ml" 491 15447 15480
+type(
+  exn -> Obj.t
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/parse/c0Parser.ml" 491 15447 15498 "front_end/parse/c0Parser.ml" 491 15447 15514
+type(
+  Parsing.parser_env -> int -> Obj.t
+)
+ident(
+  ext_ref Parsing.peek_val
+)
+"front_end/parse/c0Parser.ml" 491 15447 15515 "front_end/parse/c0Parser.ml" 491 15447 15532
+type(
+  Parsing.parser_env
+)
+ident(
+  int_ref __caml_parser_env "front_end/parse/c0Parser.ml" 491 15447 15454 "front_end/parse/c0Parser.ml" 491 15447 15471
+)
+"front_end/parse/c0Parser.ml" 491 15447 15533 "front_end/parse/c0Parser.ml" 491 15447 15534
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 491 15447 15498 "front_end/parse/c0Parser.ml" 491 15447 15534
+call(
+  stack
+)
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 491 15447 15482 "front_end/parse/c0Parser.ml" 491 15447 15535
+type(
+  exn
+)
+"front_end/parse/c0Parser.ml" 491 15447 15475 "front_end/parse/c0Parser.ml" 491 15447 15536
+type(
+  Obj.t
+)
+"front_end/parse/c0Parser.ml" 491 15447 15454 "front_end/parse/c0Parser.ml" 491 15447 15536
+type(
+  Parsing.parser_env -> Obj.t
+)
+"front_end/parse/c0Parser.ml" 264 7063 7075 "front_end/parse/c0Parser.ml" 492 15538 15540
+type(
+  (Parsing.parser_env -> Obj.t) array
+)
+"front_end/parse/c0Parser.ml" 493 15541 15545 "front_end/parse/c0Parser.ml" 493 15541 15553
+type(
+  Parsing.parse_tables
+)
+ident(
+  def yytables "front_end/parse/c0Parser.ml" 510 16062 16062 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 494 15556 15576 "front_end/parse/c0Parser.ml" 494 15556 15581
+type(
+  (Parsing.parser_env -> Obj.t) array
+)
+ident(
+  int_ref yyact "front_end/parse/c0Parser.ml" 264 7063 7067 "front_end/parse/c0Parser.ml" 264 7063 7072
+)
+"front_end/parse/c0Parser.ml" 495 15583 15608 "front_end/parse/c0Parser.ml" 495 15583 15622
+type(
+  int array
+)
+ident(
+  int_ref yytransl_const "front_end/parse/c0Parser.ml" 87 1702 1706 "front_end/parse/c0Parser.ml" 87 1702 1720
+)
+"front_end/parse/c0Parser.ml" 496 15624 15649 "front_end/parse/c0Parser.ml" 496 15624 15663
+type(
+  int array
+)
+ident(
+  int_ref yytransl_block "front_end/parse/c0Parser.ml" 131 2530 2534 "front_end/parse/c0Parser.ml" 131 2530 2548
+)
+"front_end/parse/c0Parser.ml" 497 15665 15681 "front_end/parse/c0Parser.ml" 497 15665 15686
+type(
+  string
+)
+ident(
+  int_ref yylhs "front_end/parse/c0Parser.ml" 137 2626 2630 "front_end/parse/c0Parser.ml" 137 2626 2635
+)
+"front_end/parse/c0Parser.ml" 498 15688 15704 "front_end/parse/c0Parser.ml" 498 15688 15709
+type(
+  string
+)
+ident(
+  int_ref yylen "front_end/parse/c0Parser.ml" 144 2924 2928 "front_end/parse/c0Parser.ml" 144 2924 2933
+)
+"front_end/parse/c0Parser.ml" 499 15711 15730 "front_end/parse/c0Parser.ml" 499 15711 15738
+type(
+  string
+)
+ident(
+  int_ref yydefred "front_end/parse/c0Parser.ml" 151 3222 3226 "front_end/parse/c0Parser.ml" 151 3222 3234
+)
+"front_end/parse/c0Parser.ml" 500 15740 15758 "front_end/parse/c0Parser.ml" 500 15740 15765
+type(
+  string
+)
+ident(
+  int_ref yydgoto "front_end/parse/c0Parser.ml" 161 3753 3757 "front_end/parse/c0Parser.ml" 161 3753 3764
+)
+"front_end/parse/c0Parser.ml" 501 15767 15786 "front_end/parse/c0Parser.ml" 501 15767 15794
+type(
+  string
+)
+ident(
+  int_ref yysindex "front_end/parse/c0Parser.ml" 165 3855 3859 "front_end/parse/c0Parser.ml" 165 3855 3867
+)
+"front_end/parse/c0Parser.ml" 502 15796 15815 "front_end/parse/c0Parser.ml" 502 15796 15823
+type(
+  string
+)
+ident(
+  int_ref yyrindex "front_end/parse/c0Parser.ml" 175 4386 4390 "front_end/parse/c0Parser.ml" 175 4386 4398
+)
+"front_end/parse/c0Parser.ml" 503 15825 15844 "front_end/parse/c0Parser.ml" 503 15825 15852
+type(
+  string
+)
+ident(
+  int_ref yygindex "front_end/parse/c0Parser.ml" 185 4917 4921 "front_end/parse/c0Parser.ml" 185 4917 4929
+)
+"front_end/parse/c0Parser.ml" 504 15854 15876 "front_end/parse/c0Parser.ml" 504 15854 15887
+type(
+  int
+)
+ident(
+  int_ref yytablesize "front_end/parse/c0Parser.ml" 189 5020 5024 "front_end/parse/c0Parser.ml" 189 5020 5035
+)
+"front_end/parse/c0Parser.ml" 505 15889 15907 "front_end/parse/c0Parser.ml" 505 15889 15914
+type(
+  string
+)
+ident(
+  int_ref yytable "front_end/parse/c0Parser.ml" 190 5041 5045 "front_end/parse/c0Parser.ml" 190 5041 5052
+)
+"front_end/parse/c0Parser.ml" 506 15916 15934 "front_end/parse/c0Parser.ml" 506 15916 15941
+type(
+  string
+)
+ident(
+  int_ref yycheck "front_end/parse/c0Parser.ml" 202 5727 5731 "front_end/parse/c0Parser.ml" 202 5727 5738
+)
+"front_end/parse/c0Parser.ml" 507 15943 15970 "front_end/parse/c0Parser.ml" 507 15943 15981
+type(
+  string -> unit
+)
+ident(
+  ext_ref Parsing.parse_error
+)
+"front_end/parse/c0Parser.ml" 508 15983 16007 "front_end/parse/c0Parser.ml" 508 15983 16020
+type(
+  string
+)
+ident(
+  int_ref yynames_const "front_end/parse/c0Parser.ml" 214 6413 6417 "front_end/parse/c0Parser.ml" 214 6413 6430
+)
+"front_end/parse/c0Parser.ml" 509 16022 16046 "front_end/parse/c0Parser.ml" 509 16022 16059
+type(
+  string
+)
+ident(
+  int_ref yynames_block "front_end/parse/c0Parser.ml" 258 6990 6994 "front_end/parse/c0Parser.ml" 258 6990 7007
+)
+"front_end/parse/c0Parser.ml" 494 15556 15558 "front_end/parse/c0Parser.ml" 509 16022 16061
+type(
+  Parsing.parse_tables
+)
+"front_end/parse/c0Parser.ml" 510 16062 16066 "front_end/parse/c0Parser.ml" 510 16062 16073
+type(
+  (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Ast.stm list
+)
+ident(
+  def program "front_end/parse/c0Parser.ml" 511 16135 16195 "front_end/parse/c0Parser.ml" 1 0 -1
+)
+"front_end/parse/c0Parser.ml" 510 16062 16075 "front_end/parse/c0Parser.ml" 510 16062 16081
+type(
+  Lexing.lexbuf -> token
+)
+ident(
+  def lexfun "front_end/parse/c0Parser.ml" 510 16062 16108 "front_end/parse/c0Parser.ml" 511 16135 16195
+)
+"front_end/parse/c0Parser.ml" 510 16062 16109 "front_end/parse/c0Parser.ml" 510 16062 16115
+type(
+  Lexing.lexbuf
+)
+ident(
+  def lexbuf "front_end/parse/c0Parser.ml" 511 16135 16138 "front_end/parse/c0Parser.ml" 511 16135 16195
+)
+"front_end/parse/c0Parser.ml" 511 16135 16139 "front_end/parse/c0Parser.ml" 511 16135 16154
+type(
+  Parsing.parse_tables ->
+  int -> (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Ast.stm list
+)
+ident(
+  ext_ref Parsing.yyparse
+)
+"front_end/parse/c0Parser.ml" 511 16135 16155 "front_end/parse/c0Parser.ml" 511 16135 16163
+type(
+  Parsing.parse_tables
+)
+ident(
+  int_ref yytables "front_end/parse/c0Parser.ml" 493 15541 15545 "front_end/parse/c0Parser.ml" 493 15541 15553
+)
+"front_end/parse/c0Parser.ml" 511 16135 16164 "front_end/parse/c0Parser.ml" 511 16135 16165
+type(
+  int
+)
+"front_end/parse/c0Parser.ml" 511 16135 16166 "front_end/parse/c0Parser.ml" 511 16135 16172
+type(
+  Lexing.lexbuf -> token
+)
+ident(
+  int_ref lexfun "front_end/parse/c0Parser.ml" 510 16062 16075 "front_end/parse/c0Parser.ml" 510 16062 16081
+)
+"front_end/parse/c0Parser.ml" 511 16135 16173 "front_end/parse/c0Parser.ml" 511 16135 16179
+type(
+  Lexing.lexbuf
+)
+ident(
+  int_ref lexbuf "front_end/parse/c0Parser.ml" 510 16062 16109 "front_end/parse/c0Parser.ml" 510 16062 16115
+)
+"front_end/parse/c0Parser.ml" 511 16135 16139 "front_end/parse/c0Parser.ml" 511 16135 16179
+call(
+  tail
+)
+type(
+  Ast.stm list
+)
+type(
+  Ast.stm list
+)
+"front_end/parse/c0Parser.ml" 510 16062 16108 "front_end/parse/c0Parser.ml" 511 16135 16195
+type(
+  Lexing.lexbuf -> Ast.stm list
+)
+"front_end/parse/c0Parser.ml" 510 16062 16074 "front_end/parse/c0Parser.ml" 511 16135 16195
+type(
+  (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Ast.stm list
+)

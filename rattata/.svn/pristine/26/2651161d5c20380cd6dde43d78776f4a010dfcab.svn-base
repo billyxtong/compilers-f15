@@ -1,0 +1,1917 @@
+"front_end/typeChecker/typeChecker.ml" 27 933 941 "front_end/typeChecker/typeChecker.ml" 27 933 947
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  def tc_exp "front_end/typeChecker/typeChecker.ml" 27 933 933 "front_end/typeChecker/typeChecker.ml" 1 0 -1
+)
+"front_end/typeChecker/typeChecker.ml" 27 933 948 "front_end/typeChecker/typeChecker.ml" 27 933 951
+type(
+  bool S.t
+)
+ident(
+  def env "front_end/typeChecker/typeChecker.ml" 27 933 952 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+)
+"front_end/typeChecker/typeChecker.ml" 27 933 952 "front_end/typeChecker/typeChecker.ml" 27 933 955
+type(
+  A.exp
+)
+ident(
+  def ast "front_end/typeChecker/typeChecker.ml" 27 933 956 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+)
+"front_end/typeChecker/typeChecker.ml" 27 933 956 "front_end/typeChecker/typeChecker.ml" 27 933 959
+type(
+  Mark.ext option
+)
+ident(
+  def ext "front_end/typeChecker/typeChecker.ml" 28 962 964 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+)
+"front_end/typeChecker/typeChecker.ml" 28 962 970 "front_end/typeChecker/typeChecker.ml" 28 962 973
+type(
+  A.exp
+)
+ident(
+  int_ref ast "front_end/typeChecker/typeChecker.ml" 27 933 952 "front_end/typeChecker/typeChecker.ml" 27 933 955
+)
+"front_end/typeChecker/typeChecker.ml" 29 979 989 "front_end/typeChecker/typeChecker.ml" 29 979 991
+type(
+  A.ident
+)
+ident(
+  def id "front_end/typeChecker/typeChecker.ml" 30 995 1002 "front_end/typeChecker/typeChecker.ml" 37 1287 1310
+)
+"front_end/typeChecker/typeChecker.ml" 29 979 983 "front_end/typeChecker/typeChecker.ml" 29 979 991
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 30 995 1008 "front_end/typeChecker/typeChecker.ml" 30 995 1014
+type(
+  bool S.t -> S.Key.t -> bool option
+)
+ident(
+  ext_ref S.find
+)
+"front_end/typeChecker/typeChecker.ml" 30 995 1015 "front_end/typeChecker/typeChecker.ml" 30 995 1018
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 27 933 948 "front_end/typeChecker/typeChecker.ml" 27 933 951
+)
+"front_end/typeChecker/typeChecker.ml" 30 995 1019 "front_end/typeChecker/typeChecker.ml" 30 995 1021
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 29 979 989 "front_end/typeChecker/typeChecker.ml" 29 979 991
+)
+"front_end/typeChecker/typeChecker.ml" 30 995 1008 "front_end/typeChecker/typeChecker.ml" 30 995 1021
+call(
+  stack
+)
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 31 1027 1035 "front_end/typeChecker/typeChecker.ml" 31 1027 1039
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 31 1027 1043 "front_end/typeChecker/typeChecker.ml" 31 1027 1057
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/typeChecker/typeChecker.ml" 31 1027 1058 "front_end/typeChecker/typeChecker.ml" 31 1027 1061
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 27 933 956 "front_end/typeChecker/typeChecker.ml" 27 933 959
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1073 "front_end/typeChecker/typeChecker.ml" 32 1062 1096
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1097 "front_end/typeChecker/typeChecker.ml" 32 1062 1098
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1099 "front_end/typeChecker/typeChecker.ml" 32 1062 1110
+type(
+  A.ident -> string
+)
+ident(
+  ext_ref Symbol.name
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1111 "front_end/typeChecker/typeChecker.ml" 32 1062 1113
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 29 979 989 "front_end/typeChecker/typeChecker.ml" 29 979 991
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1099 "front_end/typeChecker/typeChecker.ml" 32 1062 1113
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1114 "front_end/typeChecker/typeChecker.ml" 32 1062 1115
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1116 "front_end/typeChecker/typeChecker.ml" 32 1062 1119
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1099 "front_end/typeChecker/typeChecker.ml" 32 1062 1119
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 32 1062 1073 "front_end/typeChecker/typeChecker.ml" 32 1062 1119
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 31 1027 1043 "front_end/typeChecker/typeChecker.ml" 32 1062 1120
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 33 1122 1130 "front_end/typeChecker/typeChecker.ml" 33 1122 1135
+type(
+  exn -> unit
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/typeChecker/typeChecker.ml" 33 1122 1136 "front_end/typeChecker/typeChecker.ml" 33 1122 1150
+type(
+  exn
+)
+"front_end/typeChecker/typeChecker.ml" 33 1122 1130 "front_end/typeChecker/typeChecker.ml" 33 1122 1150
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 31 1027 1043 "front_end/typeChecker/typeChecker.ml" 33 1122 1150
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 34 1151 1164 "front_end/typeChecker/typeChecker.ml" 34 1151 1169
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 34 1151 1159 "front_end/typeChecker/typeChecker.ml" 34 1151 1169
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 34 1151 1173 "front_end/typeChecker/typeChecker.ml" 34 1151 1187
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/typeChecker/typeChecker.ml" 34 1151 1188 "front_end/typeChecker/typeChecker.ml" 34 1151 1191
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 27 933 956 "front_end/typeChecker/typeChecker.ml" 27 933 959
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1203 "front_end/typeChecker/typeChecker.ml" 35 1192 1229
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1230 "front_end/typeChecker/typeChecker.ml" 35 1192 1231
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1232 "front_end/typeChecker/typeChecker.ml" 35 1192 1243
+type(
+  A.ident -> string
+)
+ident(
+  ext_ref Symbol.name
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1244 "front_end/typeChecker/typeChecker.ml" 35 1192 1246
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 29 979 989 "front_end/typeChecker/typeChecker.ml" 29 979 991
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1232 "front_end/typeChecker/typeChecker.ml" 35 1192 1246
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1247 "front_end/typeChecker/typeChecker.ml" 35 1192 1248
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1249 "front_end/typeChecker/typeChecker.ml" 35 1192 1252
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1232 "front_end/typeChecker/typeChecker.ml" 35 1192 1252
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 35 1192 1203 "front_end/typeChecker/typeChecker.ml" 35 1192 1252
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 34 1151 1173 "front_end/typeChecker/typeChecker.ml" 35 1192 1253
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 36 1256 1266 "front_end/typeChecker/typeChecker.ml" 36 1256 1271
+type(
+  exn -> unit
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/typeChecker/typeChecker.ml" 36 1256 1272 "front_end/typeChecker/typeChecker.ml" 36 1256 1286
+type(
+  exn
+)
+"front_end/typeChecker/typeChecker.ml" 36 1256 1266 "front_end/typeChecker/typeChecker.ml" 36 1256 1286
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 34 1151 1173 "front_end/typeChecker/typeChecker.ml" 36 1256 1286
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 37 1287 1300 "front_end/typeChecker/typeChecker.ml" 37 1287 1304
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 37 1287 1295 "front_end/typeChecker/typeChecker.ml" 37 1287 1304
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 37 1287 1308 "front_end/typeChecker/typeChecker.ml" 37 1287 1310
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 30 995 1002 "front_end/typeChecker/typeChecker.ml" 37 1287 1310
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 38 1312 1327 "front_end/typeChecker/typeChecker.ml" 38 1312 1328
+type(
+  Int32.t
+)
+ident(
+  def c "front_end/typeChecker/typeChecker.ml" 38 1312 1332 "front_end/typeChecker/typeChecker.ml" 38 1312 1334
+)
+"front_end/typeChecker/typeChecker.ml" 38 1312 1316 "front_end/typeChecker/typeChecker.ml" 38 1312 1328
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 38 1312 1332 "front_end/typeChecker/typeChecker.ml" 38 1312 1334
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 39 1335 1348 "front_end/typeChecker/typeChecker.ml" 39 1335 1352
+type(
+  A.oper
+)
+ident(
+  def oper "front_end/typeChecker/typeChecker.ml" 44 1547 1553 "front_end/typeChecker/typeChecker.ml" 44 1547 1596
+)
+"front_end/typeChecker/typeChecker.ml" 39 1335 1353 "front_end/typeChecker/typeChecker.ml" 39 1335 1355
+type(
+  A.exp list
+)
+ident(
+  def es "front_end/typeChecker/typeChecker.ml" 44 1547 1553 "front_end/typeChecker/typeChecker.ml" 44 1547 1596
+)
+"front_end/typeChecker/typeChecker.ml" 39 1335 1339 "front_end/typeChecker/typeChecker.ml" 39 1335 1356
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1553 "front_end/typeChecker/typeChecker.ml" 44 1547 1562
+type(
+  A.exp Core.Std.List.t -> f:(A.exp -> unit) -> unit
+)
+ident(
+  ext_ref Core.Std.List.iter
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1563 "front_end/typeChecker/typeChecker.ml" 44 1547 1565
+type(
+  A.exp Core.Std.List.t
+)
+ident(
+  int_ref es "front_end/typeChecker/typeChecker.ml" 39 1335 1353 "front_end/typeChecker/typeChecker.ml" 39 1335 1355
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1574 "front_end/typeChecker/typeChecker.ml" 44 1547 1575
+type(
+  A.exp
+)
+ident(
+  def e "front_end/typeChecker/typeChecker.ml" 44 1547 1579 "front_end/typeChecker/typeChecker.ml" 44 1547 1595
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1579 "front_end/typeChecker/typeChecker.ml" 44 1547 1585
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  int_ref tc_exp "front_end/typeChecker/typeChecker.ml" 27 933 941 "front_end/typeChecker/typeChecker.ml" 27 933 947
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1586 "front_end/typeChecker/typeChecker.ml" 44 1547 1589
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 27 933 948 "front_end/typeChecker/typeChecker.ml" 27 933 951
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1590 "front_end/typeChecker/typeChecker.ml" 44 1547 1591
+type(
+  A.exp
+)
+ident(
+  int_ref e "front_end/typeChecker/typeChecker.ml" 44 1547 1574 "front_end/typeChecker/typeChecker.ml" 44 1547 1575
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1592 "front_end/typeChecker/typeChecker.ml" 44 1547 1595
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 27 933 956 "front_end/typeChecker/typeChecker.ml" 27 933 959
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1579 "front_end/typeChecker/typeChecker.ml" 44 1547 1595
+call(
+  tail
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1574 "front_end/typeChecker/typeChecker.ml" 44 1547 1595
+type(
+  A.exp -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 44 1547 1553 "front_end/typeChecker/typeChecker.ml" 44 1547 1596
+call(
+  tail
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 45 1597 1610 "front_end/typeChecker/typeChecker.ml" 45 1597 1620
+type(
+  A.exp Mark.marked
+)
+ident(
+  def marked_exp "front_end/typeChecker/typeChecker.ml" 46 1624 1630 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+)
+"front_end/typeChecker/typeChecker.ml" 45 1597 1601 "front_end/typeChecker/typeChecker.ml" 45 1597 1620
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1630 "front_end/typeChecker/typeChecker.ml" 46 1624 1636
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  int_ref tc_exp "front_end/typeChecker/typeChecker.ml" 27 933 941 "front_end/typeChecker/typeChecker.ml" 27 933 947
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1637 "front_end/typeChecker/typeChecker.ml" 46 1624 1640
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 27 933 948 "front_end/typeChecker/typeChecker.ml" 27 933 951
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1642 "front_end/typeChecker/typeChecker.ml" 46 1624 1651
+type(
+  A.exp Mark.marked -> A.exp
+)
+ident(
+  ext_ref Mark.data
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1652 "front_end/typeChecker/typeChecker.ml" 46 1624 1662
+type(
+  A.exp Mark.marked
+)
+ident(
+  int_ref marked_exp "front_end/typeChecker/typeChecker.ml" 45 1597 1610 "front_end/typeChecker/typeChecker.ml" 45 1597 1620
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1642 "front_end/typeChecker/typeChecker.ml" 46 1624 1662
+call(
+  stack
+)
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1665 "front_end/typeChecker/typeChecker.ml" 46 1624 1673
+type(
+  A.exp Mark.marked -> Mark.ext option
+)
+ident(
+  ext_ref Mark.ext
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1674 "front_end/typeChecker/typeChecker.ml" 46 1624 1684
+type(
+  A.exp Mark.marked
+)
+ident(
+  int_ref marked_exp "front_end/typeChecker/typeChecker.ml" 45 1597 1610 "front_end/typeChecker/typeChecker.ml" 45 1597 1620
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1665 "front_end/typeChecker/typeChecker.ml" 46 1624 1684
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/typeChecker/typeChecker.ml" 46 1624 1630 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+call(
+  tail
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 28 962 964 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 27 933 956 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+type(
+  Mark.ext option -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 27 933 952 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+type(
+  A.exp -> Mark.ext option -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 27 933 948 "front_end/typeChecker/typeChecker.ml" 46 1624 1685
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1766 "front_end/typeChecker/typeChecker.ml" 49 1758 1773
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  def tc_exp' "front_end/typeChecker/typeChecker.ml" 49 1758 1758 "front_end/typeChecker/typeChecker.ml" 1 0 -1
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1774 "front_end/typeChecker/typeChecker.ml" 49 1758 1777
+type(
+  bool S.t
+)
+ident(
+  def env "front_end/typeChecker/typeChecker.ml" 49 1758 1778 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1778 "front_end/typeChecker/typeChecker.ml" 49 1758 1781
+type(
+  A.exp
+)
+ident(
+  def ast "front_end/typeChecker/typeChecker.ml" 49 1758 1782 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1782 "front_end/typeChecker/typeChecker.ml" 49 1758 1785
+type(
+  Mark.ext option
+)
+ident(
+  def ext "front_end/typeChecker/typeChecker.ml" 50 1788 1790 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+)
+"front_end/typeChecker/typeChecker.ml" 50 1788 1796 "front_end/typeChecker/typeChecker.ml" 50 1788 1799
+type(
+  A.exp
+)
+ident(
+  int_ref ast "front_end/typeChecker/typeChecker.ml" 49 1758 1778 "front_end/typeChecker/typeChecker.ml" 49 1758 1781
+)
+"front_end/typeChecker/typeChecker.ml" 51 1805 1815 "front_end/typeChecker/typeChecker.ml" 51 1805 1817
+type(
+  A.ident
+)
+ident(
+  def id "front_end/typeChecker/typeChecker.ml" 52 1821 1828 "front_end/typeChecker/typeChecker.ml" 55 1915 1938
+)
+"front_end/typeChecker/typeChecker.ml" 51 1805 1809 "front_end/typeChecker/typeChecker.ml" 51 1805 1817
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 52 1821 1834 "front_end/typeChecker/typeChecker.ml" 52 1821 1840
+type(
+  bool S.t -> S.Key.t -> bool option
+)
+ident(
+  ext_ref S.find
+)
+"front_end/typeChecker/typeChecker.ml" 52 1821 1841 "front_end/typeChecker/typeChecker.ml" 52 1821 1844
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 49 1758 1774 "front_end/typeChecker/typeChecker.ml" 49 1758 1777
+)
+"front_end/typeChecker/typeChecker.ml" 52 1821 1845 "front_end/typeChecker/typeChecker.ml" 52 1821 1847
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 51 1805 1815 "front_end/typeChecker/typeChecker.ml" 51 1805 1817
+)
+"front_end/typeChecker/typeChecker.ml" 52 1821 1834 "front_end/typeChecker/typeChecker.ml" 52 1821 1847
+call(
+  stack
+)
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 53 1853 1861 "front_end/typeChecker/typeChecker.ml" 53 1853 1865
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 53 1853 1869 "front_end/typeChecker/typeChecker.ml" 53 1853 1874
+type(
+  exn -> unit
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/typeChecker/typeChecker.ml" 53 1853 1875 "front_end/typeChecker/typeChecker.ml" 53 1853 1889
+type(
+  exn
+)
+"front_end/typeChecker/typeChecker.ml" 53 1853 1869 "front_end/typeChecker/typeChecker.ml" 53 1853 1889
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 54 1890 1903 "front_end/typeChecker/typeChecker.ml" 54 1890 1908
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 54 1890 1898 "front_end/typeChecker/typeChecker.ml" 54 1890 1908
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 54 1890 1912 "front_end/typeChecker/typeChecker.ml" 54 1890 1914
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 55 1915 1928 "front_end/typeChecker/typeChecker.ml" 55 1915 1932
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 55 1915 1923 "front_end/typeChecker/typeChecker.ml" 55 1915 1932
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 55 1915 1936 "front_end/typeChecker/typeChecker.ml" 55 1915 1938
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 52 1821 1828 "front_end/typeChecker/typeChecker.ml" 55 1915 1938
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 56 1940 1955 "front_end/typeChecker/typeChecker.ml" 56 1940 1956
+type(
+  Int32.t
+)
+ident(
+  def c "front_end/typeChecker/typeChecker.ml" 56 1940 1960 "front_end/typeChecker/typeChecker.ml" 56 1940 1962
+)
+"front_end/typeChecker/typeChecker.ml" 56 1940 1944 "front_end/typeChecker/typeChecker.ml" 56 1940 1956
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 56 1940 1960 "front_end/typeChecker/typeChecker.ml" 56 1940 1962
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 57 1963 1976 "front_end/typeChecker/typeChecker.ml" 57 1963 1980
+type(
+  A.oper
+)
+ident(
+  def oper "front_end/typeChecker/typeChecker.ml" 62 2175 2181 "front_end/typeChecker/typeChecker.ml" 62 2175 2225
+)
+"front_end/typeChecker/typeChecker.ml" 57 1963 1981 "front_end/typeChecker/typeChecker.ml" 57 1963 1983
+type(
+  A.exp list
+)
+ident(
+  def es "front_end/typeChecker/typeChecker.ml" 62 2175 2181 "front_end/typeChecker/typeChecker.ml" 62 2175 2225
+)
+"front_end/typeChecker/typeChecker.ml" 57 1963 1967 "front_end/typeChecker/typeChecker.ml" 57 1963 1984
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2181 "front_end/typeChecker/typeChecker.ml" 62 2175 2190
+type(
+  A.exp Core.Std.List.t -> f:(A.exp -> unit) -> unit
+)
+ident(
+  ext_ref Core.Std.List.iter
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2191 "front_end/typeChecker/typeChecker.ml" 62 2175 2193
+type(
+  A.exp Core.Std.List.t
+)
+ident(
+  int_ref es "front_end/typeChecker/typeChecker.ml" 57 1963 1981 "front_end/typeChecker/typeChecker.ml" 57 1963 1983
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2202 "front_end/typeChecker/typeChecker.ml" 62 2175 2203
+type(
+  A.exp
+)
+ident(
+  def e "front_end/typeChecker/typeChecker.ml" 62 2175 2207 "front_end/typeChecker/typeChecker.ml" 62 2175 2224
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2207 "front_end/typeChecker/typeChecker.ml" 62 2175 2214
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  int_ref tc_exp' "front_end/typeChecker/typeChecker.ml" 49 1758 1766 "front_end/typeChecker/typeChecker.ml" 49 1758 1773
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2215 "front_end/typeChecker/typeChecker.ml" 62 2175 2218
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 49 1758 1774 "front_end/typeChecker/typeChecker.ml" 49 1758 1777
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2219 "front_end/typeChecker/typeChecker.ml" 62 2175 2220
+type(
+  A.exp
+)
+ident(
+  int_ref e "front_end/typeChecker/typeChecker.ml" 62 2175 2202 "front_end/typeChecker/typeChecker.ml" 62 2175 2203
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2221 "front_end/typeChecker/typeChecker.ml" 62 2175 2224
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 49 1758 1782 "front_end/typeChecker/typeChecker.ml" 49 1758 1785
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2207 "front_end/typeChecker/typeChecker.ml" 62 2175 2224
+call(
+  tail
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2202 "front_end/typeChecker/typeChecker.ml" 62 2175 2224
+type(
+  A.exp -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 62 2175 2181 "front_end/typeChecker/typeChecker.ml" 62 2175 2225
+call(
+  tail
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 63 2226 2239 "front_end/typeChecker/typeChecker.ml" 63 2226 2249
+type(
+  A.exp Mark.marked
+)
+ident(
+  def marked_exp "front_end/typeChecker/typeChecker.ml" 64 2253 2259 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+)
+"front_end/typeChecker/typeChecker.ml" 63 2226 2230 "front_end/typeChecker/typeChecker.ml" 63 2226 2249
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2259 "front_end/typeChecker/typeChecker.ml" 64 2253 2266
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  int_ref tc_exp' "front_end/typeChecker/typeChecker.ml" 49 1758 1766 "front_end/typeChecker/typeChecker.ml" 49 1758 1773
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2267 "front_end/typeChecker/typeChecker.ml" 64 2253 2270
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 49 1758 1774 "front_end/typeChecker/typeChecker.ml" 49 1758 1777
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2272 "front_end/typeChecker/typeChecker.ml" 64 2253 2281
+type(
+  A.exp Mark.marked -> A.exp
+)
+ident(
+  ext_ref Mark.data
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2282 "front_end/typeChecker/typeChecker.ml" 64 2253 2292
+type(
+  A.exp Mark.marked
+)
+ident(
+  int_ref marked_exp "front_end/typeChecker/typeChecker.ml" 63 2226 2239 "front_end/typeChecker/typeChecker.ml" 63 2226 2249
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2272 "front_end/typeChecker/typeChecker.ml" 64 2253 2292
+call(
+  stack
+)
+type(
+  A.exp
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2295 "front_end/typeChecker/typeChecker.ml" 64 2253 2303
+type(
+  A.exp Mark.marked -> Mark.ext option
+)
+ident(
+  ext_ref Mark.ext
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2304 "front_end/typeChecker/typeChecker.ml" 64 2253 2314
+type(
+  A.exp Mark.marked
+)
+ident(
+  int_ref marked_exp "front_end/typeChecker/typeChecker.ml" 63 2226 2239 "front_end/typeChecker/typeChecker.ml" 63 2226 2249
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2295 "front_end/typeChecker/typeChecker.ml" 64 2253 2314
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/typeChecker/typeChecker.ml" 64 2253 2259 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+call(
+  tail
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 50 1788 1790 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1782 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+type(
+  Mark.ext option -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1778 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+type(
+  A.exp -> Mark.ext option -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 49 1758 1774 "front_end/typeChecker/typeChecker.ml" 64 2253 2315
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  def tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2577 "front_end/typeChecker/typeChecker.ml" 1 0 -1
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+type(
+  bool S.t
+)
+ident(
+  def env "front_end/typeChecker/typeChecker.ml" 71 2577 2597 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2597 "front_end/typeChecker/typeChecker.ml" 71 2577 2600
+type(
+  A.stm list
+)
+ident(
+  def ast "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+type(
+  Mark.ext option
+)
+ident(
+  def ext "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+type(
+  bool
+)
+ident(
+  def ret "front_end/typeChecker/typeChecker.ml" 72 2611 2613 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+)
+"front_end/typeChecker/typeChecker.ml" 72 2611 2619 "front_end/typeChecker/typeChecker.ml" 72 2611 2622
+type(
+  A.stm list
+)
+ident(
+  int_ref ast "front_end/typeChecker/typeChecker.ml" 71 2577 2597 "front_end/typeChecker/typeChecker.ml" 71 2577 2600
+)
+"front_end/typeChecker/typeChecker.ml" 73 2628 2632 "front_end/typeChecker/typeChecker.ml" 73 2628 2634
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 73 2628 2638 "front_end/typeChecker/typeChecker.ml" 73 2628 2641
+type(
+  bool
+)
+ident(
+  int_ref ret "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+)
+"front_end/typeChecker/typeChecker.ml" 74 2642 2656 "front_end/typeChecker/typeChecker.ml" 74 2642 2657
+type(
+  A.decl
+)
+ident(
+  def d "front_end/typeChecker/typeChecker.ml" 75 2668 2675 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+)
+"front_end/typeChecker/typeChecker.ml" 74 2642 2646 "front_end/typeChecker/typeChecker.ml" 74 2642 2658
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 74 2642 2660 "front_end/typeChecker/typeChecker.ml" 74 2642 2664
+type(
+  A.stm list
+)
+ident(
+  def stms "front_end/typeChecker/typeChecker.ml" 75 2668 2675 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+)
+"front_end/typeChecker/typeChecker.ml" 74 2642 2646 "front_end/typeChecker/typeChecker.ml" 74 2642 2664
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 75 2668 2681 "front_end/typeChecker/typeChecker.ml" 75 2668 2682
+type(
+  A.decl
+)
+ident(
+  int_ref d "front_end/typeChecker/typeChecker.ml" 74 2642 2656 "front_end/typeChecker/typeChecker.ml" 74 2642 2657
+)
+"front_end/typeChecker/typeChecker.ml" 76 2688 2705 "front_end/typeChecker/typeChecker.ml" 76 2688 2707
+type(
+  A.ident
+)
+ident(
+  def id "front_end/typeChecker/typeChecker.ml" 77 2711 2722 "front_end/typeChecker/typeChecker.ml" 81 2884 2956
+)
+"front_end/typeChecker/typeChecker.ml" 76 2688 2696 "front_end/typeChecker/typeChecker.ml" 76 2688 2707
+type(
+  A.decl
+)
+"front_end/typeChecker/typeChecker.ml" 77 2711 2728 "front_end/typeChecker/typeChecker.ml" 77 2711 2734
+type(
+  bool S.t -> S.Key.t -> bool option
+)
+ident(
+  ext_ref S.find
+)
+"front_end/typeChecker/typeChecker.ml" 77 2711 2735 "front_end/typeChecker/typeChecker.ml" 77 2711 2738
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 77 2711 2739 "front_end/typeChecker/typeChecker.ml" 77 2711 2741
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 76 2688 2705 "front_end/typeChecker/typeChecker.ml" 76 2688 2707
+)
+"front_end/typeChecker/typeChecker.ml" 77 2711 2728 "front_end/typeChecker/typeChecker.ml" 77 2711 2741
+call(
+  stack
+)
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 78 2747 2764 "front_end/typeChecker/typeChecker.ml" 78 2747 2765
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 78 2747 2759 "front_end/typeChecker/typeChecker.ml" 78 2747 2765
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 78 2747 2769 "front_end/typeChecker/typeChecker.ml" 78 2747 2783
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/typeChecker/typeChecker.ml" 78 2747 2784 "front_end/typeChecker/typeChecker.ml" 78 2747 2788
+type(
+  Mark.ext option
+)
+"front_end/typeChecker/typeChecker.ml" 79 2789 2806 "front_end/typeChecker/typeChecker.ml" 79 2789 2829
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 79 2789 2830 "front_end/typeChecker/typeChecker.ml" 79 2789 2831
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 79 2789 2832 "front_end/typeChecker/typeChecker.ml" 79 2789 2843
+type(
+  A.ident -> string
+)
+ident(
+  ext_ref Symbol.name
+)
+"front_end/typeChecker/typeChecker.ml" 79 2789 2844 "front_end/typeChecker/typeChecker.ml" 79 2789 2846
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 76 2688 2705 "front_end/typeChecker/typeChecker.ml" 76 2688 2707
+)
+"front_end/typeChecker/typeChecker.ml" 79 2789 2832 "front_end/typeChecker/typeChecker.ml" 79 2789 2846
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 79 2789 2806 "front_end/typeChecker/typeChecker.ml" 79 2789 2846
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 78 2747 2769 "front_end/typeChecker/typeChecker.ml" 79 2789 2847
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 80 2849 2863 "front_end/typeChecker/typeChecker.ml" 80 2849 2868
+type(
+  exn -> bool
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/typeChecker/typeChecker.ml" 80 2849 2869 "front_end/typeChecker/typeChecker.ml" 80 2849 2883
+type(
+  exn
+)
+"front_end/typeChecker/typeChecker.ml" 80 2849 2863 "front_end/typeChecker/typeChecker.ml" 80 2849 2883
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 78 2747 2769 "front_end/typeChecker/typeChecker.ml" 80 2849 2883
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2896 "front_end/typeChecker/typeChecker.ml" 81 2884 2900
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2904 "front_end/typeChecker/typeChecker.ml" 81 2884 2911
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2913 "front_end/typeChecker/typeChecker.ml" 81 2884 2918
+type(
+  bool S.t -> key:S.Key.t -> data:bool -> bool S.t
+)
+ident(
+  ext_ref S.add
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2919 "front_end/typeChecker/typeChecker.ml" 81 2884 2922
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2928 "front_end/typeChecker/typeChecker.ml" 81 2884 2930
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 76 2688 2705 "front_end/typeChecker/typeChecker.ml" 76 2688 2707
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2937 "front_end/typeChecker/typeChecker.ml" 81 2884 2942
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2913 "front_end/typeChecker/typeChecker.ml" 81 2884 2942
+call(
+  stack
+)
+type(
+  bool S.t
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2944 "front_end/typeChecker/typeChecker.ml" 81 2884 2948
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 74 2642 2660 "front_end/typeChecker/typeChecker.ml" 74 2642 2664
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2949 "front_end/typeChecker/typeChecker.ml" 81 2884 2952
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2953 "front_end/typeChecker/typeChecker.ml" 81 2884 2956
+type(
+  bool
+)
+ident(
+  int_ref ret "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+)
+"front_end/typeChecker/typeChecker.ml" 81 2884 2904 "front_end/typeChecker/typeChecker.ml" 81 2884 2956
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 77 2711 2722 "front_end/typeChecker/typeChecker.ml" 81 2884 2956
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 82 2958 2974 "front_end/typeChecker/typeChecker.ml" 82 2958 2976
+type(
+  A.ident
+)
+ident(
+  def id "front_end/typeChecker/typeChecker.ml" 83 2984 2994 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+)
+"front_end/typeChecker/typeChecker.ml" 82 2958 2978 "front_end/typeChecker/typeChecker.ml" 82 2958 2979
+type(
+  A.exp
+)
+ident(
+  def e "front_end/typeChecker/typeChecker.ml" 83 2984 2994 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+)
+"front_end/typeChecker/typeChecker.ml" 82 2958 2966 "front_end/typeChecker/typeChecker.ml" 82 2958 2980
+type(
+  A.decl
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 2994 "front_end/typeChecker/typeChecker.ml" 83 2984 3001
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3002 "front_end/typeChecker/typeChecker.ml" 83 2984 3005
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3026 "front_end/typeChecker/typeChecker.ml" 83 2984 3028
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 82 2958 2974 "front_end/typeChecker/typeChecker.ml" 82 2958 2976
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3017 "front_end/typeChecker/typeChecker.ml" 83 2984 3028
+type(
+  A.decl
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3007 "front_end/typeChecker/typeChecker.ml" 83 2984 3029
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3040 "front_end/typeChecker/typeChecker.ml" 83 2984 3042
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 82 2958 2974 "front_end/typeChecker/typeChecker.ml" 82 2958 2976
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3044 "front_end/typeChecker/typeChecker.ml" 83 2984 3045
+type(
+  A.exp
+)
+ident(
+  int_ref e "front_end/typeChecker/typeChecker.ml" 82 2958 2978 "front_end/typeChecker/typeChecker.ml" 82 2958 2979
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3031 "front_end/typeChecker/typeChecker.ml" 83 2984 3046
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3048 "front_end/typeChecker/typeChecker.ml" 83 2984 3052
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 74 2642 2660 "front_end/typeChecker/typeChecker.ml" 74 2642 2664
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3031 "front_end/typeChecker/typeChecker.ml" 83 2984 3052
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3007 "front_end/typeChecker/typeChecker.ml" 83 2984 3052
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3054 "front_end/typeChecker/typeChecker.ml" 83 2984 3057
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 3058 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+type(
+  bool
+)
+ident(
+  int_ref ret "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+)
+"front_end/typeChecker/typeChecker.ml" 83 2984 2994 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 75 2668 2675 "front_end/typeChecker/typeChecker.ml" 83 2984 3061
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 84 3063 3076 "front_end/typeChecker/typeChecker.ml" 84 3063 3078
+type(
+  A.ident
+)
+ident(
+  def id "front_end/typeChecker/typeChecker.ml" 85 3091 3097 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+)
+"front_end/typeChecker/typeChecker.ml" 84 3063 3079 "front_end/typeChecker/typeChecker.ml" 84 3063 3080
+type(
+  A.exp
+)
+ident(
+  def e "front_end/typeChecker/typeChecker.ml" 85 3091 3097 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+)
+"front_end/typeChecker/typeChecker.ml" 84 3063 3067 "front_end/typeChecker/typeChecker.ml" 84 3063 3081
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 84 3063 3083 "front_end/typeChecker/typeChecker.ml" 84 3063 3087
+type(
+  A.stm list
+)
+ident(
+  def stms "front_end/typeChecker/typeChecker.ml" 85 3091 3097 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+)
+"front_end/typeChecker/typeChecker.ml" 84 3063 3067 "front_end/typeChecker/typeChecker.ml" 84 3063 3087
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 85 3091 3097 "front_end/typeChecker/typeChecker.ml" 85 3091 3103
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  int_ref tc_exp "front_end/typeChecker/typeChecker.ml" 27 933 941 "front_end/typeChecker/typeChecker.ml" 27 933 947
+)
+"front_end/typeChecker/typeChecker.ml" 85 3091 3104 "front_end/typeChecker/typeChecker.ml" 85 3091 3107
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 85 3091 3108 "front_end/typeChecker/typeChecker.ml" 85 3091 3109
+type(
+  A.exp
+)
+ident(
+  int_ref e "front_end/typeChecker/typeChecker.ml" 84 3063 3079 "front_end/typeChecker/typeChecker.ml" 84 3063 3080
+)
+"front_end/typeChecker/typeChecker.ml" 85 3091 3110 "front_end/typeChecker/typeChecker.ml" 85 3091 3113
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 85 3091 3097 "front_end/typeChecker/typeChecker.ml" 85 3091 3113
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 86 3115 3128 "front_end/typeChecker/typeChecker.ml" 86 3115 3134
+type(
+  bool S.t -> S.Key.t -> bool option
+)
+ident(
+  ext_ref S.find
+)
+"front_end/typeChecker/typeChecker.ml" 86 3115 3135 "front_end/typeChecker/typeChecker.ml" 86 3115 3138
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 86 3115 3139 "front_end/typeChecker/typeChecker.ml" 86 3115 3141
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 84 3063 3076 "front_end/typeChecker/typeChecker.ml" 84 3063 3078
+)
+"front_end/typeChecker/typeChecker.ml" 86 3115 3128 "front_end/typeChecker/typeChecker.ml" 86 3115 3141
+call(
+  stack
+)
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 87 3147 3155 "front_end/typeChecker/typeChecker.ml" 87 3147 3159
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 87 3147 3163 "front_end/typeChecker/typeChecker.ml" 87 3147 3177
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/typeChecker/typeChecker.ml" 87 3147 3178 "front_end/typeChecker/typeChecker.ml" 87 3147 3181
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3195 "front_end/typeChecker/typeChecker.ml" 88 3182 3218
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3219 "front_end/typeChecker/typeChecker.ml" 88 3182 3220
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3221 "front_end/typeChecker/typeChecker.ml" 88 3182 3232
+type(
+  A.ident -> string
+)
+ident(
+  ext_ref Symbol.name
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3233 "front_end/typeChecker/typeChecker.ml" 88 3182 3235
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 84 3063 3076 "front_end/typeChecker/typeChecker.ml" 84 3063 3078
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3221 "front_end/typeChecker/typeChecker.ml" 88 3182 3235
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3236 "front_end/typeChecker/typeChecker.ml" 88 3182 3237
+type(
+  string -> string -> string
+)
+ident(
+  ext_ref Pervasives.( ^ )
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3238 "front_end/typeChecker/typeChecker.ml" 88 3182 3241
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3221 "front_end/typeChecker/typeChecker.ml" 88 3182 3241
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 88 3182 3195 "front_end/typeChecker/typeChecker.ml" 88 3182 3241
+call(
+  stack
+)
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 87 3147 3163 "front_end/typeChecker/typeChecker.ml" 88 3182 3242
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 89 3244 3254 "front_end/typeChecker/typeChecker.ml" 89 3244 3259
+type(
+  exn -> bool
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/typeChecker/typeChecker.ml" 89 3244 3260 "front_end/typeChecker/typeChecker.ml" 89 3244 3274
+type(
+  exn
+)
+"front_end/typeChecker/typeChecker.ml" 89 3244 3254 "front_end/typeChecker/typeChecker.ml" 89 3244 3274
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 87 3147 3163 "front_end/typeChecker/typeChecker.ml" 89 3244 3274
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3327 "front_end/typeChecker/typeChecker.ml" 91 3314 3332
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3322 "front_end/typeChecker/typeChecker.ml" 91 3314 3332
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3336 "front_end/typeChecker/typeChecker.ml" 91 3314 3343
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3345 "front_end/typeChecker/typeChecker.ml" 91 3314 3350
+type(
+  bool S.t -> key:S.Key.t -> data:bool -> bool S.t
+)
+ident(
+  ext_ref S.add
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3351 "front_end/typeChecker/typeChecker.ml" 91 3314 3354
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3360 "front_end/typeChecker/typeChecker.ml" 91 3314 3362
+type(
+  A.ident
+)
+ident(
+  int_ref id "front_end/typeChecker/typeChecker.ml" 84 3063 3076 "front_end/typeChecker/typeChecker.ml" 84 3063 3078
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3369 "front_end/typeChecker/typeChecker.ml" 91 3314 3373
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3345 "front_end/typeChecker/typeChecker.ml" 91 3314 3373
+call(
+  stack
+)
+type(
+  bool S.t
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3375 "front_end/typeChecker/typeChecker.ml" 91 3314 3379
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 84 3063 3083 "front_end/typeChecker/typeChecker.ml" 84 3063 3087
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3380 "front_end/typeChecker/typeChecker.ml" 91 3314 3383
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3384 "front_end/typeChecker/typeChecker.ml" 91 3314 3387
+type(
+  bool
+)
+ident(
+  int_ref ret "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+)
+"front_end/typeChecker/typeChecker.ml" 91 3314 3336 "front_end/typeChecker/typeChecker.ml" 91 3314 3387
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3439 "front_end/typeChecker/typeChecker.ml" 93 3426 3443
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3434 "front_end/typeChecker/typeChecker.ml" 93 3426 3443
+type(
+  bool option
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3447 "front_end/typeChecker/typeChecker.ml" 93 3426 3454
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3455 "front_end/typeChecker/typeChecker.ml" 93 3426 3458
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3459 "front_end/typeChecker/typeChecker.ml" 93 3426 3463
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 84 3063 3083 "front_end/typeChecker/typeChecker.ml" 84 3063 3087
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3464 "front_end/typeChecker/typeChecker.ml" 93 3426 3467
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3468 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+type(
+  bool
+)
+ident(
+  int_ref ret "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+)
+"front_end/typeChecker/typeChecker.ml" 93 3426 3447 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 86 3115 3122 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 85 3091 3097 "front_end/typeChecker/typeChecker.ml" 93 3426 3471
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 94 3473 3486 "front_end/typeChecker/typeChecker.ml" 94 3473 3487
+type(
+  A.exp
+)
+ident(
+  def e "front_end/typeChecker/typeChecker.ml" 95 3498 3504 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+)
+"front_end/typeChecker/typeChecker.ml" 94 3473 3477 "front_end/typeChecker/typeChecker.ml" 94 3473 3488
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 94 3473 3490 "front_end/typeChecker/typeChecker.ml" 94 3473 3494
+type(
+  A.stm list
+)
+ident(
+  def stms "front_end/typeChecker/typeChecker.ml" 95 3498 3504 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+)
+"front_end/typeChecker/typeChecker.ml" 94 3473 3477 "front_end/typeChecker/typeChecker.ml" 94 3473 3494
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 95 3498 3504 "front_end/typeChecker/typeChecker.ml" 95 3498 3510
+type(
+  bool S.t -> A.exp -> Mark.ext option -> unit
+)
+ident(
+  int_ref tc_exp "front_end/typeChecker/typeChecker.ml" 27 933 941 "front_end/typeChecker/typeChecker.ml" 27 933 947
+)
+"front_end/typeChecker/typeChecker.ml" 95 3498 3511 "front_end/typeChecker/typeChecker.ml" 95 3498 3514
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 95 3498 3515 "front_end/typeChecker/typeChecker.ml" 95 3498 3516
+type(
+  A.exp
+)
+ident(
+  int_ref e "front_end/typeChecker/typeChecker.ml" 94 3473 3486 "front_end/typeChecker/typeChecker.ml" 94 3473 3487
+)
+"front_end/typeChecker/typeChecker.ml" 95 3498 3517 "front_end/typeChecker/typeChecker.ml" 95 3498 3520
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 95 3498 3504 "front_end/typeChecker/typeChecker.ml" 95 3498 3520
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3588 "front_end/typeChecker/typeChecker.ml" 97 3578 3591
+type(
+  bool S.t
+)
+ident(
+  def env "front_end/typeChecker/typeChecker.ml" 98 3626 3632 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3594 "front_end/typeChecker/typeChecker.ml" 97 3578 3599
+type(
+  bool S.t -> f:(bool -> bool) -> bool S.t
+)
+ident(
+  ext_ref S.map
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3600 "front_end/typeChecker/typeChecker.ml" 97 3578 3603
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3612 "front_end/typeChecker/typeChecker.ml" 97 3578 3613
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3617 "front_end/typeChecker/typeChecker.ml" 97 3578 3621
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3612 "front_end/typeChecker/typeChecker.ml" 97 3578 3621
+type(
+  bool -> bool
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3594 "front_end/typeChecker/typeChecker.ml" 97 3578 3622
+call(
+  stack
+)
+type(
+  bool S.t
+)
+"front_end/typeChecker/typeChecker.ml" 98 3626 3632 "front_end/typeChecker/typeChecker.ml" 98 3626 3639
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 98 3626 3640 "front_end/typeChecker/typeChecker.ml" 98 3626 3643
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 97 3578 3588 "front_end/typeChecker/typeChecker.ml" 97 3578 3591
+)
+"front_end/typeChecker/typeChecker.ml" 98 3626 3644 "front_end/typeChecker/typeChecker.ml" 98 3626 3648
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 94 3473 3490 "front_end/typeChecker/typeChecker.ml" 94 3473 3494
+)
+"front_end/typeChecker/typeChecker.ml" 98 3626 3649 "front_end/typeChecker/typeChecker.ml" 98 3626 3652
+type(
+  Mark.ext option
+)
+ident(
+  int_ref ext "front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 71 2577 2604
+)
+"front_end/typeChecker/typeChecker.ml" 98 3626 3653 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 98 3626 3632 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 97 3578 3584 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 95 3498 3504 "front_end/typeChecker/typeChecker.ml" 98 3626 3657
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 99 3658 3672 "front_end/typeChecker/typeChecker.ml" 99 3658 3682
+type(
+  A.stm Mark.marked
+)
+ident(
+  def marked_stm "front_end/typeChecker/typeChecker.ml" 100 3693 3699 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+)
+"front_end/typeChecker/typeChecker.ml" 99 3658 3662 "front_end/typeChecker/typeChecker.ml" 99 3658 3683
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 99 3658 3685 "front_end/typeChecker/typeChecker.ml" 99 3658 3689
+type(
+  A.stm list
+)
+ident(
+  def stms "front_end/typeChecker/typeChecker.ml" 100 3693 3699 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+)
+"front_end/typeChecker/typeChecker.ml" 99 3658 3662 "front_end/typeChecker/typeChecker.ml" 99 3658 3689
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3699 "front_end/typeChecker/typeChecker.ml" 100 3693 3706
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3707 "front_end/typeChecker/typeChecker.ml" 100 3693 3710
+type(
+  bool S.t
+)
+ident(
+  int_ref env "front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 71 2577 2596
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3713 "front_end/typeChecker/typeChecker.ml" 100 3693 3722
+type(
+  A.stm Mark.marked -> A.stm
+)
+ident(
+  ext_ref Mark.data
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3723 "front_end/typeChecker/typeChecker.ml" 100 3693 3733
+type(
+  A.stm Mark.marked
+)
+ident(
+  int_ref marked_stm "front_end/typeChecker/typeChecker.ml" 99 3658 3672 "front_end/typeChecker/typeChecker.ml" 99 3658 3682
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3713 "front_end/typeChecker/typeChecker.ml" 100 3693 3733
+call(
+  stack
+)
+type(
+  A.stm
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3736 "front_end/typeChecker/typeChecker.ml" 100 3693 3740
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 99 3658 3685 "front_end/typeChecker/typeChecker.ml" 99 3658 3689
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3712 "front_end/typeChecker/typeChecker.ml" 100 3693 3740
+type(
+  A.stm list
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3743 "front_end/typeChecker/typeChecker.ml" 100 3693 3751
+type(
+  A.stm Mark.marked -> Mark.ext option
+)
+ident(
+  ext_ref Mark.ext
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3752 "front_end/typeChecker/typeChecker.ml" 100 3693 3762
+type(
+  A.stm Mark.marked
+)
+ident(
+  int_ref marked_stm "front_end/typeChecker/typeChecker.ml" 99 3658 3672 "front_end/typeChecker/typeChecker.ml" 99 3658 3682
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3743 "front_end/typeChecker/typeChecker.ml" 100 3693 3762
+call(
+  stack
+)
+type(
+  Mark.ext option
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3764 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+type(
+  bool
+)
+ident(
+  int_ref ret "front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 71 2577 2608
+)
+"front_end/typeChecker/typeChecker.ml" 100 3693 3699 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 72 2611 2613 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2605 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+type(
+  bool -> bool
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2601 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+type(
+  Mark.ext option -> bool -> bool
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2597 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+type(
+  A.stm list -> Mark.ext option -> bool -> bool
+)
+"front_end/typeChecker/typeChecker.ml" 71 2577 2593 "front_end/typeChecker/typeChecker.ml" 100 3693 3767
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3851 "front_end/typeChecker/typeChecker.ml" 103 3843 3861
+type(
+  A.stm list -> bool
+)
+ident(
+  def typecheck' "front_end/typeChecker/typeChecker.ml" 103 3843 3843 "front_end/typeChecker/typeChecker.ml" 1 0 -1
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3862 "front_end/typeChecker/typeChecker.ml" 103 3843 3866
+type(
+  A.stm list
+)
+ident(
+  def stms "front_end/typeChecker/typeChecker.ml" 103 3843 3869 "front_end/typeChecker/typeChecker.ml" 103 3843 3900
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3869 "front_end/typeChecker/typeChecker.ml" 103 3843 3876
+type(
+  bool S.t -> A.stm list -> Mark.ext option -> bool -> bool
+)
+ident(
+  int_ref tc_stms "front_end/typeChecker/typeChecker.ml" 71 2577 2585 "front_end/typeChecker/typeChecker.ml" 71 2577 2592
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3877 "front_end/typeChecker/typeChecker.ml" 103 3843 3884
+type(
+  bool S.t
+)
+ident(
+  ext_ref S.empty
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3885 "front_end/typeChecker/typeChecker.ml" 103 3843 3889
+type(
+  A.stm list
+)
+ident(
+  int_ref stms "front_end/typeChecker/typeChecker.ml" 103 3843 3862 "front_end/typeChecker/typeChecker.ml" 103 3843 3866
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3890 "front_end/typeChecker/typeChecker.ml" 103 3843 3894
+type(
+  Mark.ext option
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3895 "front_end/typeChecker/typeChecker.ml" 103 3843 3900
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3869 "front_end/typeChecker/typeChecker.ml" 103 3843 3900
+call(
+  tail
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 103 3843 3862 "front_end/typeChecker/typeChecker.ml" 103 3843 3900
+type(
+  A.stm list -> bool
+)
+"front_end/typeChecker/typeChecker.ml" 105 3902 3906 "front_end/typeChecker/typeChecker.ml" 105 3902 3915
+type(
+  A.stm list -> unit
+)
+ident(
+  def typecheck "front_end/typeChecker/typeChecker.ml" 107 3952 4027 "front_end/typeChecker/typeChecker.ml" 1 0 -1
+)
+"front_end/typeChecker/typeChecker.ml" 105 3902 3916 "front_end/typeChecker/typeChecker.ml" 105 3902 3920
+type(
+  A.stm list
+)
+ident(
+  def prog "front_end/typeChecker/typeChecker.ml" 106 3923 3925 "front_end/typeChecker/typeChecker.ml" 107 3952 4027
+)
+"front_end/typeChecker/typeChecker.ml" 106 3923 3928 "front_end/typeChecker/typeChecker.ml" 106 3923 3938
+type(
+  A.stm list -> bool
+)
+ident(
+  int_ref typecheck' "front_end/typeChecker/typeChecker.ml" 103 3843 3851 "front_end/typeChecker/typeChecker.ml" 103 3843 3861
+)
+"front_end/typeChecker/typeChecker.ml" 106 3923 3939 "front_end/typeChecker/typeChecker.ml" 106 3923 3943
+type(
+  A.stm list
+)
+ident(
+  int_ref prog "front_end/typeChecker/typeChecker.ml" 105 3902 3916 "front_end/typeChecker/typeChecker.ml" 105 3902 3920
+)
+"front_end/typeChecker/typeChecker.ml" 106 3923 3928 "front_end/typeChecker/typeChecker.ml" 106 3923 3943
+call(
+  stack
+)
+type(
+  bool
+)
+"front_end/typeChecker/typeChecker.ml" 106 3923 3949 "front_end/typeChecker/typeChecker.ml" 106 3923 3951
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 3960 "front_end/typeChecker/typeChecker.ml" 107 3952 3974
+type(
+  Mark.ext option -> string -> unit
+)
+ident(
+  ext_ref ErrorMsg.error
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 3975 "front_end/typeChecker/typeChecker.ml" 107 3952 3979
+type(
+  Mark.ext option
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 3980 "front_end/typeChecker/typeChecker.ml" 107 3952 4004
+type(
+  string
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 3960 "front_end/typeChecker/typeChecker.ml" 107 3952 4004
+call(
+  stack
+)
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 4006 "front_end/typeChecker/typeChecker.ml" 107 3952 4011
+type(
+  exn -> unit
+)
+ident(
+  ext_ref Pervasives.raise
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 4012 "front_end/typeChecker/typeChecker.ml" 107 3952 4026
+type(
+  exn
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 4006 "front_end/typeChecker/typeChecker.ml" 107 3952 4026
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 107 3952 3960 "front_end/typeChecker/typeChecker.ml" 107 3952 4026
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 106 3923 3925 "front_end/typeChecker/typeChecker.ml" 107 3952 4027
+type(
+  unit
+)
+"front_end/typeChecker/typeChecker.ml" 105 3902 3916 "front_end/typeChecker/typeChecker.ml" 107 3952 4027
+type(
+  A.stm list -> unit
+)

@@ -1,0 +1,1166 @@
+"util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 200
+type(
+  int
+)
+type(
+  int
+)
+type(
+  int
+)
+ident(
+  int_ref ret "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 200
+)
+type(
+  bool
+)
+type(
+  int
+)
+type(
+  int
+)
+ident(
+  int_ref ret "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 200
+)
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( <> )
+)
+type(
+  int
+)
+type(
+  string -> string -> int
+)
+type(
+  string -> string -> int
+)
+ident(
+  ext_ref Pervasives.compare
+)
+type(
+  int
+)
+ident(
+  def ret "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 200
+)
+type(
+  string -> Sexplib.Sexp.t
+)
+ident(
+  ext_ref Core.Std.sexp_of_string
+)
+type(
+  Sexplib.Sexp.t -> string
+)
+ident(
+  ext_ref Core.Std.string_of_sexp
+)
+"util/symbol.ml" 10 183 203 "util/symbol.ml" 10 183 206
+type(
+  int
+)
+type(
+  int -> int -> int
+)
+type(
+  int -> int -> int
+)
+ident(
+  ext_ref Pervasives.compare
+)
+type(
+  int -> Sexplib.Sexp.t
+)
+ident(
+  ext_ref Core.Std.sexp_of_int
+)
+type(
+  Sexplib.Sexp.t -> int
+)
+ident(
+  ext_ref Core.Std.int_of_sexp
+)
+"util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+call(
+  stack
+)
+call(
+  stack
+)
+call(
+  tail
+)
+call(
+  stack
+)
+call(
+  stack
+)
+type(
+  int
+)
+type(
+  int
+)
+type(
+  int
+)
+ident(
+  int_ref t__006_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  int
+)
+ident(
+  int_ref t__004_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  int_ref t__005_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  int_ref t__003_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+type(
+  int
+)
+ident(
+  def t__006_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 200
+)
+type(
+  string
+)
+ident(
+  def t__005_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 200
+)
+type(
+  t
+)
+type(
+  int
+)
+ident(
+  def t__004_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  def t__003_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+type(
+  Sexplib.Sexp.t list
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t list
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t list
+)
+type(
+  Sexplib.Sexp.t
+)
+type(
+  Sexplib.Sexp.t
+)
+type(
+  int
+)
+ident(
+  int_ref v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+type(
+  string
+)
+ident(
+  int_ref v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+type(
+  int
+)
+ident(
+  def v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  def v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref sexp "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  int
+)
+type(
+  string
+)
+ident(
+  int_ref _tp_loc "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  string -> int -> Sexplib.Sexp.t -> t
+)
+ident(
+  ext_ref Sexplib.Conv_error.tuple_of_size_n_expected
+)
+type(
+  string * int
+)
+type(
+  string * int
+)
+type(
+  int
+)
+ident(
+  int_ref v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  int_ref v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  int
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  int
+)
+ident(
+  def v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  def v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def sexp "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+type(
+  Sexplib.Sexp.t list
+)
+type(
+  Sexplib.Sexp.t list
+)
+type(
+  Sexplib.Sexp.t list
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def v2 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def v1 "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+"util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+call(
+  tail
+)
+call(
+  stack
+)
+type(
+  t -> t -> int
+)
+ident(
+  int_ref compare_t "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t -> t -> int
+)
+type(
+  t -> t -> int
+)
+ident(
+  int_ref compare "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t -> t -> int
+)
+ident(
+  def compare_t "util/symbol.ml" 10 183 190 "util/symbol.ml" 11 226 229
+)
+type(
+  t -> t -> int
+)
+ident(
+  int_ref compare "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t -> t -> int
+)
+type(
+  t -> t -> int
+)
+type(
+  t -> t -> int
+)
+type(
+  t -> int
+)
+type(
+  t
+)
+ident(
+  int_ref b__002_ "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+ident(
+  int_ref a__001_ "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+ident(
+  def b__002_ "util/symbol.ml" 10 183 194 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+ident(
+  def a__001_ "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t -> t -> int
+)
+ident(
+  def compare "util/symbol.ml" 10 183 190 "util/symbol.ml" 11 226 229
+)
+type(
+  t -> Sexplib.Sexp.t
+)
+ident(
+  int_ref sexp_of_t "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t -> Sexplib.Sexp.t
+)
+type(
+  t -> Sexplib.Sexp.t
+)
+type(
+  t -> Sexplib.Sexp.t
+)
+type(
+  t -> Sexplib.Sexp.t
+)
+ident(
+  def sexp_of_t "util/symbol.ml" 10 183 190 "util/symbol.ml" 11 226 229
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+ident(
+  int_ref t_of_sexp "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  t
+)
+type(
+  t
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref sexp "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  int_ref _tp_loc "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  string -> Sexplib.Sexp.t -> t
+)
+ident(
+  ext_ref Sexplib.Conv_error.no_matching_variant_found
+)
+type(
+  exn
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def sexp "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  string
+)
+ident(
+  def _tp_loc "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  t
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  int_ref sexp "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+ident(
+  int_ref __t_of_sexp__ "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t
+)
+ident(
+  def sexp "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+ident(
+  def t_of_sexp "util/symbol.ml" 10 183 190 "util/symbol.ml" 11 226 229
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+ident(
+  int_ref __t_of_sexp__ "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+type(
+  string
+)
+type(
+  string
+)
+ident(
+  def _tp_loc "util/symbol.ml" 10 183 190 "util/symbol.ml" 10 183 206
+)
+type(
+  Sexplib.Sexp.t -> t
+)
+ident(
+  def __t_of_sexp__ "util/symbol.ml" 10 183 190 "util/symbol.ml" 11 226 229
+)
+type(
+  t -> unit
+)
+type(
+  unit
+)
+type(
+  t
+)
+type(
+  t -> unit
+)
+"util/symbol.ml" 15 242 246 "util/symbol.ml" 15 242 251
+type(
+  string * int
+)
+ident(
+  def bogus "util/symbol.ml" 16 264 264 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 15 242 255 "util/symbol.ml" 15 242 258
+type(
+  string
+)
+"util/symbol.ml" 15 242 260 "util/symbol.ml" 15 242 262
+type(
+  int
+)
+"util/symbol.ml" 15 242 255 "util/symbol.ml" 15 242 262
+type(
+  string * int
+)
+"util/symbol.ml" 16 264 268 "util/symbol.ml" 16 264 276
+type(
+  'a * int -> bool
+)
+ident(
+  def is_bogus "util/symbol.ml" 18 294 294 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 16 264 278 "util/symbol.ml" 16 264 279
+type(
+  'a
+)
+"util/symbol.ml" 16 264 281 "util/symbol.ml" 16 264 282
+type(
+  int
+)
+ident(
+  def x "util/symbol.ml" 16 264 286 "util/symbol.ml" 16 264 292
+)
+"util/symbol.ml" 16 264 278 "util/symbol.ml" 16 264 282
+type(
+  'a * int
+)
+"util/symbol.ml" 16 264 286 "util/symbol.ml" 16 264 287
+type(
+  int
+)
+ident(
+  int_ref x "util/symbol.ml" 16 264 281 "util/symbol.ml" 16 264 282
+)
+"util/symbol.ml" 16 264 288 "util/symbol.ml" 16 264 289
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( = )
+)
+"util/symbol.ml" 16 264 290 "util/symbol.ml" 16 264 292
+type(
+  int
+)
+"util/symbol.ml" 16 264 286 "util/symbol.ml" 16 264 292
+type(
+  bool
+)
+"util/symbol.ml" 16 264 277 "util/symbol.ml" 16 264 292
+type(
+  'a * int -> bool
+)
+"util/symbol.ml" 18 294 298 "util/symbol.ml" 18 294 305
+type(
+  'a * int -> 'b * int -> int
+)
+ident(
+  def compare "util/symbol.ml" 22 366 366 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 18 294 307 "util/symbol.ml" 18 294 308
+type(
+  'a
+)
+"util/symbol.ml" 18 294 310 "util/symbol.ml" 18 294 311
+type(
+  int
+)
+ident(
+  def i "util/symbol.ml" 18 294 313 "util/symbol.ml" 20 351 364
+)
+"util/symbol.ml" 18 294 307 "util/symbol.ml" 18 294 311
+type(
+  'a * int
+)
+"util/symbol.ml" 18 294 314 "util/symbol.ml" 18 294 315
+type(
+  'b
+)
+"util/symbol.ml" 18 294 317 "util/symbol.ml" 18 294 319
+type(
+  int
+)
+ident(
+  def i' "util/symbol.ml" 19 323 325 "util/symbol.ml" 20 351 364
+)
+"util/symbol.ml" 18 294 314 "util/symbol.ml" 18 294 319
+type(
+  'b * int
+)
+"util/symbol.ml" 19 323 328 "util/symbol.ml" 19 323 329
+type(
+  int
+)
+ident(
+  int_ref i "util/symbol.ml" 18 294 310 "util/symbol.ml" 18 294 311
+)
+"util/symbol.ml" 19 323 330 "util/symbol.ml" 19 323 331
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( < )
+)
+"util/symbol.ml" 19 323 332 "util/symbol.ml" 19 323 333
+type(
+  int
+)
+"util/symbol.ml" 19 323 328 "util/symbol.ml" 19 323 333
+type(
+  bool
+)
+"util/symbol.ml" 19 323 334 "util/symbol.ml" 19 323 336
+type(
+  bool -> bool -> bool
+)
+ident(
+  ext_ref Pervasives.( || )
+)
+"util/symbol.ml" 19 323 337 "util/symbol.ml" 19 323 339
+type(
+  int
+)
+ident(
+  int_ref i' "util/symbol.ml" 18 294 317 "util/symbol.ml" 18 294 319
+)
+"util/symbol.ml" 19 323 340 "util/symbol.ml" 19 323 341
+type(
+  int -> int -> bool
+)
+ident(
+  ext_ref Pervasives.( < )
+)
+"util/symbol.ml" 19 323 342 "util/symbol.ml" 19 323 343
+type(
+  int
+)
+"util/symbol.ml" 19 323 337 "util/symbol.ml" 19 323 343
+type(
+  bool
+)
+"util/symbol.ml" 19 323 328 "util/symbol.ml" 19 323 343
+type(
+  bool
+)
+"util/symbol.ml" 19 323 349 "util/symbol.ml" 19 323 350
+type(
+  int
+)
+"util/symbol.ml" 20 351 358 "util/symbol.ml" 20 351 359
+type(
+  int
+)
+ident(
+  int_ref i "util/symbol.ml" 18 294 310 "util/symbol.ml" 18 294 311
+)
+"util/symbol.ml" 20 351 360 "util/symbol.ml" 20 351 361
+type(
+  int -> int -> int
+)
+ident(
+  ext_ref Pervasives.( - )
+)
+"util/symbol.ml" 20 351 362 "util/symbol.ml" 20 351 364
+type(
+  int
+)
+ident(
+  int_ref i' "util/symbol.ml" 18 294 317 "util/symbol.ml" 18 294 319
+)
+"util/symbol.ml" 20 351 358 "util/symbol.ml" 20 351 364
+type(
+  int
+)
+"util/symbol.ml" 19 323 325 "util/symbol.ml" 20 351 364
+type(
+  int
+)
+"util/symbol.ml" 18 294 313 "util/symbol.ml" 20 351 364
+type(
+  'b * int -> int
+)
+"util/symbol.ml" 18 294 306 "util/symbol.ml" 20 351 364
+type(
+  'a * int -> 'b * int -> int
+)
+"util/symbol.ml" 22 366 370 "util/symbol.ml" 22 366 372
+type(
+  ('a, int) Core.Std.String.Table.t_
+)
+ident(
+  def ht "util/symbol.ml" 23 398 398 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 22 366 375 "util/symbol.ml" 22 366 394
+type(
+  ('a Core.Std.String.Table.key_, int,
+   unit -> ('a, int) Core.Std.String.Table.t_)
+  Core_kernel.Core_hashtbl_intf.create_options_without_hashable
+)
+ident(
+  ext_ref Core.Std.String.Table.create
+)
+"util/symbol.ml" 22 366 395 "util/symbol.ml" 22 366 397
+type(
+  unit
+)
+"util/symbol.ml" 22 366 375 "util/symbol.ml" 22 366 397
+call(
+  stack
+)
+type(
+  ('a, int) Core.Std.String.Table.t_
+)
+"util/symbol.ml" 23 398 402 "util/symbol.ml" 23 398 407
+type(
+  int ref
+)
+ident(
+  def nexts "util/symbol.ml" 24 416 416 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 23 398 410 "util/symbol.ml" 23 398 413
+type(
+  int -> int ref
+)
+ident(
+  ext_ref Pervasives.ref
+)
+"util/symbol.ml" 23 398 414 "util/symbol.ml" 23 398 415
+type(
+  int
+)
+"util/symbol.ml" 23 398 410 "util/symbol.ml" 23 398 415
+type(
+  int ref
+)
+"util/symbol.ml" 24 416 420 "util/symbol.ml" 24 416 425
+type(
+  unit -> unit
+)
+ident(
+  def reset "util/symbol.ml" 25 465 465 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 24 416 426 "util/symbol.ml" 24 416 428
+type(
+  unit
+)
+"util/symbol.ml" 24 416 431 "util/symbol.ml" 24 416 436
+type(
+  int ref
+)
+ident(
+  int_ref nexts "util/symbol.ml" 23 398 402 "util/symbol.ml" 23 398 407
+)
+"util/symbol.ml" 24 416 440 "util/symbol.ml" 24 416 441
+type(
+  int
+)
+"util/symbol.ml" 24 416 431 "util/symbol.ml" 24 416 441
+type(
+  unit
+)
+type(
+  int ref -> int -> unit
+)
+ident(
+  ext_ref Pervasives.( := )
+)
+"util/symbol.ml" 24 416 443 "util/symbol.ml" 24 416 461
+type(
+  ('_a, int) Core.Std.String.Table.t_ -> unit
+)
+ident(
+  ext_ref Core.Std.String.Table.clear
+)
+"util/symbol.ml" 24 416 462 "util/symbol.ml" 24 416 464
+type(
+  ('_b, int) Core.Std.String.Table.t_
+)
+ident(
+  int_ref ht "util/symbol.ml" 22 366 370 "util/symbol.ml" 22 366 372
+)
+"util/symbol.ml" 24 416 443 "util/symbol.ml" 24 416 464
+call(
+  tail
+)
+type(
+  unit
+)
+"util/symbol.ml" 24 416 431 "util/symbol.ml" 24 416 464
+type(
+  unit
+)
+"util/symbol.ml" 24 416 426 "util/symbol.ml" 24 416 464
+type(
+  unit -> unit
+)
+"util/symbol.ml" 25 465 469 "util/symbol.ml" 25 465 475
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key ->
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+ident(
+  def symbol "util/symbol.ml" 34 652 652 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 25 465 476 "util/symbol.ml" 25 465 480
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key
+)
+ident(
+  def name "util/symbol.ml" 26 483 485 "util/symbol.ml" 32 637 650
+)
+"util/symbol.ml" 27 489 494 "util/symbol.ml" 27 489 498
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key
+)
+ident(
+  int_ref name "util/symbol.ml" 25 465 476 "util/symbol.ml" 25 465 480
+)
+"util/symbol.ml" 27 489 500 "util/symbol.ml" 27 489 516
+type(
+  (Core.Std.String.Table.key, int) Core.Std.Hashtbl.t ->
+  Core.Std.String.Table.key Core.Std.Hashtbl.key -> int
+)
+ident(
+  ext_ref Core.Std.Hashtbl.find_exn
+)
+"util/symbol.ml" 27 489 517 "util/symbol.ml" 27 489 519
+type(
+  ('_a, int) Core.Std.String.Table.t_
+)
+ident(
+  int_ref ht "util/symbol.ml" 22 366 370 "util/symbol.ml" 22 366 372
+)
+"util/symbol.ml" 27 489 520 "util/symbol.ml" 27 489 524
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key
+)
+ident(
+  int_ref name "util/symbol.ml" 25 465 476 "util/symbol.ml" 25 465 480
+)
+"util/symbol.ml" 27 489 500 "util/symbol.ml" 27 489 524
+call(
+  stack
+)
+type(
+  int
+)
+"util/symbol.ml" 27 489 494 "util/symbol.ml" 27 489 524
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 28 526 533 "util/symbol.ml" 28 526 542
+type(
+  exn
+)
+"util/symbol.ml" 29 546 554 "util/symbol.ml" 29 546 555
+type(
+  int
+)
+ident(
+  def i "util/symbol.ml" 30 568 572 "util/symbol.ml" 32 637 650
+)
+"util/symbol.ml" 29 546 559 "util/symbol.ml" 29 546 564
+type(
+  int ref
+)
+ident(
+  int_ref nexts "util/symbol.ml" 23 398 402 "util/symbol.ml" 23 398 407
+)
+"util/symbol.ml" 29 546 558 "util/symbol.ml" 29 546 564
+type(
+  int
+)
+type(
+  int ref -> int
+)
+ident(
+  ext_ref Pervasives.( ! )
+)
+"util/symbol.ml" 30 568 576 "util/symbol.ml" 30 568 578
+type(
+  unit
+)
+"util/symbol.ml" 30 568 581 "util/symbol.ml" 30 568 585
+type(
+  int ref -> unit
+)
+ident(
+  ext_ref Pervasives.incr
+)
+"util/symbol.ml" 30 568 586 "util/symbol.ml" 30 568 591
+type(
+  int ref
+)
+ident(
+  int_ref nexts "util/symbol.ml" 23 398 402 "util/symbol.ml" 23 398 407
+)
+"util/symbol.ml" 30 568 581 "util/symbol.ml" 30 568 591
+type(
+  unit
+)
+"util/symbol.ml" 31 595 603 "util/symbol.ml" 31 595 605
+type(
+  unit
+)
+"util/symbol.ml" 31 595 608 "util/symbol.ml" 31 595 623
+type(
+  (Core.Std.String.Table.key, int) Core.Std.Hashtbl.t ->
+  key:Core.Std.String.Table.key Core.Std.Hashtbl.key -> data:int -> unit
+)
+ident(
+  ext_ref Core.Std.Hashtbl.add_exn
+)
+"util/symbol.ml" 31 595 624 "util/symbol.ml" 31 595 626
+type(
+  ('_b, int) Core.Std.String.Table.t_
+)
+ident(
+  int_ref ht "util/symbol.ml" 22 366 370 "util/symbol.ml" 22 366 372
+)
+"util/symbol.ml" 31 595 627 "util/symbol.ml" 31 595 631
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key
+)
+ident(
+  int_ref name "util/symbol.ml" 25 465 476 "util/symbol.ml" 25 465 480
+)
+"util/symbol.ml" 31 595 632 "util/symbol.ml" 31 595 633
+type(
+  int
+)
+ident(
+  int_ref i "util/symbol.ml" 29 546 554 "util/symbol.ml" 29 546 555
+)
+"util/symbol.ml" 31 595 608 "util/symbol.ml" 31 595 633
+call(
+  stack
+)
+type(
+  unit
+)
+"util/symbol.ml" 32 637 642 "util/symbol.ml" 32 637 646
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key
+)
+ident(
+  int_ref name "util/symbol.ml" 25 465 476 "util/symbol.ml" 25 465 480
+)
+"util/symbol.ml" 32 637 648 "util/symbol.ml" 32 637 649
+type(
+  int
+)
+ident(
+  int_ref i "util/symbol.ml" 29 546 554 "util/symbol.ml" 29 546 555
+)
+"util/symbol.ml" 32 637 642 "util/symbol.ml" 32 637 649
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 31 595 599 "util/symbol.ml" 32 637 650
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 30 568 572 "util/symbol.ml" 32 637 650
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 29 546 550 "util/symbol.ml" 32 637 650
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 26 483 485 "util/symbol.ml" 32 637 650
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 25 465 476 "util/symbol.ml" 32 637 650
+type(
+  Core.Std.String.Table.key Core.Std.Hashtbl.key ->
+  Core.Std.String.Table.key Core.Std.Hashtbl.key * int
+)
+"util/symbol.ml" 34 652 656 "util/symbol.ml" 34 652 660
+type(
+  'a * 'b -> 'a
+)
+ident(
+  def name "util/symbol.ml" 36 673 673 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 34 652 662 "util/symbol.ml" 34 652 663
+type(
+  'a
+)
+ident(
+  def n "util/symbol.ml" 34 652 670 "util/symbol.ml" 34 652 671
+)
+"util/symbol.ml" 34 652 665 "util/symbol.ml" 34 652 666
+type(
+  'b
+)
+"util/symbol.ml" 34 652 662 "util/symbol.ml" 34 652 666
+type(
+  'a * 'b
+)
+"util/symbol.ml" 34 652 670 "util/symbol.ml" 34 652 671
+type(
+  'a
+)
+ident(
+  int_ref n "util/symbol.ml" 34 652 662 "util/symbol.ml" 34 652 663
+)
+"util/symbol.ml" 34 652 661 "util/symbol.ml" 34 652 671
+type(
+  'a * 'b -> 'a
+)
+"util/symbol.ml" 36 673 677 "util/symbol.ml" 36 673 683
+type(
+  Format.formatter -> string * 'a -> unit
+)
+ident(
+  def format "util/symbol.ml" 39 726 726 "util/symbol.ml" 1 0 -1
+)
+"util/symbol.ml" 36 673 684 "util/symbol.ml" 36 673 686
+type(
+  Format.formatter
+)
+ident(
+  def ff "util/symbol.ml" 36 673 687 "util/symbol.ml" 37 691 724
+)
+"util/symbol.ml" 36 673 687 "util/symbol.ml" 36 673 688
+type(
+  string * 'a
+)
+ident(
+  def s "util/symbol.ml" 37 691 693 "util/symbol.ml" 37 691 724
+)
+"util/symbol.ml" 37 691 693 "util/symbol.ml" 37 691 707
+type(
+  Format.formatter ->
+  (string -> unit, Format.formatter, unit) format -> string -> unit
+)
+ident(
+  ext_ref Format.fprintf
+)
+"util/symbol.ml" 37 691 708 "util/symbol.ml" 37 691 710
+type(
+  Format.formatter
+)
+ident(
+  int_ref ff "util/symbol.ml" 36 673 684 "util/symbol.ml" 36 673 686
+)
+"util/symbol.ml" 37 691 711 "util/symbol.ml" 37 691 715
+type(
+  (string -> unit, Format.formatter, unit) format
+)
+"util/symbol.ml" 37 691 717 "util/symbol.ml" 37 691 721
+type(
+  string * 'a -> string
+)
+ident(
+  int_ref name "util/symbol.ml" 34 652 656 "util/symbol.ml" 34 652 660
+)
+"util/symbol.ml" 37 691 722 "util/symbol.ml" 37 691 723
+type(
+  string * 'a
+)
+ident(
+  int_ref s "util/symbol.ml" 36 673 687 "util/symbol.ml" 36 673 688
+)
+"util/symbol.ml" 37 691 717 "util/symbol.ml" 37 691 723
+call(
+  stack
+)
+type(
+  string
+)
+"util/symbol.ml" 37 691 693 "util/symbol.ml" 37 691 724
+call(
+  tail
+)
+type(
+  unit
+)
+"util/symbol.ml" 36 673 687 "util/symbol.ml" 37 691 724
+type(
+  string * 'a -> unit
+)
+"util/symbol.ml" 36 673 684 "util/symbol.ml" 37 691 724
+type(
+  Format.formatter -> string * 'a -> unit
+)
+"util/symbol.ml" 39 726 734 "util/symbol.ml" 39 726 752
+call(
+  stack
+)
