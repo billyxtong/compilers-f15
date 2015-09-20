@@ -39,7 +39,7 @@ let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl
 
 let fixOffsets tbl i x y =
   match y with
-        MemAddr(RSP, offset) -> replace tbl x (MemAddr(RSP, offset - i))
+        MemAddr(RSP, offset) -> replace tbl x (MemAddr(RSP, i - offset))
       | _ -> ()
 
 let translate tbl (instr : tmp2AddrInstr) =
