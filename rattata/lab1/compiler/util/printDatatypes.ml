@@ -18,14 +18,14 @@ let regToString (r : reg) =
       | RSP -> "%rsp" (* callee-saved *)
       | ESI -> "%esi" (* callee-saved *) 
       | EDI -> "%edi" (* callee-saved *)
-      | R8  -> "%r8"
-      | R9  -> "%r9"
-      | R10 -> "%r10"
-      | R11 -> "%r11"
-      | R12 -> "%r12" (* callee-saved *)
-      | R13 -> "%r13" (* callee-saved *)
-      | R14 -> "%r14" (* callee-saved *)
-      | R15 -> "%r15" (* callee-saved *)
+      | R8  -> "%r8d"
+      | R9  -> "%r9d"
+      | R10 -> "%r10d"
+      | R11 -> "%r11d"
+      | R12 -> "%r12d" (* callee-saved *)
+      | R13 -> "%r13d" (* callee-saved *)
+      | R14 -> "%r14d" (* callee-saved *)
+      | R15 -> "%r15d" (* callee-saved *)
 
 let memAddrToString ((register, offset) : memAddr) = 
     concat "" [string_of_int(offset); "("; 
@@ -45,7 +45,6 @@ let binopToString (op: binop) =
   match op with
         ADD -> "addl "
       | SUB -> "subl "
-      | SUBQ -> "subq "
       | MUL -> "imull "
       | FAKEDIV -> "fakediv "
       | FAKEMOD -> "fakemod "

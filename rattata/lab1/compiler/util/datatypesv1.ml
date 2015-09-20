@@ -8,7 +8,7 @@ type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 |
 type memAddr = reg * int
 
 (* These are for actual assembly instructions. Tmps are not allowed. *)
-type binop = ADD | MUL | SUB | SUBQ | FAKEDIV | FAKEMOD
+type binop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinopInstr = binop * assemArg * assemLoc

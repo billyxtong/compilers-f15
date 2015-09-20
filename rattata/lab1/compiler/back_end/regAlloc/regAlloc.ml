@@ -57,7 +57,7 @@ let translate tbl (instr : tmp2AddrInstr) =
 let spillReg = EDI
 
 let regAlloc (instrList : tmp2AddrProg) =
-  let regList = [EBX; ECX; ESI; EDI] in
+  let regList = [EBX; ECX; ESI; EDI; R8; R9; R10; R11; R12; R13; R14; R15] in
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList (-4) in
   (* let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in *)
