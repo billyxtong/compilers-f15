@@ -57,13 +57,13 @@ let translate tbl (instr : tmp2AddrInstr) =
 let spillReg = EDI
 
 let regAlloc (instrList : tmp2AddrProg) =
-  let regList = [EAX; EBX; ECX; EDX; RBP; ESI; EDI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  let regList = [EBX; ECX; ESI; EDI] in
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList (-4) in
   (* let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in *)
   List.concat [ (* [PUSH(EBX)]; [PUSH(RSP)]; [PUSH(ESI)]; [PUSH(EDI)]; 
                 [PUSH(R12)]; [PUSH(R13)]; [PUSH(R14)]; [PUSH(R15)]; *) [(PUSH(RBP))];
-                [MOV(AssemLoc(Reg(RSP)), Reg(RBP))]; 
+                [MOVQ(AssemLoc(Reg(RSP)), Reg(RBP))]; 
                 (List.map (translate tmpToAssemLocTable) instrList); 
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
                 [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *) [POP(RBP)];

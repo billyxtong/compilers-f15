@@ -57,6 +57,10 @@ let assemBinopInstrToString((op, src, dest) : assemBinopInstr) =
 let assemInstrToString(instr : assemInstr) = 
   match instr with
         MOV(src, dest) ->
+            concat "" ["movl "; 
+            assemArgToString(src); ", ";
+            assemLocToString(dest)]
+      | MOVQ(src, dest) ->
             concat "" ["movq "; 
             assemArgToString(src); ", ";
             assemLocToString(dest)]

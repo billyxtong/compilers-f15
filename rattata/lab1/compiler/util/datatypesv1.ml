@@ -13,6 +13,7 @@ type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinopInstr = binop * assemArg * assemLoc
 type assemInstr = MOV of assemArg * assemLoc
+                | MOVQ of assemArg * assemLoc
                 | BINOP of assemBinopInstr
                 | PUSH of reg
                 | POP of reg
