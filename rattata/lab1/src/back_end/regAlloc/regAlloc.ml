@@ -1,6 +1,6 @@
 open Hashtbl
 open Datatypesv1
-
+open PrintDatatypes
 
 let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
                        (regList : reg list) (offset : int ref) =
@@ -50,12 +50,15 @@ let translate tbl (instr : tmp2AddrInstr) =
       | Tmp2AddrBinop(TmpBinop(binop), arg, dest) -> (match arg with
                                                             TmpLoc(t) -> BINOP(binop, AssemLoc(find tbl t), find tbl dest)
                                                           | TmpConst(c) -> BINOP(binop, Const(c), find tbl dest))
-      | Tmp2AddrReturn(arg) -> RETURN
+      | Tmp2AddrReturn(arg) -> (match arg with
+                                      TmpLoc(t) -> MOV(AssemLoc(find tbl t), Reg(EAX))
+                                    | TmpConst(c) -> MOV(Const(c), Reg(EAX)))
 
 let regAlloc (instrList : tmp2AddrProg) =
-  let regList = [EBX; ECX; ESI; EDI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  let spillReg = EDI in
   let offset = ref 0 in
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList offset in
   let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in
-  List.map (translate tmpToAssemLocTable) instrList
+  List.concat [[BINOP(SUB,Const(!offset),Reg(RSP))]; (List.map (translate tmpToAssemLocTable) instrList); [RETURN]]
