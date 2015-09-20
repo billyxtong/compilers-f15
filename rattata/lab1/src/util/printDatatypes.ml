@@ -41,28 +41,17 @@ let assemArgToString (arg : assemArg) =
         AssemLoc(loc) -> assemLocToString(loc)
       | Const(c) -> constToString(c)
 
-let assemBinopToString(binop : assemBinop) = 
-  match binop with
-        ADD(src, dest) -> 
-            concat "" ["addl "; 
-            assemArgToString(src); ", "; 
-            assemLocToString(dest)]
-      | SUB(src, dest) -> 
-            concat "" ["subl "; 
-            assemArgToString(src); ", "; 
-            assemLocToString(dest)]
-      | MUL(src, dest) -> 
-            concat "" ["imull "; 
-            assemArgToString(src); ", "; 
-            assemLocToString(dest)]
-      | FAKEDIV(src, dest) -> 
-            concat "" ["idivl "; 
-            assemArgToString(src); ", "; 
-            assemLocToString(dest)]
-      | FAKEMOD(src, dest) -> 
-            concat "" ["imodl "; 
-            assemArgToString(src); ", "; 
-            assemLocToString(dest)]
+let assemBinopToString (op: binop) =
+  match op with
+        ADD -> "addl "
+      | SUB -> "subl "
+      | MUL -> "imull "
+      | FAKEDIV -> "fakediv "
+      | FAKEMOD -> "fakemod "
+
+let assemBinopInstrToString((op, src, dest) : assemBinopInstr) = 
+    concat "" [assemBinopToString op; assemArgToString(src); ", "; 
+               assemLocToString(dest)]
 
 let assemInstrToString(instr : assemInstr) = 
   match instr with
@@ -70,7 +59,7 @@ let assemInstrToString(instr : assemInstr) =
             concat "" ["movl "; 
             assemArgToString(src); ", ";
             assemLocToString(dest)]
-      | BINOP(binop) -> assemBinopToString(binop)
+      | BINOP(op) -> assemBinopInstrToString(op)
       | RETURN -> "ret"
 
 let assemProgToString(assemprog : assemProg) = 
