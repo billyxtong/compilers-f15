@@ -1,5 +1,6 @@
 open Hashtbl
 open Datatypesv1
+open PrintDatatypes
 
 let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
                        (regList : reg list) (offset : int ref) =
