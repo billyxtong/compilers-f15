@@ -27,7 +27,7 @@ let spec =
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
   +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
-  +> flag "--dump-wonky" no_arg ~doc:" Pretty print the two address code"
+  +> flag "--dump-wonky" no_arg ~doc:" Pretty print the wonky assembly"
 
 let say_if flag s =
   if flag then say (s ()) else ()
@@ -69,6 +69,8 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
     
     (* Allocate Registers  TODO *)
+    let almostAssem = RegAlloc.regAlloc twoAddr in
+    say_if dump_assem (fun () -> assemProgToString almostAssem);
 
     (* Account for wonky instructions that require specific
        registers, like idiv *)

@@ -1,35 +1,53 @@
-open Core.Std
-open REF
+open Hashtbl
 open Datatypesv1
 
-(* adds a temp to the set of temps *)
-let addTmpToSet (instr : tmp2AddrInstr) (S : "tmp set") =
-  match instr with
-        Tmp2AddrMov(arg, temp) -> "add temp to set"
-      | Tmp2AddrBinop(binop, arg, temp) -> "add temp to set" 
-      | Tmp2AddrReturn(retVal) -> (match retVal with
-                                         TmpLoc(tmp) -> "add temp to set"
-                                       | Const(c) -> "do nothing")
-
-(* maps a temp to a register and puts the pair in our hashtable *)
-let rec mapTmpToReg (L : reg list) (S : "tmp set") (H : tmp hashtbl) =
-  match (L, S) with
-      | (x::L',s::S') -> let (add H (Reg(x)) s) in mapTmpsToRegs L' S' H
-      | ([], S') -> ()
-      | (_, []) -> ()
-
-(* maps a temp to a memory address and puts the pair in our hashtable *)
-let rec mapTmpToMemAddr (S : "tmp set") (H : tmp hashtbl) (offset : int ref) =
-  match S with
+let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
+                       (regList : reg list) (offset : int ref) =
+  match instrList with
         [] -> ()
-      | s::S' -> let (add H s (MemAddr(RSP, offset))) 
-                 and offset := !offset + 4 
-                 in mapTmpToMemAddr S' H offset
+      | instr :: prog -> (match regList with
+                                [] -> (match instr with
+                                             Tmp2AddrMov(arg,dest) -> 
+                                               (try (let _ = find tbl dest in ()) with
+                                                    Not_found -> (let () = (add tbl dest (MemAddr(RSP, !offset))) in
+                                                                  let () = (offset := !offset + 4) in
+                                                                  putInHashTable prog tbl [] offset))
+                                           | Tmp2AddrBinop(binop,arg,dest) -> 
+                                               (try (let _ = find tbl dest in ()) with
+                                                    Not_found -> (let () = (add tbl dest (MemAddr(RSP, !offset))) in
+                                                                  let () = (offset := !offset + 4) in
+                                                                  putInHashTable prog tbl [] offset))
+                                           | Tmp2AddrReturn(arg) -> ())
+                              | r :: newRegList -> (match instr with
+                                             Tmp2AddrMov(arg,dest) -> 
+                                               (try (let _ = find tbl dest in ()) with
+                                                    Not_found -> let () = add tbl dest (Reg(r)) in
+                                                                 putInHashTable prog tbl newRegList offset)
+                                           | Tmp2AddrBinop(binop,arg,dest) -> 
+                                               (try (let _ = find tbl dest in ()) with
+                                                    Not_found -> let () = add tbl dest (Reg(r)) in
+                                                                 putInHashTable prog tbl newRegList offset)
+                                           | Tmp2AddrReturn(arg) -> ()))
 
-let rec regAlloc (instrList : tmp2AddrProg) =
-  let tempSet = "initialize empty set of temps"
-  (* list of 12 registers. Not sure if EBP is allowed to be used*)
-  and regList = [EBX; ECX; ESI; EDI; R8; R9; R10; R11; R12; R13; R14; R15] in
-  (* iterate through prog, add all temps to set of temps *)
-  List.iter (addTmpToSet i tempSet) instrList
-  Set.iter (mapTmpToReg regList tempS)  
+let fixOffsets tbl i x y =
+  match y with
+        MemAddr(RSP, offset) -> replace tbl x (MemAddr(RSP, offset - i))
+      | _ -> ()
+
+let translate tbl (instr : tmp2AddrInstr) =
+  match instr with
+        Tmp2AddrMov(arg, dest) -> (match arg with
+                                         TmpLoc(t) -> MOV(AssemLoc(find tbl t), find tbl dest)
+                                       | TmpConst(c) -> MOV(Const(c), find tbl dest))
+      | Tmp2AddrBinop(TmpBinop(binop), arg, dest) -> (match arg with
+                                                            TmpLoc(t) -> BINOP(binop, AssemLoc(find tbl t), find tbl dest)
+                                                          | TmpConst(c) -> BINOP(binop, Const(c), find tbl dest))
+      | Tmp2AddrReturn(arg) -> RETURN
+
+let regAlloc (instrList : tmp2AddrProg) =
+  let regList = [EBX; ECX; ESI; EDI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  let offset = ref 0 in
+  let tmpToAssemLocTable = create 100 in
+  let () = putInHashTable instrList tmpToAssemLocTable regList offset in
+  let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in
+  List.map (translate tmpToAssemLocTable) instrList
