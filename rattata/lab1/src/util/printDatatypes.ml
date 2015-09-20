@@ -45,6 +45,7 @@ let binopToString (op: binop) =
   match op with
         ADD -> "addl "
       | SUB -> "subl "
+      | SUBQ -> "subq "
       | MUL -> "imull "
       | FAKEDIV -> "fakediv "
       | FAKEMOD -> "fakemod "

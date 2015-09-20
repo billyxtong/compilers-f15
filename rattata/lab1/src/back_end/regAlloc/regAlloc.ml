@@ -62,6 +62,6 @@ let regAlloc (instrList : tmp2AddrProg) =
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList offset in
   let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in
-  List.concat [[BINOP(SUB,Const(!offset),Reg(RSP))]; (List.map (translate tmpToAssemLocTable) instrList); [RETURN]]
+  List.concat [[BINOP(SUBQ,Const(!offset),Reg(RSP))]; (List.map (translate tmpToAssemLocTable) instrList); [RETURN]]
 
 
