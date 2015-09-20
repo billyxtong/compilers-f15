@@ -11,6 +11,6 @@ let instrToWonky = function
         ::AssemInstr(MOV(AssemLoc (Reg EDX), dest))::[]
   | instr -> [AssemInstr instr]
 
-let rec toWonky2Addr = function
+let rec toWonkyAssem = function
     [] -> []
-  | instr::instrs -> instrToWonky instr @ toWonky2Addr instrs
+  | instr::instrs -> instrToWonky instr @ toWonkyAssem instrs
