@@ -9,6 +9,10 @@ let instrToWonky = function
   | BINOP(FAKEMOD, divisor, dest) ->
         AssemInstr(MOV(AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
         ::AssemInstr(MOV(AssemLoc (Reg EDX), dest))::[]
+  | BINOP(MUL, src, MemAddr memDest) ->
+        AssemInstr(MOV (AssemLoc (MemAddr memDest), RegAlloc.spillReg))
+        ::AssemInstr(BINOP(MUL, src, RegAlloc.spillReg))
+        ::AssemInstr(MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest))::[]
   | instr -> [AssemInstr instr]
 
 let rec toWonkyAssem = function
