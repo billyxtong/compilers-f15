@@ -3,5 +3,5 @@
    a .s file. Currently really simple. *)
 
 let formatAssem finalprog =
-    String.concat "" [".globl main\n"; "main:\n";
+    String.concat "" [".globl _c0_main\n"; "_c0_main:\n";
                       PrintDatatypes.assemProgWonkyToString finalprog]

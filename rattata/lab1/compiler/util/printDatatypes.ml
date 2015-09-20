@@ -11,21 +11,21 @@ let constToString (c : const) = string_of_int(c)
 let regToString (r : reg) = 
   match r with
         EAX -> "%eax"
-      | EBX -> "%ebx"
+      | EBX -> "%ebx" (* callee-saved *)
       | ECX -> "%ecx"
       | EDX -> "%edx"
-      | EBP -> "%ebp"
-      | RSP -> "%rsp"
-      | ESI -> "%esi"
-      | EDI -> "%edi"
+      | RBP -> "%rbp" (* callee-saved *)
+      | RSP -> "%rsp" (* callee-saved *)
+      | ESI -> "%esi" (* callee-saved *) 
+      | EDI -> "%edi" (* callee-saved *)
       | R8  -> "%r8"
       | R9  -> "%r9"
       | R10 -> "%r10"
       | R11 -> "%r11"
-      | R12 -> "%r12"
-      | R13 -> "%r13"
-      | R14 -> "%r14"
-      | R15 -> "%r15"
+      | R12 -> "%r12" (* callee-saved *)
+      | R13 -> "%r13" (* callee-saved *)
+      | R14 -> "%r14" (* callee-saved *)
+      | R15 -> "%r15" (* callee-saved *)
 
 let memAddrToString ((register, offset) : memAddr) = 
     concat "" [string_of_int(offset); "("; 
@@ -57,10 +57,12 @@ let assemBinopInstrToString((op, src, dest) : assemBinopInstr) =
 let assemInstrToString(instr : assemInstr) = 
   match instr with
         MOV(src, dest) ->
-            concat "" ["movl "; 
+            concat "" ["movq "; 
             assemArgToString(src); ", ";
             assemLocToString(dest)]
       | BINOP(op) -> assemBinopInstrToString(op)
+      | PUSH(r) -> concat "" ["push "; regToString(r)]
+      | POP(r) -> concat "" ["pop "; regToString(r)]
       | RETURN -> "ret"
 
 let assemProgToString(assemprog : assemProg) = 

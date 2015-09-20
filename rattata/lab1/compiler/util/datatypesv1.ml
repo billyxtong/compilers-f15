@@ -2,7 +2,7 @@ type c0type = INT | PTR (* will add more eventually *)
 (* everything in c0 is an int! *)              
 type const = int
 
-type reg = EAX | EBX | ECX | EDX | EBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
+type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 (* the int is the memory offest from the register *)
 type memAddr = reg * int
@@ -14,6 +14,8 @@ type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinopInstr = binop * assemArg * assemLoc
 type assemInstr = MOV of assemArg * assemLoc
                 | BINOP of assemBinopInstr
+                | PUSH of reg
+                | POP of reg
                 | RETURN
 type assemProg = assemInstr list
 
