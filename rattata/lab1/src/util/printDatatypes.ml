@@ -39,7 +39,7 @@ let assemLocToString(loc : assemLoc) =
 let assemArgToString (arg : assemArg) = 
   match arg with
         AssemLoc(loc) -> assemLocToString(loc)
-      | Const(c) -> constToString(c)
+      | Const(c) -> concat "" ["$"; constToString(c)]
 
 let binopToString (op: binop) =
   match op with
