@@ -1,7 +1,0 @@
-//test error
-int main() {
-  int a = 0;
-  int a = 1;
-  a = a * a;
-  return a;
-}
