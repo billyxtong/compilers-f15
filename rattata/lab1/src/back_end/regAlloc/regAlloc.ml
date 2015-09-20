@@ -54,11 +54,14 @@ let translate tbl (instr : tmp2AddrInstr) =
                                       TmpLoc(t) -> MOV(AssemLoc(find tbl t), Reg(EAX))
                                     | TmpConst(c) -> MOV(Const(c), Reg(EAX)))
 
+let spillReg = EDI
+
 let regAlloc (instrList : tmp2AddrProg) =
   let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
-  let spillReg = EDI in
   let offset = ref 0 in
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList offset in
   let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in
   List.concat [[BINOP(SUB,Const(!offset),Reg(RSP))]; (List.map (translate tmpToAssemLocTable) instrList); [RETURN]]
+
+
