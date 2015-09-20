@@ -2,6 +2,8 @@ open Hashtbl
 open Datatypesv1
 open PrintDatatypes
 
+let spillReg = EDI
+
 let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
                        (regList : reg list) (offset : int ref) =
   match instrList with
@@ -56,7 +58,6 @@ let translate tbl (instr : tmp2AddrInstr) =
 
 let regAlloc (instrList : tmp2AddrProg) =
   let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
-  let spillReg = EDI in
   let offset = ref 0 in
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList offset in
