@@ -27,12 +27,13 @@ let spec =
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
   +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
-  +> flag "--dump-wonky" no_arg ~doc:" Pretty print the wonky assembly"
+  +> flag "--dump-NoMemMem" no_arg ~doc:" Pretty print after handling Mem-Mem instrs"
+  +> flag "--dump-final" no_arg ~doc:" Pretty print the final (wonky) assembly"
 
 let say_if flag s =
   if flag then say (s ()) else ()
 
-let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_wonky () =
+let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_final () =
   try
    
     let source = match files with
@@ -65,18 +66,28 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 
     (* Three address to Two address *)
+    say_if verbose (fun () -> "3Addr to 2Addr...");
     let twoAddr = To2Addr.to2Addr threeAddr in
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
     
-    (* Allocate Registers  TODO *)
+    (* Allocate Registers *)
+    say_if verbose (fun () -> "Allocating Registers...");
     let almostAssem = RegAlloc.regAlloc twoAddr in
     say_if dump_assem (fun () -> assemProgToString almostAssem);
 
+    (* RemoveMemMemInstrs *)
+    say_if verbose (fun () -> "Removing mem-mem instrs...");
+    let noMemMemAssem =
+       RemoveMemMemInstrs.removeMemMemInstrs almostAssem in
+    say_if dump_NoMemMem (fun () ->
+        assemProgToString noMemMemAssem);
+
     (* Account for wonky instructions that require specific
        registers, like idiv *)
-    (* let wonkyAssem = ToWonkyAssem.toWonkyAssem assem in *)
-    (* say_if dump_wonky (fun () -> assemProgWonkyToString *)
-    (*                       wonkyAssem); *)
+    say_if verbose (fun () -> "Handling wonky instructions...");
+    let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in
+    say_if dump_final (fun () -> assemProgWonkyToString
+                          wonkyAssem);
     
     (* Add assembly header and footer *)
     (* let assem = *)

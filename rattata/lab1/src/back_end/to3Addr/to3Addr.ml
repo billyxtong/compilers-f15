@@ -11,10 +11,7 @@
 open Core.Std
 
 module T = Tree
-module AS = FormatAssem
-
-(* munch_exp : AS.operand -> T.exp -> AS.instr list *)
-(* munch_exp d e
+(*
  * generates instructions to achieve d <- e
  * d must be TEMP(t) or REG(r)
  *)
@@ -25,7 +22,6 @@ let rec munch_exp d e =
   | T.BINOP (binop, e1, e2) ->
       munch_binop d (binop, e1, e2)
 
-(* munch_binop : AS.operand -> T.binop * T.exp * T.exp -> AS.instr list *)
 (* munch_binop d (binop, e1, e2)
  * generates instruction to achieve d <- e1 binop e2
  * d must be TEMP(t) or REG(r)
@@ -38,13 +34,13 @@ and munch_binop d (binop, e1, e2) =
     @ [T.MOVE (d, T.BINOP(binop, t1, t2))]
 
 
-(* munch_stm : T.stm -> AS.instr list *)
 (* munch_stm stm generates code to execute stm *)
 let munch_instr = function
     T.MOVE (T.TEMP t1, e2) -> munch_exp (T.TEMP t1) e2
-  | T.RETURN e ->
+  | T.RETURN e -> 
       (* return e is implemented as %eax <- e *)
-      munch_exp (T.TEMP(Temp.create())) e
+      let t = T.TEMP(Temp.create()) in
+      (munch_exp t e) @ T.RETURN t :: []
   | _ -> assert false
 
 let rec to3Addr = function

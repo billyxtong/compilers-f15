@@ -4,4 +4,4 @@ open Datatypesv1
    For example, we can't assign the divisor for an idiv
    instruction into eax, since eax needs to contain the thing
    we're dividing. *)
-val toWonky2Addr: assemProg -> assemProgWithWonky
+val toWonkyAssem: assemProg -> assemProgWonky
