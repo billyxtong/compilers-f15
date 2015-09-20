@@ -2,6 +2,9 @@
 rattata/lab1/haskell
 rattata/lab1/sml
 
+# subversion
+*.svn*
+
 # emacs cruft
 *~
 /#*#
