@@ -57,9 +57,8 @@ let translate tbl (instr : tmp2AddrInstr) =
                                     | TmpConst(c) -> MOV(Const(c), Reg(EAX)))
 
 let regAlloc (instrList : tmp2AddrProg) =
-  (* let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in *)
-  let regList = [EBX; ECX; ESI] in
-  (* let regList = [] in *)
+  let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! *)
   let tmpToAssemLocTable = create 100 in
   let () = putInHashTable instrList tmpToAssemLocTable regList (-4) in
   (* let () = iter (fixOffsets tmpToAssemLocTable !offset) tmpToAssemLocTable in *)
