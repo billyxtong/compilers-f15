@@ -7,8 +7,9 @@ let handleOneInstr (instr: assemInstr) : assemInstr list =
              MOV(AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
              MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
       | BINOP(op, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
-             MOV(AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
-             BINOP(op, AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
+             MOV(AssemLoc (MemAddr memDest), RegAlloc.spillReg)::
+             BINOP(op, AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
+             MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
       | otherInstr -> [otherInstr]
 
 let rec removeMemMemInstrs (prog: assemProg) : assemProg =
