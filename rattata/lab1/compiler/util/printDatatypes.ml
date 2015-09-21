@@ -76,7 +76,7 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
         AssemInstr(instr) -> assemInstrToString(instr)
       | CDQ -> "cdq"
       | IDIV(divisor) ->
-           concat "" ["idiv "; 
+           concat "" ["idivl "; 
            assemArgToString(divisor)]
 
 let assemProgWonkyToString(wonkyAssemProg : assemProgWonky) = 
