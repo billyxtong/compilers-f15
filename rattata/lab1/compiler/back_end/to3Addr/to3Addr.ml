@@ -11,10 +11,6 @@
 open Core.Std
 
 module T = Tree
-(*
- * generates instructions to achieve d <- e
- * d must be TEMP(t) or REG(r)
- *)
 let rec munch_exp d e =
   match e with
     T.CONST n -> [T.MOVE (d, T.CONST n)]
@@ -37,7 +33,7 @@ and munch_binop d (binop, e1, e2) =
 (* munch_stm stm generates code to execute stm *)
 let munch_instr = function
     T.MOVE (T.TEMP t1, e2) -> munch_exp (T.TEMP t1) e2
-  | T.RETURN e -> 
+  | T.RETURN e ->
       (* return e is implemented as %eax <- e *)
       let t = T.TEMP(Temp.create()) in
       (munch_exp t e) @ T.RETURN t :: []
