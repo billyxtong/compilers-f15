@@ -26,4 +26,4 @@ val maxCardSearch: graph -> vertex -> vertex list
     
 (* Takes an interference graph and an ordering of vertices,
    returns an mapping of each vertex to a color (an integer) *)
-val greedilyColor: graph -> vertex list -> (vertex, int) Core.Std.Hashtbl.t
+val greedilyColor: graph -> vertex list -> (vertex, int) Hashtbl.t
