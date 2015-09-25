@@ -11,12 +11,17 @@ type binop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type assemBinopInstr = binop * assemArg * assemLoc
+type jump = JNE | JE | JG | JGE | JLE | JL | JMP_UNCOND 
+type label = Label of int
+type jumpInstr = jump * label
 type assemInstr = MOV of assemArg * assemLoc
                 | MOVQ of assemArg * assemLoc
                 | BINOP of assemBinopInstr
                 | PUSH of reg
                 | POP of reg
                 | RETURN
+                | CMPL of assemArg * assemArg
+                | JMP of jumpInstr
 type assemProg = assemInstr list
 
 (* Assembly Code with wonky instructions (i.e. idiv, etc) *)
@@ -36,12 +41,15 @@ type assemProgWonky = assemInstrWonky list
 type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
 type tmpBinop = TmpBinop of binop
-
+type tmpJump = TmpJump of jump
 (* Two Address Code *)
 type tmp2AddrBinop = tmpBinop * tmpArg * tmp
+type tmp2AddrJump = tmpJump * label
 type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
                    | Tmp2AddrReturn of tmpArg
+                   | Tmp2AddrJump of tmp2AddrJump
+                   | Tmp2AddrCompare of tmpArg * tmpArg
 type tmp2AddrProg = tmp2AddrInstr list
 
 (* Three Address Code *)
