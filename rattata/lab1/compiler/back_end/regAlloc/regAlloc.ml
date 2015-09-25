@@ -1,6 +1,7 @@
 open Hashtbl
 open Datatypesv1
 open PrintDatatypes
+open LivenessAnalysis
 
 let spillReg = Reg EDI
 
