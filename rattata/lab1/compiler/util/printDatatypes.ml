@@ -1,10 +1,10 @@
 open Datatypesv1
 open String
-
-let c0typeToString (c : c0type) =
+module A = Ast
+let c0typeToString (c : A.c0type) =
   match c with
-        INT -> "int"
-      | PTR -> "pointer"
+        A.INT -> "int"
+      | A.BOOL -> "bool"
 
 let constToString (c : const) = string_of_int(c)
 

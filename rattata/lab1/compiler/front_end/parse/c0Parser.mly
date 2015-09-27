@@ -16,24 +16,24 @@
 open Core.Std
 
 module A = Ast
-
-let ploc (left, right) =
-  Parsing.rhs_start left, Parsing.rhs_end right
-let mark e (left, right) =
-  A.Marked (Mark.mark' (e, ParseState.ext (ploc (left, right))))
-let marks e (left, right) =
-  A.Markeds (Mark.mark' (e, ParseState.ext (ploc (left, right))))
+module D = Datatypesv1
+(* let ploc (left, right) = *)
+(*   Parsing.rhs_start left, Parsing.rhs_end right *)
+(* let mark e (left, right) = *)
+(*   A.Marked (Mark.mark' (e, ParseState.ext (ploc (left, right)))) *)
+(* let marks e (left, right) = *)
+(*   A.Markeds (Mark.mark' (e, ParseState.ext (ploc (left, right)))) *)
 
 (* expand_asnop (id, "op=", exp) region = "id = id op exps"
  * or = "id = exp" if asnop is "="
  * syntactically expands a compound assignment operator
  *)
-let expand_asnop a b =
-  match a, b with
-    (id, None, exp), (left, right) ->
-      A.Assign(id, exp)
-  | (id, Some oper, exp), (left, right) ->
-      A.Assign(id, mark (A.OpExp (oper, [A.Var(id); exp])) (left, right))
+(* let expand_asnop a = *)
+(*   match a with *)
+(*     (id, None, exp) -> *)
+(*       A.Assign(id, exp) *)
+(*   | (id, Some oper, exp) -> *)
+(*       A.Assign(id, mark (A.OpExp (oper, [A.Var(id); exp])) (left, right)) *)
 
 %}
 
@@ -64,7 +64,7 @@ let expand_asnop a b =
  * MINUSMINUS is a dummy terminal to parse fail on.
  */
 
-%type <Ast.stm list> program
+%type <Ast.preElabAST> program
 
 %left PLUS MINUS
 %left STAR SLASH PERCENT
@@ -85,40 +85,44 @@ stmts :
  ;
 
 stmt :
-  decl SEMI                      { marks (A.Declare $1) (1, 1) }
- | simp SEMI                     { marks $1 (1, 1) }
- | RETURN exp SEMI               { marks (A.Return $2) (1, 2) }
+  decl SEMI                      { A.PreElabDecl $1 }
+ | simp SEMI                     { A.SimpAssign $1  }
+ | RETURN exp SEMI               { A.PreElabReturn $2 }
  ;
 
 decl :
-  INT IDENT                     { A.NewVar $2 }
- | INT IDENT ASSIGN exp         { A.Init ($2, $4) }
- | INT MAIN                     { A.NewVar (Symbol.symbol "main") }
- | INT MAIN ASSIGN exp          { A.Init (Symbol.symbol "main", $4) }
+   INT IDENT                     { A.NewVar ($2, INT)}
+ | INT IDENT ASSIGN exp         { Init ($2, INT, $4) }
+ | INT MAIN                     { A.NewVar ("main", A.INT) }
+ | INT MAIN ASSIGN exp          { A.Init ("main", A.INT, $4) }
  ;
 
 simp :
-  lvalue asnop exp %prec ASNOP   { expand_asnop ($1, $2, $3) (1, 3) }
+  lvalue asnop exp %prec ASNOP   { A.SimpAssign ($1, $2, $3) }
   ;
 
 lvalue :
   IDENT                         { $1 }
- | MAIN                         { Symbol.symbol "main" }
+ | MAIN                         { "main" }
  | LPAREN lvalue RPAREN         { $2 }
  ;
 
 exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
- | MAIN                          { mark (A.Var (Symbol.symbol "main")) (1, 1) }
- | IDENT                         { mark (A.Var $1) (1, 1) }
- | exp PLUS exp                  { mark (A.OpExp (A.PLUS, [$1; $3])) (1, 3) }
- | exp MINUS exp                 { mark (A.OpExp (A.MINUS, [$1; $3])) (1, 3) }
- | exp STAR exp                  { mark (A.OpExp (A.TIMES, [$1; $3])) (1, 3) }
- | exp SLASH exp                 { mark (A.OpExp (A.DIVIDEDBY, [$1; $3]))
-                                     (1, 3) }
- | exp PERCENT exp               { mark (A.OpExp (A.MODULO, [$1; $3])) (1, 3) }
- | MINUS exp %prec UNARY         { mark (A.OpExp (A.NEGATIVE, [$2])) (1, 2) }
+ | MAIN                          { A.Ident "main" }
+ | IDENT                         { A.Ident $1 }
+ | exp PLUS exp                  { A.PreElabBinop
+				     ($1 D.TmpBinop D.ADD, $3 }
+ | exp MINUS exp                  { A.PreElabBinop
+				     ($1 D.TmpBinop D.SUB, $3 }
+ | exp STAR exp                  { A.PreElabBinop
+				     ($1 D.TmpBinop D.MUL, $3 }
+ | exp SLASH exp                  { A.PreElabBinop
+				     ($1 D.TmpBinop D.FAKEDIV, $3 }
+ | exp PERCENT exp                  { A.PreElabBinop
+				     ($1 D.TmpBinop D.FAKEMOD, $3 }
+ | MINUS exp %prec UNARY         { A.UnaryMinus $2 }
  ;
 
 intconst :
@@ -127,12 +131,12 @@ intconst :
  ;
 
 asnop :
-  ASSIGN                        { None }
- | PLUSEQ                       { Some A.PLUS }
- | MINUSEQ                      { Some A.MINUS }
- | STAREQ                       { Some A.TIMES }
- | SLASHEQ                      { Some A.DIVIDEDBY }
- | PERCENTEQ                    { Some A.MODULO }
+  ASSIGN                        { A.EQ }
+ | PLUSEQ                       { A.PLUSEQ }
+ | MINUSEQ                      { A.SUBEQ }
+ | STAREQ                       { A.MULEQ }
+ | SLASHEQ                      { A.DIVEQ }
+ | PERCENTEQ                    { A.MODEQ }
  ;
 
 %%

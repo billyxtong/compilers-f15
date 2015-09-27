@@ -1,6 +1,6 @@
 open Datatypesv1
-
-val c0typeToString : c0type -> string
+module A = Ast
+val c0typeToString : A.c0type -> string
 val constToString : const -> string
 val regToString : reg -> string
 val memAddrToString : memAddr -> string
