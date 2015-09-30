@@ -1,6 +1,6 @@
 # other starter code
-rattata/lab1/haskell
-rattata/lab1/sml
+rattata/lab1
+rattata/lab2/tests*
 
 # subversion
 *.svn*

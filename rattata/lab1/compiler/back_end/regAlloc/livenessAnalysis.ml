@@ -1,4 +1,26 @@
 open Graph
+open Hashtbl
+(*
+let mapLineNumToInstr (lineNum : int) tbl (prog : tmp2AddrProg) = 
+  match prog with
+        [] -> tbl
+      | instr :: prog' -> 
+          let () = add tbl lineNum instr in
+          mapLineNumToInstr (lineNum + 1) tbl (prog')
+*)
+
+let findPrecessors (lineNum : int) tbl = 
+
+
+let predecessors (prog : tmp2AddrProg) = 
+  let indexedProg = List.mapi (fun i -> fun instr -> (i, instr)) prog in
+  let predecessorTable = create (List.length indexedProg) in 
+  findPredecessors 0 indexProg
+
+
+
+
+
 
 (* each of the match helpers takes 3 parameters: 
   * -a type of two-address instruction,
