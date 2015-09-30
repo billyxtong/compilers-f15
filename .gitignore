@@ -14,6 +14,8 @@ rattata/lab2/tests*
 *.cmi
 *.cmo
 *top.native
+*a.out
+*grader
 
 # You get these when you compile the tests I guess
 *.s
