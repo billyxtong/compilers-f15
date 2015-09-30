@@ -39,9 +39,9 @@ let expand_asnop id op e =
     match op with
        A.EQ -> A.SimpAssign (id, A.EQ, e)
      | A.PLUSEQ -> A.SimpAssign (id, A.EQ,
-	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.ADD, e))
+     	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.ADD, e))
      | A.SUBEQ -> A.SimpAssign (id, A.EQ,
-	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.SUB, e))
+     	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.SUB, e))
      | A.MULEQ -> A.SimpAssign (id, A.EQ,
              A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.MUL, e))
      | A.DIVEQ -> A.SimpAssign (id, A.EQ,
@@ -99,8 +99,8 @@ stmts :
  ;
 
 stmt :
-  decl SEMI                      { A.PreElabDecl $1 }
- | IDENT asnop exp SEMI       { A.SimpAssign ($1, $2, $3)  }
+   decl SEMI                     { A.PreElabDecl $1 }
+ | simp SEMI                     { $1  }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
  ;
 

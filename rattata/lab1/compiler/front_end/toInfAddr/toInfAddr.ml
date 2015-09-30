@@ -40,7 +40,6 @@ let updateTmpMap varToTmpMap id =
          let () = print_string("Redeclared: " ^ id ^ "\n") in
          assert(false)
      with Not_found -> let t = Temp.create() in
-let () =print_string("newVar: " ^ id ^" as " ^string_of_int(t) ^ "\n") in
        H.add varToTmpMap id t
 
 (* currently assuming all asnops are just eq, because we expanded

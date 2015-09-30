@@ -62,7 +62,7 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
 
     (* Convert Inf Addr (arbitrarily nested right hand side)
        to three address *)
-    let threeAddr = DebugTo3Addr.to3Addr ir in
+    let threeAddr = To3Addr.to3Addr ir in
     say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 
     (* Three address to Two address *)
