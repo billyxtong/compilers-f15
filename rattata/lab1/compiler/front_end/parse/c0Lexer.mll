@@ -120,7 +120,7 @@ rule initial =
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }
 
-  | id as name  { let id = Symbol.symbol name in T.IDENT id }
+  | id as name  { T.IDENT name }
 
   | "/*"        { enterComment lexbuf; comment lexbuf }
   | "*/"        { ErrorMsg.error (ParseState.ext (start lexbuf, start lexbuf))

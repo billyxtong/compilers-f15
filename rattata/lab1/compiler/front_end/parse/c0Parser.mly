@@ -35,6 +35,14 @@ module D = Datatypesv1
 (*   | (id, Some oper, exp) -> *)
 (*       A.Assign(id, mark (A.OpExp (oper, [A.Var(id); exp])) (left, right)) *)
 
+let expand_asnop id op e =
+    match op with
+       ASSIGN -> A.SimpAssign (id, A.EQ, e)
+     | PLUSEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, ADD, e)
+     | MINUSEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, SUB, e)
+     | STAREQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, MUL, e)
+     | SLASHEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, FAKEDIV, e)
+     | PERCENTEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, FAKEMOD, e)
 %}
 
 %token EOF
@@ -44,7 +52,7 @@ module D = Datatypesv1
 %token SEMI
 %token <Int32.t> DECCONST
 %token <Int32.t> HEXCONST
-%token <Symbol.t> IDENT
+%token <string> IDENT
 %token RETURN
 %token INT
 %token MAIN
@@ -86,13 +94,13 @@ stmts :
 
 stmt :
   decl SEMI                      { A.PreElabDecl $1 }
- | simp SEMI                     { A.SimpAssign $1  }
+ | IDENT asnop exp SEMI       { A.SimpAssign ($1, $2, $3)  }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
  ;
 
 decl :
-   INT IDENT                     { A.NewVar ($2, INT)}
- | INT IDENT ASSIGN exp         { Init ($2, INT, $4) }
+   INT IDENT                     { A.NewVar ($2, A.INT)}
+ | INT IDENT ASSIGN exp         { A.Init ($2, A.INT, $4) }
  | INT MAIN                     { A.NewVar ("main", A.INT) }
  | INT MAIN ASSIGN exp          { A.Init ("main", A.INT, $4) }
  ;
@@ -110,24 +118,32 @@ lvalue :
 exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
- | MAIN                          { A.Ident "main" }
- | IDENT                         { A.Ident $1 }
+ | MAIN                          { A.IdentExpr "main" }
+ | IDENT                         { A.IdentExpr $1 }
  | exp PLUS exp                  { A.PreElabBinop
-				     ($1 D.TmpBinop D.ADD, $3 }
+				     ($1, D.TmpBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
-				     ($1 D.TmpBinop D.SUB, $3 }
+				     ($1, D.TmpBinop D.SUB, $3) }
  | exp STAR exp                  { A.PreElabBinop
-				     ($1 D.TmpBinop D.MUL, $3 }
+				     ($1, D.TmpBinop D.MUL, $3) }
  | exp SLASH exp                  { A.PreElabBinop
-				     ($1 D.TmpBinop D.FAKEDIV, $3 }
+				     ($1, D.TmpBinop D.FAKEDIV, $3) }
  | exp PERCENT exp                  { A.PreElabBinop
-				     ($1 D.TmpBinop D.FAKEMOD, $3 }
+				     ($1, D.TmpBinop D.FAKEMOD, $3) }
  | MINUS exp %prec UNARY         { A.UnaryMinus $2 }
  ;
 
 intconst :
-  DECCONST           { A.ConstExp $1 }
- | HEXCONST          { A.ConstExp $1 }
+  DECCONST           { A.PreElabConstExpr (match Int32.to_int $1 with
+			     Some x -> x
+			   | None ->
+			       failwith "could not convert 32bit int")
+		     }
+ | HEXCONST          { A.PreElabConstExpr (match Int32.to_int $1 with
+			     Some x -> x
+			   | None ->
+			       failwith "could not convert 32bit int")
+		     }
  ;
 
 asnop :
