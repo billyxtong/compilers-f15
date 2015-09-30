@@ -26,7 +26,6 @@ type elabAST = stmt list
    Unfortunately, we have to wrap everything in different
    constructors here, in order to keep in separate from
    Post-Elab AST *)
-type leftHandIdent = Ident of ident
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = PreElabConstExpr of const
                  | IdentExpr of ident
