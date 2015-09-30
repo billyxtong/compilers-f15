@@ -83,6 +83,10 @@ let rec tc_stms env ast ext ret =
                raise ErrorMsg.Error)
   | A.PreElabReturn(e)::stms -> 
       let () = tc_exp env e ext in
+      (* apparently all variables defined before the first return
+         get to be treated as initialized...although those declared
+         after don't *)
+      let () = H.iter (fun id _ -> H.replace env id true) env in
       tc_stms env stms ext true
       (* CURRENTLY ASSUMING NOTHING COMES AFTER RETURN WHICH IS FALSE
          WITH CONTROL FLOW *)
