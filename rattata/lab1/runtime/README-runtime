@@ -7,6 +7,8 @@ are implementing your compiler.
 
 % cp -p runtime/* compiler/
 
+IF YOU DO THIS, MAKE SURE YOU DO NOT CHECK IN THE RUNTIME FILES
+
 Now the driver can link the runtime with your generated
 <file>.s, using the command
 
