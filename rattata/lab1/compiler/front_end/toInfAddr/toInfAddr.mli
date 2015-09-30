@@ -6,4 +6,4 @@
  * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
  *)
 
-val toInfAddr : Ast.program -> Tree.stm list
+val toInfAddr : Ast.preElabAST -> Tree.stm list

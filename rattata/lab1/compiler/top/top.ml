@@ -47,8 +47,8 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     say_if verbose (fun () -> "Parsing... " ^ source);
     if dump_parsing then ignore (Parsing.set_trace true);
 
-    let ast = Parse.parse source in
-    say_if dump_ast (fun () -> Ast.Print.pp_program ast);
+    let ast = Parse.parse source in ();
+    (* say_if dump_ast (fun () -> Ast.Print.pp_program ast); *)
 
     (* Typecheck *)
     say_if verbose (fun () -> "Typecking...");
@@ -62,7 +62,6 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
 
     (* Convert Inf Addr (arbitrarily nested right hand side)
        to three address *)
-    say_if verbose (fun () -> "Allocating Registers");
     let threeAddr = DebugTo3Addr.to3Addr ir in
     say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 

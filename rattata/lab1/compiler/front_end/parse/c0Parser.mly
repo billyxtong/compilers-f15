@@ -37,12 +37,18 @@ module D = Datatypesv1
 
 let expand_asnop id op e =
     match op with
-       ASSIGN -> A.SimpAssign (id, A.EQ, e)
-     | PLUSEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, ADD, e)
-     | MINUSEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, SUB, e)
-     | STAREQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, MUL, e)
-     | SLASHEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, FAKEDIV, e)
-     | PERCENTEQ -> A.SimpAssign (id, A.EQ, A.PreElabBinop(id, FAKEMOD, e)
+       A.EQ -> A.SimpAssign (id, A.EQ, e)
+     | A.PLUSEQ -> A.SimpAssign (id, A.EQ,
+	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.ADD, e))
+     | A.SUBEQ -> A.SimpAssign (id, A.EQ,
+	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.SUB, e))
+     | A.MULEQ -> A.SimpAssign (id, A.EQ,
+             A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.MUL, e))
+     | A.DIVEQ -> A.SimpAssign (id, A.EQ,
+             A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.FAKEDIV, e))
+     | A.MODEQ -> A.SimpAssign (id, A.EQ,
+             A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.FAKEMOD, e))
+     | _ -> assert(false)		 
 %}
 
 %token EOF
@@ -106,11 +112,11 @@ decl :
  ;
 
 simp :
-  lvalue asnop exp %prec ASNOP   { A.SimpAssign ($1, $2, $3) }
+  lvalue asnop exp %prec ASNOP   { expand_asnop $1 $2 $3 }
   ;
 
 lvalue :
-  IDENT                         { $1 }
+   IDENT                        { $1 }
  | MAIN                         { "main" }
  | LPAREN lvalue RPAREN         { $2 }
  ;

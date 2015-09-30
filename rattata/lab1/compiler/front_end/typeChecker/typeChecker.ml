@@ -18,10 +18,10 @@
  *
  *)
 
-open Core.Std
+(* open Core.Std *)
 
 module A = Ast
-module S = Symbol.Map
+module H = Hashtbl
 
 (* tc_exp : unit Symbol.Map.t -> Ast.exp -> Mark.ext option -> unit *)
 let rec tc_exp env ast ext =
@@ -71,36 +71,38 @@ let rec tc_exp' env ast ext =
 let rec tc_stms env ast ext ret =
   match ast with
     [] -> ret
-  | A.Declare(d)::stms ->
+  | A.PreElabDecl(d)::stms ->
       (match d with
-        A.NewVar id ->
-          (match S.find env id with
-            Some _ -> ErrorMsg.error None
-                ("redeclared variable `" ^ Symbol.name id);
-              raise ErrorMsg.Error
-          | None -> tc_stms (S.add env ~key:id ~data:false) stms ext ret)
-      | A.Init (id, e) ->
-          tc_stms env (A.Declare(A.NewVar id)::A.Assign(id, e)::stms) ext ret)
-  | A.Assign(id,e)::stms ->
+        A.NewVar (id, idType) ->
+          (try let _ = H.find env id in
+               ErrorMsg.error None ("redeclared variable" ^ id ^ "\n");
+               raise ErrorMsg.Error
+           with Not_found ->
+               let () = H.add env id false in
+               tc_stms env ast ext ret)
+      | A.Init (id, idType, e) ->
+          tc_stms env ((A.PreElabDecl (A.NewVar (id, idType)))
+          ::(A.SimpAssign(id, A.EQ, e))::stms) ext ret)
+          (* tc_stms env (A.Declare(A.NewVar id)::A.Assign(id, e)::stms) ext ret *)
+  | A.SimpAssign(id, op, e)::stms ->
       tc_exp env e ext;
-      (match S.find env id with
-        None -> ErrorMsg.error ext
-            ("undeclared variable `" ^ Symbol.name id ^ "'");
-          raise ErrorMsg.Error
-            (* just got initialized *)
-      | Some false -> tc_stms (S.add env ~key:id ~data:true) stms ext ret
-            (* already initialized *)
-      | Some true -> tc_stms env stms ext ret)
-  | A.Return(e)::stms ->
+          (try
+              let _ = H.find env id in (* it's declared, good *)
+              let _ = H.replace env id true (* it's now initialized *) in
+              tc_stms env ast ext ret
+           with Not_found -> 
+               ErrorMsg.error None ("undeclared variable" ^ id ^ "\n");
+               raise ErrorMsg.Error)
+  | A.PreElabReturn(e)::stms ->
       tc_exp env e ext;
       (* Define all variables declared before return *)
-      let env = S.map env ~f:(fun _ -> true) in
+      (* let env = S.map env ~f:(fun _ -> true) in *)
       tc_stms env stms ext true
-  | A.Markeds(marked_stm)::stms ->
-      tc_stms env ((Mark.data marked_stm)::stms) (Mark.ext marked_stm) ret
-
-(* populate environment with declarations. false is for uninitialized. *)
-let rec typecheck' stms = tc_stms S.empty stms None false
+        
+(* env maps declared vars to boolean: whether or not it has been
+   initialized *)
+let rec typecheck' stms = let env = H.create 50 in
+  tc_stms env stms None false
 
 let typecheck prog =
   if typecheck' prog then ()

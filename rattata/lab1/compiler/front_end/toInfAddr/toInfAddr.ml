@@ -3,8 +3,6 @@ module A = Ast
 module T = Tree
 module H = Hashtbl
 
-let varToTmpsMap = H.create 50
-
 let trans_oper = function
     ADD -> T.ADD
   | SUB -> T.SUB
@@ -12,14 +10,18 @@ let trans_oper = function
   | FAKEDIV -> T.DIV
   | FAKEMOD -> T.MOD
 
-let rec trans_exp = function
+let rec trans_exp varToTmpMap = function
        A.PreElabConstExpr c -> T.CONST (Int32.of_int c)
      | A.IdentExpr id ->
-          (try T.TEMP (H.find varToTmpsMap id)
-           with Not_found -> failwith "undeclared variable I think\n")
+          (try T.TEMP (H.find varToTmpMap id)
+           with Not_found ->
+             let () = print_string("Undeclared: " ^ id ^ "\n") in
+             assert(false))
      | A.PreElabBinop (e1, TmpBinop op, e2) ->
-          T.BINOP (trans_oper op, trans_exp e1, trans_exp e2)
-     | A.UnaryMinus e -> T.BINOP (T.SUB, T.CONST Int32.zero, trans_exp e)
+          T.BINOP (trans_oper op, trans_exp varToTmpMap e1,
+                   trans_exp varToTmpMap e2)
+     | A.UnaryMinus e ->
+          T.BINOP (T.SUB, T.CONST Int32.zero, trans_exp varToTmpMap e)
                               
     (* after type-checking, id must be declared; do not guard lookup *)
   (*   A.Var id -> T.TEMP (S.find_exn env id) *)
@@ -31,22 +33,35 @@ let rec trans_exp = function
   (* | A.Marked marked_exp -> trans_exp env (Mark.data marked_exp) *)
   (* | _ -> assert false *)
 
-(* translate the statement *)
-(* trans_stms : Temp.temp Symbol.table -> A.stm list -> Tree.stm list *)
-let rec trans_stms = function
+(* Creates a new tmp for this variable, unless this variable has
+   already been declared, in which case throws an error. *)
+let updateTmpMap varToTmpMap id =
+     try let _ = H.find varToTmpMap id in
+         let () = print_string("Redeclared: " ^ id ^ "\n") in
+         assert(false)
+     with Not_found -> let t = Temp.create() in
+let () =print_string("newVar: " ^ id ^" as " ^string_of_int(t) ^ "\n") in
+       H.add varToTmpMap id t
+
+(* currently assuming all asnops are just eq, because we expanded
+   asnops in c0Parser.mly *)
+let rec trans_stms varToTmpMap = function
     (A.PreElabDecl d)::stms ->
-      (match d with
-        A.NewVar (id, idType) -> trans_stms stms
-      | A.Init (id, idType, e) -> trans_stms ((A.Assign (id, e))::stms))
-  | (A.Assign (id,e))::stms ->
-      let t = Temp.create () in
-      let env' = S.add env ~key:id ~data:t in
-      T.MOVE (T.TEMP t, trans_exp env e) :: trans_stms env' stms
-  | (A.Return e)::_ ->
-      (* ignore code after return *)
-      T.RETURN (trans_exp env e) :: []
-  | (A.Markeds marked_stm)::stms ->
-      trans_stms env ((Mark.data marked_stm)::stms)
+        (match d with
+           A.NewVar (id, idType) ->
+             let () = updateTmpMap varToTmpMap id in
+             trans_stms varToTmpMap stms
+         | A.Init (id, idType, e) ->
+             let () = updateTmpMap varToTmpMap id in
+             trans_stms varToTmpMap ((A.SimpAssign (id, A.EQ, e))::stms))
+  | (A.SimpAssign (id, op, e))::stms ->
+        let dest = T.TEMP (try H.find varToTmpMap id
+                   with Not_found -> failwith "undeclared var") in
+        T.MOVE (dest, trans_exp varToTmpMap e) :: trans_stms varToTmpMap stms
+  | (A.PreElabReturn e)::stms ->
+    (* assume there is no code after return CHANGEEEEEEEEEEEE FOR L2 *)
+      T.RETURN (trans_exp varToTmpMap e) :: []
   | [] -> assert false                  (* There must be a return! *)
 
-let toInfAddr stms = trans_stms S.empty stms
+let toInfAddr stms = let varToTmpMap = H.create 50 in
+                     trans_stms varToTmpMap stms
