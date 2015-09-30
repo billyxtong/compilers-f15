@@ -1,0 +1,74 @@
+L1 Compiler by Ben Plaut (bplaut)
+and Billy Tong (wxt)
+
+External libraries:
+1. Using things like ocamlfind in the Makefile, which were
+part of the Makefile given in the starter code.
+2. Using normal built-in OCaml libraries, just
+as List, Hashtbl, etc.
+3. Using Jane Street's Core.Std in some places, mostly not
+though. One place we are is that we're using their priority
+queue in maximum cardinality search.
+
+Design:
+The file util/datatypesv1 contains pretty much all of the
+datatypes we use. We have different types for 3 address code,
+2 address code, and assembly (among others), in order to keep
+them as separate as possible. For example, only temps and
+constants are allowed in 3 address and 2 address code (so no
+registers, no memory addresses). We're not actually using
+our datatypes for every up to and including 3 address
+currently though (we're just using the built-in datatypes).
+
+The top level file is top/top.ml (hence the name), which
+was given in the starter code. It calls each piece of our
+compiler in turn.
+
+Compiler flow is as follows:
+1. We just use the starter code to take us all the way from the
+input to what we called "Infinite Address code", which is
+basically code that only uses temps, but allows arbitrarily
+nested right hand sides. Although we wrote datatypes for
+this, we're not actually using them yet. The result of this
+step is a Tree.stm list (a built-in type).
+
+2. We modified the code to go from infinite address to 3
+address (what was called codegen in lecture, I believe) a bit,
+but that's mostly the same too. Also not using these
+datatypes yet, the result is stil a Tree.stm list, but
+this one will not have nested right hand sides. This is not
+enforced by the datatype itself, unfortunately (part of the
+reason we plan to use a datatype that will enforce this).
+
+3. Then the to2Addr directory takes us from 3 address to 2
+address (as per the name), which is pretty straightforward.
+Everything is still temps at this point. We are using
+our datatype for this, which keeps everything pretty abstract.
+The result of this step is of type tmp2AddrProg.
+
+4. Next we do "register allocation". This is in quotes because
+currently we just assume everything interferes and put it
+all on the stack :P We'll write actual register allocation
+next, we promise! We wrote the graph stuff, we just haven't
+plugged it in yet.
+The result of this step is of type assemProg, which is mostly
+assembly, but still contains memory-to-memory instructions,
+which are dealt with in step 5, and instructions like
+"div %ecx, %esi", for example, which are dealt with in step 6.
+
+5. Here we deal with memory-to-memory instructions, just
+by moving one of the operands to the spillage register and
+moving it back to the proper destination when we're done.
+
+6. Next we deal with "wonky" instructions (credit to Grant
+for that terminology, which we definitely plan to use for
+the entirety of the course :)  ), such as idiv.
+
+Then we're done! Yay.
+
+Other things:
+- I wrote a different version of to3Addr which tries to
+generate as few temps as possible. This was mostly for
+debugging purposes, as it was tedious to look through
+huge amounts of assembly. This also seems to pass all the
+tests though. This is in the directory "forDebug".
