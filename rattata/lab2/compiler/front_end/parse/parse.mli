@@ -10,4 +10,4 @@
 (* parse filename = ast
  * will raise ErrorMsg.Error in case of lexing or parsing error
  *)
-val parse : string -> Ast.program
+val parse : string -> Ast.preElabAST

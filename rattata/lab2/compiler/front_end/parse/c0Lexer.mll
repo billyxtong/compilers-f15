@@ -152,7 +152,7 @@ rule initial =
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }
 
-  | id as name  { let id = Symbol.symbol name in P.IDENT id }
+  | id as name  { P.IDENT name }
 
   | "/*"        { enterComment lexbuf; comment lexbuf }
   | "*/"        { ErrorMsg.error (ParseState.ext (start lexbuf, start lexbuf))
