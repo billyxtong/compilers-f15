@@ -17,7 +17,7 @@ val addEdge: graph -> (vertex * vertex) -> unit
 
 val hasEdge: graph -> (vertex * vertex) -> bool
 
-val getNeighbors: graph -> vertex -> neighbors
+val getNeighbors: graph -> vertex -> neighbors option
                                  
 (* Given a graph (an interference graph) and the vertex at which
    to start, returns a simplicial elimination order of the
