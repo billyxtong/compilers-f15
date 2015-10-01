@@ -47,6 +47,7 @@ let munch_instr = function
         instrs @ T.RETURN dest :: []
   | _ -> assert false
 
+(* just removes all move instrs with same src and dest *)
 let rec finalPass = function
     [] -> []
   | instr::instrs -> match instr with

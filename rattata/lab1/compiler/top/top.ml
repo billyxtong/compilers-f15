@@ -30,12 +30,11 @@ let spec =
   +> flag "--dump-NoMemMem" no_arg ~doc:" Pretty print after handling Mem-Mem instrs"
   +> flag "--dump-wonky" no_arg ~doc:" Pretty print the wonky assembly"
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
+  +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
 
-let say_if flag s =
-  if flag then say (s ()) else ()
-
-let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final () =
+let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
   try
+    let say_if flag s = if (dump_all || flag) then say (s ()) else () in
    
     let source = match files with
     | [] -> say "Error: no input file provided"; raise EXIT
@@ -62,7 +61,7 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
 
     (* Convert Inf Addr (arbitrarily nested right hand side)
        to three address *)
-    let threeAddr = To3Addr.to3Addr ir in
+    let threeAddr = DebugTo3Addr.to3Addr ir in
     say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 
     (* Three address to Two address *)

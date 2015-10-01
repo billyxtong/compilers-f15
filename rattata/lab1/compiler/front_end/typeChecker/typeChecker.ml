@@ -88,8 +88,6 @@ let rec tc_stms env ast ext ret =
          after don't *)
       let () = H.iter (fun id _ -> H.replace env id true) env in
       tc_stms env stms ext true
-      (* CURRENTLY ASSUMING NOTHING COMES AFTER RETURN WHICH IS FALSE
-         WITH CONTROL FLOW *)
         
 (* env maps declared vars to boolean: whether or not it has been
    initialized *)

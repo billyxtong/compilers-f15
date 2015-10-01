@@ -33,34 +33,32 @@ let rec trans_exp varToTmpMap = function
   (* | A.Marked marked_exp -> trans_exp env (Mark.data marked_exp) *)
   (* | _ -> assert false *)
 
-(* Creates a new tmp for this variable, unless this variable has
-   already been declared, in which case throws an error. *)
-let updateTmpMap varToTmpMap id =
-     try let _ = H.find varToTmpMap id in
-         let () = print_string("Redeclared: " ^ id ^ "\n") in
-         assert(false)
-     with Not_found -> let t = Temp.create() in
-       H.add varToTmpMap id t
-
 (* currently assuming all asnops are just eq, because we expanded
    asnops in c0Parser.mly *)
 let rec trans_stms varToTmpMap = function
     (A.PreElabDecl d)::stms ->
         (match d with
            A.NewVar (id, idType) ->
-             let () = updateTmpMap varToTmpMap id in
              trans_stms varToTmpMap stms
          | A.Init (id, idType, e) ->
-             let () = updateTmpMap varToTmpMap id in
              trans_stms varToTmpMap ((A.SimpAssign (id, A.EQ, e))::stms))
   | (A.SimpAssign (id, op, e))::stms ->
-        let dest = T.TEMP (try H.find varToTmpMap id
-                   with Not_found -> failwith "undeclared var") in
-        T.MOVE (dest, trans_exp varToTmpMap e) :: trans_stms varToTmpMap stms
+        let expInfAddr = trans_exp varToTmpMap e in
+        let t = Temp.create() in
+        (* We have to do the above line before adding t for the following
+           reason. First, a variable might be assigned to multiple temps,
+           since we create a new temp for every simpAssign. Second,
+           assignment evaluates right hand side first, so we need to
+           do trans_expr with the previous binding of id *)
+        let () = H.add varToTmpMap id t in
+        T.MOVE (T.TEMP t, expInfAddr)
+        :: trans_stms varToTmpMap stms
   | (A.PreElabReturn e)::stms ->
     (* assume there is no code after return CHANGEEEEEEEEEEEE FOR L2 *)
       T.RETURN (trans_exp varToTmpMap e) :: []
   | [] -> assert false                  (* There must be a return! *)
 
+(* We assume that this is run after typechecking, so everything is
+   declared initialized, etc *)
 let toInfAddr stms = let varToTmpMap = H.create 50 in
                      trans_stms varToTmpMap stms
