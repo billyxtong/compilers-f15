@@ -53,7 +53,13 @@ let expand_asnop a b =
 %token LBRACE RBRACE
 %token LPAREN RPAREN
 %token UNARY ASNOP
-%token MINUSMINUS
+%token MINUSMINUS PLUSPLUS
+%token LOG_NOT LOG_AND LOG_OR
+%token NEQ EQ LT LEQ GT GEQ
+%token BIT_NOT BIT_AND BIT_OR XOR
+%token AND_EQ OR_EQ XOR_EQ
+%token LSHIFT RSHIFT LSHIFT_EQ RSHIFT_EQ
+%token COLON QUESMARK       
 /* UNARY and ASNOP are dummy terminals.
  * We need dummy terminals if we wish to assign a precedence
  * to a rule that does not correspond to the precedence of

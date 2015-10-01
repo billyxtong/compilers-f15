@@ -20,7 +20,7 @@ open Core.Std
 
 module A = Ast
 module S = Symbol
-module T = C0Parser
+module P = C0Parser
 
 let start = Lexing.lexeme_start
 let l_end = Lexing.lexeme_end
@@ -39,26 +39,26 @@ let exitComment () =
 
 let decnumber s lexbuf =
   try
-    T.DECCONST (Int32.of_string (if s = "2147483648" then "0x80000000"
+    P.DECCONST (Int32.of_string (if s = "2147483648" then "0x80000000"
                                  else s))
   with Failure _ ->
     ErrorMsg.error (ParseState.ext (start lexbuf, l_end lexbuf))
       ("cannot parse integral constant `" ^ text lexbuf ^ "'");
-    T.DECCONST Int32.zero
+    P.DECCONST Int32.zero
 
 let hexnumber s lexbuf =
   try
-    T.HEXCONST (Int32.of_string s)
+    P.HEXCONST (Int32.of_string s)
   with Failure _ ->
     ErrorMsg.error (ParseState.ext (start lexbuf, l_end lexbuf))
       ("cannot parse integral constant `" ^ text lexbuf ^ "'");
-    T.HEXCONST Int32.zero
+    P.HEXCONST Int32.zero
 
 let eof () =
   (if !commentLevel > 0 then
     ErrorMsg.error (ParseState.ext (!commentPos, !commentPos))
       "unterminated comment");
-  T.EOF
+  P.EOF
 
 }
 
@@ -73,54 +73,86 @@ rule initial =
     ws+         { initial lexbuf }
   | '\n'        { ParseState.newline (start lexbuf); initial lexbuf }
 
-  | '{'         { T.LBRACE }
-  | '}'         { T.RBRACE }
-  | '('         { T.LPAREN }
-  | ')'         { T.RPAREN }
+  | '{'         { P.LBRACE }
+  | '}'         { P.RBRACE }
+  | '('         { P.LPAREN }
+  | ')'         { P.RPAREN }
 
-  | ';'         { T.SEMI }
+  | ';'         { P.SEMI }
 
-  | '='         { T.ASSIGN }
-  | "+="        { T.PLUSEQ }
-  | "-="        { T.MINUSEQ }
-  | "*="        { T.STAREQ }
-  | "/="        { T.SLASHEQ }
-  | "%="        { T.PERCENTEQ }
+  | '='         { P.ASSIGN }
+  | "+="        { P.PLUSEQ }
+  | "-="        { P.MINUSEQ }
+  | "*="        { P.STAREQ }
+  | "/="        { P.SLASHEQ }
+  | "%="        { P.PERCENTEQ }
 
-  | '+'         { T.PLUS }
-  | '-'         { T.MINUS }
-  | '*'         { T.STAR }
-  | '/'         { T.SLASH }
-  | '%'         { T.PERCENT }
+  | '+'         { P.PLUS }
+  | '-'         { P.MINUS }
+  | '*'         { P.STAR }
+  | '/'         { P.SLASH }
+  | '%'         { P.PERCENT }
+
+  | "!"         { P.LOG_NOT }
+  | "&&"        { P.LOG_AND }
+  | "||"        { P.LOG_OR }
+      
+  | "!="        { P.NEQ }
+  | "=="        { P.EQ }
+  | "<"         { P.LT }
+  | "<="        { P.LEQ }
+  | ">"         { P.GT }
+  | ">="        { P.GEQ }
+
+  | "~"         { P.BIT_NOT }
+  | "&"         { P.BIT_AND }
+  | "|"         { P.BIT_OR }
+  | "^"         { P.XOR }
+
+  | "&="        { P.AND_EQ }
+  | "|="        { P.OR_EQ }
+  | "^="        { P.XOR_EQ }    
+
+  | "<<="       { P.LSHIFT_EQ }
+  | ">>="       { P.RSHIFT_EQ }
+  | "<<"        { P.LSHIFT }
+  | ">>"        { P.RSHIFT }
+
+  | ":"         { P.COLON }
+  | "?"         { P.QUESMARK }
+
+  | "--"          { P.MINUSMINUS }
+  | "++"          { P.PLUSPLUS }
+      
+  | "true"        { P.TRUE }
+  | "false"       { P.FALSE }
+  | "bool"        { P.BOOL }
+
+  | "if"          { P.IF }
+  | "else"        { P.ELSE }
+  | "while"       { P.WHILE }
+  | "for"         { P.FOR }
+  | "break"       { P.BREAK }
 
   | "struct"      { assert false }
   | "typedef"     { assert false }
-  | "if"          { assert false }
-  | "else"        { assert false }
-  | "while"       { assert false }
-  | "for"         { assert false }
   | "continue"    { assert false }
-  | "break"       { assert false }
   | "assert"      { assert false }
-  | "true"        { assert false }
-  | "false"       { assert false }
   | "NULL"        { assert false }
   | "alloc"       { assert false }
   | "alloc_array" { assert false }
-  | "bool"        { assert false }
   | "void"        { assert false }
   | "char"        { assert false }
   | "string"      { assert false }
-  | "--"          { T.MINUSMINUS }   (* Illegal *)
 
-  | "return"    { T.RETURN }
-  | "int"       { T.INT }
-  | "main"      { T.MAIN }
+  | "return"    { P.RETURN }
+  | "int"       { P.INT }
+  | "main"      { P.MAIN }
 
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }
 
-  | id as name  { let id = Symbol.symbol name in T.IDENT id }
+  | id as name  { let id = Symbol.symbol name in P.IDENT id }
 
   | "/*"        { enterComment lexbuf; comment lexbuf }
   | "*/"        { ErrorMsg.error (ParseState.ext (start lexbuf, start lexbuf))
