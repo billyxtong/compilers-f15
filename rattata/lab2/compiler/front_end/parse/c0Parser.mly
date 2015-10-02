@@ -102,9 +102,9 @@ stmt :
  ;
 
 simp :
-   decl SEMI                     { A.PreElabDecl $1 }
+   decl                     { A.PreElabDecl $1 }
  | lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
-/* | exp                           { A.SimpStmtExpr $1 }*/
+ | exp                           { A.SimpStmtExpr $1 }
  | lvalue postop		 { expand_postop $1 $2 }
   ;
 
