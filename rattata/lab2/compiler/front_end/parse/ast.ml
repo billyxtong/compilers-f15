@@ -33,7 +33,8 @@ type preElabExpr = PreElabConstExpr of const
 type preElabDecl = NewVar of ident * c0type
                  | Init of (ident * c0type * preElabExpr)
 type simpStmt = PreElabDecl of preElabDecl                        
-              | SimpAssiegn of ident * assignOp * preElabExpr
+              | SimpAssign of ident * assignOp * preElabExpr
+              | SimpStmtExpr of preElabExpr
 type elseopt = EmptyElse | PreElabElse of preElabStmt
 type simpopt = EmptySimp | HasSimpStmt of simpStmt
 type control = PreElabIf of preElabExpr * preElabStmt * elseopt

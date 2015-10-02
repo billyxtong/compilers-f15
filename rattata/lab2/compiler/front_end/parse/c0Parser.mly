@@ -35,8 +35,8 @@ let expand_asnop id op e =
 
 let expand_postop id op =
     match op with
-       A.PLUSPLUS -> expand_asnop id A.PLUSEQ 1
-     | A.MINUSMINUS -> expand_asnop id A.SUBEQ 1
+       A.PLUSPLUS -> expand_asnop id A.PLUSEQ (A.PreElabConstExpr 1)
+     | A.MINUSMINUS -> expand_asnop id A.SUBEQ (A.PreElabConstExpr 1)
 		  
 %}
 
@@ -96,15 +96,15 @@ stmts :
  ;
 
 stmt :
- | simp SEMI                     { $1 }
- | control                       { $1 }
- | block                         { $1 }
+ | simp SEMI                     { A.SimpStmt $1 }
+ | control                       { A.Control $1 }
+ | block                         { A.Block $1 }
  ;
 
 simp :
    decl SEMI                     { A.PreElabDecl $1 }
- | lvalue asnop exp %prec ASNOP   { expand_asnop $1 $2 $3 }
- | exp                           { $1 }
+ | lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
+ | exp                           { A.SimpStmt $1 }
  | lvalue postop		 { expand_postop $1 $2 }
   ;
 
@@ -117,17 +117,18 @@ c0type :
  | BOOL 		         { A.BOOL }
     
 simpopt :
-   /* empty */                  {}
- | simp				{}
+   /* empty */                  { EmptySimp }
+ | simp				{ HasSimpOpt $1 }
 
 elseopt :
-   /* empty */                  {}
- | ELSE stmt				{}
+   /* empty */                  { EmptyElse }
+ | ELSE stmt		        { PreElabElse $2 }
 
 control :
-   IF LPAREN exp RPAREN stmt elseopt {}
- | WHILE LPAREN exp RPAREN stmt {}
- | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt {}
+   IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
+ | WHILE LPAREN exp RPAREN stmt { A.PreElabWhile ($3, $5) }
+ | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
+       {PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
    
 decl :
