@@ -16,9 +16,14 @@ open Datatypesv1
    file (which I have not yet written) for more info. *)
 type ident = string
 type expr = ConstExpr of const | Ident of ident
-          | ASTBinop of expr * tmpBinop * expr
+          | ASTBinop of expr * intBinop * expr
 and assignStmt = ident * expr 
-type stmt = Decl of ident | AssignStmt of assignStmt | Return of expr
+type stmt = Decl of ident * c0type | AssignStmt of assignStmt
+          | If of expr * stmt * stmt
+          | While of expr * stmt
+          | Seq of stmt * stmt
+          | Nop
+          | Return of expr
 type elabAST = stmt list
 
 (* Pre-Elab AST
