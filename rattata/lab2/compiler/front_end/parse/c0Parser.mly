@@ -134,8 +134,8 @@ control :
 decl :
    c0type IDENT                     { A.NewVar ($2, $1)}
  | c0type IDENT ASSIGN exp         { A.Init ($2, $1, $4) }
- | INT MAIN                     { A.NewVar ("main", A.INT) }
- | INT MAIN ASSIGN exp          { A.Init ("main", A.INT, $4) }
+ | INT MAIN                     { A.NewVar ("main", D.INT) }
+ | INT MAIN ASSIGN exp          { A.Init ("main", D.INT, $4) }
  ;
 
 lvalue :
@@ -160,7 +160,8 @@ exp :
  | exp PERCENT exp                  { A.PreElabBinop
 				     ($1, D.TmpBinop D.FAKEMOD, $3) }
  | MINUS exp %prec UNARY         { A.PreElabBinop
-				     (0, D.TmpBinop D.Sub, $2 ) }
+				     (PreElabConstExpr 0,
+				      D.TmpBinop D.SUB, $2 ) }
  ;
 
 intconst :
