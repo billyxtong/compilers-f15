@@ -102,9 +102,9 @@ stmt :
  ;
 
 simp :
-   decl SEMI                     { A.PreElabDecl $1 }
+   decl                          { A.PreElabDecl $1 }
  | lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
-/* | exp                           { A.SimpStmtExpr $1 }*/
+ | exp                           { A.SimpStmtExpr $1 }
  | lvalue postop		 { expand_postop $1 $2 }
   ;
 
@@ -130,7 +130,7 @@ control :
    IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
  | WHILE LPAREN exp RPAREN stmt { A.PreElabWhile ($3, $5) }
  | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
-       {PreElabFor ($3, $5, $7, $9) }
+       {A.PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
 	  
 decl :
@@ -162,7 +162,7 @@ exp :
  | exp PERCENT exp                  { A.PreElabBinop
 				     ($1, D.TmpBinop D.FAKEMOD, $3) }
  | MINUS exp %prec UNARY         { A.PreElabBinop
-				     (PreElabConstExpr 0,
+				     (A.PreElabConstExpr 0,
 				      D.TmpBinop D.SUB, $2 ) }
  ;
 
