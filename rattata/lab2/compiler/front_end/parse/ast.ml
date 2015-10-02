@@ -18,13 +18,14 @@ type ident = string
 type expr = ConstExpr of const | Ident of ident
           | ASTBinop of expr * intBinop * expr
 and assignStmt = ident * expr 
-type stmt = Decl of ident * c0type | AssignStmt of assignStmt
+type stmt = Decl of ident * c0type * stmt
+          | AssignStmt of assignStmt
           | If of expr * stmt * stmt
           | While of expr * stmt
           | Seq of stmt * stmt
           | Nop
           | Return of expr
-type elabAST = stmt list
+type postElabAST = stmt list
 
 (* Pre-Elab AST
    Unfortunately, we have to wrap everything in different
