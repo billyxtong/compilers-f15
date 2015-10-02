@@ -1,4 +1,4 @@
-type c0type = INT | PTR (* will add more eventually *)
+type c0type = INT | BOOL (* will add more eventually *)
 (* everything in c0 is an int! *)              
 type const = int
 

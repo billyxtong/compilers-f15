@@ -20,8 +20,6 @@ let rec trans_exp varToTmpMap = function
      | A.PreElabBinop (e1, TmpBinop op, e2) ->
           T.BINOP (trans_oper op, trans_exp varToTmpMap e1,
                    trans_exp varToTmpMap e2)
-     | A.UnaryMinus e ->
-          T.BINOP (T.SUB, T.CONST Int32.zero, trans_exp varToTmpMap e)
                               
     (* after type-checking, id must be declared; do not guard lookup *)
   (*   A.Var id -> T.TEMP (S.find_exn env id) *)

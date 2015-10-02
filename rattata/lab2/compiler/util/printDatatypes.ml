@@ -4,7 +4,7 @@ open String
 let c0typeToString (c : c0type) =
   match c with
         INT -> "int"
-      | PTR -> "pointer"
+      | BOOL -> "bool"
 
 let constToString (c : const) = string_of_int(c)
 

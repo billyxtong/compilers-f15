@@ -11,7 +11,6 @@
 
 open Datatypesv1
 
-type c0type = INT | BOOL
 (* Post-Elab AST
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
@@ -26,14 +25,24 @@ type elabAST = stmt list
    Unfortunately, we have to wrap everything in different
    constructors here, in order to keep in separate from
    Post-Elab AST *)
+type postOp = PLUSPLUS | MINUSMINUS
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = PreElabConstExpr of const
                  | IdentExpr of ident
                  | PreElabBinop of preElabExpr * tmpBinop * preElabExpr
-                 | UnaryMinus of preElabExpr
 type preElabDecl = NewVar of ident * c0type
                  | Init of (ident * c0type * preElabExpr)
-type preElabStmt = PreElabDecl of preElabDecl
-                 | SimpAssign of ident * assignOp * preElabExpr
-                 | PreElabReturn of preElabExpr
-type preElabAST = preElabStmt list
+type simpStmt = PreElabDecl of preElabDecl                        
+              | SimpAssiegn of ident * assignOp * preElabExpr
+type elseopt = EmptyElse | PreElabElse of preElabStmt
+type simpopt = EmptySimp | HasSimpStmt of simpStmt
+type control = PreElabIf of preElabExpr * preElabStmt * elseopt
+             | PreElabWhile of preElabExpr * preElabStmt
+             | PreElabFor of simpopt * preElabExpr * simpopt *
+                             preElabStmt
+             | PreElabReturn of preElabExpr
+type preElabStmt = SimpStmt of simpStmt
+                 | Control of control
+                 | Block of block
+and block = preElabStmt list                      
+type preElabAST = block
