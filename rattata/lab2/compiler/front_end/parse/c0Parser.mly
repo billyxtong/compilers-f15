@@ -104,7 +104,7 @@ stmt :
 simp :
    decl SEMI                     { A.PreElabDecl $1 }
  | lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
- | exp                           { A.SimpStmt $1 }
+ | exp                           { A.SimpStmtExpr $1 }
  | lvalue postop		 { expand_postop $1 $2 }
   ;
 
@@ -113,16 +113,16 @@ postop :
  | MINUSMINUS 	                 { A.MINUSMINUS }
     
 c0type :
-   INT                           { A.INT }
- | BOOL 		         { A.BOOL }
+   INT                           { D.INT }
+ | BOOL 		         { D.BOOL }
     
 simpopt :
-   /* empty */                  { EmptySimp }
- | simp				{ HasSimpOpt $1 }
+   /* empty */                  { A.EmptySimp }
+ | simp				{ A.HasSimpStmt $1 }
 
 elseopt :
-   /* empty */                  { EmptyElse }
- | ELSE stmt		        { PreElabElse $2 }
+   /* empty */                  { A.EmptyElse }
+ | ELSE stmt		        { A.PreElabElse $2 }
 
 control :
    IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }

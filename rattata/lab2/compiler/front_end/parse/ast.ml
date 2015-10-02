@@ -35,11 +35,11 @@ type preElabDecl = NewVar of ident * c0type
 type simpStmt = PreElabDecl of preElabDecl                        
               | SimpAssign of ident * assignOp * preElabExpr
               | SimpStmtExpr of preElabExpr
-type elseopt = EmptyElse | PreElabElse of preElabStmt
-type simpopt = EmptySimp | HasSimpStmt of simpStmt
-type control = PreElabIf of preElabExpr * preElabStmt * elseopt
+type elseOpt = EmptyElse | PreElabElse of preElabStmt
+type simpOpt = EmptySimp | HasSimpStmt of simpStmt
+type control = PreElabIf of preElabExpr * preElabStmt * elseOpt
              | PreElabWhile of preElabExpr * preElabStmt
-             | PreElabFor of simpopt * preElabExpr * simpopt *
+             | PreElabFor of simpOpt * preElabExpr * simpOpt *
                              preElabStmt
              | PreElabReturn of preElabExpr
 type preElabStmt = SimpStmt of simpStmt
