@@ -149,8 +149,11 @@ lvalue :
 exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
+ | lvalue 			 { A.IdentExpr $1 }	 
+				 /*
  | MAIN                          { A.IdentExpr "main" }
  | IDENT                         { A.IdentExpr $1 }
+				 */
  | exp PLUS exp                  { A.PreElabBinop
 				     ($1, D.TmpBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
