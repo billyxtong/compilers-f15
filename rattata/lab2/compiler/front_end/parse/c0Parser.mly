@@ -98,13 +98,13 @@ stmts :
 stmt :
  | simp SEMI                     { A.SimpStmt $1 }
  | control                       { A.Control $1 }
- | block                         { A.Block $1 }
+ | block                         { A.Block $1 } 
  ;
 
 simp :
    decl SEMI                     { A.PreElabDecl $1 }
  | lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
- | exp                           { A.SimpStmtExpr $1 }
+/* | exp                           { A.SimpStmtExpr $1 }*/
  | lvalue postop		 { expand_postop $1 $2 }
   ;
 
@@ -115,22 +115,24 @@ postop :
 c0type :
    INT                           { D.INT }
  | BOOL 		         { D.BOOL }
-    
+
 simpopt :
-   /* empty */                  { A.EmptySimp }
+   /* empty */                   { A.EmptySimp }
  | simp				{ A.HasSimpStmt $1 }
 
 elseopt :
-   /* empty */                  { A.EmptyElse }
+   /* empty */                   { A.EmptyElse }
  | ELSE stmt		        { A.PreElabElse $2 }
 
+
+  
 control :
    IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
  | WHILE LPAREN exp RPAREN stmt { A.PreElabWhile ($3, $5) }
  | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
        {PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
-   
+	  
 decl :
    c0type IDENT                     { A.NewVar ($2, $1)}
  | c0type IDENT ASSIGN exp         { A.Init ($2, $1, $4) }
