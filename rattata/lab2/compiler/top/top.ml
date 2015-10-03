@@ -48,15 +48,15 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     let ast = Parse.parse source in ();
     (* say_if dump_ast (fun () -> Ast.Print.pp_program ast); *)
 
-    (* Typecheck *)
-    say_if verbose (fun () -> "Typecking...");
-    TypeChecker.typecheck ast;
-    if typecheck_only then exit 0;
+    (* (\* Typecheck *\) *)
+    (* say_if verbose (fun () -> "Typecking..."); *)
+    (* TypeChecker.typecheck ast; *)
+    (* if typecheck_only then exit 0; *)
 
     (* Convert Post-Elab AST to Infinte Addr *)
     say_if verbose (fun () -> "converting to Infinite Address code");
     let ir = ToInfAddr.toInfAddr [] in ();
-    say_if dump_ir (fun () -> Tree.Print.pp_program ir);
+    (* say_if dump_ir (fun () -> Tree.Print.pp_program ir); *)
 
     (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *\) *)

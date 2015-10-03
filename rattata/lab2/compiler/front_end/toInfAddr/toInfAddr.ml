@@ -20,36 +20,45 @@ let trans_exp idToTmpMap = function
        A.IntExpr e -> TmpIntExpr (trans_int_exp idToTmpMap e)
      | A.BoolExpr e -> TmpBoolExpr (trans_bool_exp idToTmpMap e)
 
-let rec trans_if idToTmpMap (e, stmtForIf, stmtForElse):tmpInfAddrInstr list =
+let rec if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse =
+    let ifLabel = (GenLabel.create()) in
+    let elseLabel = (GenLabel.create()) in
+    let endLabel = (GenLabel.create()) in
+    TmpInfAddrJump(JNE, ifLabel)
+    ::TmpInfAddrJump(JE, elseLabel)
+    ::TmpInfAddrLabel(ifLabel)
+    ::trans_stmts idToTmpMap stmtsForIf
+    @ TmpInfAddrJump(JMP_UNCOND, endLabel)
+    ::TmpInfAddrLabel(elseLabel)
+    ::trans_stmts idToTmpMap stmtsForElse
+    @ TmpInfAddrJump(JMP_UNCOND, endLabel)
+    ::TmpInfAddrLabel(endLabel) :: []
+
+and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
      match e with
          A.LogNot e' ->
-              trans_if idToTmpMap (e', stmtForElse, stmtForIf)
+              trans_if idToTmpMap (e', stmtsForElse, stmtsForIf)
                           (* just switch them *)
        | A.BoolConst c -> (match c with
-                              1 -> trans_stmts idToTmpMap stmtForIf
-                            | 0 -> trans_stmts idToTmpMap stmtForElse
+                              1 -> trans_stmts idToTmpMap stmtsForIf
+                            | 0 -> trans_stmts idToTmpMap stmtsForElse
                             | _ -> assert(false))
+       | A.GreaterThan (int_exp1, int_exp2) ->[]
+             (* TmpInfAddrBoolInstr (TmpInfAddrCmp *)
        | A.BoolIdent id ->  
           (match M.find idToTmpMap id with
              None -> 
              let () = print_string("Undeclared: " ^ id ^ "\n") in
              assert(false)
-           | Some t ->
-               let ifLabel = (GenLabel.create()) in
-               let elseLabel = (GenLabel.create()) in
-               let endLabel = (GenLabel.create()) in
-               TmpInfAddrBoolInstr
+           | Some t -> TmpInfAddrBoolInstr
                  (TmpInfAddrTest (TmpBoolArg (TmpLoc (Tmp t)),
                                   TmpBoolArg (TmpConst 1)))
+                 ::(if_instrs_from_labels idToTmpMap stmtsForIf
+                      stmtsForElse)
                  (* check to make sure you don't mix up je and jne *)
-               ::TmpInfAddrJump(JNE, ifLabel)
-               ::TmpInfAddrJump(JE, elseLabel)
-               ::TmpInfAddrLabel(ifLabel)
-               ::trans_stmts idToTmpMap stmtForIf
-               @ TmpInfAddrLabel(elseLabel)
-               ::trans_stmts idToTmpMap stmtForElse
           )
        | _ -> assert(false)
+
 (* currently assuming all asnops are just eq, because we expanded
    asnops in c0Parser.mly *)
 and trans_stmts idToTmpMap = function
@@ -73,7 +82,9 @@ and trans_stmts idToTmpMap = function
      (* Can I assume that nothing after the return in a given
         subtree matters? That should be fine, right? *)
         TmpInfAddrReturn (TmpIntExpr (trans_int_exp idToTmpMap e)) :: []
-   | _ -> assert(false)                                                        
+   | _ -> assert(false)
+
+
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
