@@ -41,13 +41,25 @@ let assemArgToString (arg : assemArg) =
         AssemLoc(loc) -> assemLocToString(loc)
       | Const(c) -> concat "" ["$"; constToString(c)]
 
-let binopToString (op: binop) =
+let intBinopToString (op: intBinop) =
   match op with
         ADD -> "addl "
       | SUB -> "subl "
       | MUL -> "imull "
       | FAKEDIV -> "fakediv "
       | FAKEMOD -> "fakemod "
+      | BIT_AND -> "andl "
+      | BIT_OR -> "orl "
+      | BIT_XOR -> "xorl "
+      | RSHIFT -> "sarl "
+      | LSHIFT -> "sall "
+
+let boolInstrToString (instr : boolInstr) =
+  match instr with
+        LOG_AND(arg, loc) -> ""
+      | LOG_NOT(loc) -> ""
+      | TEST(arg, loc) -> ""
+      | CMPL(arg, loc) -> ""
 
 let assemBinopInstrToString((op, src, dest) : assemBinopInstr) = 
     concat "" [binopToString op; assemArgToString(src); ", "; 
