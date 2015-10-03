@@ -46,10 +46,12 @@ and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
                             | _ -> assert(false))
        | A.GreaterThan (int_exp1, int_exp2) -> TmpInfAddrBoolInstr
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
-         (* MAKE SURE TO CHECK THIS *)
+         (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
             (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
                            trans_int_exp idToTmpMap int_exp1))
-            ::[] (* FINISH THIS *)
+            ::(if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse
+                 JG JLE)
+               
        | A.BoolIdent id ->  
           (match M.find idToTmpMap id with
              None -> 
