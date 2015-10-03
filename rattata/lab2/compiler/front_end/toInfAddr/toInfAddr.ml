@@ -20,12 +20,13 @@ let trans_exp idToTmpMap = function
        A.IntExpr e -> TmpIntExpr (trans_int_exp idToTmpMap e)
      | A.BoolExpr e -> TmpBoolExpr (trans_bool_exp idToTmpMap e)
 
-let rec if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse =
+let rec if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse ifJumpType elseJumpType
+  =
     let ifLabel = (GenLabel.create()) in
     let elseLabel = (GenLabel.create()) in
     let endLabel = (GenLabel.create()) in
-    TmpInfAddrJump(JNE, ifLabel)
-    ::TmpInfAddrJump(JE, elseLabel)
+    TmpInfAddrJump(ifJumpType, ifLabel)
+    ::TmpInfAddrJump(elseJumpType, elseLabel)
     ::TmpInfAddrLabel(ifLabel)
     ::trans_stmts idToTmpMap stmtsForIf
     @ TmpInfAddrJump(JMP_UNCOND, endLabel)
@@ -43,8 +44,12 @@ and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
                               1 -> trans_stmts idToTmpMap stmtsForIf
                             | 0 -> trans_stmts idToTmpMap stmtsForElse
                             | _ -> assert(false))
-       | A.GreaterThan (int_exp1, int_exp2) ->[]
-             (* TmpInfAddrBoolInstr (TmpInfAddrCmp *)
+       | A.GreaterThan (int_exp1, int_exp2) -> TmpInfAddrBoolInstr
+           (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
+         (* MAKE SURE TO CHECK THIS *)
+            (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
+                           trans_int_exp idToTmpMap int_exp1))
+            ::[] (* FINISH THIS *)
        | A.BoolIdent id ->  
           (match M.find idToTmpMap id with
              None -> 
@@ -54,7 +59,7 @@ and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
                  (TmpInfAddrTest (TmpBoolArg (TmpLoc (Tmp t)),
                                   TmpBoolArg (TmpConst 1)))
                  ::(if_instrs_from_labels idToTmpMap stmtsForIf
-                      stmtsForElse)
+                      stmtsForElse JNE JE)
                  (* check to make sure you don't mix up je and jne *)
           )
        | _ -> assert(false)
