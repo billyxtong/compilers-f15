@@ -22,6 +22,7 @@ and boolExpr = BoolConst of const | BoolIdent of ident
            | IntEquals of intExpr * intExpr
            | BoolEquals of boolExpr * boolExpr
            | LogNot of boolExpr
+           | LogAnd of boolExpr * boolExpr
 and expr = IntExpr of intExpr | BoolExpr of boolExpr               
 and assignStmt = ident * expr 
 type stmt = Decl of ident * c0type * postElabAST
