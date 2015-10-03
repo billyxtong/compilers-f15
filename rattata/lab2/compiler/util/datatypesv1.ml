@@ -16,7 +16,7 @@ type assemArg = AssemLoc of assemLoc | Const of const
 type boolInstr = TEST of assemArg * assemLoc
                | CMP of assemArg * assemLoc
 type assemIntInstr = intBinop * assemArg * assemLoc
-type jump = JNE | JE | JG | JMP_UNCOND 
+type jump = JNE | JE | JG | JLE | JMP_UNCOND 
 type label = int
 type jumpInstr = jump * label
 type assemInstr = MOV of assemArg * assemLoc

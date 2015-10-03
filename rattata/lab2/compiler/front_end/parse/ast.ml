@@ -37,8 +37,6 @@ and postElabAST = stmt list
    Unfortunately, we have to wrap everything in different
    constructors here, in order to keep in separate from
    Post-Elab AST *)
-type postOp = PLUSPLUS | MINUSMINUS
-type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = PreElabConstExpr of const
                  | IdentExpr of ident
                  | PreElabBinop of preElabExpr * intBinop * preElabExpr
