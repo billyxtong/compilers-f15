@@ -146,14 +146,15 @@ lvalue :
  | LPAREN lvalue RPAREN         { $2 }
  ;
 
+/* There's a shift/reduce conflict for something like
+   (lvalue | ) because do you reduce the lvalue into an exp first
+   and then do LPAREN exp RPAREN or do you shift RPAREN first and
+   and reduce via LPAREN lvalue RPAREN. But this should be ok,
+   because both ways lead to a correct parse. */
 exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
  | lvalue 			 { A.IdentExpr $1 }	 
-				 /*
- | MAIN                          { A.IdentExpr "main" }
- | IDENT                         { A.IdentExpr $1 }
-				 */
  | exp PLUS exp                  { A.PreElabBinop
 				     ($1, D.TmpBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
