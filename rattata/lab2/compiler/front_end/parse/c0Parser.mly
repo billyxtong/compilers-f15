@@ -22,15 +22,15 @@ let expand_asnop id op e =
     match op with
        A.EQ -> A.SimpAssign (id, A.EQ, e)
      | A.PLUSEQ -> A.SimpAssign (id, A.EQ,
-     	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.ADD, e))
+     	     A.PreElabBinop(A.IdentExpr id, D.ADD, e))
      | A.SUBEQ -> A.SimpAssign (id, A.EQ,
-     	     A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.SUB, e))
+     	     A.PreElabBinop(A.IdentExpr id, D.SUB, e))
      | A.MULEQ -> A.SimpAssign (id, A.EQ,
-             A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.MUL, e))
+             A.PreElabBinop(A.IdentExpr id, D.MUL, e))
      | A.DIVEQ -> A.SimpAssign (id, A.EQ,
-             A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.FAKEDIV, e))
+             A.PreElabBinop(A.IdentExpr id, D.FAKEDIV, e))
      | A.MODEQ -> A.SimpAssign (id, A.EQ,
-             A.PreElabBinop(A.IdentExpr id, D.TmpBinop D.FAKEMOD, e))
+             A.PreElabBinop(A.IdentExpr id, D.FAKEMOD, e))
      | _ -> assert(false)
 
 let expand_postop id op =
@@ -156,18 +156,18 @@ exp :
  | intconst                      { $1 }
  | lvalue 			 { A.IdentExpr $1 }	 
  | exp PLUS exp                  { A.PreElabBinop
-				     ($1, D.TmpBinop D.ADD, $3) }
+				     ($1, D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
-				     ($1, D.TmpBinop D.SUB, $3) }
+				     ($1, D.SUB, $3) }
  | exp STAR exp                  { A.PreElabBinop
-				     ($1, D.TmpBinop D.MUL, $3) }
+				     ($1, D.MUL, $3) }
  | exp SLASH exp                  { A.PreElabBinop
-				     ($1, D.TmpBinop D.FAKEDIV, $3) }
+				     ($1, D.FAKEDIV, $3) }
  | exp PERCENT exp                  { A.PreElabBinop
-				     ($1, D.TmpBinop D.FAKEMOD, $3) }
+				     ($1, D.FAKEMOD, $3) }
  | MINUS exp %prec UNARY         { A.PreElabBinop
 				     (A.PreElabConstExpr 0,
-				      D.TmpBinop D.SUB, $2 ) }
+				      D.SUB, $2 ) }
  ;
 
 intconst :

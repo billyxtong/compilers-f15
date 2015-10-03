@@ -8,7 +8,6 @@
 
 open Core.Std
 open Datatypesv1
-open PrintDatatypes
 
 let say = prerr_endline
 let newline = prerr_newline
@@ -56,50 +55,50 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
 
     (* Convert Post-Elab AST to Infinte Addr *)
     say_if verbose (fun () -> "converting to Infinite Address code");
-    let ir = ToInfAddr.toInfAddr ast in
+    let ir = ToInfAddr.toInfAddr [] in ();
     say_if dump_ir (fun () -> Tree.Print.pp_program ir);
 
-    (* Convert Inf Addr (arbitrarily nested right hand side)
-       to three address *)
-    let threeAddr = FewTmpsTo3Addr.to3Addr ir in
-    say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
+    (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
+    (*    to three address *\) *)
+    (* let threeAddr = FewTmpsTo3Addr.to3Addr ir in (); *)
+    (* say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr); *)
 
-    (* Three address to Two address *)
-    say_if verbose (fun () -> "3Addr to 2Addr...");
-    let twoAddr = To2Addr.to2Addr threeAddr in
-    say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
+    (* (\* Three address to Two address *\) *)
+    (* say_if verbose (fun () -> "3Addr to 2Addr..."); *)
+    (* let twoAddr = To2Addr.to2Addr threeAddr in (); *)
+    (* say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr); *)
     
-    (* Allocate Registers *)
-    say_if verbose (fun () -> "Allocating Registers...");
-    let almostAssem = RegAlloc.regAlloc twoAddr in
-    say_if dump_assem (fun () -> assemProgToString almostAssem);
+    (* (\* Allocate Registers *\) *)
+    (* say_if verbose (fun () -> "Allocating Registers..."); *)
+    (* let almostAssem = RegAlloc.regAlloc twoAddr in *)
+    (* say_if dump_assem (fun () -> assemProgToString almostAssem); *)
 
-    (* RemoveMemMemInstrs *)
-    say_if verbose (fun () -> "Removing mem-mem instrs...");
-    let noMemMemAssem =
-       RemoveMemMemInstrs.removeMemMemInstrs almostAssem in
-    say_if dump_NoMemMem (fun () ->
-        assemProgToString noMemMemAssem);
+    (* (\* RemoveMemMemInstrs *\) *)
+    (* say_if verbose (fun () -> "Removing mem-mem instrs..."); *)
+    (* let noMemMemAssem = *)
+    (*    RemoveMemMemInstrs.removeMemMemInstrs almostAssem in *)
+    (* say_if dump_NoMemMem (fun () -> *)
+    (*     assemProgToString noMemMemAssem); *)
 
-    (* Account for wonky instructions that require specific
-       registers, like idiv *)
-    say_if verbose (fun () -> "Handling wonky instructions...");
-    let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in
-    say_if dump_wonky (fun () -> assemProgWonkyToString
-                          wonkyAssem);
+    (* (\* Account for wonky instructions that require specific *)
+    (*    registers, like idiv *\) *)
+    (* say_if verbose (fun () -> "Handling wonky instructions..."); *)
+    (* let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in *)
+    (* say_if dump_wonky (fun () -> assemProgWonkyToString *)
+    (*                       wonkyAssem); *)
 
-    (* Format assembly *)
-    say_if verbose (fun () -> "Formatting assembly...");
-    let finalAssem = FormatAssem.formatAssem wonkyAssem in
-    say_if dump_final (fun () -> finalAssem);
+    (* (\* Format assembly *\) *)
+    (* say_if verbose (fun () -> "Formatting assembly..."); *)
+    (* let finalAssem = FormatAssem.formatAssem wonkyAssem in *)
+    (* say_if dump_final (fun () -> finalAssem); *)
     
-    (* Output assembly *)
-    say_if verbose (fun () -> "Outputting assembly...");
-    let afname = (Filename.chop_extension source) ^ ".s" in
-    say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
+    (* (\* Output assembly *\) *)
+    (* say_if verbose (fun () -> "Outputting assembly..."); *)
+    (* let afname = (Filename.chop_extension source) ^ ".s" in *)
+    (* say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ..."); *)
 
-    Out_channel.with_file afname
-      ~f:(fun afstream -> output_string afstream finalAssem)
+    (* Out_channel.with_file afname *)
+    (*   ~f:(fun afstream -> output_string afstream finalAssem) *)
       
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1

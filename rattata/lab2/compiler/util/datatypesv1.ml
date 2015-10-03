@@ -73,20 +73,21 @@ type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
 type tmp3AddrProg = tmp3AddrInstr list
 
 (* Inf Address Code (any number of operands on right hand side *)
-type tmpExpr = TmpIntArg of tmpArg
-             | TmpInfAddrBinop of tmpInfAddrBinop
-and tmpInfAddrBinop = intBinop * tmpExpr * tmpExpr *  tmp
+type tmpIntExpr = TmpIntArg of tmpArg
+             | TmpInfAddrBinopExpr of intBinop *
+                                      tmpIntExpr * tmpIntExpr
+type tmpInfAddrBinopInstr = intBinop * tmpIntExpr * tmpIntExpr *  tmp
 type tmpBoolExpr = TmpBoolArg of tmpArg
-                  | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
-and tmpInfAddrBoolInstr = TmpLogAnd of tmpBoolExpr * tmpExpr * tmp
-            | TmpLogNot of tmpExpr
-            | TmpTest of tmpArg * tmp
-            | TmpCmp of tmpArg * tmp
+type tmpExpr = TmpBoolExpr of tmpBoolExpr
+            | TmpIntExpr of tmpIntExpr
+and tmpInfAddrBoolInstr = TmpInfAddrLogAnd of tmpBoolExpr * tmpBoolExpr * tmp
+            | TmpInfAddrLogNot of tmpBoolExpr
+            | TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
+            | TmpInfAddrCmp of tmpBoolExpr * tmpBoolExpr
 
-type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmpExpr *  tmp
-                   | Tmp3AddrBinop of tmp3AddrBinop
-                   | Tmp3AddrJump of jumpInstr
-                   | Tmp3AddrBoolInstr of tmpBoolExpr
-                   | Tmp3AddrLabel of label
+type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
+                   | TmpInfAddrJump of jumpInstr
+                   | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
+                   | TmpInfAddrLabel of label
                    | TmpInfAddrReturn of tmpExpr   
 type tmpInfAddrProg = tmpInfAddrInstr list
