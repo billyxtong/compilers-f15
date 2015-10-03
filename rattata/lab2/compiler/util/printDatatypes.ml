@@ -56,14 +56,24 @@ let intBinopToString (op: intBinop) =
 
 let boolInstrToString (instr : boolInstr) =
   match instr with
-        LOG_AND(arg, loc) -> ""
-      | LOG_NOT(loc) -> ""
-      | TEST(arg, loc) -> ""
-      | CMPL(arg, loc) -> ""
+        TEST(arg1, arg2) -> concat "" ["test "; assemArgToString(arg1); ", "; assemLocToString(arg2)]
+      | CMP(arg1, arg2) -> concat "" ["cmpl "; assemArgToString(arg1); ", "; assemLocToString(arg2)]
 
-let assemBinopInstrToString((op, src, dest) : assemBinopInstr) = 
-    concat "" [binopToString op; assemArgToString(src); ", "; 
+let assemIntInstrToString((intOp, src, dest) : assemBinopInstr) = 
+    concat "" [intBinopToString intOp; assemArgToString(src); ", "; 
                assemLocToString(dest)]
+
+let jumpToString (j : jump) =
+  match j with
+        JNE -> "jne "
+      | JE -> "je "
+      | JG -> "jg "
+      | JLE -> "jle "
+      | JMP_UNCOND -> "jmp "
+
+let labelToString (l : label) = concat "" [".L"; string_of_int(l)]
+
+let jumpInstrToString (j, l) = concat "" [jumpToString(j); labelToString(l)]
 
 let assemInstrToString(instr : assemInstr) = 
   match instr with
@@ -75,10 +85,13 @@ let assemInstrToString(instr : assemInstr) =
             concat "" ["movq "; 
             assemArgToString(src); ", ";
             assemLocToString(dest)]
-      | BINOP(op) -> assemBinopInstrToString(op)
+      | INT_BINOP(intinstr) -> assemIntInstrToString(intinstr)
       | PUSH(r) -> concat "" ["push "; regToString(r)]
       | POP(r) -> concat "" ["pop "; regToString(r)]
       | RETURN -> "ret"
+      | JUMP(jInstr) -> jumpInstrToString(jInstr)
+      | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
+      | LABEL(l) -> labelToString(l)
 
 let assemProgToString(assemprog : assemProg) = 
   concat "\n" (List.map assemInstrToString assemprog) ^ "\n"
@@ -94,14 +107,6 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
 let assemProgWonkyToString(wonkyAssemProg : assemProgWonky) = 
   concat "\n" (List.map assemInstrWonkyToString wonkyAssemProg) ^ "\n"
 
-let tmpBinopToString (op: tmpBinop) =
-  match op with
-        TmpBinop ADD -> " + "
-      | TmpBinop SUB -> " - "
-      | TmpBinop MUL -> " * "
-      | TmpBinop FAKEDIV -> "/ "
-      | TmpBinop FAKEMOD -> "% "
-
 let tmpToString(Tmp(t) : tmp) = concat "" ["t"; string_of_int t]
 
 let tmpArgToString(tArg : tmpArg) = 
@@ -109,10 +114,14 @@ let tmpArgToString(tArg : tmpArg) =
         TmpLoc(t) -> tmpToString(t)
       | TmpConst(c) -> constToString(c)
 
+let tmpBoolInstrToString(tmpbool : tmpBoolInstr) =
+  match tmpbool with
+        TmpTest(arg, t) -> concat "" ["test "; tmpArgToString(arg); ", "; tmpToString(t)]
+      | TmpCmp(arg, t) -> concat "" ["cmpl "; tmpArgToString(arg); ", "; tmpToString(t)]
 
 let tmp2AddrBinopToString((binop, arg, temp) : tmp2AddrBinop) =
     concat "" [tmpToString(temp); " <-- "; 
-    tmpToString(temp); tmpBinopToString(binop);
+    tmpToString(temp); intBinopToString(binop);
     tmpArgToString(arg)]
      
 let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) = 
@@ -123,6 +132,9 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
       | Tmp2AddrBinop(tmpbinop) -> tmp2AddrBinopToString(tmpbinop)
       | Tmp2AddrReturn(tmparg) -> 
             concat "" ["return "; tmpArgToString(tmparg)]
+      | Tmp2AddrJump(jumpinstr) -> jumpInstrToString(jInstr)
+      | Tmp2AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
+      | Tmp2AddrLabel(l) -> labelToString(l)
 
 let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
   (* We want a newline at the end *)
@@ -130,7 +142,7 @@ let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
 
 let tmp3AddrBinopToString((binop, arg1, arg2, temp) : tmp3AddrBinop) =
     concat "" [tmpToString(temp); " <-- "; 
-    tmpArgToString(arg1); tmpBinopToString(binop); 
+    tmpArgToString(arg1); intBinopToString(binop); 
     tmpArgToString(arg2)]
 
 let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) = 
@@ -141,6 +153,10 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
       | Tmp3AddrBinop(tmpbinop) -> tmp3AddrBinopToString(tmpbinop)
       | Tmp3AddrReturn(tmparg) -> 
             concat "" ["return "; tmpArgToString(tmparg)]
+      | Tmp3AddrJump(jumpinstr) -> jumpInstrToString(jumpinstr)
+      | Tmp3AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
+      | Tmp3AddrLabel(l) -> labelToString(l)
 
 let tmp3AddrProgToString(tmp3addrprog : tmp3AddrProg) = 
   concat "\n" (List.map tmp3AddrInstrToString tmp3addrprog) ^ "\n"
+

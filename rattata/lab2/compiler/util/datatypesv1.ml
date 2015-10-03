@@ -14,7 +14,7 @@ type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type boolInstr = TEST of assemArg * assemLoc
-               | CMPL of assemArg * assemLoc
+               | CMP of assemArg * assemLoc
 type assemIntInstr = intBinop * assemArg * assemLoc
 type jump = JNE | JE | JG | JMP_UNCOND 
 type label = int
@@ -47,8 +47,8 @@ type assemProgWonky = assemInstrWonky list
 type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
 (* Two Address Code *)
-type tmpBoolInstr = TmpTest of tmpArg * tmpArg
-                  | TmpCmp of tmpArg * tmpArg
+type tmpBoolInstr = TmpTest of tmpArg * tmp
+                  | TmpCmp of tmpArg * tmp
 type tmp2AddrBinop = intBinop * tmpArg * tmp
 type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
