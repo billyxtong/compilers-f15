@@ -37,13 +37,17 @@ and postElabAST = stmt list
    Unfortunately, we have to wrap everything in different
    constructors here, in order to keep in separate from
    Post-Elab AST *)
+(* assignOp is only used in parsing; is not actually used in the
+   resulting preElabAST *)
+type postOp = PLUSPLUS | MINUSMINUS    
+type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = PreElabConstExpr of const
                  | IdentExpr of ident
                  | PreElabBinop of preElabExpr * intBinop * preElabExpr
 type preElabDecl = NewVar of ident * c0type
                  | Init of (ident * c0type * preElabExpr)
 type simpStmt = PreElabDecl of preElabDecl                        
-              | SimpAssign of ident * assignOp * preElabExpr
+              | SimpAssign of ident * preElabExpr
               | SimpStmtExpr of preElabExpr
 type simpOpt = EmptySimp | HasSimpStmt of simpStmt
 type elseOpt = EmptyElse | PreElabElse of preElabStmt

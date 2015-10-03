@@ -20,16 +20,16 @@ module D = Datatypesv1
 
 let expand_asnop id op e =
     match op with
-       A.EQ -> A.SimpAssign (id, A.EQ, e)
-     | A.PLUSEQ -> A.SimpAssign (id, A.EQ,
+       A.EQ -> A.SimpAssign (id, e)
+     | A.PLUSEQ -> A.SimpAssign (id,
      	     A.PreElabBinop(A.IdentExpr id, D.ADD, e))
-     | A.SUBEQ -> A.SimpAssign (id, A.EQ,
+     | A.SUBEQ -> A.SimpAssign (id,
      	     A.PreElabBinop(A.IdentExpr id, D.SUB, e))
-     | A.MULEQ -> A.SimpAssign (id, A.EQ,
+     | A.MULEQ -> A.SimpAssign (id,
              A.PreElabBinop(A.IdentExpr id, D.MUL, e))
-     | A.DIVEQ -> A.SimpAssign (id, A.EQ,
+     | A.DIVEQ -> A.SimpAssign (id,
              A.PreElabBinop(A.IdentExpr id, D.FAKEDIV, e))
-     | A.MODEQ -> A.SimpAssign (id, A.EQ,
+     | A.MODEQ -> A.SimpAssign (id,
              A.PreElabBinop(A.IdentExpr id, D.FAKEMOD, e))
      | _ -> assert(false)
 
