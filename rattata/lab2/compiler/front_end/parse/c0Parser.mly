@@ -35,8 +35,8 @@ let expand_asnop id op e =
 
 let expand_postop id op =
     match op with
-       A.PLUSPLUS -> expand_asnop id A.PLUSEQ (A.PreElabConstExpr 1)
-     | A.MINUSMINUS -> expand_asnop id A.SUBEQ (A.PreElabConstExpr 1)
+       A.PLUSPLUS -> expand_asnop id A.PLUSEQ (A.PreElabConstExpr (1, D.INT))
+     | A.MINUSMINUS -> expand_asnop id A.SUBEQ (A.PreElabConstExpr (1, D.INT))
 		  
 %}
 
@@ -165,23 +165,22 @@ exp :
 				     ($1, D.FAKEDIV, $3) }
  | exp PERCENT exp                  { A.PreElabBinop
 				     ($1, D.FAKEMOD, $3) }
- | MINUS exp %prec UNARY         { A.PreElabBinop
-				     (A.PreElabConstExpr 0,
-				      D.SUB, $2 ) }
+ | MINUS exp %prec UNARY      { A.PreElabBinop
+				(A.PreElabConstExpr (0, D.INT),
+				  D.SUB, $2 ) }
  ;
 
 intconst :
-  DECCONST           { A.PreElabConstExpr (match Int32.to_int $1 with
-			     Some x -> x
-			   | None ->
-			       failwith "could not convert 32bit int")
+  DECCONST           { match Int32.to_int $1 with
+			   Some x -> A.PreElabConstExpr (x, D.INT)
+			 | None ->
+			       failwith "could not convert 32bit int"
 		     }
- | HEXCONST          { A.PreElabConstExpr (match Int32.to_int $1 with
-			     Some x -> x
-			   | None ->
-			       failwith "could not convert 32bit int")
+ | HEXCONST         { match Int32.to_int $1 with
+			   Some x -> A.PreElabConstExpr (x, D.INT)
+			 | None ->
+			       failwith "could not convert 32bit int"
 		     }
- ;
 
 asnop :
   ASSIGN                        { A.EQ }

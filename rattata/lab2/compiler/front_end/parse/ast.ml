@@ -41,7 +41,7 @@ and postElabAST = stmt list
    resulting preElabAST *)
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
-type preElabExpr = PreElabConstExpr of const
+type preElabExpr = PreElabConstExpr of const * c0type
                  | IdentExpr of ident
                  | PreElabBinop of preElabExpr * intBinop * preElabExpr
 type preElabDecl = NewVar of ident * c0type
