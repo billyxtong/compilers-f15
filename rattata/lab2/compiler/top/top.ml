@@ -8,6 +8,8 @@
 
 open Core.Std
 open Datatypesv1
+open PrintDatatypes    
+module A = Ast
 
 let say = prerr_endline
 let newline = prerr_newline
@@ -21,7 +23,7 @@ let spec =
   +> flag "--verbose" ~aliases:["-v"] no_arg ~doc:" Verbose messages"
   +> flag "--dump-parsing" no_arg ~doc:" Pretty print parsing messages"
   +> flag "--dump-ast" no_arg ~doc:" Pretty print the AST"
-  +> flag "--dump-ir" no_arg ~doc:" Pretty print the IR"
+  +> flag "--dump-infAddr" no_arg ~doc:" Pretty print the infAddr"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
@@ -31,7 +33,7 @@ let spec =
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
   +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
 
-let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
+let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
   try
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
    
@@ -45,8 +47,8 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     say_if verbose (fun () -> "Parsing... " ^ source);
     if dump_parsing then ignore (Parsing.set_trace true);
 
-    let preElabAst = Parse.parse source in
-    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst));
+    let preElabAst = Parse.parse source in ();
+    (* say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst)); *)
 
     (* (\* Typecheck *\) *)
     (* say_if verbose (fun () -> "Typecking..."); *)
@@ -55,12 +57,19 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
 
     (* Convert Post-Elab AST to Infinte Addr *)
     say_if verbose (fun () -> "converting to Infinite Address code");
-    let ir = ToInfAddr.toInfAddr [] in ();
-    (* say_if dump_ir (fun () -> Tree.Print.pp_program ir); *)
+    let test =
+      A.While (A.LogNot
+        (A.LogAnd (A.IntEquals(A.IntConst 7, A.IntConst 8),
+                         A.IntEquals(A.IntConst 10, A.IntConst 9)))
+         ,
+            [A.AssignStmt ("x", A.IntExpr(A.IntConst 6))])
+               ::[] in
+    let infAddr = ToInfAddr.toInfAddr test in ();
+    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
 
     (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *\) *)
-    (* let threeAddr = FewTmpsTo3Addr.to3Addr ir in (); *)
+    (* let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in (); *)
     (* say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr); *)
 
     (* (\* Three address to Two address *\) *)

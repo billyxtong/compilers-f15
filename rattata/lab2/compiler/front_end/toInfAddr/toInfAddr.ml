@@ -147,6 +147,7 @@ and trans_stmts idToTmpMap = function
         let topLabel = GenLabel.create() in
         let jumpToTopStmt = A.JumpUncond(topLabel) in
         (* Empty list because no else statements *)
+        TmpInfAddrLabel topLabel::
         trans_cond idToTmpMap (e, whileStmts @ [jumpToTopStmt], []) @
         trans_stmts idToTmpMap stmts
    | A.JumpUncond target :: stmts ->
@@ -157,7 +158,7 @@ and trans_stmts idToTmpMap = function
      (* Can I assume that nothing after the return in a given
         subtree matters? That should be fine, right? *)
         TmpInfAddrReturn (TmpIntExpr (trans_int_exp idToTmpMap e)) :: []
-   | _ -> failwith "there must be a return!"
+   | _ -> []
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
