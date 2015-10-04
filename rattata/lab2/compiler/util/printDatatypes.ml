@@ -163,3 +163,37 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
 let tmp3AddrProgToString(tmp3addrprog : tmp3AddrProg) = 
   concat "\n" (List.map tmp3AddrInstrToString tmp3addrprog) ^ "\n"
 
+let rec tmpIntExprToString(tmpintexpr : tmpIntExpr) =
+  match tmpintexpr with
+        TmpIntArg(tArg) -> tmpArgToString(tArg)
+      | TmpInfAddrBinopExpr(op, expr1, expr2) -> concat "" ["("; tmpIntExprToString(expr1); 
+                                                            " "; intBinopToString(op); 
+                                                            " "; tmpIntExprToString(expr2); ")"]
+
+let tmpInfAddrBinopInstrToString((op, expr1, expr2, t) : tmpInfAddrBinopInstr) = 
+  concat "" [tmpToString(t); " = ("; tmpIntExprToString(expr1); " "; 
+             intBinopToString(op); " "; tmpIntExprToString(expr2); ")"]
+
+let tmpBoolExprToString(TmpBoolArg(t) : tmpBoolExpr) = tmpArgToString(t)
+
+let rec tmpExprToString(t : tmpExpr) =
+  match tExpr with
+        TmpBoolExpr(bExpr) -> tmpBoolExprToString(bExpr)
+      | TmpIntExpr(iExpr) -> tmpIntExprToString(iExpr)
+
+and tmpInfAddrBoolInstrToString(t : tmpInfAddrBoolInstr) =
+  match tInstr with
+        TmpInfAddrTest(bExpr1, bExpr2) = concat "" ["test "; tmpBoolExprToString(bExpr1); ", "; tmpBoolExprToString(bExpr2)]
+      | TmpInfAddrCmp(iExpr1, iExpr2) = concat "" ["cmp "; tmpBoolExprToString(bExpr1); ", "; tmpBoolExprToString(bExpr2)]
+
+let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
+  match t with
+        TmpInfAddrMov(tExpr,t) -> concat "" [tmpToString(t); " <-- "; tmpExprToString(tExpr)]
+      | TmpInfAddrJump(jInstr) -> jumpInstrToString(jInstr)
+      | TmpInfAddrBoolInstr(bInstr) -> tmpInfAddrBoolInstrToString(bInstr)
+      | TmpInfAddrLabel(l) -> labelToString(l)
+      | TmpInfAddrReturn(tExpr) -> concat "" ["return "; tmpExprToString(tExpr)]
+
+let tmpInfAddrProgToString(instrs : tmpInfAddrInstr list) = 
+  concat "\n" (List.map tmpInfAddrInstrToString instrs) ^ "\n"
+
