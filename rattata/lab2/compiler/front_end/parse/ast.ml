@@ -48,6 +48,13 @@ type untypedPostElabStmt = Decl of ident * c0type
                                  untypedPostElabAST
                          | While of boolExpr * untypedPostElabAST
                          | Return of intExpr
+                         | JumpUncond of label
+(* I'm sure I had to add jumps to postElabAST Billy,
+             since postElabAST really shouldn't have jumps...
+             I need it for toInfAddr :(
+             Ignore this though; don't write print functions
+             for it or anything *)
+
 and untypedPostElabAST = untypedPostElabStmt list
 
 (* Pre-Elab AST
@@ -59,6 +66,7 @@ and untypedPostElabAST = untypedPostElabStmt list
    
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
+              | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabIdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr

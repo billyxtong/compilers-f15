@@ -31,6 +31,16 @@ let expand_asnop id op e =
              A.PreElabBinop(A.IdentExpr id, A.IntBinop D.FAKEDIV, e))
      | A.MODEQ -> A.SimpAssign (id,
              A.PreElabBinop(A.IdentExpr id, A.IntBinop D.FAKEMOD, e))
+     | A.AND_EQ -> A.SimpAssign (id,
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.BIT_AND, e))
+     | A.OR_EQ -> A.SimpAssign (id,
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.BIT_OR, e))
+     | A.XOR_EQ -> A.SimpAssign (id,
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.BIT_XOR, e))
+     | A.LSHIFT_EQ -> A.SimpAssign (id,
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.LSHIFT, e))
+     | A.RSHIFT_EQ -> A.SimpAssign (id,
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.RSHIFT, e))
 
 let expand_postop id op =
     match op with
@@ -76,6 +86,8 @@ let expand_postop id op =
 %left PLUS MINUS
 %left LOG_AND LOG_OR
 %left NEQ DOUBLE_EQ LT LEQ GT GEQ
+%left BIT_AND BIT_OR XOR
+%left LSHIFT RSHIFT      
 %left STAR SLASH PERCENT      
 %right UNARY
 %left LPAREN
@@ -128,7 +140,8 @@ elseopt :
 
   
 control :
-   IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
+   exp QUESMARK stmt COLON stmt  { A.PreElabIf ($1, $3, A.PreElabElse $5) }
+ | IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
  | WHILE LPAREN exp RPAREN stmt { A.PreElabWhile ($3, $5) }
  | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
        {A.PreElabFor ($3, $5, $7, $9) }
@@ -212,6 +225,11 @@ asnop :
  | STAREQ                       { A.MULEQ }
  | SLASHEQ                      { A.DIVEQ }
  | PERCENTEQ                    { A.MODEQ }
+ | AND_EQ                       { A.AND_EQ }
+ | OR_EQ                        { A.OR_EQ }
+ | XOR_EQ                       { A.XOR_EQ }
+ | LSHIFT_EQ                    { A.LSHIFT_EQ }
+ | RSHIFT_EQ                    { A.LSHIFT_EQ }
  ;
 
 %%

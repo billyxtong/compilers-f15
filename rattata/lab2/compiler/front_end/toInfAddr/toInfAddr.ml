@@ -3,16 +3,6 @@ module A = Ast
 module M = Core.Std.Map
 open Core.Std             
 
-(* Tells a conditional expression if it needs to jump to the top
-   (i.e., to execute it again, in a loop. *)
-type jumpToTop = NoJump | IfJumpsToTop | ElseJumpsToTop
-
-let negate jumpToTopStatus =
-    match jumpToTopStatus with
-         NoJump -> NoJump
-       | IfJumpsToTop -> ElseJumpsToTop
-       | ElseJumpsToTop -> IfJumpsToTop
-
 let rec trans_int_exp idToTmpMap = function
        A.IntConst c -> TmpIntArg (TmpConst c)
      | A.IntIdent id ->
@@ -52,26 +42,19 @@ let rec trans_bool_exp idToTmpMap e =
    back to the top. Of course, for a normal if statement,
    neither jumps to top. *)
 and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
-    ifJumpType elseJumpType jumpToTopStatus =
-    let startLabel = GenLabel.create() in
+    ifJumpType elseJumpType =
     let ifLabel = GenLabel.create() in
     let elseLabel = GenLabel.create() in
     let endLabel = GenLabel.create() in
-    let (ifEndTarget, elseEndTarget) =
-        (match jumpToTopStatus with
-             NoJump -> (endLabel, endLabel)
-           | IfJumpsToTop -> (startLabel, endLabel)
-           | ElseJumpsToTop -> (endLabel, startLabel)) in
-    TmpInfAddrLabel(startLabel)
-    ::priorInstr
+    priorInstr
     ::TmpInfAddrJump(ifJumpType, ifLabel)
     ::TmpInfAddrJump(elseJumpType, elseLabel)
     ::TmpInfAddrLabel(ifLabel)
     ::trans_stmts idToTmpMap stmtsForIf
-    @ TmpInfAddrJump(JMP_UNCOND, ifEndTarget)
+    @ TmpInfAddrJump(JMP_UNCOND, endLabel)
     ::TmpInfAddrLabel(elseLabel)
     ::trans_stmts idToTmpMap stmtsForElse
-    @ TmpInfAddrJump(JMP_UNCOND, elseEndTarget)
+    @ TmpInfAddrJump(JMP_UNCOND, endLabel)
     ::TmpInfAddrLabel(endLabel) :: []
 
 (* We use this function for both ifs and whiles. We pass in
@@ -81,20 +64,21 @@ and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
    jump at the end of if and else. But for while, there will be
    a start label (and no else label), and there will be an
    unconditional jump to the start label after the if *)
-and trans_cond idToTmpMap (condition, (stmtsForIf: A.postElabAST),
-                         (stmtsForElse:A.postElabAST)) jumpToTopStatus : tmpInfAddrInstr list =
+and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse) 
+  : tmpInfAddrInstr list =
      match condition with
          A.LogNot negCondition ->
         (* In this case, just switch the statements for if and else,
            AND ALSO THE JUMPTOTOPSTATUS *)
               trans_cond idToTmpMap (negCondition, stmtsForElse,
-                                   stmtsForIf) (negate jumpToTopStatus)
+                                   stmtsForIf)
        | A.LogAnd (bool_exp1, bool_exp2) ->
           (* For &&, we break it up into nested if statements, where each
              of them gets the "else" from the original. *)
            let innerIfAst = [A.If (bool_exp2, stmtsForIf, stmtsForElse)] in
             trans_cond idToTmpMap (bool_exp1, innerIfAst,
-                                 stmtsForElse) jumpToTopStatus
+                                 stmtsForElse) 
+              (* ONLY THE INNER ONE JUMPS TO TOP FIX THISSSSSSSSSSSSSS *)
        | A.BoolConst c -> (match c with
                               1 -> trans_stmts idToTmpMap stmtsForIf
                             | 0 -> trans_stmts idToTmpMap stmtsForElse
@@ -106,13 +90,13 @@ and trans_cond idToTmpMap (condition, (stmtsForIf: A.postElabAST),
                  (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
                                trans_int_exp idToTmpMap int_exp1)) in
               (make_cond_instrs idToTmpMap priorInstr stmtsForIf
-                 stmtsForElse JG JLE jumpToTopStatus)
+                 stmtsForElse JG JLE )
        | A.IntEquals (int_exp1, int_exp2) ->
             let priorInstr = TmpInfAddrBoolInstr
             (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
                            trans_int_exp idToTmpMap int_exp1)) in
               (make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
-                 JE JNE jumpToTopStatus)
+                 JE JNE )
        | A.BoolEquals (bool_exp1, bool_exp2) ->
             (* See description of trans_bool_exp *)
             let (instrs_for_exp1, tmp_exp1) =
@@ -125,7 +109,7 @@ and trans_cond idToTmpMap (condition, (stmtsForIf: A.postElabAST),
             (* The order of instrs_for_exp1/2 shouldn't matter *)
             instrs_for_exp1 @ instrs_for_exp2 @
             (make_cond_instrs idToTmpMap priorInstr stmtsForIf
-                 stmtsForElse JE JNE jumpToTopStatus)
+                 stmtsForElse JE JNE )
        | A.BoolIdent id ->  
           (match M.find idToTmpMap id with
              None -> 
@@ -135,7 +119,7 @@ and trans_cond idToTmpMap (condition, (stmtsForIf: A.postElabAST),
                  (TmpInfAddrTest (TmpBoolArg (TmpLoc (Tmp t)),
                                   TmpBoolArg (TmpConst 1))) in
                    make_cond_instrs idToTmpMap priorInstr stmtsForIf
-                      stmtsForElse JNE JE jumpToTopStatus)
+                      stmtsForElse JNE JE )
                  (* check to make sure you don't mix up je and jne *)
 
 and trans_stmts idToTmpMap = function
@@ -157,18 +141,24 @@ and trans_stmts idToTmpMap = function
         let newMap = M.add idToTmpMap id t in
         TmpInfAddrMov (expInfAddr, Tmp t)::trans_stmts newMap stmts
    | A.If (e, ifStmts, elseStmts) :: stmts ->
-        let jumpToTopStatus = NoJump in (* if never jumps to top *) 
-        trans_cond idToTmpMap (e, ifStmts, elseStmts) jumpToTopStatus @
+        trans_cond idToTmpMap (e, ifStmts, elseStmts) @
         trans_stmts idToTmpMap stmts
    | A.While (e, whileStmts) :: stmts ->
-        let jumpToTopStatus = IfJumpsToTop in
-        trans_cond idToTmpMap (e, whileStmts, []) jumpToTopStatus @
+        let topLabel = GenLabel.create() in
+        let jumpToTopStmt = A.JumpUncond(topLabel) in
+        (* Empty list because no else statements *)
+        TmpInfAddrLabel topLabel::
+        trans_cond idToTmpMap (e, whileStmts @ [jumpToTopStmt], []) @
         trans_stmts idToTmpMap stmts
+   | A.JumpUncond target :: stmts ->
+     (* This really shouldn't be an AST instruction
+        but I need it for toInfAddr :( *)
+        TmpInfAddrJump(JMP_UNCOND, target)::trans_stmts idToTmpMap stmts
    | A.Return e :: stmts ->
      (* Can I assume that nothing after the return in a given
         subtree matters? That should be fine, right? *)
         TmpInfAddrReturn (TmpIntExpr (trans_int_exp idToTmpMap e)) :: []
-   | _ -> failwith "there must be a return!"
+   | _ -> []
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
