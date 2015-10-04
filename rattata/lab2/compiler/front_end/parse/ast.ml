@@ -17,7 +17,7 @@ open Datatypesv1
 type ident = string
 type intExpr = IntConst of const | IntIdent of ident
           | ASTBinop of intExpr * intBinop * intExpr
-and boolExpr = BoolConst of const | BoolIdent of ident
+type boolExpr = BoolConst of const | BoolIdent of ident
            | GreaterThan of intExpr * intExpr
            | IntEquals of intExpr * intExpr
            | BoolEquals of boolExpr * boolExpr

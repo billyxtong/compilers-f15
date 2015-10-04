@@ -7,11 +7,11 @@ let identToString(i : ident) = i
 
 let rec preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
-        PreElabConstExpr(c,t) -> concat "" [c0typeToString t; " "; constToString c]
+        PreElabConstExpr(c,t) -> constToString c
       | IdentExpr(i) -> identToString i
-      | PreElabBinop(expr1, op, expr2) -> concat "" [preElabExprToString expr1; 
+      | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; 
                                                      intBinopToString op; 
-                                                     preElabExprToString expr2]
+                                                     preElabExprToString expr2; ")"]
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
         NewVar(i,t) -> c0typeToString(t) ^ identToString(i)
@@ -63,3 +63,21 @@ let rec intExprToString(iExpr : intExpr) =
         IntConst(c) -> constToString(c)
       | IntIdent(i) -> identToString(i)
       | ASTBinop(expr1, op, expr2) -> concat "" [intExprToString(expr1); intBinopToString(op); intExprToString(expr2)]
+
+let rec boolExprToString(bExpr : boolExpr) =
+  match bExpr with
+        BoolConst(c) -> constToString(c)
+      | BoolIdent(i) -> identToString(i)
+      | GreaterThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " > "; intExprToString(iExpr2)]
+      | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
+      | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
+      | LogNot(bExpr) -> concat "" ["!"; intExprToString(iExpr2)]
+
+
+
+
+
+
+
+
+
