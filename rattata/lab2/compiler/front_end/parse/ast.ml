@@ -11,38 +11,56 @@
 
 open Datatypesv1
 
-(* Post-Elab AST
+(* Typed Post-Elab AST
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
 type ident = string
 type intExpr = IntConst of const | IntIdent of ident
-          | ASTBinop of intExpr * intBinop * intExpr
+             | ASTBinop of intExpr * intBinop * intExpr
 type boolExpr = BoolConst of const | BoolIdent of ident
-           | GreaterThan of intExpr * intExpr
-           | IntEquals of intExpr * intExpr
-           | BoolEquals of boolExpr * boolExpr
-           | LogNot of boolExpr
-           | LogAnd of boolExpr * boolExpr
+              | GreaterThan of intExpr * intExpr
+              | IntEquals of intExpr * intExpr
+              | BoolEquals of boolExpr * boolExpr
+              | LogNot of boolExpr
+              | LogAnd of boolExpr * boolExpr
 type expr = IntExpr of intExpr | BoolExpr of boolExpr               
 type assignStmt = ident * expr 
-type stmt = Decl of ident * c0type
-          | AssignStmt of assignStmt
-          | If of boolExpr * postElabAST * postElabAST
-          | While of boolExpr * postElabAST
-          | Return of intExpr
-and postElabAST = stmt list
-    
+type postElabStmt = Decl of ident * c0type
+                  | AssignStmt of assignStmt
+                  | If of boolExpr * postElabAST * postElabAST
+                  | While of boolExpr * postElabAST
+                  | Return of intExpr
+ and postElabAST = stmt list
+
+(* Untyped Post-Elab AST
+   A restriced grammar from the Pre-Elab AST. See the elaboration
+   file (which I have not yet written) for more info. *)
+type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
+type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
+                         | UntypedPostElabIdentExpr of ident
+                         | UntypedPostElabBinop of untypedPostElabExpr * 
+                                                   generalBinop * 
+                                                   untypedPostElabExpr
+                         | UntypedPostElabNot of untypedPostElabExpr
+type untypedPostElabStmt = Decl of ident * c0type
+                         | AssignStmt of ident * expr
+                         | If of boolExpr * untypedPostElabAST * 
+                                 untypedPostElabAST
+                         | While of boolExpr * untypedPostElabAST
+                         | Return of intExpr
+and untypedPostElabAST = untypedPostElabStmt list
+
 (* Pre-Elab AST
    Unfortunately, we have to wrap everything in different
    constructors here, in order to keep in separate from
    Post-Elab AST *)
 (* assignOp is only used in parsing; is not actually used in the
    resulting preElabAST *)
-type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND    
+   
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = PreElabConstExpr of const * c0type
-                 | IdentExpr of ident
+                 | PreElabIdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
 type preElabDecl = NewVar of ident * c0type
@@ -52,13 +70,13 @@ type simpStmt = PreElabDecl of preElabDecl
               | SimpStmtExpr of preElabExpr
 type simpOpt = EmptySimp | HasSimpStmt of simpStmt
 type elseOpt = EmptyElse | PreElabElse of preElabStmt
-and control = PreElabIf of preElabExpr * preElabStmt * elseOpt
+ and control = PreElabIf of preElabExpr * preElabStmt * elseOpt
              | PreElabWhile of preElabExpr * preElabStmt
              | PreElabFor of simpOpt * preElabExpr * simpOpt *
                              preElabStmt
              | PreElabReturn of preElabExpr
-and preElabStmt = SimpStmt of simpStmt
+ and preElabStmt = SimpStmt of simpStmt
                  | Control of control
                  | Block of block
-and block = preElabStmt list                      
+ and block = preElabStmt list                      
 type preElabAST = block
