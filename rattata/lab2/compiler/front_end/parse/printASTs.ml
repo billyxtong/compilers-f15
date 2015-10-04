@@ -5,13 +5,21 @@ open String
 
 let identToString(i : ident) = i
 
+let generalBinopToString(op : generalBinop) = 
+  match op with
+        IntBinop(i) -> intBinopToString(i)
+      | DOUBLE_EQ -> " == "
+      | GT -> " > "
+      | LOG_AND -> " && "
+
 let rec preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
         PreElabConstExpr(c,t) -> constToString c
       | IdentExpr(i) -> identToString i
-      | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; 
-                                                     intBinopToString op; 
+      | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; " ";
+                                                     generalBinopToString op; 
                                                      preElabExprToString expr2; ")"]
+      | PreElabNot(expr1) -> concat "" ["!("; preElabExprToString(expr1); ")"]
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
         NewVar(i,t) -> c0typeToString(t) ^ identToString(i)
@@ -62,7 +70,10 @@ let rec intExprToString(iExpr : intExpr) =
   match iExpr with
         IntConst(c) -> constToString(c)
       | IntIdent(i) -> identToString(i)
-      | ASTBinop(expr1, op, expr2) -> concat "" [intExprToString(expr1); intBinopToString(op); intExprToString(expr2)]
+      | ASTBinop(expr1, op, expr2) -> concat "" ["("; intExprToString(expr1); 
+                                                      intBinopToString(op); 
+                                                      intExprToString(expr2); 
+                                                 ")"]
 
 let rec boolExprToString(bExpr : boolExpr) =
   match bExpr with
@@ -72,7 +83,25 @@ let rec boolExprToString(bExpr : boolExpr) =
       | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
       | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
       | LogNot(bExpr) -> concat "" ["!"; intExprToString(iExpr2)]
+      | LogAnd(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " && "; boolExprToString(bExpr2)]
 
+let exprToString(e : expr) = 
+  match e with
+        IntExpr(i) -> intExprToString(i)
+      | BoolExpr(b) -> boolExprToString(b)
+
+let assignStmtToString(i,e) = concat "" [identToString(i); " = "; exprToString(e)]
+
+let stmtToString(s : stmt) = 
+  match s with
+        Decl(i,c,p) -> concat "" [c0typeToString(c); identToString(i); postElabAstToString(p)]
+      | AssignStmt(a) -> assignStmtToString(a)
+      | If(b,p,p) -> ""
+      | While(b,p) -> ""
+      | Nop -> ""
+      | Return(i) -> ""
+
+and postElabAstToString(stmts : stmt list) = concat "\n" (List.map stmtToString stmts) ^ "\n"
 
 
 
