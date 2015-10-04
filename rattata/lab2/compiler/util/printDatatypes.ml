@@ -3,8 +3,8 @@ open String
 
 let c0typeToString (c : c0type) =
   match c with
-        INT -> "int"
-      | BOOL -> "bool"
+        INT -> "int "
+      | BOOL -> "bool "
 
 let constToString (c : const) = string_of_int(c)
 
@@ -28,8 +28,7 @@ let regToString (r : reg) =
       | R15 -> "%r15d" (* callee-saved *)
 
 let memAddrToString ((register, offset) : memAddr) = 
-    concat "" [string_of_int(offset); "("; 
-    regToString(register); ")"]
+    concat "" [string_of_int(offset); "("; regToString(register); ")"]
 
 let assemLocToString(loc : assemLoc) =
   match loc with
@@ -56,8 +55,10 @@ let intBinopToString (op: intBinop) =
 
 let boolInstrToString (instr : boolInstr) =
   match instr with
-        TEST(arg1, arg2) -> concat "" ["test "; assemArgToString(arg1); ", "; assemLocToString(arg2)]
-      | CMP(arg1, arg2) -> concat "" ["cmpl "; assemArgToString(arg1); ", "; assemLocToString(arg2)]
+        TEST(arg1, arg2) -> concat "" ["test "; assemArgToString(arg1); ", "; 
+                                                assemLocToString(arg2)]
+      | CMP(arg1, arg2) -> concat "" ["cmpl "; assemArgToString(arg1); ", "; 
+                                               assemLocToString(arg2)]
 
 let assemIntInstrToString((intOp, src, dest) : assemBinopInstr) = 
     concat "" [intBinopToString intOp; assemArgToString(src); ", "; 
@@ -116,8 +117,10 @@ let tmpArgToString(tArg : tmpArg) =
 
 let tmpBoolInstrToString(tmpbool : tmpBoolInstr) =
   match tmpbool with
-        TmpTest(arg, t) -> concat "" ["test "; tmpArgToString(arg); ", "; tmpToString(t)]
-      | TmpCmp(arg, t) -> concat "" ["cmpl "; tmpArgToString(arg); ", "; tmpToString(t)]
+        TmpTest(arg, t) -> concat "" ["test "; tmpArgToString(arg); ", "; 
+                                               tmpToString(t)]
+      | TmpCmp(arg, t) -> concat "" ["cmpl "; tmpArgToString(arg); ", "; 
+                                              tmpToString(t)]
 
 let tmp2AddrBinopToString((binop, arg, temp) : tmp2AddrBinop) =
     concat "" [tmpToString(temp); " <-- "; 
