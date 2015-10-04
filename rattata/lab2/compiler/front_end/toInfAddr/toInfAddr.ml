@@ -135,15 +135,12 @@ and trans_cond idToTmpMap (condition, (stmtsForIf: A.postElabAST),
                  (TmpInfAddrTest (TmpBoolArg (TmpLoc (Tmp t)),
                                   TmpBoolArg (TmpConst 1))) in
                    make_cond_instrs idToTmpMap priorInstr stmtsForIf
-                      stmtsForElse JNE JE jumpToTopStatus
+                      stmtsForElse JNE JE jumpToTopStatus)
                  (* check to make sure you don't mix up je and jne *)
-          )
-             
-       | _ -> assert(false)
 
 and trans_stmts idToTmpMap = function
-     A.Decl (id, idType, stmts1)::stmts2 ->
-           trans_stmts idToTmpMap stmts1 @ trans_stmts idToTmpMap stmts2
+     A.Decl (id, idType)::stmts ->
+        trans_stmts idToTmpMap stmts
    | A.AssignStmt (id, A.BoolExpr e)::stmts ->
         (* see description of trans_bool_exp *)
         let (instrs_for_move, Tmp t) = trans_bool_exp idToTmpMap e in
@@ -171,9 +168,7 @@ and trans_stmts idToTmpMap = function
      (* Can I assume that nothing after the return in a given
         subtree matters? That should be fine, right? *)
         TmpInfAddrReturn (TmpIntExpr (trans_int_exp idToTmpMap e)) :: []
-   | _ -> assert(false)
-
-
+   | _ -> failwith "there must be a return!"
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)

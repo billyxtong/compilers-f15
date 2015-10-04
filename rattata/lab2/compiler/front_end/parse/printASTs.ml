@@ -94,7 +94,7 @@ let assignStmtToString(i,e) = concat "" [identToString(i); " = "; exprToString(e
 
 let rec stmtToString(s : stmt) = 
   match s with
-        Decl(i,c,p) -> concat "" [c0typeToString(c); identToString(i); postElabAstToString(p)]
+        Decl(i,c) -> concat "" [c0typeToString(c); identToString(i)]
       | AssignStmt(a) -> assignStmtToString(a)
       | If(b,p1,p2) -> concat "" ["if("; boolExprToString(b); 
                                                   ") {\n\t"; postElabAstToString(p1); 
