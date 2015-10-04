@@ -1,5 +1,5 @@
 open Datatypesv1
-open Printdatatypes
+open PrintDatatypes
 open Ast
 
 let identToString(i : ident) = i
