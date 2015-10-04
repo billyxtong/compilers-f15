@@ -20,6 +20,9 @@ let trans_exp idToTmpMap = function
        A.IntExpr e -> TmpIntExpr (trans_int_exp idToTmpMap e)
      | A.BoolExpr e -> TmpBoolExpr (trans_bool_exp idToTmpMap e)
 
+let trans_while idToTmpMap (condition, stmtsForWhile) =
+    []
+
 let rec if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse ifJumpType elseJumpType
   =
     let ifLabel = (GenLabel.create()) in
@@ -35,11 +38,16 @@ let rec if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse ifJumpType else
     @ TmpInfAddrJump(JMP_UNCOND, endLabel)
     ::TmpInfAddrLabel(endLabel) :: []
 
-and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
-     match e with
-         A.LogNot e' ->
-              trans_if idToTmpMap (e', stmtsForElse, stmtsForIf)
+and trans_if idToTmpMap (condition, (stmtsForIf:A.postElabAST), (stmtsForElse:A.postElabAST)) : tmpInfAddrInstr list =
+     match condition with
+         A.LogNot negCondition ->
+              trans_if idToTmpMap (negCondition, stmtsForElse, stmtsForIf)
                           (* just switch them *)
+       | A.LogAnd (bool_exp1, bool_exp2) ->
+          (* For &&, we break it up into nested if statements, where each
+             of them gets the "else" from the original. *)
+           let innerIfAst = [A.If (bool_exp2, stmtsForIf, stmtsForElse)] in
+            trans_if idToTmpMap (bool_exp1, innerIfAst, stmtsForElse)
        | A.BoolConst c -> (match c with
                               1 -> trans_stmts idToTmpMap stmtsForIf
                             | 0 -> trans_stmts idToTmpMap stmtsForElse
@@ -75,10 +83,9 @@ and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
                       stmtsForElse JNE JE)
                  (* check to make sure you don't mix up je and jne *)
           )
+             
        | _ -> assert(false)
 
-(* currently assuming all asnops are just eq, because we expanded
-   asnops in c0Parser.mly *)
 and trans_stmts idToTmpMap = function
      A.Decl (id, idType, stmts1)::stmts2 ->
            trans_stmts idToTmpMap stmts1 @ trans_stmts idToTmpMap stmts2
@@ -91,8 +98,7 @@ and trans_stmts idToTmpMap = function
            assignment evaluates right hand side first, so we need to
            do trans_int_expr with the previous binding of id *)
         let newMap = M.add idToTmpMap id t in
-        TmpInfAddrMov (expInfAddr, Tmp t)::trans_stmts idToTmpMap stmts
-   | A.Nop::stmts -> trans_stmts idToTmpMap stmts
+        TmpInfAddrMov (expInfAddr, Tmp t)::trans_stmts newMap stmts
    | A.If (e, ifStmts, elseStmts) :: stmts ->
         trans_if idToTmpMap (e, ifStmts, elseStmts) @
         trans_stmts idToTmpMap stmts
@@ -106,5 +112,5 @@ and trans_stmts idToTmpMap = function
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
-let toInfAddr ast = let idToTmpMap = String.Map.empty in
-                     trans_stmts idToTmpMap ast
+let toInfAddr (ast: A.postElabAST) =
+     let idToTmpMap = String.Map.empty in trans_stmts idToTmpMap ast
