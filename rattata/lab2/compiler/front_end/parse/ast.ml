@@ -47,6 +47,7 @@ and postElabAST = stmt list
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND    
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
+              | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type preElabExpr = PreElabConstExpr of const * c0type
                  | IdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
