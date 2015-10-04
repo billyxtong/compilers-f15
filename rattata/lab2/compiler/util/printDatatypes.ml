@@ -176,15 +176,15 @@ let tmpInfAddrBinopInstrToString((op, expr1, expr2, t) : tmpInfAddrBinopInstr) =
 
 let tmpBoolExprToString(TmpBoolArg(t) : tmpBoolExpr) = tmpArgToString(t)
 
-let rec tmpExprToString(t : tmpExpr) =
+let rec tmpExprToString(tExpr : tmpExpr) =
   match tExpr with
         TmpBoolExpr(bExpr) -> tmpBoolExprToString(bExpr)
       | TmpIntExpr(iExpr) -> tmpIntExprToString(iExpr)
 
-and tmpInfAddrBoolInstrToString(t : tmpInfAddrBoolInstr) =
+and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =
   match tInstr with
-        TmpInfAddrTest(bExpr1, bExpr2) = concat "" ["test "; tmpBoolExprToString(bExpr1); ", "; tmpBoolExprToString(bExpr2)]
-      | TmpInfAddrCmp(iExpr1, iExpr2) = concat "" ["cmp "; tmpBoolExprToString(bExpr1); ", "; tmpBoolExprToString(bExpr2)]
+        TmpInfAddrTest(bExpr1, bExpr2) -> concat "" ["test "; tmpBoolExprToString(bExpr1); ", "; tmpBoolExprToString(bExpr2)]
+      | TmpInfAddrCmp(iExpr1, iExpr2) -> concat "" ["cmp "; tmpIntExprToString(iExpr1); ", "; tmpIntExprToString(iExpr2)]
 
 let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
   match t with
