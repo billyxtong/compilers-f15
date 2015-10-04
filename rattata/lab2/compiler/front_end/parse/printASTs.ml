@@ -96,10 +96,12 @@ let stmtToString(s : stmt) =
   match s with
         Decl(i,c,p) -> concat "" [c0typeToString(c); identToString(i); postElabAstToString(p)]
       | AssignStmt(a) -> assignStmtToString(a)
-      | If(b,p,p) -> ""
-      | While(b,p) -> ""
-      | Nop -> ""
-      | Return(i) -> ""
+      | If(b,p1,p2) -> concat "" ["if("; boolExprToString(b); 
+                                                  ") {\n\t"; postElabStmtToString(p1); 
+                                                  "} else {\n\t"; postElabStmtToString(p2); "\n}"]
+      | While(b,p) -> concat "" ["while("; boolExprToString(b);
+                                                ") {\n\t"; postElabStmtToString(p); "\n}"]
+      | Return(i) -> "return " ^ intExprToString(i)
 
 and postElabAstToString(stmts : stmt list) = concat "\n" (List.map stmtToString stmts) ^ "\n"
 

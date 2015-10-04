@@ -29,7 +29,6 @@ type stmt = Decl of ident * c0type * postElabAST
           | AssignStmt of assignStmt
           | If of boolExpr * postElabAST * postElabAST
           | While of boolExpr * postElabAST
-          | Nop
           | Return of intExpr
 and postElabAST = stmt list
     
