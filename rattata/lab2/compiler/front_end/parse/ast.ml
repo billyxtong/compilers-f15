@@ -30,6 +30,12 @@ type stmt = Decl of ident * c0type
           | If of boolExpr * postElabAST * postElabAST
           | While of boolExpr * postElabAST
           | Return of intExpr
+          (* I'm sure I had to add jumps to postElabAST Billy,
+             since postElabAST really shouldn't have jumps...
+             I need it for toInfAddr :(
+             Ignore this though; don't write print functions
+             for it or anything *)
+          | JumpUncond of label
 and postElabAST = stmt list
     
 (* Pre-Elab AST
