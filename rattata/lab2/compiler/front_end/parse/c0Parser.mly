@@ -83,7 +83,7 @@ let expand_postop id op =
 
 %type <Ast.preElabAST> program
 
-%left PLUS MINUS
+%left PLUS MINUS BIT_NOT
 %left LOG_AND LOG_OR
 %left NEQ DOUBLE_EQ LT LEQ GT GEQ
 %left BIT_AND BIT_OR XOR
@@ -178,6 +178,8 @@ exp :
 				     ($1, A.IntBinop D.MUL, $3) }
  | exp SLASH exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.FAKEDIV, $3) }
+ | exp PERCENT exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.FAKEMOD, $3) }
  | exp BIT_OR exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_OR, $3) }
  | exp BIT_AND exp                  { A.PreElabBinop
@@ -191,6 +193,9 @@ exp :
  | MINUS exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (0, D.INT),
 				  A.IntBinop D.SUB, $2 ) }
+ | BIT_NOT exp %prec UNARY      { A.PreElabBinop
+				(A.PreElabConstExpr (1, D.INT),
+				  A.IntBinop D.BIT_XOR, $2 ) }
  | exp DOUBLE_EQ exp          { A.PreElabBinop ($1, A.DOUBLE_EQ, $3) }
  | exp NEQ exp          { A.PreElabNot
 			    (A.PreElabBinop ($1, A.DOUBLE_EQ, $3)) }

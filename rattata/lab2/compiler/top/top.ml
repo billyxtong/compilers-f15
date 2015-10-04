@@ -48,7 +48,7 @@ let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_o
     if dump_parsing then ignore (Parsing.set_trace true);
 
     let preElabAst = Parse.parse source in ();
-    (* say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst)); *)
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst));
 
     (* (\* Typecheck *\) *)
     (* say_if verbose (fun () -> "Typecking..."); *)
@@ -57,15 +57,15 @@ let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_o
 
     (* Convert Post-Elab AST to Infinte Addr *)
     say_if verbose (fun () -> "converting to Infinite Address code");
-    let test =
-      A.While (A.LogNot
-        (A.LogAnd (A.IntEquals(A.IntConst 7, A.IntConst 8),
-                         A.IntEquals(A.IntConst 10, A.IntConst 9)))
-         ,
-            [A.AssignStmt ("x", A.IntExpr(A.IntConst 6))])
-               ::[] in
-    let infAddr = ToInfAddr.toInfAddr test in ();
-    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
+    (* let test = *)
+    (*   A.While (A.LogNot *)
+    (*     (A.LogAnd (A.IntEquals(A.IntConst 7, A.IntConst 8), *)
+    (*                      A.IntEquals(A.IntConst 10, A.IntConst 9))) *)
+    (*      , *)
+    (*         [A.AssignStmt ("x", A.IntExpr(A.IntConst 6))]) *)
+    (*            ::[] in *)
+    (* let infAddr = ToInfAddr.toInfAddr test in (); *)
+    (* say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
 
     (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *\) *)
