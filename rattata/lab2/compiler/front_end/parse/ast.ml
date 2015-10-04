@@ -39,11 +39,13 @@ and postElabAST = stmt list
    Post-Elab AST *)
 (* assignOp is only used in parsing; is not actually used in the
    resulting preElabAST *)
+type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND    
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type preElabExpr = PreElabConstExpr of const * c0type
                  | IdentExpr of ident
-                 | PreElabBinop of preElabExpr * intBinop * preElabExpr
+                 | PreElabBinop of preElabExpr * generalBinop * preElabExpr
+                 | PreElabNot of preElabExpr
 type preElabDecl = NewVar of ident * c0type
                  | Init of (ident * c0type * preElabExpr)
 type simpStmt = PreElabDecl of preElabDecl                        
