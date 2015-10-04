@@ -82,7 +82,7 @@ let rec boolExprToString(bExpr : boolExpr) =
       | GreaterThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " > "; intExprToString(iExpr2)]
       | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
       | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
-      | LogNot(bExpr) -> concat "" ["!"; intExprToString(iExpr2)]
+      | LogNot(bExpr) -> concat "" ["!"; boolExprToString bExpr]
       | LogAnd(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " && "; boolExprToString(bExpr2)]
 
 let exprToString(e : expr) = 
@@ -92,15 +92,15 @@ let exprToString(e : expr) =
 
 let assignStmtToString(i,e) = concat "" [identToString(i); " = "; exprToString(e)]
 
-let stmtToString(s : stmt) = 
+let rec stmtToString(s : stmt) = 
   match s with
         Decl(i,c,p) -> concat "" [c0typeToString(c); identToString(i); postElabAstToString(p)]
       | AssignStmt(a) -> assignStmtToString(a)
       | If(b,p1,p2) -> concat "" ["if("; boolExprToString(b); 
-                                                  ") {\n\t"; postElabStmtToString(p1); 
-                                                  "} else {\n\t"; postElabStmtToString(p2); "\n}"]
+                                                  ") {\n\t"; postElabAstToString(p1); 
+                                                  "} else {\n\t"; postElabAstToString(p2); "\n}"]
       | While(b,p) -> concat "" ["while("; boolExprToString(b);
-                                                ") {\n\t"; postElabStmtToString(p); "\n}"]
+                                                ") {\n\t"; postElabAstToString(p); "\n}"]
       | Return(i) -> "return " ^ intExprToString(i)
 
 and postElabAstToString(stmts : stmt list) = concat "\n" (List.map stmtToString stmts) ^ "\n"
