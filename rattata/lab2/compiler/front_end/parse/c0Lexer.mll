@@ -98,7 +98,7 @@ rule initial =
   | "||"        { P.LOG_OR }
       
   | "!="        { P.NEQ }
-  | "=="        { P.EQ }
+  | "=="        { P.DOUBLE_EQ }
   | "<"         { P.LT }
   | "<="        { P.LEQ }
   | ">"         { P.GT }

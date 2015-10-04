@@ -22,16 +22,15 @@ let expand_asnop id op e =
     match op with
        A.EQ -> A.SimpAssign (id, e)
      | A.PLUSEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.IdentExpr id, D.ADD, e))
+     	     A.PreElabBinop(A.IdentExpr id, A.IntBinop D.ADD, e))
      | A.SUBEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.IdentExpr id, D.SUB, e))
+     	     A.PreElabBinop(A.IdentExpr id, A.IntBinop D.SUB, e))
      | A.MULEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, D.MUL, e))
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.MUL, e))
      | A.DIVEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, D.FAKEDIV, e))
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.FAKEDIV, e))
      | A.MODEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, D.FAKEMOD, e))
-     | _ -> assert(false)
+             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.FAKEMOD, e))
 
 let expand_postop id op =
     match op with
@@ -58,7 +57,7 @@ let expand_postop id op =
 %token UNARY ASNOP
 %token MINUSMINUS PLUSPLUS
 %token LOG_NOT LOG_AND LOG_OR
-%token NEQ EQ LT LEQ GT GEQ
+%token NEQ DOUBLE_EQ LT LEQ GT GEQ
 %token BIT_NOT BIT_AND BIT_OR XOR
 %token AND_EQ OR_EQ XOR_EQ
 %token LSHIFT RSHIFT LSHIFT_EQ RSHIFT_EQ
@@ -75,7 +74,9 @@ let expand_postop id op =
 %type <Ast.preElabAST> program
 
 %left PLUS MINUS
-%left STAR SLASH PERCENT
+%left LOG_AND LOG_OR
+%left NEQ DOUBLE_EQ LT LEQ GT GEQ
+%left STAR SLASH PERCENT      
 %right UNARY
 %left LPAREN
 
@@ -154,22 +155,44 @@ lvalue :
 exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
+ | boolconst                     { $1 } 
  | lvalue 			 { A.IdentExpr $1 }	 
  | exp PLUS exp                  { A.PreElabBinop
-				     ($1, D.ADD, $3) }
+				     ($1, A.IntBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
-				     ($1, D.SUB, $3) }
+				     ($1, A.IntBinop D.SUB, $3) }
  | exp STAR exp                  { A.PreElabBinop
-				     ($1, D.MUL, $3) }
+				     ($1, A.IntBinop D.MUL, $3) }
  | exp SLASH exp                  { A.PreElabBinop
-				     ($1, D.FAKEDIV, $3) }
- | exp PERCENT exp                  { A.PreElabBinop
-				     ($1, D.FAKEMOD, $3) }
+				     ($1, A.IntBinop D.FAKEDIV, $3) }
+ | exp BIT_OR exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.BIT_OR, $3) }
+ | exp BIT_AND exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.BIT_AND, $3) }
+ | exp XOR exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.BIT_XOR, $3) }
+ | exp RSHIFT exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.RSHIFT, $3) }
+ | exp LSHIFT exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.LSHIFT, $3) }
  | MINUS exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (0, D.INT),
-				  D.SUB, $2 ) }
+				  A.IntBinop D.SUB, $2 ) }
+ | exp DOUBLE_EQ exp          { A.PreElabBinop ($1, A.DOUBLE_EQ, $3) }
+ | exp NEQ exp          { A.PreElabNot
+			    (A.PreElabBinop ($1, A.DOUBLE_EQ, $3)) }
+ | exp LOG_AND exp            { A.PreElabBinop ($1, A.LOG_AND, $3) }
+ | exp LOG_OR exp             { A.PreElabNot (A.PreElabBinop
+				 (A.PreElabNot $1, A.LOG_AND,
+				  A.PreElabNot $3))
+			      }
+ | LOG_NOT exp %prec UNARY    { A.PreElabNot $2 }
  ;
 
+boolconst :
+   TRUE               { A.PreElabConstExpr(1, D.BOOL) }
+ | FALSE              { A.PreElabConstExpr(0, D.BOOL) }		     
+   
 intconst :
   DECCONST           { match Int32.to_int $1 with
 			   Some x -> A.PreElabConstExpr (x, D.INT)
