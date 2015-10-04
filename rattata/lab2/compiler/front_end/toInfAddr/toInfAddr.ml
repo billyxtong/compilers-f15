@@ -51,7 +51,18 @@ and trans_if idToTmpMap (e, stmtsForIf, stmtsForElse) =
                            trans_int_exp idToTmpMap int_exp1))
             ::(if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse
                  JG JLE)
-               
+       | A.IntEquals (int_exp1, int_exp2) -> TmpInfAddrBoolInstr
+            (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
+                           trans_int_exp idToTmpMap int_exp1))
+            ::(if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse
+                 JE JNE)
+       | A.BoolEquals (bool_exp1, bool_exp2) -> 
+            let TmpBoolArg exp1 = trans_bool_exp idToTmpMap bool_exp2 in
+            let TmpBoolArg exp2 = trans_bool_exp idToTmpMap bool_exp1 in
+            TmpInfAddrBoolInstr (TmpInfAddrCmp
+                                   (TmpIntArg exp1, TmpIntArg exp2))
+            ::(if_instrs_from_labels idToTmpMap stmtsForIf stmtsForElse
+                 JE JNE)
        | A.BoolIdent id ->  
           (match M.find idToTmpMap id with
              None -> 
