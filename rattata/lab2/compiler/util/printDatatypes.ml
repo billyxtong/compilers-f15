@@ -60,7 +60,7 @@ let boolInstrToString (instr : boolInstr) =
       | CMP(arg1, arg2) -> concat "" ["cmpl "; assemArgToString(arg1); ", "; 
                                                assemLocToString(arg2)]
 
-let assemIntInstrToString((intOp, src, dest) : assemBinopInstr) = 
+let assemIntInstrToString((intOp, src, dest) : assemIntInstr) = 
     concat "" [intBinopToString intOp; assemArgToString(src); ", "; 
                assemLocToString(dest)]
 
@@ -135,7 +135,7 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
       | Tmp2AddrBinop(tmpbinop) -> tmp2AddrBinopToString(tmpbinop)
       | Tmp2AddrReturn(tmparg) -> 
             concat "" ["return "; tmpArgToString(tmparg)]
-      | Tmp2AddrJump(jumpinstr) -> jumpInstrToString(jInstr)
+      | Tmp2AddrJump(jumpinstr) -> jumpInstrToString(jumpinstr)
       | Tmp2AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
       | Tmp2AddrLabel(l) -> labelToString(l)
 

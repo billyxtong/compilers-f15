@@ -46,7 +46,7 @@ let main files verbose dump_parsing dump_ast dump_ir dump_assem typecheck_only d
     if dump_parsing then ignore (Parsing.set_trace true);
 
     let preElabAst = Parse.parse source in
-    say_if dump_ast (fun () -> PrintASTs.preElabASTToString);
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst));
 
     (* (\* Typecheck *\) *)
     (* say_if verbose (fun () -> "Typecking..."); *)

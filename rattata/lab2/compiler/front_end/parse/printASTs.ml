@@ -1,18 +1,13 @@
 open Datatypesv1
 open PrintDatatypes
 open Ast
+open String
 
 let identToString(i : ident) = i
 
-let intExprToString(intexpr : intExpr) =
-  match intexpr with
-        IntConst(c) -> ""
-      | IntIdent(i) -> ""
-      | ASTBinop(expr1, op, expr2) -> ""
-
-let preElabExprToString(preelabexpr : preElabExpr) =
+let rec preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
-        PreElabConstExpr(c,t) -> concat "" [c0TypeToString t; " "; constToString c]
+        PreElabConstExpr(c,t) -> concat "" [c0typeToString t; " "; constToString c]
       | IdentExpr(i) -> identToString i
       | PreElabBinop(expr1, op, expr2) -> concat "" [preElabExprToString expr1; 
                                                      intBinopToString op; 
@@ -33,7 +28,7 @@ let simpOptToString(sOpt : simpOpt) =
         EmptySimp -> ""
       | HasSimpStmt(statement) -> simpStmtToString(statement)
 
-let elseOptToString(eOpt : elseOpt) =
+let rec elseOptToString(eOpt : elseOpt) =
   match eOpt with
         EmptyElse -> ""
       | PreElabElse(p) -> preElabStmtToString(p)
@@ -57,13 +52,13 @@ and preElabStmtToString(pStmt : preElabStmt) =
       | Control(c) -> controlToString(c)
       | Block(b) -> blockToString(b)
 
-and blockTostring(blk : block) = concat "\n" (List.map preElabStmtToString) blk ^ "\n" 
+and blockToString(blk : block) = concat "\n" (List.map preElabStmtToString blk) ^ "\n" 
 
 let preElabASTToString(blk) = blockToString blk
 
 (* ============ Post-Elab AST Print Functions ================= *)
 
-let intExprToString(iExpr : intExpr) = 
+let rec intExprToString(iExpr : intExpr) = 
   match iExpr with
         IntConst(c) -> constToString(c)
       | IntIdent(i) -> identToString(i)
