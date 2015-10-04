@@ -38,7 +38,7 @@ let elseOptToString(eOpt : elseOpt) =
         EmptyElse -> ""
       | PreElabElse(p) -> preElabStmtToString(p)
 
-and controlToString(c) = 
+and controlToString(c : control) = 
   match c with
         PreElabIf(pExpr,pStmt,eOpt) -> concat "" ["if("; preElabExprToString(pExpr); 
                                                   ") {\n\t"; preElabStmtToString(pStmt); 
@@ -51,15 +51,20 @@ and controlToString(c) =
                                                         preElabStmtToString(pStmt); "\n}"]
       | PreElabReturn(pExpr) -> "return " ^ preElabExprToString(pExpr)
 
-and preElabStmtToString(pStmt) = 
+and preElabStmtToString(pStmt : preElabStmt) = 
   match pStmt with
         SimpStmt(s) -> simpStmtToString(s)
       | Control(c) -> controlToString(c)
       | Block(b) -> blockToString(b)
 
-and blockTostring(blk) =
-  match blk with
-        [] -> ""
-      | pStmt :: stmts -> ""
+and blockTostring(blk : block) = concat "\n" (List.map preElabStmtToString) blk ^ "\n" 
 
 let preElabASTToString(blk) = blockToString blk
+
+(* ============ Post-Elab AST Print Functions ================= *)
+
+let intExprToString(iExpr : intExpr) = 
+  match iExpr with
+        IntConst(c) -> constToString(c)
+      | IntIdent(i) -> identToString(i)
+      | ASTBinop(expr1, op, expr2) -> concat "" [intExprToString(expr1); intBinopToString(op); intExprToString(expr2)]
