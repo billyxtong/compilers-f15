@@ -26,7 +26,7 @@ let rec trans_bool_exp idToTmpMap e =
        asts as input, but asts only take idents, not tmps. So we
        create an ident that is guaranteed to not already be an ident
        (hence the \\), and map it to t. *)
-    let identForT = "\\" ^ string_of_int(t) in
+    let identForT = GenUnusedID.create() in
     let newMap = M.add idToTmpMap identForT t in
     let ifStmts = [A.AssignStmt (identForT, A.BoolExpr (A.BoolConst 1))] in
     let elseStmts = [A.AssignStmt (identForT, A.BoolExpr (A.BoolConst 0))] in
