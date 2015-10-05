@@ -65,6 +65,15 @@ let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_o
     say_if verbose (fun () -> "converting to Infinite Address code");
         let infAddr = ToInfAddr.toInfAddr test in ();
     say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
+    (* let test = *)
+    (*   A.While (A.LogNot *)
+    (*     (A.LogAnd (A.IntEquals(A.IntConst 7, A.IntConst 8), *)
+    (*                      A.IntEquals(A.IntConst 10, A.IntConst 9))) *)
+    (*      , *)
+    (*         [A.AssignStmt ("x", A.IntExpr(A.IntConst 6))]) *)
+    (*            ::[] in *)
+    (* let infAddr = ToInfAddr.toInfAddr test in (); *)
+    (* say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
 
     (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *\) *)

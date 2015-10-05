@@ -30,7 +30,7 @@ type typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedJumpUncond of label
  and typedPostElabAST = typedPostElabStmt list
 
-(* Untyped Post-Elab AST
+ (* Untyped Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 

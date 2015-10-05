@@ -22,25 +22,25 @@ let expand_asnop id op e =
     match op with
        A.EQ -> A.SimpAssign (id, e)
      | A.PLUSEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.IdentExpr id, A.IntBinop D.ADD, e))
+     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.ADD, e))
      | A.SUBEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.IdentExpr id, A.IntBinop D.SUB, e))
+     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.SUB, e))
      | A.MULEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.MUL, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.MUL, e))
      | A.DIVEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.FAKEDIV, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.FAKEDIV, e))
      | A.MODEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.FAKEMOD, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.FAKEMOD, e))
      | A.AND_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.BIT_AND, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_AND, e))
      | A.OR_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.BIT_OR, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_OR, e))
      | A.XOR_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.BIT_XOR, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_XOR, e))
      | A.LSHIFT_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.LSHIFT, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.LSHIFT, e))
      | A.RSHIFT_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.IdentExpr id, A.IntBinop D.RSHIFT, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.RSHIFT, e))
 
 let expand_postop id op =
     match op with
@@ -83,7 +83,7 @@ let expand_postop id op =
 
 %type <Ast.preElabAST> program
 
-%left PLUS MINUS
+%left PLUS MINUS BIT_NOT
 %left LOG_AND LOG_OR
 %left NEQ DOUBLE_EQ LT LEQ GT GEQ
 %left BIT_AND BIT_OR XOR
@@ -140,11 +140,10 @@ elseopt :
 
   
 control :
-   exp QUESMARK stmt COLON stmt  { A.PreElabIf ($1, $3, A.PreElabElse $5) }
- | IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
+   IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
  | WHILE LPAREN exp RPAREN stmt { A.PreElabWhile ($3, $5) }
  | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
-       {A.PreElabFor ($3, $5, $7, $9) }
+       { A.PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
 	  
 decl :
@@ -169,7 +168,7 @@ exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
  | boolconst                     { $1 } 
- | lvalue 			 { A.IdentExpr $1 }	 
+ | lvalue 			 { A.PreElabIdentExpr $1 }	 
  | exp PLUS exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
@@ -178,6 +177,8 @@ exp :
 				     ($1, A.IntBinop D.MUL, $3) }
  | exp SLASH exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.FAKEDIV, $3) }
+ | exp PERCENT exp                  { A.PreElabBinop
+				     ($1, A.IntBinop D.FAKEMOD, $3) }
  | exp BIT_OR exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_OR, $3) }
  | exp BIT_AND exp                  { A.PreElabBinop
@@ -191,6 +192,9 @@ exp :
  | MINUS exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (0, D.INT),
 				  A.IntBinop D.SUB, $2 ) }
+ | BIT_NOT exp %prec UNARY      { A.PreElabBinop
+				(A.PreElabConstExpr (1, D.INT),
+				  A.IntBinop D.BIT_XOR, $2 ) }
  | exp DOUBLE_EQ exp          { A.PreElabBinop ($1, A.DOUBLE_EQ, $3) }
  | exp NEQ exp          { A.PreElabNot
 			    (A.PreElabBinop ($1, A.DOUBLE_EQ, $3)) }
@@ -200,6 +204,9 @@ exp :
 				  A.PreElabNot $3))
 			      }
  | LOG_NOT exp %prec UNARY    { A.PreElabNot $2 }
+		     /*
+ | exp QUESMARK exp COLON exp  { A.PreElabIf ($1, $3, A.PreElabElse $5) }
+       */
  ;
 
 boolconst :
