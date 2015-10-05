@@ -62,6 +62,7 @@ let rec expand_log_binop e1 op e2 =
 		let is_eq = expand_log_binop e1 A.DOUBLE_EQ e2 in
 		expand_log_binop is_gt A.LOG_OR is_eq
      | A.LT -> A.PreElabNot (expand_log_binop e1 A.GEQ e2)
+     | _ -> failwith "this should only be called with logical binops"
 				    
 %}
 
