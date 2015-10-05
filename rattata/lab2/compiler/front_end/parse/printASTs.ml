@@ -19,7 +19,7 @@ let rec preElabExprToString(preelabexpr : preElabExpr) =
       | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; " ";
                                                      generalBinopToString op; 
                                                      preElabExprToString expr2; ")"]
-      | PreElabNot(expr1) -> concat "" ["!("; preElabExprToString(expr1); ")"]
+      | PreElabNot(expr1) -> concat "" ["!"; preElabExprToString(expr1)]
 
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
@@ -46,7 +46,7 @@ and controlToString(c : control) =
   match c with
         PreElabIf(pExpr,pStmt,eOpt) -> concat "" ["if("; preElabExprToString(pExpr); 
                                                   ") {\n\t"; preElabStmtToString(pStmt); 
-                                                  "} else {\n\t"; elseOptToString(eOpt); "\n}"]
+                                                  "} \nelse {\n\t"; elseOptToString(eOpt); "\n}"]
       | PreElabWhile(pExpr,pStmt) -> concat "" ["while("; preElabExprToString(pExpr);
                                                 ") {\n\t"; preElabStmtToString(pStmt); "\n}"]
       | PreElabFor(sOpt1,pExpr,sOpt2,pStmt) -> concat "" ["for("; simpOptToString(sOpt1); "; ";
@@ -74,7 +74,7 @@ let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
       | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; untypedPostElabExprToString expr1; " ";
                                                      generalBinopToString op; 
                                                      untypedPostElabExprToString expr2; ")"]
-      | UntypedPostElabNot(expr1) -> concat "" ["!("; untypedPostElabExprToString(expr1); ")"]
+      | UntypedPostElabNot(expr1) -> concat "" ["!"; untypedPostElabExprToString(expr1)]
 
 
 let rec untypedPostElabStmtToString(s : untypedPostElabStmt) = 
@@ -84,7 +84,7 @@ let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
                                                                         untypedPostElabExprToString(untypedexpr)]
       | UntypedPostElabIf(expression,postelabast1,postelabast2) -> concat "" ["if("; untypedPostElabExprToString(expression); 
                                                   ") {\n\t"; untypedPostElabASTToString(postelabast1); 
-                                                  "} else {\n\t"; untypedPostElabASTToString(postelabast2); "\n}"]
+                                                  "} \nelse {\n\t"; untypedPostElabASTToString(postelabast2); "\n}"]
       | UntypedPostElabWhile(expression,postelabast) -> concat "" ["while("; untypedPostElabExprToString(expression);
                                                 ") {\n\t"; untypedPostElabASTToString(postelabast); "\n}"]
       | UntypedPostElabReturn(i) -> "return " ^ untypedPostElabExprToString(i)
