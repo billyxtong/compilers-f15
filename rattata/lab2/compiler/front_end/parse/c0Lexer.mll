@@ -132,7 +132,7 @@ rule initial =
   | "else"        { P.ELSE }
   | "while"       { P.WHILE }
   | "for"         { P.FOR }
-  | "break"       { P.BREAK }
+  | "break"       { assert false }
 
   | "struct"      { assert false }
   | "typedef"     { assert false }

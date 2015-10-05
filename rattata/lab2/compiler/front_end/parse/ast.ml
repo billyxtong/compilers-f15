@@ -30,7 +30,7 @@ type postElabStmt = Decl of ident * c0type
                   | If of boolExpr * postElabAST * postElabAST
                   | While of boolExpr * postElabAST
                   | Return of intExpr
- and postElabAST = stmt list
+ and postElabAST = postElabStmt list
 
 (* Untyped Post-Elab AST
    A restriced grammar from the Pre-Elab AST. See the elaboration
