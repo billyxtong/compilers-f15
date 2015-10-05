@@ -1,5 +1,20 @@
 open Ast
 
+let elaboratePreElabDecl(decl : preElabDecl) = 
+  match decl with
+        NewVar(identifier, typee) -> [Decl(identifier, typee)]
+      | Init(identifier, typee, expression) -> 
+          [Decl(identifier, typee), AssignStmt(identifier, elaboratePreElabExpr(expression))]
+
+let rec elaboratePreElabExpr(expression : preElabExpr) =
+  match expression with
+        PreElabConstExpr(constant, typee) -> (match typee with
+                                                    INT -> IntConst(constant)
+                                                  | BOOL -> BoolConst(constant))
+      | IdentExpr(identifier) -> 
+      | PreElabBinop(expr1, op, expr2) -> ""
+      | PreElabNot(expression') -> ""
+
 let elaboratePreElabStmt (statement : preElabStmt) =
   match statement with
         SimpStmt(s) -> elaborateSimpStmt(s)
@@ -8,9 +23,9 @@ let elaboratePreElabStmt (statement : preElabStmt) =
 
 and elaborateSimpStmt (simpleStatement : simpStmt) =
   match simpleStatement with
-        PreElabDecl(p) -> ""
-      | SimpAssign(i, p) -> ""
-      | SimpStmtExpr(p) -> ""
+        PreElabDecl(p) -> elaboratePreElabDecl(p)
+      | SimpAssign(identifier, expression) -> 
+      | SimpStmtExpr(p) -> elaboratePreElabExpr(p)
 
 and elaborateControl (ctrl : control) =
   match ctrl with
@@ -19,10 +34,7 @@ and elaborateControl (ctrl : control) =
       | PreElabFor(sOpt,pExpr,sOpt,pStmt) -> ""
       | PreElabReturn(pExpr) -> ""
 
-and elaborateBlock (blk : block) = elaborateAST blk
+and elaborateBlock (statements : preElabStmt list) = List.map elaboratePreElabStmt statements
 
 
-let elaborateAST (statements : preElabAST) =
-  match statements with
-        [] -> []
-      | statement :: statements' -> elaboratePreElabStmt(statement) :: elaborateAST(statements')
+let elaborateAST (statements : preElabAST) = elaborateBlock(statements)
