@@ -15,11 +15,12 @@ let generalBinopToString(op : generalBinop) =
 let rec preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
         PreElabConstExpr(c,t) -> constToString c
-      | IdentExpr(i) -> identToString i
+      | PreElabIdentExpr(i) -> identToString i
       | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; " ";
                                                      generalBinopToString op; 
                                                      preElabExprToString expr2; ")"]
       | PreElabNot(expr1) -> concat "" ["!("; preElabExprToString(expr1); ")"]
+
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
         NewVar(i,t) -> c0typeToString(t) ^ identToString(i)
@@ -64,8 +65,43 @@ and blockToString(blk : block) = concat "\n" (List.map preElabStmtToString blk) 
 
 let preElabASTToString(blk) = blockToString blk
 
-(* ============ Post-Elab AST Print Functions ================= *)
+(* ============ Untyped Post-Elab AST Print Functions ================= *)
 
+let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
+  match expression with
+        UntypedPostElabConstExpr(c,t) -> constToString c
+      | UntypedPostElabIdentExpr(i) -> identToString i
+      | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; untypedPostElabExprToString expr1; " ";
+                                                     generalBinopToString op; 
+                                                     untypedPostElabExprToString expr2; ")"]
+      | UntypedPostElabNot(expr1) -> concat "" ["!("; untypedPostElabExprToString(expr1); ")"]
+
+
+let rec untypedPostElabStmtToString(s : postElabStmt) = 
+  match s with
+        UntypedPostElabDecl(identifier,constant) -> concat "" [c0typeToString(constant); identToString(identifier)]
+      | UntypedPostElabAssignStmt(identifier,untypedexpr) -> concat "" [identToString(identifier); " = "; 
+                                                                        untypedPostElabExprToString(untypedexpr)]
+      | UntypedPostElabIf(expression,postelabast1,postelabast2) -> concat "" ["if("; untypedPostElabExprToString(expression); 
+                                                  ") {\n\t"; untypedPostElabASTToString(postelabast1); 
+                                                  "} else {\n\t"; untypedPostElabASTToString(postelabast2); "\n}"]
+      | UntypedPostElabWhile(expression,postelabast) -> concat "" ["while("; untypedPostElabExprToString(expression);
+                                                ") {\n\t"; untypedPostElabASTToString(postelabast); "\n}"]
+      | UntypedPostElabReturn(i) -> "return " ^ untypedPostElabExprToString(i)
+
+
+and untypedPostElabASTToString(stmts : untypedPostElabAST) =
+  concat "\n" (List.map untypedPostElabStmt stmts) ^ "\n"
+
+
+
+
+
+
+
+(* ============ Typed Post-Elab AST Print Functions ================= *)
+
+(*
 let rec intExprToString(iExpr : intExpr) = 
   match iExpr with
         IntConst(c) -> constToString(c)
@@ -104,11 +140,4 @@ let rec stmtToString(s : stmt) =
       | Return(i) -> "return " ^ intExprToString(i)
 
 and postElabAstToString(stmts : stmt list) = concat "\n" (List.map stmtToString stmts) ^ "\n"
-
-
-
-
-
-
-
-
+*)

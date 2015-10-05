@@ -1,12 +1,9 @@
-(* L1 Compiler
+(* L2 Compiler
  * Abstract Syntax Trees
- * Author: Alex Vaynberg
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- *
- * Modified: Anand Subramanian <asubrama@andrew.cmu.edu> Fall 2010
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
- *
- * Forward compatible fragment of C0
+ * Authors: Ben Plaut, William Tong
+ * 
+ * Datatypes for pre-elaboration ASTs, untyped post-elaboration ASTs,
+ * and typed post-elaboration ASTs.
  *)
 
 open Datatypesv1
@@ -23,18 +20,19 @@ type boolExpr = BoolConst of const | BoolIdent of ident
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
-type expr = IntExpr of intExpr | BoolExpr of boolExpr               
-type assignStmt = ident * expr 
-type postElabStmt = Decl of ident * c0type
-                  | AssignStmt of assignStmt
-                  | If of boolExpr * postElabAST * postElabAST
-                  | While of boolExpr * postElabAST
-                  | Return of intExpr
- and postElabAST = stmt list
+type typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr               
+type typedPostElabStmt = TypedPostElabDecl of ident * c0type
+                  | TypedPostElabAssignStmt of ident * typedPostElabExpr
+                  | TypedPostElabIf of boolExpr * typedPostElabAST * 
+                                       typedPostElabAST
+                  | TypedPostElabWhile of boolExpr * typedPostElabAST
+                  | TypedPostElabReturn of intExpr
+                  | TypedJumpUncond of label
+ and typedPostElabAST = typedPostElabStmt list
 
 (* Untyped Post-Elab AST
-   A restriced grammar from the Pre-Elab AST. See the elaboration
-   file (which I have not yet written) for more info. *)
+   A restricted grammar from the Pre-Elab AST. See the elaboration
+   file for more info. *)
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
 type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
                          | UntypedPostElabIdentExpr of ident
@@ -42,28 +40,19 @@ type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
                                                    generalBinop * 
                                                    untypedPostElabExpr
                          | UntypedPostElabNot of untypedPostElabExpr
-type untypedPostElabStmt = Decl of ident * c0type
-                         | AssignStmt of ident * expr
-                         | If of boolExpr * untypedPostElabAST * 
-                                 untypedPostElabAST
-                         | While of boolExpr * untypedPostElabAST
-                         | Return of intExpr
-                         | JumpUncond of label
-(* I'm sure I had to add jumps to postElabAST Billy,
-             since postElabAST really shouldn't have jumps...
-             I need it for toInfAddr :(
-             Ignore this though; don't write print functions
-             for it or anything *)
+type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
+                         | UntypedPostElabAssignStmt of ident * 
+                                                        untypedPostElabExpr
+                         | UntypedPostElabIf of untypedPostElabExpr * 
+                                                untypedPostElabAST * 
+                                                untypedPostElabAST
+                         | UntypedPostElabWhile of untypedPostElabExpr * 
+                                                   untypedPostElabAST
+                         | UntypedPostElabReturn of untypedPostElabExpr
+                         | UntypedPostElabJumpUncond of label
+ and untypedPostElabAST = untypedPostElabStmt list
 
-and untypedPostElabAST = untypedPostElabStmt list
-
-(* Pre-Elab AST
-   Unfortunately, we have to wrap everything in different
-   constructors here, in order to keep in separate from
-   Post-Elab AST *)
-(* assignOp is only used in parsing; is not actually used in the
-   resulting preElabAST *)
-   
+(* Pre-Elab AST *)
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
@@ -72,7 +61,7 @@ type preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
 type preElabDecl = NewVar of ident * c0type
-                 | Init of (ident * c0type * preElabExpr)
+                 | Init of ident * c0type * preElabExpr
 type simpStmt = PreElabDecl of preElabDecl                        
               | SimpAssign of ident * preElabExpr
               | SimpStmtExpr of preElabExpr
@@ -86,5 +75,5 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
  and preElabStmt = SimpStmt of simpStmt
                  | Control of control
                  | Block of block
- and block = preElabStmt list                      
+ and block = preElabStmt list
 type preElabAST = block

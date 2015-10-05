@@ -22,7 +22,8 @@ let spec =
   +> anon (sequence ("files" %: string))
   +> flag "--verbose" ~aliases:["-v"] no_arg ~doc:" Verbose messages"
   +> flag "--dump-parsing" no_arg ~doc:" Pretty print parsing messages"
-  +> flag "--dump-ast" no_arg ~doc:" Pretty print the AST"
+  +> flag "--dump-ast" no_arg ~doc:" Pretty print the pre-elab AST"
+  +> flag "--dump-untypedPostElabAST" no_arg ~doc:" Pretty print the untyped post-elab AST"
   +> flag "--dump-infAddr" no_arg ~doc:" Pretty print the infAddr"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
@@ -46,26 +47,24 @@ let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_o
     (* Parse *)
     say_if verbose (fun () -> "Parsing... " ^ source);
     if dump_parsing then ignore (Parsing.set_trace true);
-
     let preElabAst = Parse.parse source in ();
-    (* say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst)); *)
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst));
+
+    (* Elaborate *)
+    say_if verbose (fun () -> "Elaborating... ");
+    let untypedPostElabAst = Elab.elaborateAST preElabAst in ();
+    say_if dump_untypedPostElabAST (fun () -> 
+      PrintASTs.untypedPostElabASTToString(untypedPostElabAst))
 
     (* (\* Typecheck *\) *)
     (* say_if verbose (fun () -> "Typecking..."); *)
     (* TypeChecker.typecheck ast; *)
     (* if typecheck_only then exit 0; *)
 
-    (* Convert Post-Elab AST to Infinte Addr *)
+    (* Convert Post-Elab AST to Infinte Addr 
     say_if verbose (fun () -> "converting to Infinite Address code");
-    let test =
-      A.While (A.LogNot
-        (A.LogAnd (A.IntEquals(A.IntConst 7, A.IntConst 8),
-                         A.IntEquals(A.IntConst 10, A.IntConst 9)))
-         ,
-            [A.AssignStmt ("x", A.IntExpr(A.IntConst 6))])
-               ::[] in
-    let infAddr = ToInfAddr.toInfAddr test in ();
-    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
+        let infAddr = ToInfAddr.toInfAddr test in ();
+    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
 
     (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *\) *)

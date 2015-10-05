@@ -1,19 +1,36 @@
 open Ast
 
+let addSimpStmtToPreElabStmt(pStmt,sStmt) = 
+  match (sStmt, pStmt) with
+        (EmptySimp, _) -> pStmt
+      | (HasSimpStmt(s), Block(b)) -> Block(List.append b (SimpStmt(s)))
+      | _ -> Block([pStmt, sStmt])
+
+let elaborateSimpOpt(sOpt : simpOpt) = 
+  match sOpt with
+        EmptySimp -> ""
+      | HasSimpStmt(stmt) -> elaborateSimpStmt(stmt)
+
+let elaborateElseOpt(eOpt : elseOpt) =
+  match eOpt with
+        EmptyElse -> ""
+      | PreElabElse(pStmt) -> elaboratePreElabStmt(pStmt)
+
 let elaboratePreElabDecl(decl : preElabDecl) = 
   match decl with
-        NewVar(identifier, typee) -> [Decl(identifier, typee)]
+        NewVar(identifier, typee) -> [UntypedPostElabDecl(identifier, typee)]
       | Init(identifier, typee, expression) -> 
-          [Decl(identifier, typee), AssignStmt(identifier, elaboratePreElabExpr(expression))]
+          [UntypedPostElabDecl(identifier, typee); 
+           UntypedPostElabAssignStmt(identifier, 
+                        elaboratePreElabExpr(expression))]
 
 let rec elaboratePreElabExpr(expression : preElabExpr) =
   match expression with
-        PreElabConstExpr(constant, typee) -> (match typee with
-                                                    INT -> IntConst(constant)
-                                                  | BOOL -> BoolConst(constant))
-      | IdentExpr(identifier) -> 
-      | PreElabBinop(expr1, op, expr2) -> ""
-      | PreElabNot(expression') -> ""
+        PreElabConstExpr(constant, typee) -> UntypedPostElabConstExpr(constant, typee)
+      | PreElabIdentExpr(identifier) -> UntypedPostElabIdentExpr(identifier)
+      | PreElabBinop(expr1, op, expr2) -> UntypedPostElabBinop(elaboratePreElabExpr(expr1); 
+                                                           op; elaboratePreElabExpr(expr2))
+      | PreElabNot(expression') -> UntypedPostElabNot(elaboratePreElabExpr(expression'))
 
 let elaboratePreElabStmt (statement : preElabStmt) =
   match statement with
@@ -24,17 +41,20 @@ let elaboratePreElabStmt (statement : preElabStmt) =
 and elaborateSimpStmt (simpleStatement : simpStmt) =
   match simpleStatement with
         PreElabDecl(p) -> elaboratePreElabDecl(p)
-      | SimpAssign(identifier, expression) -> 
-      | SimpStmtExpr(p) -> elaboratePreElabExpr(p)
+      | SimpAssign(identifier, expression) -> [UntypedPostElabAssignStmt(identifier, elaboratePreElabExpr(expression))]
+      | SimpStmtExpr(p) -> [elaboratePreElabExpr(p)]
 
 and elaborateControl (ctrl : control) =
   match ctrl with
-        PreElabIf(pExpr, pStmt, eOpt) -> ""
-      | PreElabWhile(pExpr, pStmt) -> ""
-      | PreElabFor(sOpt,pExpr,sOpt,pStmt) -> ""
-      | PreElabReturn(pExpr) -> ""
+        PreElabIf(pExpr, pStmt, eOpt) -> [UntypedPostElabIf(elaboratePreElabExpr(pExpr), 
+                                                            elaboratePreElabStmt(pStmt), 
+                                                            elaborateElseOpt(eOpt))]
+      | PreElabWhile(pExpr, pStmt) -> [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), elaboratePreElabStmt(pStmt))]
+      | PreElabFor(sOpt1,pExpr,sOpt2,pStmt) -> [elaborateSimpOpt(sOpt1); 
+                                                UntypedPostElabWhile(elaboratePreElabExpr(pExpr), 
+                                                addSimpStmtToPreElabStmt(pStmt,sOpt2))]
+      | PreElabReturn(pExpr) -> [UntypedPostElabReturn(elaboratePreElabExpr(pExpr))]
 
-and elaborateBlock (statements : preElabStmt list) = List.map elaboratePreElabStmt statements
-
+and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements)
 
 let elaborateAST (statements : preElabAST) = elaborateBlock(statements)
