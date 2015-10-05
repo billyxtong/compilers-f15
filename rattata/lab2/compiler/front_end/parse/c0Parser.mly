@@ -44,9 +44,25 @@ let expand_asnop id op e =
 
 let expand_postop id op =
     match op with
-       A.PLUSPLUS -> expand_asnop id A.PLUSEQ (A.PreElabConstExpr (1, D.INT))
-     | A.MINUSMINUS -> expand_asnop id A.SUBEQ (A.PreElabConstExpr (1, D.INT))
-		  
+       A.PLUSPLUS -> expand_asnop id A.PLUSEQ
+	      (A.PreElabConstExpr (1, D.INT))
+     | A.MINUSMINUS -> expand_asnop id A.SUBEQ
+	      (A.PreElabConstExpr (1, D.INT))
+
+let rec expand_log_binop e1 op e2 =
+    match op with
+       A.GT -> A.PreElabBinop (e1, A.GT, e2)
+     | A.DOUBLE_EQ -> A.PreElabBinop (e1, A.DOUBLE_EQ, e2)
+     | A.NEQ -> A.PreElabNot (expand_log_binop e1 A.DOUBLE_EQ e2)
+     | A.LEQ -> A.PreElabNot (expand_log_binop e1 A.GT e2)
+     | A.LOG_AND -> A.PreElabBinop (e1, A.LOG_AND, e2)
+     | A.LOG_OR -> A.PreElabNot
+          (A.PreElabBinop (A.PreElabNot e1, A.LOG_AND, A.PreElabNot e2))
+     | A.GEQ -> let is_gt = expand_log_binop e1 A.GT e2 in
+		let is_eq = expand_log_binop e1 A.DOUBLE_EQ e2 in
+		expand_log_binop is_gt A.LOG_OR is_eq
+     | A.LT -> A.PreElabNot (expand_log_binop e1 A.GEQ e2)
+				    
 %}
 
 %token EOF
@@ -64,7 +80,7 @@ let expand_postop id op =
 %token ASSIGN PLUSEQ MINUSEQ STAREQ SLASHEQ PERCENTEQ
 %token LBRACE RBRACE
 %token LPAREN RPAREN
-%token UNARY ASNOP
+%token UNARY ASNOP LOG_BINOP
 %token MINUSMINUS PLUSPLUS
 %token LOG_NOT LOG_AND LOG_OR
 %token NEQ DOUBLE_EQ LT LEQ GT GEQ
@@ -72,7 +88,7 @@ let expand_postop id op =
 %token AND_EQ OR_EQ XOR_EQ
 %token LSHIFT RSHIFT LSHIFT_EQ RSHIFT_EQ
 %token COLON QUESMARK       
-/* UNARY and ASNOP are dummy terminals.
+/* UNARY and ASNOP and LOG_BINOP are dummy terminals.
  * We need dummy terminals if we wish to assign a precedence
  * to a rule that does not correspond to the precedence of
  * the rightmost terminal in that rule.
@@ -168,7 +184,8 @@ exp :
   LPAREN exp RPAREN              { $2 }
  | intconst                      { $1 }
  | boolconst                     { $1 } 
- | lvalue 			 { A.PreElabIdentExpr $1 }	 
+ | lvalue 			 { A.PreElabIdentExpr $1 }
+ /* Int arithmetic */				 
  | exp PLUS exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
@@ -179,36 +196,40 @@ exp :
 				     ($1, A.IntBinop D.FAKEDIV, $3) }
  | exp PERCENT exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.FAKEMOD, $3) }
+/* Bitwise ops */       
  | exp BIT_OR exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_OR, $3) }
  | exp BIT_AND exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_AND, $3) }
  | exp XOR exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_XOR, $3) }
+/* Shifts */       
  | exp RSHIFT exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.RSHIFT, $3) }
  | exp LSHIFT exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.LSHIFT, $3) }
+/* Unary */       
  | MINUS exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (0, D.INT),
 				  A.IntBinop D.SUB, $2 ) }
  | BIT_NOT exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (1, D.INT),
 				  A.IntBinop D.BIT_XOR, $2 ) }
- | exp DOUBLE_EQ exp          { A.PreElabBinop ($1, A.DOUBLE_EQ, $3) }
- | exp NEQ exp          { A.PreElabNot
-			    (A.PreElabBinop ($1, A.DOUBLE_EQ, $3)) }
- | exp LOG_AND exp            { A.PreElabBinop ($1, A.LOG_AND, $3) }
- | exp LOG_OR exp             { A.PreElabNot (A.PreElabBinop
-				 (A.PreElabNot $1, A.LOG_AND,
-				  A.PreElabNot $3))
-			      }
+/* Comparison/Logical */
+ | exp GT exp                  { expand_log_binop $1 A.GT $3 }
+ | exp DOUBLE_EQ exp           { expand_log_binop $1 A.DOUBLE_EQ $3 }
+ | exp NEQ exp                 { expand_log_binop $1 A.NEQ $3 }
+ | exp LT exp 		       { expand_log_binop $1 A.LT $3 }
+ | exp GEQ exp 		       { expand_log_binop $1 A.GEQ $3 }
+ | exp LEQ exp 		       { expand_log_binop $1 A.LEQ $3 }
+ | exp LOG_AND exp 	       { expand_log_binop $1 A.LOG_AND $3 }
+ | exp LOG_OR exp              { expand_log_binop $1 A.LOG_OR $3 }
  | LOG_NOT exp %prec UNARY    { A.PreElabNot $2 }
 		     /*
  | exp QUESMARK exp COLON exp  { A.PreElabIf ($1, $3, A.PreElabElse $5) }
        */
  ;
-
+   
 boolconst :
    TRUE               { A.PreElabConstExpr(1, D.BOOL) }
  | FALSE              { A.PreElabConstExpr(0, D.BOOL) }		     

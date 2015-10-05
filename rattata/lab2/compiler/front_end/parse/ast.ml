@@ -34,6 +34,9 @@ type typedPostElabStmt = TypedPostElabDecl of ident * c0type
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
+                   (* Billy just ignore these ones underneath,
+                      I'm just using them for parsing *)
+                  | LT | LEQ | GEQ | LOG_OR | NEQ
 type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
                          | UntypedPostElabIdentExpr of ident
                          | UntypedPostElabBinop of untypedPostElabExpr * 
