@@ -1,1 +1,1 @@
-val create: () -> string
+val create : unit -> string

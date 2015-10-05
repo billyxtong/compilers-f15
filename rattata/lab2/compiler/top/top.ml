@@ -23,7 +23,7 @@ let spec =
   +> flag "--verbose" ~aliases:["-v"] no_arg ~doc:" Verbose messages"
   +> flag "--dump-parsing" no_arg ~doc:" Pretty print parsing messages"
   +> flag "--dump-ast" no_arg ~doc:" Pretty print the pre-elab AST"
-  +> flag "--dump-untypedPostElabAST" no_arg ~doc:" Pretty print the untyped post-elab AST"
+  +> flag "--dump-upeAST" no_arg ~doc:" Pretty print the untyped post-elab AST"
   +> flag "--dump-infAddr" no_arg ~doc:" Pretty print the infAddr"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
@@ -34,7 +34,7 @@ let spec =
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
   +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
 
-let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
+let main files verbose dump_parsing dump_ast dump_upeAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
   try
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
    
@@ -53,7 +53,7 @@ let main files verbose dump_parsing dump_ast dump_infAddr dump_assem typecheck_o
     (* Elaborate *)
     say_if verbose (fun () -> "Elaborating... ");
     let untypedPostElabAst = Elab.elaborateAST preElabAst in ();
-    say_if dump_untypedPostElabAST (fun () -> 
+    say_if dump_upeAST (fun () -> 
       PrintASTs.untypedPostElabASTToString(untypedPostElabAst))
 
     (* (\* Typecheck *\) *)

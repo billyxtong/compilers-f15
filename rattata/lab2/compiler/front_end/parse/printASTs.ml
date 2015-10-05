@@ -77,7 +77,7 @@ let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
       | UntypedPostElabNot(expr1) -> concat "" ["!("; untypedPostElabExprToString(expr1); ")"]
 
 
-let rec untypedPostElabStmtToString(s : postElabStmt) = 
+let rec untypedPostElabStmtToString(s : untypedPostElabStmt) = 
   match s with
         UntypedPostElabDecl(identifier,constant) -> concat "" [c0typeToString(constant); identToString(identifier)]
       | UntypedPostElabAssignStmt(identifier,untypedexpr) -> concat "" [identToString(identifier); " = "; 
@@ -91,7 +91,7 @@ let rec untypedPostElabStmtToString(s : postElabStmt) =
 
 
 and untypedPostElabASTToString(stmts : untypedPostElabAST) =
-  concat "\n" (List.map untypedPostElabStmt stmts) ^ "\n"
+  concat "\n" (List.map untypedPostElabStmtToString stmts) ^ "\n"
 
 
 

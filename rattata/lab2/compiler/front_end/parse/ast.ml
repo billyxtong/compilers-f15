@@ -72,8 +72,7 @@ type simpOpt = EmptySimp | HasSimpStmt of simpStmt
 type elseOpt = EmptyElse | PreElabElse of preElabStmt
  and control = PreElabIf of preElabExpr * preElabStmt * elseOpt
              | PreElabWhile of preElabExpr * preElabStmt
-             | PreElabFor of simpOpt * preElabExpr * simpOpt *
-                             preElabStmt
+             | PreElabFor of simpOpt * preElabExpr * simpOpt * preElabStmt
              | PreElabReturn of preElabExpr
  and preElabStmt = SimpStmt of simpStmt
                  | Control of control

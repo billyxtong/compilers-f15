@@ -1,3 +1,4 @@
 open Datatypesv1
+open Ast 
 
-val makePostElabAST : preElabAST -> postElabAST
+val elaborateAST : preElabAST -> untypedPostElabAST
