@@ -1,7 +1,7 @@
 open Datatypesv1
 module A = Ast
 module M = Core.Std.Map
-open Core.Std             
+open Core.Std
 
 let rec trans_int_exp idToTmpMap = function
        A.IntConst c -> TmpIntArg (TmpConst c)
@@ -26,6 +26,11 @@ let rec trans_bool_exp idToTmpMap e =
        asts as input, but asts only take idents, not tmps. So we
        create an ident that is guaranteed to not already be an ident
        (hence the \\), and map it to t. *)
+    match e with
+        A.BoolConst c ->
+            (TmpInfAddrMov(TmpBoolExpr (TmpBoolArg (TmpConst c)), Tmp t)
+            ::[], Tmp t)
+      | _ ->
     let identForT = GenUnusedID.create() in
     let newMap = M.add idToTmpMap identForT t in
     let ifStmts = [A.AssignStmt (identForT, A.BoolExpr (A.BoolConst 1))] in
@@ -65,14 +70,14 @@ and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
    a start label (and no else label), and there will be an
    unconditional jump to the start label after the if *)
 and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse) 
-  : tmpInfAddrInstr list =
+  : tmpInfAddrInstr list = 
      match condition with
          A.LogNot negCondition ->
         (* In this case, just switch the statements for if and else,
            AND ALSO THE JUMPTOTOPSTATUS *)
               trans_cond idToTmpMap (negCondition, stmtsForElse,
                                    stmtsForIf)
-       | A.LogAnd (bool_exp1, bool_exp2) ->
+       | A.LogAnd (bool_exp1, bool_exp2) -> 
           (* For &&, we break it up into nested if statements, where each
              of them gets the "else" from the original. *)
            let innerIfAst = [A.If (bool_exp2, stmtsForIf, stmtsForElse)] in
