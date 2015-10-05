@@ -8,4 +8,5 @@
  * Implements a "convenient munch" algorithm
  *)
 
-val to3Addr : Tree.stm list -> Tree.stm list
+open Datatypesv1
+val to3Addr : tmpInfAddrProg -> tmp3AddrProg

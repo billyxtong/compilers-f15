@@ -9,51 +9,72 @@
  *)
 
 open Core.Std
+open Datatypesv1
 
-module T = Tree
+let munch_bool_instr = function
+    TmpInfAddrTest (TmpBoolArg e1, TmpBoolArg TmpLoc t) ->
+        Tmp3AddrBoolInstr (TmpTest (e1, t))::[]
+  | TmpInfAddrTest (TmpBoolArg e1, TmpBoolArg TmpConst c) ->
+        let t = Tmp (Temp.create()) in
+        Tmp3AddrMov(TmpConst c, t)
+        ::Tmp3AddrBoolInstr (TmpTest (e1, t))::[]
+  | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpLoc t) ->
+        Tmp3AddrBoolInstr (TmpCmp (e1, t))::[]
+  | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpConst c) ->
+        let t = Tmp (Temp.create()) in
+        Tmp3AddrMov(TmpConst c, t)
+        ::Tmp3AddrBoolInstr (TmpCmp (e1, t))::[]
+            
 
+(* d is the suggested destination, but we might have to generate more
+   tmps anyway if there is a nested binop *)
 let rec munch_exp d e depth =
   match e with
-    T.BINOP (binop, e1, e2) ->
-      let t = if depth > 0 then T.TEMP (Temp.create()) else d
-      in
-      (munch_binop t (binop, e1, e2) (depth + 1), t)
-  | _ -> ([], e)
+     TmpIntExpr (TmpInfAddrBinopExpr (int_binop, int_e1, int_e2)) ->
+         let t = if depth > 0 then Tmp (Temp.create()) else d in
+         (munch_int_binop t (int_binop, int_e1, int_e2) (depth + 1),
+          TmpLoc t)
+   | TmpBoolExpr (TmpBoolArg e) -> ([], e)
+   | TmpIntExpr (TmpIntArg e) -> ([], e)
 
-and munch_binop d (binop, e1, e2) depth =
-    let (instrs1, dest1) = munch_exp d e1 depth in
+(* Note: all bool binops are removed in toInfAddr because we
+   are clever :) *)
+and munch_int_binop d (int_binop, e1, e2) depth =
+    let (instrs1, dest1) = munch_exp d (TmpIntExpr e1) depth in
     let (instrs2, dest2) =
-       match (binop, e2) with
-          (T.DIV, T.CONST _) -> (* can't idivl by constants :( *)
-              let t = T.TEMP (Temp.create()) in
-              ([T.MOVE (t, e2)], t)
-        |(T.MOD, T.CONST _) -> (* can't idivl by constants :( *)
-              let t = T.TEMP (Temp.create()) in
-              ([T.MOVE (t, e2)], t)
-        | _ -> munch_exp d e2 depth
-          in
+       match (int_binop, e2) with
+         (* can't idivl by constants :( *)
+          (FAKEDIV, TmpIntArg (TmpConst  c)) -> 
+              let t = Tmp (Temp.create()) in
+              (Tmp3AddrMov (TmpConst c, t)::[], TmpLoc t)
+        |(FAKEMOD, TmpIntArg (TmpConst c)) -> 
+              let t = Tmp (Temp.create()) in
+              (Tmp3AddrMov (TmpConst c, t)::[], TmpLoc t)
+        | _ -> munch_exp d (TmpIntExpr e2) depth in
     instrs1 @ instrs2
-    @ (if d = dest1 then []
-       else [T.MOVE (d, T.BINOP(binop, dest1, dest2))])
+    @ (if TmpLoc d = dest1 then []
+       else [Tmp3AddrBinop (int_binop, dest1, dest2, d)])
 
 
 (* munch_stm stm generates code to execute stm *)
 let munch_instr = function
-    T.MOVE (T.TEMP t1, e2) ->
-        let (instrs, dest) = munch_exp (T.TEMP t1) e2 0 in
-        instrs @ [T.MOVE (T.TEMP t1, dest)]
-  | T.RETURN e ->
-        let (instrs, dest) = munch_exp (T.TEMP (Temp.create())) e 0 in
-        instrs @ T.RETURN dest :: []
-  | _ -> assert false
+    TmpInfAddrMov (e, t) ->
+       let (instrs, intermediate_dest) = munch_exp t e 0 in
+       instrs @ [Tmp3AddrMov (intermediate_dest, t)]
+  | TmpInfAddrJump j -> Tmp3AddrJump j::[]
+  | TmpInfAddrBoolInstr instr -> munch_bool_instr instr
+  | TmpInfAddrReturn e ->
+       let (instrs, dest) = munch_exp (Tmp (Temp.create())) e 0 in
+       instrs @ Tmp3AddrReturn dest :: []
+  | TmpInfAddrLabel jumpLabel -> Tmp3AddrLabel jumpLabel :: []
 
 let rec finalPass = function
     [] -> []
   | instr::instrs -> match instr with
-                         T.MOVE (T.TEMP t1, T.TEMP t2) ->
-                              if t1 = t2 then finalPass instrs
-                                  else instr :: finalPass instrs
-                       | _ -> instr::finalPass instrs
+        Tmp3AddrMov (TmpLoc t1, t2) ->
+            if t1 = t2 then finalPass instrs
+            else instr :: finalPass instrs
+  | _ -> instr::finalPass instrs
 
 let rec to3AddrRec = function
     [] -> []
