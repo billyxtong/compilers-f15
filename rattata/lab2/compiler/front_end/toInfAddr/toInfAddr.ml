@@ -28,23 +28,24 @@ let rec trans_bool_exp idToTmpMap e dest =
     let t = (match dest with
                  None -> Temp.create()
                | Some t' -> t') in
-    (* Ok this is kind of hacky but here it is: the functions that
-       take "if (e) t = true; else t = false;" to infAddr all take
-       asts as input, but asts only take idents, not tmps. So we
-       create an ident that is guaranteed to not already be an ident
-       (hence the \\), and map it to t. *)
     match e with
         A.BoolConst c ->
             (TmpInfAddrMov(TmpBoolExpr (TmpBoolArg (TmpConst c)), Tmp t)
             ::[], Tmp t)
       | _ ->
+    (* Ok this is kind of hacky but here it is: the functions that
+       take "if (e) t = true; else t = false;" to infAddr all take
+       asts as input, but asts only take idents, not tmps. So we
+       create an ident that is guaranteed to not already be an ident
+       (GenUnusedID basically puts "\\" at the front of id's, which
+       cannot be part of the input), and map it to t. *)
     let identForT = GenUnusedID.create() in
     let newMap = M.add idToTmpMap identForT t in
-    let ifStmts = [A.AssignStmt (identForT, A.BoolExpr (A.BoolConst 1))] in
-    let elseStmts = [A.AssignStmt (identForT, A.BoolExpr (A.BoolConst 0))] in
+    let ifStmts = [A.TypedPostElabAssignStmt (identForT, A.BoolExpr (A.BoolConst 1))] in
+    let elseStmts = [A.TypedPostElabAssignStmt (identForT, A.BoolExpr (A.BoolConst 0))] in
     (* Translating this if statement puts expression e in temp t.
        We also need to return the resulting location. *)
-    (trans_stmts newMap [A.If (e, ifStmts, elseStmts)],
+    (trans_stmts newMap [A.TypedPostElabIf (e, ifStmts, elseStmts)],
      Tmp t)
 
 (* For a while loop, typically we jump back to the top if the
@@ -87,7 +88,7 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
        | A.LogAnd (bool_exp1, bool_exp2) -> 
           (* For &&, we break it up into nested if statements, where each
              of them gets the "else" from the original. *)
-           let innerIfAst = [A.If (bool_exp2, stmtsForIf, stmtsForElse)] in
+           let innerIfAst = [A.TypedPostElabIf (bool_exp2, stmtsForIf, stmtsForElse)] in
             trans_cond idToTmpMap (bool_exp1, innerIfAst,
                                  stmtsForElse) 
               (* ONLY THE INNER ONE JUMPS TO TOP FIX THISSSSSSSSSSSSSS *)
@@ -135,9 +136,9 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
                  (* check to make sure you don't mix up je and jne *)
 
 and trans_stmts idToTmpMap = function
-     A.Decl (id, idType)::stmts ->
+     A.TypedPostElabDecl (id, idType)::stmts ->
         trans_stmts idToTmpMap stmts
-   | A.AssignStmt (id, A.BoolExpr e)::stmts ->
+   | A.TypedPostElabAssignStmt (id, A.BoolExpr e)::stmts ->
         (* Here's the deal: if this id already has a temp associated with it
            in this scope, we need to use that same temp here. The reason is
            that when we break "x = y" where y is a boolean, that turns into
@@ -157,15 +158,15 @@ and trans_stmts idToTmpMap = function
                trans_bool_exp idToTmpMap e dest_for_bool_expr in
         let newMap = M.add idToTmpMap id new_t in
         instrs_for_move @ trans_stmts newMap stmts
-   | A.AssignStmt (id, A.IntExpr e)::stmts ->
+   | A.TypedPostElabAssignStmt (id, A.IntExpr e)::stmts ->
         let expInfAddr = TmpIntExpr (trans_int_exp idToTmpMap e) in
         let t = get_or_make_tmp id idToTmpMap in
         let newMap = M.add idToTmpMap id t in
         TmpInfAddrMov (expInfAddr, Tmp t)::trans_stmts newMap stmts
-   | A.If (e, ifStmts, elseStmts) :: stmts ->
+   | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
         trans_cond idToTmpMap (e, ifStmts, elseStmts) @
         trans_stmts idToTmpMap stmts
-   | A.While (e, whileStmts) :: stmts ->
+   | A.TypedPostElabWhile (e, whileStmts) :: stmts ->
         let topLabel = GenLabel.create() in
         let jumpToTopStmt = A.JumpUncond(topLabel) in
         (* Empty list because no else statements *)
@@ -176,7 +177,7 @@ and trans_stmts idToTmpMap = function
      (* This really shouldn't be an AST instruction
         but I need it for toInfAddr :( *)
         TmpInfAddrJump(JMP_UNCOND, target)::trans_stmts idToTmpMap stmts
-   | A.Return e :: stmts ->
+   | A.TypedPostElabReturn e :: stmts ->
      (* Can I assume that nothing after the return in a given
         subtree matters? That should be fine, right? *)
         TmpInfAddrReturn (TmpIntExpr (trans_int_exp idToTmpMap e)) :: []
@@ -184,5 +185,5 @@ and trans_stmts idToTmpMap = function
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
-let toInfAddr (ast: A.postElabAST) =
+let toInfAddr (ast: A.typedPostElabAST) =
      let idToTmpMap = String.Map.empty in trans_stmts idToTmpMap ast
