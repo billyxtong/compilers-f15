@@ -3,28 +3,48 @@ module A = Ast
 module M = Core.Std.Map
 open Core.Std
 
+(* Pretty much everything here is mutually recursive because of
+   ternary operators *)
+
 let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
             | Some t -> t)
 
+(* Returns a tuple (instrs, e) where e is the resulting expression,
+   and instrs is any required instructions (which is empty for everything
+   but ternary *)
 let rec trans_int_exp idToTmpMap = function
-       A.IntConst c -> TmpIntArg (TmpConst c)
+       A.IntConst c -> ([], TmpIntArg (TmpConst c))
      | A.IntIdent id -> 
           (match M.find idToTmpMap id with
              None -> 
              let () = print_string("Undeclared: " ^ id ^ "\n") in
              assert(false)
            | Some t -> 
-             TmpIntArg (TmpLoc (Tmp t)))
+             ([], TmpIntArg (TmpLoc (Tmp t))))
      | A.ASTBinop (e1, op, e2) ->
-          TmpInfAddrBinopExpr (op, trans_int_exp idToTmpMap e1,
-                   trans_int_exp idToTmpMap e2)
+         let (instrs_for_exp1, tmp_exp1) =
+             trans_int_exp idToTmpMap e1 in
+         let (instrs_for_exp2, tmp_exp2) =
+             trans_int_exp idToTmpMap e2 in
+         (instrs_for_exp1 @ instrs_for_exp2,
+          TmpInfAddrBinopExpr (op, tmp_exp1, tmp_exp2))
+     | A.IntTernary (c, e1, e2) -> (* See BoolTernary in trans_cond *) 
+         let ternary_result_tmp = Temp.create() in
+         let ternary_result_id = GenUnusedID.create() in
+         let newMap = M.add idToTmpMap ternary_result_id ternary_result_tmp in
+         let astForIf = [A.TypedPostElabAssignStmt (ternary_result_id,
+                                            A.IntExpr e1)] in
+         let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
+                                            A.IntExpr e2)] in
+         (trans_cond newMap (c, astForIf, astForElse),
+          TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
    if (e) t = true; else t = false;
 *)
-let rec trans_bool_exp idToTmpMap e dest =
+and trans_bool_exp idToTmpMap e dest =
     let t = (match dest with
                  None -> Temp.create()
                | Some t' -> t') in
@@ -41,8 +61,10 @@ let rec trans_bool_exp idToTmpMap e dest =
        cannot be part of the input), and map it to t. *)
     let identForT = GenUnusedID.create() in
     let newMap = M.add idToTmpMap identForT t in
-    let ifStmts = [A.TypedPostElabAssignStmt (identForT, A.BoolExpr (A.BoolConst 1))] in
-    let elseStmts = [A.TypedPostElabAssignStmt (identForT, A.BoolExpr (A.BoolConst 0))] in
+    let ifStmts = [A.TypedPostElabAssignStmt
+                     (identForT, A.BoolExpr (A.BoolConst 1))] in
+    let elseStmts = [A.TypedPostElabAssignStmt
+                       (identForT, A.BoolExpr (A.BoolConst 0))] in
     (* Translating this if statement puts expression e in temp t.
        We also need to return the resulting location. *)
     (trans_stmts newMap [A.TypedPostElabIf (e, ifStmts, elseStmts)],
@@ -85,10 +107,29 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
            AND ALSO THE JUMPTOTOPSTATUS *)
               trans_cond idToTmpMap (negCondition, stmtsForElse,
                                    stmtsForIf)
+       | A.BoolTernary (c, bool_exp1, bool_exp2) ->
+          (* BoolTernary means the expressions are bools
+             (obviously the condition is a bool too *)
+         (* We create a new variable and a new ast that puts bool_exp1
+            into this variable is c is true, otherwise bool_exp2. Then
+            we can just recurse on a new conditional, with that var as
+            the condition *)
+            let ternary_result_tmp = Temp.create() in
+            let ternary_result_id = GenUnusedID.create() in
+            let newMap = M.add idToTmpMap ternary_result_id ternary_result_tmp in
+            let astForIf = [A.TypedPostElabAssignStmt (ternary_result_id,
+                                              A.BoolExpr bool_exp1)] in
+            let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
+                                              A.BoolExpr bool_exp2)] in
+            let ternary_instrs = trans_cond newMap (c, astForIf, astForElse) in
+            ternary_instrs @
+            trans_cond newMap (A.BoolIdent ternary_result_id, stmtsForIf,
+                               stmtsForElse)
        | A.LogAnd (bool_exp1, bool_exp2) -> 
           (* For &&, we break it up into nested if statements, where each
              of them gets the "else" from the original. *)
-           let innerIfAst = [A.TypedPostElabIf (bool_exp2, stmtsForIf, stmtsForElse)] in
+           let innerIfAst = [A.TypedPostElabIf (bool_exp2, stmtsForIf,
+                                                stmtsForElse)] in
             trans_cond idToTmpMap (bool_exp1, innerIfAst,
                                  stmtsForElse) 
               (* ONLY THE INNER ONE JUMPS TO TOP FIX THISSSSSSSSSSSSSS *)
@@ -99,15 +140,23 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
        | A.GreaterThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
+            let (instrs_for_exp1, tmp_exp1) =
+               trans_int_exp idToTmpMap int_exp1 in
+            let (instrs_for_exp2, tmp_exp2) =
+               trans_int_exp idToTmpMap int_exp2 in
             let priorInstr = TmpInfAddrBoolInstr
-                 (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
-                               trans_int_exp idToTmpMap int_exp1)) in
+                 (TmpInfAddrCmp(tmp_exp2, tmp_exp1)) in
+            instrs_for_exp1 @ instrs_for_exp2 @
               (make_cond_instrs idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JG JLE )
        | A.IntEquals (int_exp1, int_exp2) ->
+            let (instrs_for_exp1, tmp_exp1) =
+               trans_int_exp idToTmpMap int_exp1 in
+            let (instrs_for_exp2, tmp_exp2) =
+               trans_int_exp idToTmpMap int_exp2 in
             let priorInstr = TmpInfAddrBoolInstr
-            (TmpInfAddrCmp(trans_int_exp idToTmpMap int_exp2,
-                           trans_int_exp idToTmpMap int_exp1)) in
+            (TmpInfAddrCmp(tmp_exp2, tmp_exp1)) in
+            instrs_for_exp1 @ instrs_for_exp2 @
               (make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
                  JE JNE )
        | A.BoolEquals (bool_exp1, bool_exp2) ->
@@ -159,10 +208,11 @@ and trans_stmts idToTmpMap = function
         let newMap = M.add idToTmpMap id new_t in
         instrs_for_move @ trans_stmts newMap stmts
    | A.TypedPostElabAssignStmt (id, A.IntExpr e)::stmts ->
-        let expInfAddr = TmpIntExpr (trans_int_exp idToTmpMap e) in
+        let (instrs_for_e, eInfAddr) = trans_int_exp idToTmpMap e in
         let t = get_or_make_tmp id idToTmpMap in
         let newMap = M.add idToTmpMap id t in
-        TmpInfAddrMov (expInfAddr, Tmp t)::trans_stmts newMap stmts
+        instrs_for_e @
+        TmpInfAddrMov (TmpIntExpr eInfAddr, Tmp t)::trans_stmts newMap stmts
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
         trans_cond idToTmpMap (e, ifStmts, elseStmts) @
         trans_stmts idToTmpMap stmts
@@ -180,7 +230,9 @@ and trans_stmts idToTmpMap = function
    | A.TypedPostElabReturn e :: stmts ->
      (* Can I assume that nothing after the return in a given
         subtree matters? That should be fine, right? *)
-        TmpInfAddrReturn (TmpIntExpr (trans_int_exp idToTmpMap e)) :: []
+        let (instrs_for_e, eInfAddr) = trans_int_exp idToTmpMap e in
+        instrs_for_e @ TmpInfAddrReturn (TmpIntExpr eInfAddr) :: []
+
    | _ -> []
 
 (* We assume that this is run after typechecking, so everything is
