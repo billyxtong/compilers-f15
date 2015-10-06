@@ -3,14 +3,19 @@ module A = Ast
 module M = Core.Std.Map
 open Core.Std
 
+let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
+              None -> Temp.create()
+            | Some t -> t)
+
 let rec trans_int_exp idToTmpMap = function
        A.IntConst c -> TmpIntArg (TmpConst c)
-     | A.IntIdent id ->
+     | A.IntIdent id -> 
           (match M.find idToTmpMap id with
              None -> 
              let () = print_string("Undeclared: " ^ id ^ "\n") in
              assert(false)
-           | Some t -> TmpIntArg (TmpLoc (Tmp t)))
+           | Some t -> let () = print_string(id ^ " " ^ string_of_int(t) ^ "\n") in
+             TmpIntArg (TmpLoc (Tmp t)))
      | A.ASTBinop (e1, op, e2) ->
           TmpInfAddrBinopExpr (op, trans_int_exp idToTmpMap e1,
                    trans_int_exp idToTmpMap e2)
@@ -19,8 +24,10 @@ let rec trans_int_exp idToTmpMap = function
    e in t. What we do to handle short-circuit here is just say
    if (e) t = true; else t = false;
 *)
-let rec trans_bool_exp idToTmpMap e =
-    let t = Temp.create() in
+let rec trans_bool_exp idToTmpMap e dest =
+    let t = (match dest with
+                 None -> Temp.create()
+               | Some t' -> t') in
     (* Ok this is kind of hacky but here it is: the functions that
        take "if (e) t = true; else t = false;" to infAddr all take
        asts as input, but asts only take idents, not tmps. So we
@@ -105,9 +112,9 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
        | A.BoolEquals (bool_exp1, bool_exp2) ->
             (* See description of trans_bool_exp *)
             let (instrs_for_exp1, tmp_exp1) =
-               trans_bool_exp idToTmpMap bool_exp1 in
+               trans_bool_exp idToTmpMap bool_exp1 None in
             let (instrs_for_exp2, tmp_exp2) =
-               trans_bool_exp idToTmpMap bool_exp2 in
+               trans_bool_exp idToTmpMap bool_exp2 None in
             let priorInstr = TmpInfAddrBoolInstr
                 (TmpInfAddrCmp (TmpIntArg (TmpLoc tmp_exp1),
                                 TmpIntArg (TmpLoc tmp_exp2))) in
@@ -131,18 +138,28 @@ and trans_stmts idToTmpMap = function
      A.Decl (id, idType)::stmts ->
         trans_stmts idToTmpMap stmts
    | A.AssignStmt (id, A.BoolExpr e)::stmts ->
-        (* see description of trans_bool_exp *)
-        let (instrs_for_move, Tmp t) = trans_bool_exp idToTmpMap e in
-        let newMap = M.add idToTmpMap id t in
+        (* Here's the deal: if this id already has a temp associated with it
+           in this scope, we need to use that same temp here. The reason is
+           that when we break "x = y" where y is a boolean, that turns into
+           if (y) x = 1; else x = 0;. Which means the if and else need to write
+           to the same temp (even though they're in different scopes.
+           So basically if there already is a temp for id, we use that,
+           otherwise we create a new one (this is handled in trans_bool_exp) *)
+        let dest_for_bool_expr = M.find idToTmpMap id in (* We can just directly
+             use the result of find because want an option type anyway,
+             see trans_bool_exp*)
+        let (instrs_for_move, Tmp new_t) =
+          (* trans_bool_exp gives us the instructions it generated, and also
+             where it ended up putting the value (if it didn't have to
+             create a new one, new_t will just be whatever we passed in.
+             We then update the binding in idToTmpMap (which does nothing
+             if new_t is what we passed in) *)
+               trans_bool_exp idToTmpMap e dest_for_bool_expr in
+        let newMap = M.add idToTmpMap id new_t in
         instrs_for_move @ trans_stmts newMap stmts
    | A.AssignStmt (id, A.IntExpr e)::stmts ->
         let expInfAddr = TmpIntExpr (trans_int_exp idToTmpMap e) in
-        let t = Temp.create() in
-        (* We have to do the above line before adding t for the following
-           reason. First, a variable might be assigned to multiple temps,
-           since we create a new temp for every simpAssign. Second,
-           assignment evaluates right hand side first, so we need to
-           do trans_int_expr with the previous binding of id *)
+        let t = get_or_make_tmp id idToTmpMap in
         let newMap = M.add idToTmpMap id t in
         TmpInfAddrMov (expInfAddr, Tmp t)::trans_stmts newMap stmts
    | A.If (e, ifStmts, elseStmts) :: stmts ->
