@@ -17,7 +17,7 @@ type ident = string
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
              | IntTernary of boolExpr * intExpr * intExpr
-and boolExpr = BoolConst of const | BoolIdent of ident
+ and boolExpr = BoolConst of const | BoolIdent of ident
               | GreaterThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
               | BoolEquals of boolExpr * boolExpr
@@ -46,12 +46,12 @@ type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND
                   | LT | LEQ | GEQ | LOG_OR | NEQ
 type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
                          | UntypedPostElabIdentExpr of ident
-                         | UntypedPostElabBinop of untypedPostElabExpr * 
-                                                   generalBinop * 
+                         | UntypedPostElabBinop of untypedPostElabExpr *
+                                                   generalBinop *
                                                    untypedPostElabExpr
                          | UntypedPostElabNot of untypedPostElabExpr
-                         | UntypedPostElabTernary of (untypedPostElabExpr
-                                * untypedPostElabExpr * untypedPostElabExpr)
+                         | UntypedPostElabTernary of untypedPostElabExpr *
+                            untypedPostElabExpr * untypedPostElabExpr
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabAssignStmt of ident * 
                                                         untypedPostElabExpr

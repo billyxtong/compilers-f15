@@ -5,46 +5,81 @@
  *)
 
 module A = Ast
-module H = Hashtbl
+open Datatypesv1
 module M = Core.Std.Map
 
 let rec tc_expression env (expression : untypedPostElabExpr) ext =
   match expression with
-    A.UntypedPostElabIdentExpr id ->
+    A.UntypedPostElabConstExpr (constant, typee) -> 
+      (match typee with
+             INT -> IntExpr(IntConst(constant))
+           | BOOL -> BoolExpr(BoolConst(constant)))
+  | A.UntypedPostElabIdentExpr id ->
      (try
-         let init = H.find env id in (* is it declared? *) (* change H because we're no longer using a hashtable *)
-         if init then () (* declared and initialized, all good *)
+         let (typee, IsInitialized) = M.find env id in (* is it declared? *)
+         if isInitialized (* declared and initialized, all good *)
+         then 
+           (match typee with
+                  INT -> IntExpr(IntIdent(id))
+                | BOOL -> BoolExpr(BoolIdent(id)))
          else (ErrorMsg.error None ("uninitialized variable " ^ id ^ "\n");
               raise ErrorMsg.Error)
        with Not_found -> 
               (ErrorMsg.error None ("undeclared variable " ^ id ^ "\n");
               raise ErrorMsg.Error))
-  | A.UntypedPostElabConstExpr (constant, typee) -> ()
-  | A.UntypedPostElabBinop (e1, op, e2) -> (* need to check the type of op *)
-      tc_expression env e1 ext;
-      tc_expression env e2 ext
-  | A.UntypedPostElabNot e' -> tc_expression env e' ext
+  | A.UntypedPostElabBinop (e1, op, e2) -> 
+      let tcExpr1 = tc_expression env e1 ext in
+      let tcExpr2 = tc_expression env e2 ext in
+      (match op with
+             GT -> (match (tcExpr1, tcExpr2) with
+                          (IntExpr(_), IntExpr(_)) -> BoolExpr(GreaterThan(tcExpr1, tcExpr2))
+                        | _ -> ErrorMsg.error None ("expressions didn't typecheck \n");
+                               raise ErrorMsg.Error)
+           | DOUBLE_EQ -> (match (tcExpr1, tcExpr2) with
+                                 (IntExpr(_), IntExpr(_)) -> BoolExpr(IntEquals(tcExpr1, tcExpr2))
+                               | (BoolExpr(_), BoolExpr(_)) -> BoolExpr(BoolEquals(tcExpr1, tcExpr2))
+                               | _ -> ErrorMsg.error None ("expressions didn't typecheck \n");
+                                      raise ErrorMsg.Error)
+           | LOG_AND -> (match (tcExpr1, tcExpr2) with
+                               (BoolExpr(_), BoolExpr(_)) -> BoolExpr(LogAnd(tcExpr1, tcExpr2))
+                             | _ -> ErrorMsg.error None ("expressions didn't typecheck \n");
+                                    raise ErrorMsg.Error)
+           | _ -> (match (tcExpr1, tcExpr2) with
+                          (IntExpr(_), IntExpr(_)) -> IntExpr(ASTBinop(tcExpr1, op, tcExpr2))
+                        | _ -> ErrorMsg.error None ("expressions didn't typecheck \n");
+                               raise ErrorMsg.Error))
+  | A.UntypedPostElabNot e' -> 
+      let tcExpr = tc_expression env e' ext in
+      (match tcExpr with
+             BoolExpr(_) -> BoolExpr(LogNot(tcExpr))
+           | _ -> ErrorMsg.error None ("expressions didn't typecheck \n");
+                  raise ErrorMsg.Error)
+  | A.UntypedPostElabTernary(e1, e2, e3) ->
+      let tcExpr1 = tc_expression env e1 ext in
+      let tcExpr2 = tc_expression env e2 ext in
+      let tcExpr3 = tc_expression env e1 ext in
+      (match (tcExpr1, tcExpr2, tcExpr3) with
+             (BoolExpr(_), IntExpr(_), IntExpr(_)) -> IntExpr(IntTernary(tcExpr1, tcExpr2, tcExpr3))
+           | (BoolExpr(_), BoolExpr(_), BoolExpr(_)) -> BoolExpr(BoolTernary(tcExpr1, tcExpr2, tcExpr3))
+           | _ -> ErrorMsg.error None ("expressions didn't typecheck \n");
+                  raise ErrorMsg.Error)
 
-
-let rec tc_statements env (ast : untypedPostElabAST) (ext) (ret) =
+let rec tc_statements env (ast : untypedPostElabAST) ext ret =
   match ast with
     [] -> ret
-  | A.UntypedPostElabDecl(d)::stms ->
-      (match d with
-        A.NewVar (id, idType) ->
-          (try let _ = H.find env id in 
+  | A.UntypedPostElabDecl(id, typee)::stms ->
+      (try let _ = M.find env id in 
                ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");
                raise ErrorMsg.Error
            with Not_found ->
-               let () = H.add env id false in
+               let () = M.add env id (typee, false) in
                tc_statements env stms ext ret)
-      | A.Init (id, idType, e) ->
-          tc_statements env ((A.PreElabDecl (A.NewVar (id, idType)))
-          ::(A.SimpAssign(id, A.EQ, e))::stms) ext ret)
-  | A.UntypedPostElabAssignStmt(id, op, e)::stms ->
-      tc_expression env e ext;
+
+(* UNFINISHED FROM HERE DOWN *)
+  | A.UntypedPostElabAssignStmt(id, e)::stms ->
+      let tcExpr = tc_expression env e ext in
           (try
-              let _ = H.find env id in (* it's declared, good *)
+              let (typee, _) = M.find env id in (* it's declared, good *)
               let _ = H.replace env id true (* it's now initialized *) in
               tc_statements env stms ext ret
            with Not_found -> 
