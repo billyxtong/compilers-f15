@@ -20,14 +20,14 @@ type boolExpr = BoolConst of const | BoolIdent of ident
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
-type typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr               
+type typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr     
 type typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr
                   | TypedPostElabIf of boolExpr * typedPostElabAST * 
                                        typedPostElabAST
                   | TypedPostElabWhile of boolExpr * typedPostElabAST
                   | TypedPostElabReturn of intExpr
-                  | TypedJumpUncond of label
+                  | JumpUncond of label
  and typedPostElabAST = typedPostElabStmt list
 
  (* Untyped Post-Elab AST
@@ -43,6 +43,8 @@ type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
                                                    generalBinop * 
                                                    untypedPostElabExpr
                          | UntypedPostElabNot of untypedPostElabExpr
+                         | UntypedPostElabTernary of (untypedPostElabExpr
+                                * untypedPostElabExpr * untypedPostElabExpr)
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabAssignStmt of ident * 
                                                         untypedPostElabExpr
@@ -62,6 +64,7 @@ type preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabIdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
+                 | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
 type preElabDecl = NewVar of ident * c0type
                  | Init of ident * c0type * preElabExpr
 type simpStmt = PreElabDecl of preElabDecl                        
