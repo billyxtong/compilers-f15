@@ -52,7 +52,6 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabWhile of untypedPostElabExpr * 
                                                    untypedPostElabAST
                          | UntypedPostElabReturn of untypedPostElabExpr
-                         | UntypedPostElabJumpUncond of label
  and untypedPostElabAST = untypedPostElabStmt list
 
 (* Pre-Elab AST *)
