@@ -92,7 +92,7 @@ let assemInstrToString(instr : assemInstr) =
       | RETURN -> "ret"
       | JUMP(jInstr) -> jumpInstrToString(jInstr)
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
-      | LABEL(l) -> labelToString(l)
+      | LABEL(l) -> labelToString(l) ^ ":"
 
 let assemProgToString(assemprog : assemProg) = 
   concat "\n" (List.map assemInstrToString assemprog) ^ "\n"

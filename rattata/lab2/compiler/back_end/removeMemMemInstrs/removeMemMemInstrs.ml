@@ -6,7 +6,7 @@ let handleOneInstr (instr: assemInstr) : assemInstr list =
         MOV(AssemLoc(MemAddr memSrc), MemAddr memDest) ->
              MOV(AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
              MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
-      | BINOP(op, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
+      | INT_BINOP(op, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
              MOV(AssemLoc (MemAddr memDest), RegAlloc.spillReg)::
              (* We always put the register as the destination here,
                 because suppose the op was MUL and we put the
@@ -15,7 +15,7 @@ let handleOneInstr (instr: assemInstr) : assemInstr list =
                 because imul can't have MemAddr as 2nd operand.
                 But we can't switch them because we already
                 used spillReg. So that's why. *)
-             BINOP(op, AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
+             INT_BINOP(op, AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
              MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
       | otherInstr -> [otherInstr]
 

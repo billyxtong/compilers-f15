@@ -57,7 +57,7 @@ let translate tbl (instr : tmp2AddrInstr) : assemInstr list =
         Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, find tbl dest)::[]
       | Tmp2AddrBinop(binop, arg, dest) ->
               INT_BINOP(binop, translateTmpArg tbl arg, find tbl dest)::[]
-      | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::
+      | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::POP(RBP)::
                                RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
@@ -76,4 +76,4 @@ let regAlloc (instrList : tmp2AddrProg) =
                 [MOVQ(AssemLoc(Reg(RSP)), Reg(RBP))]; 
                 (List.concat (List.map (translate tmpToAssemLocTable) instrList));
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
-                [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *) [POP(RBP)];]
+                [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *) ]
