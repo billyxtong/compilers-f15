@@ -6,4 +6,4 @@
  * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
  *)
 
-val toInfAddr : Ast.postElabAST -> Datatypesv1.tmpInfAddrProg
+val toInfAddr : Ast.typedPostElabAST -> Datatypesv1.tmpInfAddrProg

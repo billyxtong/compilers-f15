@@ -14,7 +14,7 @@ let rec trans_int_exp idToTmpMap = function
              None -> 
              let () = print_string("Undeclared: " ^ id ^ "\n") in
              assert(false)
-           | Some t -> let () = print_string(id ^ " " ^ string_of_int(t) ^ "\n") in
+           | Some t -> 
              TmpIntArg (TmpLoc (Tmp t)))
      | A.ASTBinop (e1, op, e2) ->
           TmpInfAddrBinopExpr (op, trans_int_exp idToTmpMap e1,
