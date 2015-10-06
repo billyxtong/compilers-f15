@@ -54,31 +54,23 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_infAddr dump_assem
     say_if verbose (fun () -> "Elaborating... ");
     let untypedPostElabAst = Elab.elaborateAST preElabAst in ();
     say_if dump_upeAST (fun () -> 
-      PrintASTs.untypedPostElabASTToString(untypedPostElabAst))
+      PrintASTs.untypedPostElabASTToString(untypedPostElabAst));
 
-    (* (\* Typecheck *\) *)
-    (* say_if verbose (fun () -> "Typecking..."); *)
-    (* TypeChecker.typecheck ast; *)
-    (* if typecheck_only then exit 0; *)
+    (* Typecheck *)
+    say_if verbose (fun () -> "Typechecking...");
+    let typedPostElabAst = TypeChecker.typecheck untypedPostElabAst in
+    if typecheck_only then exit 0;
 
-    (* Convert Post-Elab AST to Infinte Addr 
+
+    (* Convert Post-Elab AST to Infinte Addr *)
     say_if verbose (fun () -> "converting to Infinite Address code");
-        let infAddr = ToInfAddr.toInfAddr test in ();
-    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
-    (* let test = *)
-    (*   A.While (A.LogNot *)
-    (*     (A.LogAnd (A.IntEquals(A.IntConst 7, A.IntConst 8), *)
-    (*                      A.IntEquals(A.IntConst 10, A.IntConst 9))) *)
-    (*      , *)
-    (*         [A.AssignStmt ("x", A.IntExpr(A.IntConst 6))]) *)
-    (*            ::[] in *)
-    (* let infAddr = ToInfAddr.toInfAddr test in (); *)
-    (* say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
-
-    (* (\* Convert Inf Addr (arbitrarily nested right hand side) *)
-    (*    to three address *\) *)
-    (* let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in (); *)
-    (* say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr); *)
+    let infAddr = ToInfAddr.toInfAddr typedPostElabAst in ();
+    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
+    
+    (* Convert Inf Addr (arbitrarily nested right hand side) *)
+    (*    to three address *)
+    let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in (); 
+    say_if dump_3Addr (fun () -> Tree.Print.pp_program threeAddr);
 
     (* (\* Three address to Two address *\) *)
     (* say_if verbose (fun () -> "3Addr to 2Addr..."); *)

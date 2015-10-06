@@ -14,4 +14,4 @@
  *)
 
 (* prints error message and raises ErrorMsg.error if error found *)
-val typecheck : Ast.preElabAST -> unit
+val typecheck : Ast.untypedPostElabAST -> Ast.typedPostElabAST
