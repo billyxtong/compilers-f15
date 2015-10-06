@@ -12,14 +12,21 @@ open Datatypesv1
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
 type ident = string
+(* intExpr and boolExpr have to be mutually recursive because
+   of damn ternary operators *)
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
-type boolExpr = BoolConst of const | BoolIdent of ident
+             | IntTernary of boolExpr * intExpr * intExpr
+and boolExpr = BoolConst of const | BoolIdent of ident
               | GreaterThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
+           (* BoolTernary (e1, e2, e3) means
+              if e1 then e2 else e3. Similarly for the other
+              ternary constructors *)
+              | BoolTernary of boolExpr * boolExpr * boolExpr
 type typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr     
 type typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr

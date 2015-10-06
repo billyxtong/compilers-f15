@@ -107,6 +107,7 @@ let rec expand_log_binop e1 op e2 =
 %left LSHIFT RSHIFT      
 %left STAR SLASH PERCENT      
 %right UNARY
+%right QUESMARK COLON       
 %left LPAREN
 
 %start program
@@ -226,9 +227,7 @@ exp :
  | exp LOG_AND exp 	       { expand_log_binop $1 A.LOG_AND $3 }
  | exp LOG_OR exp              { expand_log_binop $1 A.LOG_OR $3 }
  | LOG_NOT exp %prec UNARY    { A.PreElabNot $2 }
-		     /*
- | exp QUESMARK exp COLON exp  { A.PreElabIf ($1, $3, A.PreElabElse $5) }
-       */
+ | exp QUESMARK exp COLON exp  { A.PreElabTernary ($1, $3, $5) }
  ;
    
 boolconst :

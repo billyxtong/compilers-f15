@@ -7,6 +7,8 @@ let rec elaboratePreElabExpr(expression : preElabExpr) =
       | PreElabBinop(expr1, op, expr2) -> UntypedPostElabBinop(elaboratePreElabExpr(expr1), 
                                                            op, elaboratePreElabExpr(expr2))
       | PreElabNot(expression') -> UntypedPostElabNot(elaboratePreElabExpr(expression'))
+      | PreElabTernary(e1, e2, e3) -> UntypedPostElabTernary(elaboratePreElabExpr e1,
+                                          elaboratePreElabExpr e2, elaboratePreElabExpr e3)
 
 let elaboratePreElabDecl(decl : preElabDecl) = 
   match decl with

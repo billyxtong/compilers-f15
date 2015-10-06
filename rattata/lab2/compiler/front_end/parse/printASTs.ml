@@ -20,6 +20,8 @@ let rec preElabExprToString(preelabexpr : preElabExpr) =
                                                      generalBinopToString op; 
                                                      preElabExprToString expr2; ")"]
       | PreElabNot(expr1) -> concat "" ["!"; preElabExprToString(expr1)]
+      | PreElabTernary(e1, e2, e3) -> "(" ^ (preElabExprToString e1) ^ " ? " ^
+              (preElabExprToString e2) ^ " : " ^ (preElabExprToString e3) ^ ")"
 
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
@@ -75,6 +77,8 @@ let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
                                                      generalBinopToString op; 
                                                      untypedPostElabExprToString expr2; ")"]
       | UntypedPostElabNot(expr1) -> concat "" ["!"; untypedPostElabExprToString(expr1)]
+      | UntypedPostElabTernary(e1, e2, e3) -> "(" ^ (untypedPostElabExprToString e1) ^ " ? " ^
+              (untypedPostElabExprToString e2) ^ " : " ^ (untypedPostElabExprToString e3) ^ ")"
 
 
 let rec untypedPostElabStmtToString(s : untypedPostElabStmt) = 
