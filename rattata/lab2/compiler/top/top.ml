@@ -103,7 +103,7 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_infAddr dump_assem
     
     (* Output assembly *)
     say_if verbose (fun () -> "Outputting assembly..."); 
-    let afname = (Filename.chop_extension source) ^ ".l1.s" in 
+    let afname = source ^ ".s" in 
     say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
 
     Out_channel.with_file afname

@@ -67,7 +67,7 @@ let munch_instr = function
        let (instrs, dest) = munch_exp (Tmp (Temp.create())) e 0 in
        instrs @ Tmp3AddrReturn dest :: []
   | TmpInfAddrLabel jumpLabel -> Tmp3AddrLabel jumpLabel :: []
-  | TmpInfAddrBinop(op, expr1, expr2, t) -> munch_int_binop t (op, expr1, expr2) 0
+
 let rec finalPass = function
     [] -> []
   | instr::instrs -> match instr with
