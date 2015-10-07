@@ -132,7 +132,8 @@ stmt :
 /* Basically, turn things of the form "{int y = 0;}" into
    "if (true) int y = 0; else {}". This handles scope issues */
  | block              {A.Control (A.PreElabIf (A.PreElabConstExpr(1, D.BOOL),
-					       A.Block $1, A.EmptyElse)) } 
+					       A.Block $1,
+	                    A.PreElabElse (A.Block $1))) } 
  ;
 
 simp :
