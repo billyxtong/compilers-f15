@@ -81,10 +81,10 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
   | A.UntypedPostElabAssignStmt(id, e)::stms ->
        (let tcExpr = tc_expression env e in
           (match M.find env id with (* it's declared, good *)
-                 Some(typee, _) ->  
+                 Some(typee, _) -> 
                    (match (tcExpr, typee) with
                           (IntExpr(_), INT) -> 
-                            let newMap = M.add env id (typee, true) in              
+                            let newMap = M.add env id (typee, true) in  
                             tc_statements newMap stms ret (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)])
                         | (BoolExpr(_), BOOL) -> 
                             let newMap = M.add env id (typee, true) in              
@@ -102,17 +102,11 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
              BoolExpr(exp1) -> 
                let (ret1, env1, newast1) = tc_statements env ast1 ret [] in
                let (ret2, env2, newast2) = tc_statements env ast2 ret [] in
-               (* let printenv1 = M.iter env1 (fun ~key:x -> fun ~data:(t,i) -> 
-                 print_string(x ^ (if i then " is " else "is not") ^ "in the if env\n" )) in
-               let printenv2 = M.iter env2 (fun ~key:x -> fun ~data:(t,i) -> 
-                 print_string(x ^ (if i then " is " else "is not") ^ "in the else env\n" )) in *)
                let newret = if ret then ret else (ret1 && ret2) in
                let newenv = M.mapi env (fun ~key:id -> (fun ~data:value ->
                                              (match (M.find env1 id, M.find env2 id) with
                                                     (Some (typee1, isInit1), Some _) -> (typee1, isInit1)
                                                   | (_, _) -> value))) in
-               (*let printenv = M.iter newenv (fun ~key:x -> fun ~data:(t,i) -> 
-                 print_string(x ^ (if i then " is " else "is not") ^ "in the new env\n" )) in*)
                tc_statements newenv stms newret (typedAST @ [A.TypedPostElabIf(exp1, newast1, newast2)])
            | _ -> ErrorMsg.error None ("if expression didn't typecheck\n");
                   raise ErrorMsg.Error)
