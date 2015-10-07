@@ -261,7 +261,7 @@ asnop :
  | OR_EQ                        { A.OR_EQ }
  | XOR_EQ                       { A.XOR_EQ }
  | LSHIFT_EQ                    { A.LSHIFT_EQ }
- | RSHIFT_EQ                    { A.LSHIFT_EQ }
+ | RSHIFT_EQ                    { A.RSHIFT_EQ }
  ;
 
 %%
