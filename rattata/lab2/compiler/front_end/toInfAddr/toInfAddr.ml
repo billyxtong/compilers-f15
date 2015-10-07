@@ -119,19 +119,15 @@ and trans_bool_exp idToTmpMap e dest =
    neither jumps to top. *)
 and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
     ifJumpType elseJumpType =
-    let ifLabel = GenLabel.create() in
     let elseLabel = GenLabel.create() in
     let endLabel = GenLabel.create() in
     priorInstr
-    ::TmpInfAddrJump(ifJumpType, ifLabel)
     ::TmpInfAddrJump(elseJumpType, elseLabel)
-    ::TmpInfAddrLabel(ifLabel)
     ::trans_stmts idToTmpMap stmtsForIf
     @ TmpInfAddrJump(JMP_UNCOND, endLabel)
     ::TmpInfAddrLabel(elseLabel)
     ::trans_stmts idToTmpMap stmtsForElse
-    @ TmpInfAddrJump(JMP_UNCOND, endLabel)
-    ::TmpInfAddrLabel(endLabel) :: []
+    @ TmpInfAddrLabel(endLabel) :: []
 
 (* We use this function for both ifs and whiles. We pass in
    make_instrs_fn, which creates the structure which kind of
