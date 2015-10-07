@@ -49,8 +49,15 @@ let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl
         )
                                  
 let translateTmpArg tbl = function
-     TmpLoc t -> AssemLoc(find tbl t)
-   | TmpConst c -> Const c
+    TmpConst c -> Const c
+  | TmpLoc t -> (try AssemLoc (find tbl t)
+                 (* The "with" means there's a tmp that is used, but we
+                    never assigned an AssemLoc to it because we never
+                    wrote to it. This can happen if the variable was never initialized,
+                         but it was ok because the line was unreachable *)
+                 with Not_found -> AssemLoc (MemAddr(RSP, -666)))
+
+
                      
 let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
