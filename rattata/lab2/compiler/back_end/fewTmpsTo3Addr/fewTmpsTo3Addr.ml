@@ -11,24 +11,33 @@
 open Core.Std
 open Datatypesv1
 
-let munch_bool_instr = function
+let rec munch_bool_instr = function
     TmpInfAddrTest (TmpBoolArg e1, TmpBoolArg TmpLoc t) ->
         Tmp3AddrBoolInstr (TmpTest (e1, t))::[]
   | TmpInfAddrTest (TmpBoolArg e1, TmpBoolArg TmpConst c) ->
         let t = Tmp (Temp.create()) in
         Tmp3AddrMov(TmpConst c, t)
         ::Tmp3AddrBoolInstr (TmpTest (e1, t))::[]
-  | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpLoc t) ->
-        Tmp3AddrBoolInstr (TmpCmp (e1, t))::[]
-  | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpConst c) ->
-        let t = Tmp (Temp.create()) in
-        Tmp3AddrMov(TmpConst c, t)
-        ::Tmp3AddrBoolInstr (TmpCmp (e1, t))::[]
+  | TmpInfAddrCmp (int_exp1, int_exp2) ->
+        let t1 = Tmp (Temp.create()) in
+        let t2 = Tmp (Temp.create()) in
+        let t3 = Tmp (Temp.create()) in 
+        let (instrs1, dest1) = munch_exp t1 (TmpIntExpr int_exp1) 0 in
+        let (instrs2, dest2) = munch_exp t2 (TmpIntExpr int_exp2) 0 in
+        instrs1 @ instrs2 @ Tmp3AddrMov(dest2, t3) ::
+        Tmp3AddrBoolInstr (TmpCmp (dest1, t3))::[]
+                                               
+  (* | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpLoc t) -> *)
+  (*       Tmp3AddrBoolInstr (TmpCmp (e1, t))::[] *)
+  (* | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpConst c) -> *)
+  (*       let t = Tmp (Temp.create()) in *)
+  (*       Tmp3AddrMov(TmpConst c, t) *)
+  (*       ::Tmp3AddrBoolInstr (TmpCmp (e1, t))::[] *)
             
 
 (* d is the suggested destination, but we might have to generate more
    tmps anyway if there is a nested binop *)
-let rec munch_exp d e depth =
+and munch_exp d e depth =
   match e with
      TmpIntExpr (TmpInfAddrBinopExpr (int_binop, int_e1, int_e2)) ->
          let t = if depth > 0 then Tmp (Temp.create()) else d in
@@ -52,7 +61,7 @@ and munch_int_binop d (int_binop, e1, e2) depth =
               (Tmp3AddrMov (TmpConst c, t)::[], TmpLoc t)
         | _ -> munch_exp d (TmpIntExpr e2) depth in
     instrs1 @ instrs2
-    @ (if TmpLoc d = dest1 then []
+    @ (if false (* TmpLoc d = dest1 *) then []
        else [Tmp3AddrBinop (int_binop, dest1, dest2, d)])
 
 
