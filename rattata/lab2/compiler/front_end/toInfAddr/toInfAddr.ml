@@ -22,13 +22,16 @@ let rec handle_shifts idToTmpMap (e1, op, e2) =
                               LSHIFT -> A.ASTlshift
                             | RSHIFT -> A.ASTrshift
                             | _ -> assert(false)) in
-    let condition = A.GreaterThan(e2, max_shift) in
-          (* If shift is too big, div by zero. Else, do the shift *)
-    let divByZero = A.TypedPostElabAssignStmt(new_id, A.IntExpr
-                 (A.ASTBinop(A.IntConst 666, FAKEDIV, A.IntConst 0)))::[] in
+    let isNonNegative = A.GreaterThan(e2, A.IntConst (-1)) in
+    let isSmallEnough = A.LogNot (A.GreaterThan(e2, max_shift)) in
+    let condition = A.LogAnd (isNonNegative, isSmallEnough) in
+          (* If shift is too big, or is negative, div by zero.
+             Else, do the shift *)
     let doTheShift = A.TypedPostElabAssignStmt(new_id, A.IntExpr
                  (A.BaseCaseShift(e1, baseCaseShiftOp, e2)))::[] in
-       (trans_cond newMap (condition, divByZero, doTheShift),
+    let divByZero = A.TypedPostElabAssignStmt(new_id, A.IntExpr
+                 (A.ASTBinop(A.IntConst 666, FAKEDIV, A.IntConst 0)))::[] in
+       (trans_cond newMap (condition, doTheShift, divByZero),
        TmpIntArg (TmpLoc (Tmp result_tmp)))
 
 
