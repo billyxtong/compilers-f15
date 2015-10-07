@@ -18,8 +18,8 @@ let rec trans_int_exp idToTmpMap = function
      | A.IntIdent id -> 
           (match M.find idToTmpMap id with
              None -> 
-             let () = print_string("Undeclared: " ^ id ^ "\n") in
-             assert(false)
+             (let () = print_string("Uninitialized: " ^ id ^ "\n") in
+             ([], (TmpIntArg (TmpLoc (Tmp (Temp.create()))))))
            | Some t -> 
              ([], TmpIntArg (TmpLoc (Tmp t))))
      | A.ASTBinop (e1, op, e2) ->
@@ -100,7 +100,7 @@ and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
    a start label (and no else label), and there will be an
    unconditional jump to the start label after the if *)
 and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse) 
-  : tmpInfAddrInstr list = 
+  : tmpInfAddrInstr list =
      match condition with
          A.LogNot negCondition ->
         (* In this case, just switch the statements for if and else,
@@ -186,25 +186,19 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
 
 and trans_stmts idToTmpMap = function
      A.TypedPostElabDecl (id, idType)::stmts ->
-        trans_stmts idToTmpMap stmts
+      (* Just create a single temp per variable for now,
+         instead of creating one each assignment *)
+        let t = Temp.create() in
+        let newMap = M.add idToTmpMap id t in
+        trans_stmts newMap stmts
    | A.TypedPostElabAssignStmt (id, A.BoolExpr e)::stmts ->
-        (* Here's the deal: if this id already has a temp associated with it
-           in this scope, we need to use that same temp here. The reason is
-           that when we break "x = y" where y is a boolean, that turns into
-           if (y) x = 1; else x = 0;. Which means the if and else need to write
-           to the same temp (even though they're in different scopes.
-           So basically if there already is a temp for id, we use that,
-           otherwise we create a new one (this is handled in trans_bool_exp) *)
-        let dest_for_bool_expr = M.find idToTmpMap id in (* We can just directly
-             use the result of find because want an option type anyway,
-             see trans_bool_exp*)
         let (instrs_for_move, Tmp new_t) =
           (* trans_bool_exp gives us the instructions it generated, and also
              where it ended up putting the value (if it didn't have to
              create a new one, new_t will just be whatever we passed in.
              We then update the binding in idToTmpMap (which does nothing
              if new_t is what we passed in) *)
-               trans_bool_exp idToTmpMap e dest_for_bool_expr in
+               trans_bool_exp idToTmpMap e (M.find idToTmpMap id) in
         let newMap = M.add idToTmpMap id new_t in
         instrs_for_move @ trans_stmts newMap stmts
    | A.TypedPostElabAssignStmt (id, A.IntExpr e)::stmts ->
@@ -214,7 +208,7 @@ and trans_stmts idToTmpMap = function
         instrs_for_e @
         TmpInfAddrMov (TmpIntExpr eInfAddr, Tmp t)::trans_stmts newMap stmts
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
-        trans_cond idToTmpMap (e, ifStmts, elseStmts) @
+       trans_cond idToTmpMap (e, ifStmts, elseStmts) @
         trans_stmts idToTmpMap stmts
    | A.TypedPostElabWhile (e, whileStmts) :: stmts ->
         let topLabel = GenLabel.create() in
