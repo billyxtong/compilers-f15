@@ -182,8 +182,8 @@ control :
 decl :
    c0type IDENT                     { A.NewVar ($2, $1)}
  | c0type IDENT ASSIGN exp         { A.Init ($2, $1, $4) }
- | INT MAIN                     { A.NewVar ("main", D.INT) }
- | INT MAIN ASSIGN exp          { A.Init ("main", D.INT, $4) }
+ | c0type MAIN                     { A.NewVar ("main", $1) }
+ | c0type MAIN ASSIGN exp          { A.Init ("main", $1, $4) }
  ;
 
 lvalue :
