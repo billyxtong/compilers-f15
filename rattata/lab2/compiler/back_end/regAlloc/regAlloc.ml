@@ -8,7 +8,7 @@ let spillReg = Reg EDI
 let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
                        (regList : reg list) (offset : int) =
   match instrList with
-        [] -> ()
+        [] -> offset
       | Tmp2AddrJump _::prog -> putInHashTable prog tbl [] offset
       | Tmp2AddrLabel _::prog -> putInHashTable prog tbl [] offset                                   
       | instr :: prog ->
@@ -19,13 +19,13 @@ let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl
                                                      putInHashTable prog tbl regList offset)
                                                 with
                                                     Not_found -> (let () = (add tbl dest (MemAddr(RSP, offset))) in
-                                                                  putInHashTable prog tbl regList (offset - 4)))
+                                                                  putInHashTable prog tbl regList (offset + 4)))
                                            | Tmp2AddrBinop(binop,arg,dest) -> 
                                                (try (let _ = find tbl dest in
                                                     putInHashTable prog tbl regList offset)
                                                 with
                                                     Not_found -> (let () = (add tbl dest (MemAddr(RSP, offset))) in
-                                                                  putInHashTable prog tbl regList (offset - 4)))
+                                                                  putInHashTable prog tbl regList (offset + 4)))
                                            | Tmp2AddrReturn(arg) -> putInHashTable prog tbl regList offset
                                            (* We only allocate when we write to a temp; test and cmp don't
                                               write so we can ignore them *)
@@ -52,13 +52,13 @@ let translateTmpArg tbl = function
      TmpLoc t -> AssemLoc(find tbl t)
    | TmpConst c -> Const c
                      
-let translate tbl (instr : tmp2AddrInstr) : assemInstr list =
+let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
         Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, find tbl dest)::[]
       | Tmp2AddrBinop(binop, arg, dest) ->
               INT_BINOP(binop, translateTmpArg tbl arg, find tbl dest)::[]
-      | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::POP(RBP)::
-                               RETURN::[]
+      | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::
+                               ADDQ(Const finalOffset, Reg RSP)::POP(RBP)::RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
       | Tmp2AddrBoolInstr TmpTest(arg, t) ->
@@ -67,13 +67,14 @@ let translate tbl (instr : tmp2AddrInstr) : assemInstr list =
               BOOL_INSTR (CMP (translateTmpArg tbl arg, find tbl t))::[]
 
 let regAlloc (instrList : tmp2AddrProg) =
-  let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  (* let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in *)
+  let regList = [] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! *)
   let tmpToAssemLocTable = create 100 in
-  let () = putInHashTable instrList tmpToAssemLocTable regList (-4) in
+  let finalOffset = putInHashTable instrList tmpToAssemLocTable regList (4) in
   List.concat [ (* [PUSH(EBX)]; [PUSH(RSP)]; [PUSH(ESI)]; [PUSH(EDI)]; 
                 [PUSH(R12)]; [PUSH(R13)]; [PUSH(R14)]; [PUSH(R15)]; *) [(PUSH(RBP))];
-                [MOVQ(AssemLoc(Reg(RSP)), Reg(RBP))]; 
-                (List.concat (List.map (translate tmpToAssemLocTable) instrList));
+                [SUBQ(Const finalOffset, Reg RSP)];
+                (List.concat (List.map (translate tmpToAssemLocTable finalOffset) instrList));
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
                 [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *) ]

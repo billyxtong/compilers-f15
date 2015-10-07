@@ -21,6 +21,8 @@ type label = int
 type jumpInstr = jump * label
 type assemInstr = MOV of assemArg * assemLoc
                 | MOVQ of assemArg * assemLoc
+                | SUBQ of assemArg * assemLoc
+                | ADDQ of assemArg * assemLoc
                 | INT_BINOP of assemIntInstr
                 | PUSH of reg
                 | POP of reg

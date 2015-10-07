@@ -86,6 +86,14 @@ let assemInstrToString(instr : assemInstr) =
             concat "" ["movq "; 
             assemArgToString(src); ", ";
             assemLocToString(dest)]
+      | ADDQ(src, dest) ->
+            concat "" ["addq "; 
+            assemArgToString(src); ", ";
+            assemLocToString(dest)]
+      | SUBQ(src, dest) ->
+            concat "" ["subq "; 
+            assemArgToString(src); ", ";
+            assemLocToString(dest)]
       | INT_BINOP(intinstr) -> assemIntInstrToString(intinstr)
       | PUSH(r) -> concat "" ["push "; regToString(r)]
       | POP(r) -> concat "" ["pop "; regToString(r)]
