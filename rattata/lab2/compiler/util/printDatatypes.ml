@@ -60,8 +60,12 @@ let boolInstrToString (instr : boolInstr) =
       | CMP(arg1, arg2) -> concat "" ["cmpl "; assemArgToString(arg1); ", "; 
                                                assemLocToString(arg2)]
 
-let assemIntInstrToString((intOp, src, dest) : assemIntInstr) = 
-    concat "" [intBinopToString intOp; assemArgToString(src); ", "; 
+let assemIntInstrToString((intOp, src, dest) : assemIntInstr) =
+    let srcString = (match (intOp, src) with
+                       (LSHIFT, AssemLoc (Reg ECX)) -> "%cl"
+                     | (RSHIFT, AssemLoc (Reg ECX)) -> "%cl"
+                     | _ -> assemArgToString(src)) in
+    concat "" [intBinopToString intOp; srcString; ", "; 
                assemLocToString(dest)]
 
 let jumpToString (j : jump) =
