@@ -11,12 +11,20 @@ open Datatypesv1
 (* Typed Post-Elab AST
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
+type shiftOp = ASTrshift | ASTlshift
 type ident = string
 (* intExpr and boolExpr have to be mutually recursive because
    of damn ternary operators *)
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
              | IntTernary of boolExpr * intExpr * intExpr
+(* We need the BaseCaseShift thing, because we turn ASTBinops of shifts
+   into and if/else statement that divs by zero if the shift is
+   too large, but we need a base case. This, and shiftOp, are like
+   the jump_uncond type in that I just added them here because
+   I need them in toInfAddr, so don't write print things for
+   these *)
+             | BaseCaseShift of intExpr * shiftOp * intExpr
  and boolExpr = BoolConst of const | BoolIdent of ident
               | GreaterThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr

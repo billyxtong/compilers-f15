@@ -10,10 +10,32 @@ let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
             | Some t -> t)
 
+let rec handle_shifts idToTmpMap (e1, op, e2) =
+    let max_shift = A.IntConst 31 in
+    let new_id = GenUnusedID.create () in
+    let result_tmp = Temp.create() in
+    let newMap = M.add idToTmpMap new_id result_tmp in
+        (* whatever gets put in new_id should end up in result_tmp *)
+      (* Now: we need one for the div-by-zero instr we're about to add *)
+        (* NOTE: e2 not e1!! *)
+    let baseCaseShiftOp = (match op with
+                              LSHIFT -> A.ASTlshift
+                            | RSHIFT -> A.ASTrshift
+                            | _ -> assert(false)) in
+    let condition = A.GreaterThan(e2, max_shift) in
+          (* If shift is too big, div by zero. Else, do the shift *)
+    let divByZero = A.TypedPostElabAssignStmt(new_id, A.IntExpr
+                 (A.ASTBinop(A.IntConst 666, FAKEDIV, A.IntConst 0)))::[] in
+    let doTheShift = A.TypedPostElabAssignStmt(new_id, A.IntExpr
+                 (A.BaseCaseShift(e1, baseCaseShiftOp, e2)))::[] in
+       (trans_cond newMap (condition, divByZero, doTheShift),
+       TmpIntArg (TmpLoc (Tmp result_tmp)))
+
+
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
    but ternary *)
-let rec trans_int_exp idToTmpMap = function
+and trans_int_exp idToTmpMap = function
        A.IntConst c -> ([], TmpIntArg (TmpConst c))
      | A.IntIdent id -> 
           (match M.find idToTmpMap id with
@@ -22,6 +44,21 @@ let rec trans_int_exp idToTmpMap = function
              ([], (TmpIntArg (TmpLoc (Tmp (Temp.create()))))))
            | Some t -> 
              ([], TmpIntArg (TmpLoc (Tmp t))))
+     | A.ASTBinop (e1, LSHIFT, e2) ->
+         handle_shifts idToTmpMap (e1, LSHIFT, e2)
+     | A.ASTBinop (e1, RSHIFT, e2) ->
+         handle_shifts idToTmpMap (e1, RSHIFT, e2)
+     | A.BaseCaseShift (e1, shiftOp, e2) ->
+         let (instrs_for_exp1, tmp_exp1) =
+          trans_int_exp idToTmpMap e1 in
+         let (instrs_for_exp2, tmp_exp2) =
+          trans_int_exp idToTmpMap e2 in
+     
+         let actualShiftOp = (match shiftOp with
+                                     A.ASTrshift -> RSHIFT
+                                   | A.ASTlshift -> LSHIFT) in
+          (instrs_for_exp1 @ instrs_for_exp2,
+           TmpInfAddrBinopExpr (actualShiftOp, tmp_exp1, tmp_exp2))
      | A.ASTBinop (e1, op, e2) ->
          let (instrs_for_exp1, tmp_exp1) =
              trans_int_exp idToTmpMap e1 in
@@ -29,6 +66,7 @@ let rec trans_int_exp idToTmpMap = function
              trans_int_exp idToTmpMap e2 in
          (instrs_for_exp1 @ instrs_for_exp2,
           TmpInfAddrBinopExpr (op, tmp_exp1, tmp_exp2))
+         
      | A.IntTernary (c, e1, e2) -> (* See BoolTernary in trans_cond *) 
          let ternary_result_tmp = Temp.create() in
          let ternary_result_id = GenUnusedID.create() in
