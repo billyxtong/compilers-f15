@@ -215,7 +215,7 @@ exp :
 				(A.PreElabConstExpr (0, D.INT),
 				  A.IntBinop D.SUB, $2 ) }
  | BIT_NOT exp %prec UNARY      { A.PreElabBinop
-				(A.PreElabConstExpr (1, D.INT),
+				(A.PreElabConstExpr (-1, D.INT),
 				  A.IntBinop D.BIT_XOR, $2 ) }
 /* Comparison/Logical */
  | exp GT exp                  { expand_log_binop $1 A.GT $3 }
