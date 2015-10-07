@@ -58,7 +58,7 @@ let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
       | Tmp2AddrBinop(binop, arg, dest) ->
               INT_BINOP(binop, translateTmpArg tbl arg, find tbl dest)::[]
       | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::
-                               ADDQ(Const finalOffset, Reg RSP)::POP(RBP)::RETURN::[]
+                               ADDQ(Const finalOffset, Reg RSP)::RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
       | Tmp2AddrBoolInstr TmpTest(arg, t) ->
@@ -73,7 +73,7 @@ let regAlloc (instrList : tmp2AddrProg) =
   let tmpToAssemLocTable = create 100 in
   let finalOffset = putInHashTable instrList tmpToAssemLocTable regList (4) in
   List.concat [ (* [PUSH(EBX)]; [PUSH(RSP)]; [PUSH(ESI)]; [PUSH(EDI)]; 
-                [PUSH(R12)]; [PUSH(R13)]; [PUSH(R14)]; [PUSH(R15)]; *) [(PUSH(RBP))];
+                [PUSH(R12)]; [PUSH(R13)]; [PUSH(R14)]; [PUSH(R15)]; *)
                 [SUBQ(Const finalOffset, Reg RSP)];
                 (List.concat (List.map (translate tmpToAssemLocTable finalOffset) instrList));
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
