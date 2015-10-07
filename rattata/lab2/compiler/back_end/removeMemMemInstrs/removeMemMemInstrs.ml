@@ -6,6 +6,14 @@ let handleOneInstr (instr: assemInstr) : assemInstr list =
         MOV(AssemLoc(MemAddr memSrc), MemAddr memDest) ->
              MOV(AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
              MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
+      | BOOL_INSTR (TEST (AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
+             MOV(AssemLoc (MemAddr memDest), RegAlloc.spillReg)::
+             BOOL_INSTR (TEST(AssemLoc (MemAddr memSrc), RegAlloc.spillReg))::
+             MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
+      | BOOL_INSTR (CMP (AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
+             MOV(AssemLoc (MemAddr memDest), RegAlloc.spillReg)::
+             BOOL_INSTR (CMP (AssemLoc (MemAddr memSrc), RegAlloc.spillReg))::
+             MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
       | INT_BINOP(op, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
              MOV(AssemLoc (MemAddr memDest), RegAlloc.spillReg)::
              (* We always put the register as the destination here,
