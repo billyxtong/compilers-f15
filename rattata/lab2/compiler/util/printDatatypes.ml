@@ -178,10 +178,6 @@ let rec tmpIntExprToString(tmpintexpr : tmpIntExpr) =
                                                             " "; intBinopToString(op); 
                                                             " "; tmpIntExprToString(expr2); ")"]
 
-let tmpInfAddrBinopInstrToString((op, expr1, expr2, t) : tmpInfAddrBinopInstr) = 
-  concat "" [tmpToString(t); " = ("; tmpIntExprToString(expr1); " "; 
-             intBinopToString(op); " "; tmpIntExprToString(expr2); ")"]
-
 let tmpBoolExprToString(TmpBoolArg(t) : tmpBoolExpr) = tmpArgToString(t)
 
 let rec tmpExprToString(tExpr : tmpExpr) =

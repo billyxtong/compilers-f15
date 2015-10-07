@@ -75,17 +75,14 @@ type tmpIntExpr = TmpIntArg of tmpArg
                 | TmpInfAddrBinopExpr of intBinop *
                                          tmpIntExpr * 
                                          tmpIntExpr
-type tmpInfAddrBinopInstr = intBinop * tmpIntExpr * tmpIntExpr *  tmp
 type tmpBoolExpr = TmpBoolArg of tmpArg
 type tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
                         | TmpInfAddrCmp of tmpIntExpr * tmpIntExpr
-
 type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
                    | TmpInfAddrReturn of tmpExpr  
-                   | TmpInfAddrBinop of tmpInfAddrBinopInstr 
 type tmpInfAddrProg = tmpInfAddrInstr list
