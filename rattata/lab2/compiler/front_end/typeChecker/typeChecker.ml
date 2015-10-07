@@ -8,6 +8,12 @@ open Ast
 module A = Ast
 open Datatypesv1
 module M = Core.Std.Map
+open String
+
+let isValidVarDecl (identifier : ident) = 
+  if sub identifier 0 1 = "\\" 
+  then true 
+  else false
 
 let rec tc_expression env (expression : A.untypedPostElabExpr) =
   match expression with
@@ -15,16 +21,16 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
       (match typee with
              INT -> A.IntExpr(IntConst(constant))
            | BOOL -> A.BoolExpr(BoolConst(constant)))
-  | A.UntypedPostElabIdentExpr id ->
-     (match M.find env id with (* is it declared? *)
-        Some(typee, isInitialized) -> if isInitialized (* declared and initialized, all good *)
-                                      then (match typee with
-                                                  INT -> A.IntExpr(IntIdent(id))
-                                                | BOOL -> A.BoolExpr(BoolIdent(id)))
-                                      else (ErrorMsg.error None ("uninitialized variable " ^ id ^ "\n");
-                                            raise ErrorMsg.Error)
-      | None -> (ErrorMsg.error None ("undeclared variable " ^ id ^ "\n");
-                 raise ErrorMsg.Error))
+  | A.UntypedPostElabIdentExpr id -> 
+      (match M.find env id with (* is it declared? *)
+                   Some(typee, isInitialized) -> (if isInitialized (* declared and initialized, all good *)
+                                                 then (match typee with
+                                                       INT -> A.IntExpr(IntIdent(id))
+                                                     | BOOL -> A.BoolExpr(BoolIdent(id)))
+                                                 else (ErrorMsg.error None ("uninitialized variable " ^ id ^ "\n");
+                                                       raise ErrorMsg.Error))
+                 | None -> (ErrorMsg.error None ("undeclared variable " ^ id ^ "\n");
+                            raise ErrorMsg.Error))
   | A.UntypedPostElabBinop (e1, op, e2) -> 
       let tcExpr1 = tc_expression env e1 in
       let tcExpr2 = tc_expression env e2 in
@@ -60,32 +66,34 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
       (match (tcExpr1, tcExpr2, tcExpr3) with
              (BoolExpr(exp1), IntExpr(exp2), IntExpr(exp3)) -> IntExpr(IntTernary(exp1, exp2, exp3))
            | (BoolExpr(exp1), BoolExpr(exp2), BoolExpr(exp3)) -> BoolExpr(BoolTernary(exp1, exp2, exp3))
-           | _ -> ErrorMsg.error None ("ternary expression didn't typecheck \n");
-                  raise ErrorMsg.Error)
+           | _ -> (ErrorMsg.error None ("ternary expression didn't typecheck \n");
+                  raise ErrorMsg.Error))
 
 let rec tc_statements env (untypedAST : untypedPostElabAST) (typedAST : typedPostElabAST)=
   match untypedAST with
     [] -> typedAST
   | A.UntypedPostElabDecl(id, typee)::stms ->
       (match M.find env id with
-             Some _ -> (ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");
-                        raise ErrorMsg.Error)
-           | None ->
-               let newMap = M.add env id (typee, false) in
-               tc_statements newMap stms (typedAST @ [TypedPostElabDecl(id, typee)]))
+                   Some _ -> (ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");
+                              raise ErrorMsg.Error)
+                 | None -> (let newMap = M.add env id (typee, false) 
+                           in tc_statements newMap stms (typedAST @ [TypedPostElabDecl(id, typee)])))
   | A.UntypedPostElabAssignStmt(id, e)::stms ->
-      let tcExpr = tc_expression env e in
+       (let tcExpr = tc_expression env e in
           (match M.find env id with (* it's declared, good *)
-                 Some(typee, _) -> 
+                 Some(typee, _) ->  
                    (match (tcExpr, typee) with
                           (IntExpr(_), INT) -> let newMap = M.add env id (typee, true) in              
                                                tc_statements newMap stms (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)])
                         | (BoolExpr(_), BOOL) -> let newMap = M.add env id (typee, true) in              
                                                  tc_statements newMap stms (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)])
-                        | _ -> ErrorMsg.error None ("assignment expression didn't typecheck \n");
-                               raise ErrorMsg.Error)
-               | None -> ErrorMsg.error None ("undeclared variable " ^ id ^ "\n");
-                         raise ErrorMsg.Error)
+                        | _ -> (ErrorMsg.error None ("assignment expression didn't typecheck \n");
+                               raise ErrorMsg.Error))
+               | None -> (if ((isValidVarDecl id))
+                          then (let newMap = M.add env id (INT, true) in              
+                                tc_statements newMap stms (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)]))
+                          else (ErrorMsg.error None ("undeclared test variable " ^ id ^ "\n");
+                                raise ErrorMsg.Error))))
   | A.UntypedPostElabIf(e, ast1, ast2)::stms -> 
       let tcExpr = tc_expression env e in
       (match tcExpr with

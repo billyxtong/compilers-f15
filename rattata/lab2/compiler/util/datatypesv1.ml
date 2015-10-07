@@ -84,5 +84,6 @@ type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
-                   | TmpInfAddrReturn of tmpExpr   
+                   | TmpInfAddrReturn of tmpExpr  
+                   | TmpInfAddrBinop of tmpInfAddrBinopInstr 
 type tmpInfAddrProg = tmpInfAddrInstr list
