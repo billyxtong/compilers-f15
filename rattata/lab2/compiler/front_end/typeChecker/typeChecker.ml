@@ -62,7 +62,7 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
   | A.UntypedPostElabTernary(e1, e2, e3) ->
       let tcExpr1 = tc_expression env e1 in
       let tcExpr2 = tc_expression env e2 in
-      let tcExpr3 = tc_expression env e1 in
+      let tcExpr3 = tc_expression env e3 in
       (match (tcExpr1, tcExpr2, tcExpr3) with
              (BoolExpr(exp1), IntExpr(exp2), IntExpr(exp3)) -> IntExpr(IntTernary(exp1, exp2, exp3))
            | (BoolExpr(exp1), BoolExpr(exp2), BoolExpr(exp3)) -> BoolExpr(BoolTernary(exp1, exp2, exp3))
