@@ -121,13 +121,25 @@ and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
     ifJumpType elseJumpType =
     let elseLabel = GenLabel.create() in
     let endLabel = GenLabel.create() in
-    priorInstr
-    ::TmpInfAddrJump(elseJumpType, elseLabel)
-    ::trans_stmts idToTmpMap stmtsForIf
-    @ TmpInfAddrJump(JMP_UNCOND, endLabel)
-    ::TmpInfAddrLabel(elseLabel)
-    ::trans_stmts idToTmpMap stmtsForElse
-    @ TmpInfAddrLabel(endLabel) :: []
+    if stmtsForIf = [] then
+          (priorInstr
+          ::TmpInfAddrJump(ifJumpType, endLabel)
+          ::trans_stmts idToTmpMap stmtsForElse
+          @ TmpInfAddrLabel(endLabel) :: []) else
+    if stmtsForElse = [] then
+          (priorInstr
+          ::TmpInfAddrJump(elseJumpType, endLabel)
+          ::trans_stmts idToTmpMap stmtsForIf
+          @ TmpInfAddrLabel(endLabel) :: [])
+    else
+          (priorInstr
+          ::TmpInfAddrJump(elseJumpType, elseLabel)
+          ::trans_stmts idToTmpMap stmtsForIf
+          @ TmpInfAddrJump(JMP_UNCOND, endLabel)
+          ::TmpInfAddrLabel(elseLabel)
+          ::trans_stmts idToTmpMap stmtsForElse
+          @ TmpInfAddrLabel(endLabel) :: [])
+
 
 (* We use this function for both ifs and whiles. We pass in
    make_instrs_fn, which creates the structure which kind of
