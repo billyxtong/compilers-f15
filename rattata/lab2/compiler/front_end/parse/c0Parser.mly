@@ -101,9 +101,13 @@ let rec expand_log_binop e1 op e2 =
 %type <Ast.preElabAST> program
 /* Highest precendence at bottom */
 %right QUESMARK COLON       
-%left LOG_AND LOG_OR
-%left BIT_AND BIT_OR XOR
-%left NEQ DOUBLE_EQ LT LEQ GT GEQ
+%left LOG_OR
+%left LOG_AND
+%left BIT_OR
+%left XOR      
+%left BIT_AND
+%left NEQ DOUBLE_EQ
+%left LT LEQ GT GEQ
 %left LSHIFT RSHIFT      
 %left PLUS MINUS
 %left STAR SLASH PERCENT
