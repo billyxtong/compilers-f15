@@ -2,17 +2,22 @@
 open Graph
 open Hashtbl
 open Datatypesv1
-(*
+
+
+(* maps line numbers starting at 0 to each statement in a 2 addr program *)
 let mapLineNumToInstr (lineNum : int) tbl (prog : tmp2AddrProg) =
   match prog with
         [] -> tbl
       | instr :: prog' ->
           let () = add tbl lineNum instr in
           mapLineNumToInstr (lineNum + 1) tbl (prog')
-*)
+(* returns an int -> instr hashtable *)
 
-let findPrecessors (lineNum : int) tbl =
-
+(* maps line numbers starting at 0 to a list of their predecessor lines *)
+let findPredecessors (lineNum : int) lineToInstrTbl lineToLinesTbl =
+  match find lineToInstrTbl lineNum with
+        
+(* returns an int -> int list hashtable *)
 
 let predecessors (prog : tmp2AddrProg) =
   let indexedProg = List.mapi (fun i -> fun instr -> (i, instr)) prog in

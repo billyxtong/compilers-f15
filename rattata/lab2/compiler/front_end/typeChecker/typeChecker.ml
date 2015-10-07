@@ -105,7 +105,8 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
                let newret = if ret then ret else (ret1 && ret2) in
                let newenv = M.mapi env (fun ~key:id -> (fun ~data:value ->
                                              (match (M.find env1 id, M.find env2 id) with
-                                                    (Some (typee1, isInit1), Some _) -> (typee1, isInit1)
+                                                    (Some (typee1, isInit1), Some (typee2, isInit2)) -> 
+                                                                (typee1, isInit1 && isInit2)
                                                   | (_, _) -> value))) in
                tc_statements newenv stms newret (typedAST @ [A.TypedPostElabIf(exp1, newast1, newast2)])
            | _ -> ErrorMsg.error None ("if expression didn't typecheck\n");
