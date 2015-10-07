@@ -100,6 +100,7 @@ let rec expand_log_binop e1 op e2 =
 
 %type <Ast.preElabAST> program
 /* Highest precendence at bottom */
+%right QUESMARK COLON       
 %left LOG_AND LOG_OR
 %left BIT_AND BIT_OR XOR
 %left NEQ DOUBLE_EQ LT LEQ GT GEQ
@@ -107,7 +108,6 @@ let rec expand_log_binop e1 op e2 =
 %left PLUS MINUS
 %left STAR SLASH PERCENT
 %right UNARY
-%right QUESMARK COLON       
 %left LPAREN
 
 %start program
