@@ -71,7 +71,7 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
 
 let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedAST : typedPostElabAST) =
   match untypedAST with
-    [] -> (ret, typedAST)
+    [] -> (ret, env, typedAST)
   | A.UntypedPostElabDecl(id, typee)::stms ->
       (match M.find env id with
                    Some _ -> (ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");
@@ -100,17 +100,27 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
       let tcExpr = tc_expression env e in
       (match tcExpr with
              BoolExpr(exp1) -> 
-               let (ret1, newast1) = tc_statements env ast1 ret [] in
-               let (ret2, newast2) = tc_statements env ast2 ret [] in
+               let (ret1, env1, newast1) = tc_statements env ast1 ret [] in
+               let (ret2, env2, newast2) = tc_statements env ast2 ret [] in
+               (* let printenv1 = M.iter env1 (fun ~key:x -> fun ~data:(t,i) -> 
+                 print_string(x ^ (if i then " is " else "is not") ^ "in the if env\n" )) in
+               let printenv2 = M.iter env2 (fun ~key:x -> fun ~data:(t,i) -> 
+                 print_string(x ^ (if i then " is " else "is not") ^ "in the else env\n" )) in *)
                let newret = if ret then ret else (ret1 && ret2) in
-               tc_statements env stms newret (typedAST @ [A.TypedPostElabIf(exp1, newast1, newast2)])
+               let newenv = M.mapi env (fun ~key:id -> (fun ~data:value ->
+                                             (match (M.find env1 id, M.find env2 id) with
+                                                    (Some (typee1, isInit1), Some _) -> (typee1, isInit1)
+                                                  | (_, _) -> value))) in
+               (*let printenv = M.iter newenv (fun ~key:x -> fun ~data:(t,i) -> 
+                 print_string(x ^ (if i then " is " else "is not") ^ "in the new env\n" )) in*)
+               tc_statements newenv stms newret (typedAST @ [A.TypedPostElabIf(exp1, newast1, newast2)])
            | _ -> ErrorMsg.error None ("if expression didn't typecheck\n");
                   raise ErrorMsg.Error)
   | A.UntypedPostElabWhile(e, ast1)::stms -> 
       let tcExpr = tc_expression env e in
       (match tcExpr with
              BoolExpr(exp1) -> 
-               let (_, newast1) = tc_statements env ast1 false [] in
+               let (_, _, newast1) = tc_statements env ast1 false [] in
                tc_statements env stms ret
                 (typedAST @ [A.TypedPostElabWhile(exp1, newast1)])
            | _ -> ErrorMsg.error None ("while expression didn't typecheck\n");
@@ -129,5 +139,5 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
         
 and typecheck prog =
   let environment = Core.Std.String.Map.empty in
-  let (ret, typedast) = tc_statements environment prog false [] in
+  let (ret, finalenv, typedast) = tc_statements environment prog false [] in
   if ret then typedast else (ErrorMsg.error None "main does not return\n"; raise ErrorMsg.Error)
