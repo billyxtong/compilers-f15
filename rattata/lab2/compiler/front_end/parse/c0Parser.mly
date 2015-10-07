@@ -138,7 +138,10 @@ stmt :
 
 simp :
    decl                     { A.PreElabDecl $1 }
- | lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
+ | simpNoDecl               { $1 }  
+   
+simpNoDecl :
+   lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
  | exp                           { A.SimpStmtExpr $1 }
  | lvalue postop		 { expand_postop $1 $2 }
   ;
@@ -150,6 +153,10 @@ postop :
 c0type :
    INT                           { D.INT }
  | BOOL 		         { D.BOOL }
+
+simpoptNoDecl :
+   /* empty */                   { A.EmptySimp }
+ | simpNoDecl		         { A.HasSimpStmt $1 }
 
 simpopt :
    /* empty */                   { A.EmptySimp }
@@ -164,7 +171,7 @@ elseopt :
 control :
    IF LPAREN exp RPAREN stmt elseopt { A.PreElabIf ($3, $5, $6) }
  | WHILE LPAREN exp RPAREN stmt { A.PreElabWhile ($3, $5) }
- | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
+ | FOR LPAREN simpopt SEMI exp SEMI simpoptNoDecl RPAREN stmt
        { A.PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
 	  
