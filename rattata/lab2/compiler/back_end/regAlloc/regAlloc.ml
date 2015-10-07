@@ -74,8 +74,7 @@ let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
               BOOL_INSTR (CMP (translateTmpArg tbl arg, find tbl t))::[]
 
 let regAlloc (instrList : tmp2AddrProg) =
-  (* let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in *)
-  let regList = [] in
+  let regList = [EBX; ECX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! *)
   let tmpToAssemLocTable = create 100 in
   let finalOffset = putInHashTable instrList tmpToAssemLocTable regList (4) in
