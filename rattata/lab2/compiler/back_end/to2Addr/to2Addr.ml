@@ -21,9 +21,7 @@ let instrTo2Addr = function
     Tmp3AddrMov (dest, src) -> [Tmp2AddrMov (dest, src)]
   | Tmp3AddrReturn arg -> [Tmp2AddrReturn arg]
   | Tmp3AddrBinop (op, arg1, arg2, dest) ->
-     let t = Tmp(Temp.create()) in
-     binopTo2Addr t (op, arg1, arg2) @ [Tmp2AddrReturn
-                                     (TmpLoc t)]
+     binopTo2Addr dest (op, arg1, arg2)
   | Tmp3AddrJump j -> Tmp2AddrJump j::[]
   | Tmp3AddrLabel jumpLabel -> Tmp2AddrLabel jumpLabel::[]
   | Tmp3AddrBoolInstr instr -> Tmp2AddrBoolInstr instr::[]
