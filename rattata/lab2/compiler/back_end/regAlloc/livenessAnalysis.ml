@@ -69,8 +69,8 @@ let findLiveLines t prog predsPerLine =
     (* let () = (if t=2 then print_string(listArrayToString predsPerLine)) in *)
     let liveLinesSet = findLiveLinesRec t prog seenLines predsPerLine
                        result startLine startLine in
-    let r = H.fold addLineToList liveLinesSet [] in
-    let () = (if true then print_string(listToString t r) ) in r
+    H.fold addLineToList liveLinesSet []
+    (* let () = (if true then print_string(listToString t r) ) in r *)
 
 
 let rec findPredecessors (predecessorsArray : (int list) array)

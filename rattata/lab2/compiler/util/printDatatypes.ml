@@ -27,6 +27,25 @@ let regToString (r : reg) =
       | R14 -> "%r14d" (* callee-saved *)
       | R15 -> "%r15d" (* callee-saved *)
 
+let regToString64 (r : reg) = 
+  match r with
+        EAX -> "%rax"
+      | EBX -> "%rbx" (* callee-saved *)
+      | ECX -> "%rcx"
+      | EDX -> "%rdx"
+      | RBP -> "%rbp" (* callee-saved *)
+      | RSP -> "%rsp" (* callee-saved *)
+      | ESI -> "%rsi" (* callee-saved *) 
+      | EDI -> "%rdi" (* callee-saved *)
+      | R8  -> "%r8"
+      | R9  -> "%r9"
+      | R10 -> "%r10"
+      | R11 -> "%r11"
+      | R12 -> "%r12" (* callee-saved *)
+      | R13 -> "%r13" (* callee-saved *)
+      | R14 -> "%r14" (* callee-saved *)
+      | R15 -> "%r15" (* callee-saved *)
+
 let memAddrToString ((register, offset) : memAddr) = 
     concat "" [string_of_int(offset); "("; regToString(register); ")"]
 
@@ -101,8 +120,8 @@ let assemInstrToString(instr : assemInstr) =
             assemArgToString(src); ", ";
             assemLocToString(dest)]
       | INT_BINOP(intinstr) -> assemIntInstrToString(intinstr)
-      | PUSH(r) -> concat "" ["push "; regToString(r)]
-      | POP(r) -> concat "" ["pop "; regToString(r)]
+      | PUSH(r) -> concat "" ["push "; regToString64(r)]
+      | POP(r) -> concat "" ["pop "; regToString64(r)]
       | RETURN -> "ret"
       | JUMP(jInstr) -> jumpInstrToString(jInstr)
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)

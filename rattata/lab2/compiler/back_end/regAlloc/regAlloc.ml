@@ -6,6 +6,13 @@ open Graph
 
 let spillReg = Reg EDI
 
+let listToString i a = String.concat "" (List.map (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
+
+let pushInstrs regList =
+    List.map (fun r -> PUSH r) regList
+
+let popInstrs = List.map (fun r -> POP r) (List.rev [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15])
+
 let assemLocForColor regArray offsetIncr colorNum =
     if (colorNum < A.length regArray) then Reg(A.get regArray colorNum)
     (* If there are 8 registers but this color is 10 (indexed from 0),
@@ -41,7 +48,7 @@ let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
       | Tmp2AddrBinop(binop, arg, dest) ->
               INT_BINOP(binop, translateTmpArg tbl arg, H.find tbl dest)::[]
       | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::
-                               ADDQ(Const finalOffset, Reg RSP)::RETURN::[]
+                               ADDQ(Const finalOffset, Reg RSP)::[] @ (popInstrs)@ RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
       | Tmp2AddrBoolInstr TmpTest(arg, t) ->
@@ -58,9 +65,9 @@ let rec getTempSet instrList tempSet =
     match instrList
         with [] -> tempSet
       | instr::instrs -> (match instr with
-                              Tmp2AddrMov(src, Tmp dest) -> (let () = H.add tempSet dest () in
+                              Tmp2AddrMov(src, Tmp dest) -> (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
-                            | Tmp2AddrBinop(op, src, Tmp dest) -> (let () = H.add tempSet dest () in
+                            | Tmp2AddrBinop(op, src, Tmp dest) -> (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
                             | _ -> getTempSet instrs tempSet)
 
@@ -68,6 +75,7 @@ let getTempList instrList = let tempSet = getTempSet instrList
                                 (H.create (List.length instrList)) in
                             let addTempToList t () acc = t::acc in
                             H.fold addTempToList tempSet []
+
 
 let regAlloc (instrList : tmp2AddrProg) =
   let regList = [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
@@ -83,9 +91,7 @@ let regAlloc (instrList : tmp2AddrProg) =
   let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
       offsetIncr regArray (H.create 100) in
   let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
-  List.concat [ (* [PUSH(EBX)]; [PUSH(RSP)]; [PUSH(ESI)]; [PUSH(EDI)]; 
-                [PUSH(R12)]; [PUSH(R13)]; [PUSH(R14)]; [PUSH(R15)]; *)
-                [SUBQ(Const finalOffset, Reg RSP)];
+  (pushInstrs regList) @ [SUBQ(Const finalOffset, Reg RSP)] @
                 (List.concat (List.map (translate tmpToAssemLocMap finalOffset) instrList));
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
-                [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *) ]
+                [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *)
