@@ -1,4 +1,3 @@
-(* Billy: I commented everything out so that it would compile *)
 module G = Graph
 module H = Hashtbl
 module L = List
@@ -6,23 +5,24 @@ module A = Array
 module S = Set
 open Datatypesv1
 
-
-(* definitely 100% wrong, need to check datatypes *)
 let findPredecessors (predecessorsArray : (int list) array) 
       (progArray : tmp2AddrInstr array) (lineNum : int) =
   if lineNum = (A.length progArray) then ()
   else (match progArray.(lineNum) with
               Tmp2AddrJumpInstr(j, l) -> 
-                let () = (A.iter 
-                            (fun predecessorList -> 
-                              (match H.find lineToInstrTbl lineNum of
+                let () = (match j with
+                                JMP_UNCOND -> ()
+                              | _ -> predecessorsArray.(lineNum + 1) <- (l :: predecessorsArray.(lineNum + 1))) in
+                let () = (A.iteri
+                            (fun index -> fun instr -> 
+                              (match instr with
                                      Tmp2AddrLabel(l') -> 
                                         if l = l' 
-                                        then predecessorList @ [l] 
-                                        else predecessorList
-                                   | _ -> predecessorList)) predecessorsArray) 
+                                        then predecessorsArray.(index) <- (l :: predecessorsArray.(index)) 
+                                        else ()
+                                   | _ -> () )) progArray) 
                 in findPredecessors predecessorsArray progArray (lineNum + 1)
-            | _ -> let () = predecessorsArray.(lineNum) <- lineNum::predecessorsArray.(lineNum) in
+            | _ -> let () = (predecessorsArray.(lineNum + 1) <- (lineNum :: predecessorsArray.(lineNum + 1))) in
                    findPredecessors predecessorsArray progArray (lineNum + 1))
 
 let drawAllEdges (line : int list) interferenceGraph =
