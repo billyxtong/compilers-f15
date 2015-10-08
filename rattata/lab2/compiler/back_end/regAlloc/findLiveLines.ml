@@ -22,15 +22,31 @@ let isUsed t prog line =
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
        | _ -> false
 
-let rec findLiveLines t prog liveLinesSet currLine succLine =
+let rec findLiveLinesRec t prog predsPerLine liveLinesSet succLine currLine =
     if isLive liveLinesSet currLine then liveLinesSet
         (* If it's already declared live on this line, we're done *)
-    else if isLive
+    else let () =
+       (* Add it to liveLinesSet if it's live, otherwise do nothing. *)
+                (if (isLive liveLinesSet succLine && not (isDef t prog currLine))
+                  || isUsed t prog currLine (* It's live on this line *)
+                then H.add liveLinesSet currLine ()) in
+         let () = (if isDef t prog currLine
+            (* if it's defined on this line it's always live on the next line,
+               I think. This is to deal with temps that are assigned but
+               never used *)
+                   then H.add liveLinesSet succLine ()) in
+          (* Then make the recurisve calls in both cases *)
+          let _ = List.map (findLiveLinesRec t prog predsPerLine
+                              liveLinesSet currLine)
+                 (Array.get predsPerLine currLine) in liveLinesSet
+          
+
 
 let addLineToList line () acc = line::acc
 
-let findLiveLinesForTmp t prog predsPerLine =
-    let startLine = (List.length prog) - 1 in
+let findLiveLines t prog predsPerLine =
+    let startLine = (Array.length prog) - 1 in
     let result = H.create 500 in
-    let liveLinesSet = findLiveLines t prog result startLine startLine
+    let liveLinesSet = findLiveLinesRec t prog predsPerLine
+                       result startLine startLine
     in H.fold addLineToList liveLinesSet []
