@@ -198,6 +198,18 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
             instrs_for_exp1 @ instrs_for_exp2 @
               (make_cond_instrs idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JG JLE )
+       | A.LessThan (int_exp1, int_exp2) -> 
+           (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
+         (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
+            let (instrs_for_exp1, tmp_exp1) =
+               trans_int_exp idToTmpMap int_exp1 in
+            let (instrs_for_exp2, tmp_exp2) =
+               trans_int_exp idToTmpMap int_exp2 in
+            let priorInstr = TmpInfAddrBoolInstr
+                 (TmpInfAddrCmp(tmp_exp2, tmp_exp1)) in
+            instrs_for_exp1 @ instrs_for_exp2 @
+              (make_cond_instrs idToTmpMap priorInstr stmtsForIf
+                 stmtsForElse JL JGE )
        | A.IntEquals (int_exp1, int_exp2) ->
             let (instrs_for_exp1, tmp_exp1) =
                trans_int_exp idToTmpMap int_exp1 in

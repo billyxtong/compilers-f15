@@ -74,6 +74,8 @@ let jumpToString (j : jump) =
       | JE -> "je "
       | JG -> "jg "
       | JLE -> "jle "
+      | JL -> "jl "
+      | JGE -> "jge "
       | JMP_UNCOND -> "jmp "
 
 let labelToString (l : label) = concat "" [".L"; string_of_int(l)]

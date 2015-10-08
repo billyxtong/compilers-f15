@@ -68,7 +68,6 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                                                 untypedPostElabAST * 
                                                 untypedPostElabAST
                          | UntypedPostElabWhile of untypedPostElabExpr * 
-                                                   untypedPostElabAST *
                                                    untypedPostElabAST
                          | UntypedPostElabReturn of untypedPostElabExpr
  and untypedPostElabAST = untypedPostElabStmt list

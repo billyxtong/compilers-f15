@@ -39,6 +39,10 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
                           (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(GreaterThan(exp1, exp2))
                         | _ -> ErrorMsg.error None ("greater than expression didn't typecheck \n");
                                raise ErrorMsg.Error)
+           | LT -> (match (tcExpr1, tcExpr2) with
+                          (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(LessThan(exp1, exp2))
+                        | _ -> ErrorMsg.error None ("greater than expression didn't typecheck \n");
+                               raise ErrorMsg.Error)
            | DOUBLE_EQ -> 
                (match (tcExpr1, tcExpr2) with
                       (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(IntEquals(exp1, exp2))
