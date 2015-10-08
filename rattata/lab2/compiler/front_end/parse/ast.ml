@@ -27,6 +27,7 @@ type intExpr = IntConst of const | IntIdent of ident
              | BaseCaseShift of intExpr * shiftOp * intExpr
  and boolExpr = BoolConst of const | BoolIdent of ident
               | GreaterThan of intExpr * intExpr
+              | LessThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
@@ -67,6 +68,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                                                 untypedPostElabAST * 
                                                 untypedPostElabAST
                          | UntypedPostElabWhile of untypedPostElabExpr * 
+                                                   untypedPostElabAST *
                                                    untypedPostElabAST
                          | UntypedPostElabReturn of untypedPostElabExpr
  and untypedPostElabAST = untypedPostElabStmt list
