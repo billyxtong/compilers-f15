@@ -3,6 +3,7 @@ module H = Hashtbl
 module L = List
 module A = Array
 module S = Set
+module M = Core.Std.Map  
 open Datatypesv1
 
 let listToString i a = String.concat "" (List.map (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
@@ -30,14 +31,18 @@ let isUsed t prog line =
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
        | _ -> false
 
-let rec findLiveLinesRec t prog predsPerLine liveLinesSet succLine currLine =
-    (* let () = (if t =2 then print_string("curr: " ^ string_of_int(currLine) *)
+let seen seenLines line = match M.find seenLines line with None -> false | Some () -> true
+
+let rec findLiveLinesRec t prog seenLines predsPerLine liveLinesSet succLine currLine =
+    (* let () = (if true then print_string("curr: " ^ string_of_int(currLine) *)
     (*                                     ^ " from " ^ string_of_int(succLine) ^"\n")) in *)
     if isDef t prog currLine then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
+    if seen seenLines currLine then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
             (* if it's defined here, we're done. Also, if it's defined on this line it's
                always live on the next line,
                I think. This is to deal with temps that are assigned but
                never used *)
+    let newSeenLines = M.add seenLines currLine () in
     try (let () = H.find liveLinesSet currLine in liveLinesSet)
         (* If we've already declared the var live here, we're done *)
     with Not_found -> 
@@ -51,7 +56,7 @@ let rec findLiveLinesRec t prog predsPerLine liveLinesSet succLine currLine =
                   H.replace liveLinesSet currLine ()) in
           (* Then continue backwards to its predecessors *)
             let _ =
-            List.map (findLiveLinesRec t prog predsPerLine
+            List.map (findLiveLinesRec t prog newSeenLines predsPerLine
                               liveLinesSet currLine)
                  (Array.get predsPerLine currLine) in liveLinesSet
 
@@ -60,8 +65,9 @@ let addLineToList line () acc = line::acc
 let findLiveLines t prog predsPerLine =
     let startLine = (Array.length prog) - 1 in
     let result = H.create 500 in
+    let seenLines = Core.Std.Int.Map.empty in
     (* let () = (if t=2 then print_string(listArrayToString predsPerLine)) in *)
-    let liveLinesSet = findLiveLinesRec t prog predsPerLine
+    let liveLinesSet = findLiveLinesRec t prog seenLines predsPerLine
                        result startLine startLine in
     H.fold addLineToList liveLinesSet []
     (* let () = (if true then print_string(listToString t r) ) in r *)
