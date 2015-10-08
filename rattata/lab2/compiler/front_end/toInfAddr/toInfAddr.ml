@@ -6,6 +6,9 @@ open Core.Std
 (* Pretty much everything here is mutually recursive because of
    ternary operators *)
 
+let retLabel = GenLabel.create()
+let retTmp = Tmp (Temp.create())
+
 let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
             | Some t -> t)
@@ -283,14 +286,19 @@ and trans_stmts idToTmpMap = function
         but I need it for toInfAddr :( *)
         TmpInfAddrJump(JMP_UNCOND, target)::trans_stmts idToTmpMap stmts
    | A.TypedPostElabReturn e :: stmts ->
-     (* Can I assume that nothing after the return in a given
-        subtree matters? That should be fine, right? *)
         let (instrs_for_e, eInfAddr) = trans_int_exp idToTmpMap e in
-        instrs_for_e @ TmpInfAddrReturn (TmpIntExpr eInfAddr) :: []
+        (* Move our value to the ret tmp, then jump to the return *)
+        instrs_for_e @
+        TmpInfAddrMov(TmpIntExpr eInfAddr, retTmp)::
+        TmpInfAddrJump(JMP_UNCOND, retLabel) :: []
 
    | _ -> []
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
 let toInfAddr (ast: A.typedPostElabAST) =
-     let idToTmpMap = String.Map.empty in trans_stmts idToTmpMap ast
+     let idToTmpMap = String.Map.empty in
+     (* We will have a simple return label that all returns jump to *)
+     (trans_stmts idToTmpMap ast @
+      TmpInfAddrLabel retLabel ::
+      TmpInfAddrReturn (TmpIntExpr (TmpIntArg (TmpLoc (retTmp))))::[])

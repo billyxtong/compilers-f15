@@ -1,56 +1,35 @@
-open Hashtbl
+module H = Hashtbl
 open Datatypesv1
 open PrintDatatypes
+module A = Array
+open Graph  
 (* open LivenessAnalysis *)
 
 let spillReg = Reg EDI
 
-let rec putInHashTable (instrList : tmp2AddrProg) (tbl : (tmp, assemLoc) Hashtbl.t) 
-                       (regList : reg list) (offset : int) =
-  match instrList with
-        [] -> offset
-      | Tmp2AddrJump _::prog -> putInHashTable prog tbl [] offset
-      | Tmp2AddrLabel _::prog -> putInHashTable prog tbl [] offset                                   
-      | instr :: prog ->
-        (match regList with
-                                [] -> (match instr with
-                                             Tmp2AddrMov(arg,dest) -> 
-                                               (try (let _ = find tbl dest in
-                                                     putInHashTable prog tbl regList offset)
-                                                with
-                                                    Not_found -> (let () = (add tbl dest (MemAddr(RSP, offset))) in
-                                                                  putInHashTable prog tbl regList (offset + 4)))
-                                           | Tmp2AddrBinop(binop,arg,dest) -> 
-                                               (try (let _ = find tbl dest in
-                                                    putInHashTable prog tbl regList offset)
-                                                with
-                                                    Not_found -> (let () = (add tbl dest (MemAddr(RSP, offset))) in
-                                                                  putInHashTable prog tbl regList (offset + 4)))
-                                           | Tmp2AddrReturn(arg) -> putInHashTable prog tbl regList offset
-                                           (* We only allocate when we write to a temp; test and cmp don't
-                                              write so we can ignore them *)
-                                           | Tmp2AddrBoolInstr _ -> putInHashTable prog tbl regList offset)
-                              | r :: newRegList -> (match instr with
-                                             Tmp2AddrMov(arg,dest) -> 
-                                               (try (let _ = find tbl dest
-                                                     in putInHashTable prog tbl newRegList offset)
-                                                with
-                                                    Not_found -> let () = add tbl dest (Reg r) in
-                                                                 putInHashTable prog tbl newRegList offset)
-                                           | Tmp2AddrBinop(binop,arg,dest) -> 
-                                               (try (let _ = find tbl dest
-                                                     in putInHashTable prog tbl newRegList offset) with
-                                                    Not_found -> let () = add tbl dest (Reg(r)) in
-                                                                 putInHashTable prog tbl newRegList offset)
-                                           | Tmp2AddrReturn(arg) -> putInHashTable prog tbl regList offset
-                                           (* We only allocate when we write to a temp; test and cmp don't
-                                              write so we can ignore them *)
-                                           | Tmp2AddrBoolInstr _ -> putInHashTable prog tbl regList offset)
-        )
-                                 
+let assemLocForColor regArray offsetIncr colorNum =
+    if (colorNum < A.length regArray) then Reg(A.get regArray colorNum)
+    (* If there are 8 registers but this color is 10 (indexed from 0),
+       that means we need there are at least 11 colors, which means we need
+       at least 3 * (size of one tmp) bytes of stack memory. Since the
+       first stack spot is 4(rsp), we add one *)
+    else MemAddr(RSP, (colorNum - (A.length regArray) + 1) * offsetIncr)
+
+(* colorList consists of tuples (t, colorForTmp) where t is the temp number
+   and color is the color of t. We need t in order to add it to the
+   map properly *)
+let rec makeTmpToAssemLocMap tmpToColorMap tmpList offsetIncr regArray resultMap =
+    match tmpList with
+        [] -> resultMap
+      | t::tmps ->
+           let color = H.find tmpToColorMap t in
+           let currAssemLoc = assemLocForColor regArray offsetIncr color in
+           let () = H.add resultMap (Tmp t) currAssemLoc in
+           makeTmpToAssemLocMap tmpToColorMap tmps offsetIncr regArray resultMap
+
 let translateTmpArg tbl = function
     TmpConst c -> Const c
-  | TmpLoc t -> (try AssemLoc (find tbl t)
+  | TmpLoc t -> (try AssemLoc (H.find tbl t)
                  (* The "with" means there's a tmp that is used, but we
                     never assigned an AssemLoc to it because we never
                     wrote to it. This can happen if the variable was never initialized,
@@ -61,26 +40,39 @@ let translateTmpArg tbl = function
                      
 let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
-        Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, find tbl dest)::[]
+        Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, H.find tbl dest)::[]
       | Tmp2AddrBinop(binop, arg, dest) ->
-              INT_BINOP(binop, translateTmpArg tbl arg, find tbl dest)::[]
+              INT_BINOP(binop, translateTmpArg tbl arg, H.find tbl dest)::[]
       | Tmp2AddrReturn(arg) -> MOV(translateTmpArg tbl arg, Reg EAX)::
                                ADDQ(Const finalOffset, Reg RSP)::RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
       | Tmp2AddrBoolInstr TmpTest(arg, t) ->
-              BOOL_INSTR (TEST (translateTmpArg tbl arg, find tbl t))::[]
+              BOOL_INSTR (TEST (translateTmpArg tbl arg, H.find tbl t))::[]
       | Tmp2AddrBoolInstr TmpCmp(arg, t) ->
-              BOOL_INSTR (CMP (translateTmpArg tbl arg, find tbl t))::[]
+              BOOL_INSTR (CMP (translateTmpArg tbl arg, H.find tbl t))::[]
+
+let combineForMaxOffset t loc currMax =
+    match loc with
+        Reg _ -> currMax
+      | MemAddr(_, offset) -> max offset currMax
 
 let regAlloc (instrList : tmp2AddrProg) =
   let regList = [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! *)
-  let tmpToAssemLocTable = create 100 in
-  let finalOffset = putInHashTable instrList tmpToAssemLocTable regList (4) in
+  let regArray = Array.of_list regList in
+  let interferenceGraph = LivenessAnalysis.analyzeLiveness in
+  let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
+  let vertexOrdering = maxCardSearch interferenceGraph startVertex in
+  let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
+  let offsetIncr = 4 in
+  (* we need a list of tmps to go through; just use vertexOrdering *)
+  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
+      offsetIncr regArray (H.create 100) in
+  let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
   List.concat [ (* [PUSH(EBX)]; [PUSH(RSP)]; [PUSH(ESI)]; [PUSH(EDI)]; 
                 [PUSH(R12)]; [PUSH(R13)]; [PUSH(R14)]; [PUSH(R15)]; *)
                 [SUBQ(Const finalOffset, Reg RSP)];
-                (List.concat (List.map (translate tmpToAssemLocTable finalOffset) instrList));
+                (List.concat (List.map (translate tmpToAssemLocMap finalOffset) instrList));
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
                 [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *) ]
