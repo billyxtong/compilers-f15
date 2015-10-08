@@ -96,9 +96,10 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_infAddr dump_assem
     say_if dump_wonky (fun () -> assemProgWonkyToString 
                           wonkyAssem); 
 
+    let lala = CondenseMoves.condenseMoves wonkyAssem in
     (* Format assembly *)
     say_if verbose (fun () -> "Formatting assembly..."); 
-    let finalAssem = FormatAssem.formatAssem wonkyAssem in 
+    let finalAssem = FormatAssem.formatAssem lala in 
     say_if dump_final (fun () -> finalAssem); 
     
     (* Output assembly *)

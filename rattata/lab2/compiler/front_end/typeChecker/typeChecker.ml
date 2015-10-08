@@ -39,6 +39,10 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
                           (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(GreaterThan(exp1, exp2))
                         | _ -> ErrorMsg.error None ("greater than expression didn't typecheck \n");
                                raise ErrorMsg.Error)
+           | LT -> (match (tcExpr1, tcExpr2) with
+                          (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(LessThan(exp1, exp2))
+                        | _ -> ErrorMsg.error None ("greater than expression didn't typecheck \n");
+                               raise ErrorMsg.Error)
            | DOUBLE_EQ -> 
                (match (tcExpr1, tcExpr2) with
                       (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(IntEquals(exp1, exp2))
@@ -117,7 +121,7 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
       (match tcExpr with
              BoolExpr(exp1) ->                
                (* let (_, newenv2, newast2) = tc_statements env untypedInitAst false [] in *)
-               let (_, _, newast1) = tc_statements newenv2 ast1 ret newast2 in
+               let (_, _, newast1) = tc_statements newenv2 ast1 ret [] in
                tc_statements env stms ret (typedAST @ newast2 @ [A.TypedPostElabWhile(exp1, newast1)])
            | _ -> ErrorMsg.error None ("while expression didn't typecheck\n");
                   raise ErrorMsg.Error)

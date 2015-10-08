@@ -4,8 +4,10 @@ open Datatypesv1
 let handleOneInstr (instr: assemInstr) : assemInstr list =
     match instr with
         MOV(AssemLoc(MemAddr memSrc), MemAddr memDest) ->
+        (if memSrc = memDest then [] else
+        
              MOV(AssemLoc (MemAddr memSrc), RegAlloc.spillReg)::
-             MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[]
+             MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest)::[])
       | BOOL_INSTR (TEST (AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
              MOV(AssemLoc (MemAddr memDest), RegAlloc.spillReg)::
              BOOL_INSTR (TEST(AssemLoc (MemAddr memSrc), RegAlloc.spillReg))::
