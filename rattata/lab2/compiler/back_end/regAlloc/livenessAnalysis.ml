@@ -55,7 +55,8 @@ let findLiveLines t prog predsPerLine =
 
 let rec findPredecessors (predecessorsArray : (int list) array) 
       (progArray : tmp2AddrInstr array) (lineNum : int) =
-  if lineNum = (A.length progArray) then ()
+  (* Note the -1 here to avoid index-out-of-range! *)
+  if lineNum = (A.length progArray) - 1 then ()
   else (match A.get progArray lineNum with
               Tmp2AddrJump(j, l) -> 
                 let () = (match j with
