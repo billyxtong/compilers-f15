@@ -1,7 +1,7 @@
 (* Graph Library that will contain basic addEdge, etc, operations,
    as well as color and max-cardinality search. *)
 
-type vertex
+type vertex = int
 type neighbors
 type graph
 
