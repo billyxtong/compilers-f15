@@ -2,39 +2,39 @@
 module G = Graph
 module H = Hashtbl
 module L = List
+module A = Array
+module S = Set
 open Datatypesv1
 
+let isIn S elt =
+  try 
+    S.find elt S -> true
+  with Not_found -> false
 
-(* maps line numbers starting at 0 to each statement in a 2 addr program 
 
-let mapLineNumToInstr (lineNum : int) lineToInstrTbl (prog : tmp2AddrProg) =
-  match prog with
-        [] -> tbl
-      | instr :: prog' ->
-          let () = add tbl lineNum instr in
-          mapLineNumToInstr (lineNum + 1) lineToInstrTbl (prog')
+(* I feel like this doesn't work exactly the way I intended, 
+ * but the intention is clear... we'll debug it later lol *)
+let findPredecessors lineToLinesTbl progArray lineNum =
+  if lineNum = (A.length progArray) 
+  then ()
+  else (match A.get progArray lineNum with
+              Tmp2AddrJumpInstr(j, l) -> 
+                let () = (H.iter 
+                            (fun line -> fun predecessors -> 
+                              (match H.find lineToInstrTbl lineNum of
+                                     Tmp2AddrLabel(l') -> 
+                                        if l = l' 
+                                        then predecessors @ [l] 
+                                        else predecessors
+                                   | _ -> predecessors)) lineToLinesTbl) 
+                in findPredecessors lineToLinesTbl progArray (lineNum + 1)
+            | _ -> let oldPredecessors = H.find lineToLinesTbl lineNum in
+                   H.replace lineToLinesTbl lineNum (oldPredecessors @ [lineNum]))
 
- returns an int -> instr hashtable *)
-
-(* maps line numbers starting at 0 to a list of their predecessor lines *)
-let findPredecessors (lineNum : int) lineToInstrTbl lineToLinesTbl =
-  if lineNum = (length lineToInstrTbl) 
-  then lineToLinesTbl 
-  else (match find lineToInstrTbl lineNum with
-              Tmp2AddrJumpInstr(j, l) -> let () = (iter (fun line -> fun predecessors -> 
-                                            (match find lineToInstrTbl line of
-                                                   Tmp2AddrLabel(l') -> if l = l' then predecessors @ [l] else predecessors
-                                                 | _ -> predecessors @ [l])) lineToLinesTbl) in
-                                         findPredecessors lineNum+1 lineToInstrTbl lineToLinesTbl
-            | _ -> replace lineToLinesTbl )
-        
-(* returns an int -> int list hashtable *)
-
-let predecessors (prog : tmp2AddrProg) =
-  let indexedProg = List.mapi (fun i -> fun instr -> (i, instr)) prog in
-  let predecessorTable = create (List.length indexedProg) in
-  findPredecessors 0 indexProg
-
+let findLiveLines (t : tmp) (curLine : int) (result : int set) (succLine : int) =
+  if isIn result curLine
+  then ()
+  else  
 
 
 
@@ -89,10 +89,10 @@ let rec analyzeLiveness' (L : tmp2AddrProg) (G : graph) (liveTmps : int list) =
  * 3. Pass reversed list to helper function that does all the work
  * 4. Apply max cardinality search and greedy coloring function to return a (tmp, color) hashtable *)
 let analyzeLiveness (L : tmp2AddrProg) =
-  let indexedProg = L.mapi (fun index -> fun instr -> (index, instr)) L in
-  let len = L.length indexedProg in
+  let progArray = A.of_list L
+  let len = A.length progArray in
   let lineToPredecessorsTable = H.create len in
-  let () = addPrecedessors lineToPredecessorsTable indexedProg in
+  let () = addPrecedessors lineToPredecessorsTable progArray 0 in
   let lineToLiveVarsTable = H.create len in
-  let () = addLiveVars lineToLiveVarsTable indexedProg 
+  let () = addLiveVars lineToLiveVarsTable progArray 0
   
