@@ -42,14 +42,15 @@ let addDirectedEdge g (v1, v2) =
         None -> failwith "Just initialized vertex, what?\n"
       | Some neighs -> add neighs v2 ()
 
-let addEdge g (v1, v2) =
-    let _ = addDirectedEdge g (v1, v2) in
-    addDirectedEdge g (v2, v1)
-
 let hasEdge g (v1, v2) =
     match getNeighbors g v1 with
        None -> false
      | Some neighs -> not (find_all neighs v2 = [])
+
+let addEdge g (v1, v2) =
+    if hasEdge g (v1, v2) then () else
+    let _ = addDirectedEdge g (v1, v2) in
+    addDirectedEdge g (v2, v1)
 
 let neighsHaveColor neighs coloring curr_color =
     fold (fun neigh -> fun () -> fun already ->
