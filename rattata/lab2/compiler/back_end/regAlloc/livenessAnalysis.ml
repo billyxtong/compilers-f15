@@ -36,7 +36,7 @@ let seen seenLines line = match M.find seenLines line with None -> false | Some 
 let rec findLiveLinesRec t prog seenLines predsPerLine liveLinesSet succLine currLine =
     (* let () = (if true then print_string("curr: " ^ string_of_int(currLine) *)
     (*                                     ^ " from " ^ string_of_int(succLine) ^"\n")) in *)
-    if isDef t prog currLine then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
+    let () = (if isDef t prog currLine then H.replace liveLinesSet succLine ()) in
     if seen seenLines currLine then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
             (* if it's defined here, we're done. Also, if it's defined on this line it's
                always live on the next line,
@@ -69,8 +69,8 @@ let findLiveLines t prog predsPerLine =
     (* let () = (if t=2 then print_string(listArrayToString predsPerLine)) in *)
     let liveLinesSet = findLiveLinesRec t prog seenLines predsPerLine
                        result startLine startLine in
-    H.fold addLineToList liveLinesSet []
-    (* let () = (if true then print_string(listToString t r) ) in r *)
+    let r = H.fold addLineToList liveLinesSet [] in
+    let () = (if true then print_string(listToString t r) ) in r
 
 
 let rec findPredecessors (predecessorsArray : (int list) array)
