@@ -89,8 +89,9 @@ let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
       | UntypedPostElabIf(expression,postelabast1,postelabast2) -> concat "" ["if("; untypedPostElabExprToString(expression); 
                                                   ") {\n\t"; untypedPostElabASTToString(postelabast1); 
                                                   "} \nelse {\n\t"; untypedPostElabASTToString(postelabast2); "\n}"]
-      | UntypedPostElabWhile(expression,postelabast) -> concat "" ["while("; untypedPostElabExprToString(expression);
-                                                ") {\n\t"; untypedPostElabASTToString(postelabast); "\n}"]
+      | UntypedPostElabWhile(expression,postelabast,init) -> concat "" ["while("; untypedPostElabExprToString(expression);
+                                                ", "; untypedPostElabASTToString(init); ") {\n\t"; 
+                                                      untypedPostElabASTToString(postelabast); "\n}"]
       | UntypedPostElabReturn(i) -> "return " ^ untypedPostElabExprToString(i)
 
 

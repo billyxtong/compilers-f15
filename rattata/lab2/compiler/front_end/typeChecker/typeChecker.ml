@@ -76,8 +76,8 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
       (match M.find env id with
                    Some _ -> (ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");
                               raise ErrorMsg.Error)
-                 | None -> (let newMap = M.add env id (typee, false) 
-                           in tc_statements newMap stms ret (typedAST @ [TypedPostElabDecl(id, typee)])))
+                 | None -> (let newMap = M.add env id (typee, false) in 
+                    tc_statements newMap stms ret (typedAST @ [TypedPostElabDecl(id, typee)])))
   | A.UntypedPostElabAssignStmt(id, e)::stms ->
        (let tcExpr = tc_expression env e in
           (match M.find env id with (* it's declared, good *)
@@ -111,13 +111,14 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
                tc_statements newenv stms newret (typedAST @ [A.TypedPostElabIf(exp1, newast1, newast2)])
            | _ -> ErrorMsg.error None ("if expression didn't typecheck\n");
                   raise ErrorMsg.Error)
-  | A.UntypedPostElabWhile(e, ast1)::stms -> 
-      let tcExpr = tc_expression env e in
+  | A.UntypedPostElabWhile(e, ast1, untypedInitAst)::stms -> 
+      let (_, newenv2, newast2) = tc_statements env untypedInitAst ret [] in
+      let tcExpr = tc_expression newenv2 e in
       (match tcExpr with
-             BoolExpr(exp1) -> 
-               let (_, _, newast1) = tc_statements env ast1 false [] in
-               tc_statements env stms ret
-                (typedAST @ [A.TypedPostElabWhile(exp1, newast1)])
+             BoolExpr(exp1) ->                
+               (* let (_, newenv2, newast2) = tc_statements env untypedInitAst false [] in *)
+               let (_, _, newast1) = tc_statements newenv2 ast1 ret newast2 in
+               tc_statements env stms ret (typedAST @ newast2 @ [A.TypedPostElabWhile(exp1, newast1)])
            | _ -> ErrorMsg.error None ("while expression didn't typecheck\n");
                   raise ErrorMsg.Error)
   | A.UntypedPostElabReturn(e)::stms -> 

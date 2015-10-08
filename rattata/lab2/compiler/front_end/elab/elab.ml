@@ -29,15 +29,21 @@ let elaborateSimpStmt (simpleStatement : simpStmt) =
   match simpleStatement with
         PreElabDecl(p) -> elaboratePreElabDecl(p)
       | SimpAssign(identifier, expression) -> [UntypedPostElabAssignStmt(identifier, elaboratePreElabExpr(expression))]
-      | SimpStmtExpr(p) -> [UntypedPostElabAssignStmt(GenUnusedID.create(), elaboratePreElabExpr(p))] (* fix this *)
+      | SimpStmtExpr(p) -> [UntypedPostElabAssignStmt(GenUnusedID.create(), elaboratePreElabExpr(p))]
+
+let elaborateInitFor(sOpt : simpOpt) =
+  match sOpt with
+        EmptySimp -> ([], [])
+      | HasSimpStmt(sStmt) -> 
+          (match sStmt with
+                 PreElabDecl(p) -> ([], elaborateSimpStmt(sStmt))
+               | SimpAssign(i,e) -> ([UntypedPostElabAssignStmt(i, elaboratePreElabExpr(e))], [])
+               | SimpStmtExpr(p) -> (elaborateSimpStmt(sStmt), []))
 
 let elaborateSimpOpt(sOpt : simpOpt) = 
   match sOpt with
-        EmptySimp -> [] (* problems here? *)
+        EmptySimp -> []
       | HasSimpStmt(stmt) -> elaborateSimpStmt(stmt)
-
-
-
 
 let rec elaborateElseOpt(eOpt : elseOpt) =
   match eOpt with
@@ -50,15 +56,19 @@ and elaboratePreElabStmt (statement : preElabStmt) =
       | Control(c) -> elaborateControl(c)
       | Block(b) -> elaborateBlock(b)
 
-
 and elaborateControl (ctrl : control) : (Ast.untypedPostElabStmt list) =
   match ctrl with
         PreElabIf(pExpr, pStmt, eOpt) -> [UntypedPostElabIf(elaboratePreElabExpr(pExpr), 
                                                             elaboratePreElabStmt(pStmt), 
                                                             elaborateElseOpt(eOpt))]
-      | PreElabWhile(pExpr, pStmt) -> [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), elaboratePreElabStmt(pStmt))]
-      | PreElabFor(sOpt1,pExpr,sOpt2,pStmt) -> elaborateSimpOpt(sOpt1) @ [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), 
-                                                elaboratePreElabStmt(addSimpStmtToPreElabStmt(pStmt,sOpt2)))]
+      | PreElabWhile(pExpr, pStmt) -> [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), 
+                                                            elaboratePreElabStmt(pStmt), 
+                                                            [])]
+      | PreElabFor(sOpt1,pExpr,sOpt2,pStmt) -> 
+          let (outside, inside) = elaborateInitFor(sOpt1) in (outside @        
+          [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), 
+                                elaboratePreElabStmt(addSimpStmtToPreElabStmt(pStmt,sOpt2)),
+                                inside)])
       | PreElabReturn(pExpr) -> [UntypedPostElabReturn(elaboratePreElabExpr(pExpr))]
 
 and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements)
