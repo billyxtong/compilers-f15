@@ -39,8 +39,6 @@ let rec findLiveLinesRec t prog predsPerLine liveLinesSet succLine currLine =
           let _ = List.map (findLiveLinesRec t prog predsPerLine
                               liveLinesSet currLine)
                  (Array.get predsPerLine currLine) in liveLinesSet
-          
-
 
 let addLineToList line () acc = line::acc
 

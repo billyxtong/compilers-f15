@@ -3,7 +3,6 @@ open Datatypesv1
 open PrintDatatypes
 module A = Array
 open Graph  
-(* open LivenessAnalysis *)
 
 let spillReg = Reg EDI
 
@@ -35,8 +34,6 @@ let translateTmpArg tbl = function
                     wrote to it. This can happen if the variable was never initialized,
                          but it was ok because the line was unreachable *)
                  with Not_found -> AssemLoc (MemAddr(RSP, -666)))
-
-
                      
 let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
@@ -57,11 +54,27 @@ let combineForMaxOffset t loc currMax =
         Reg _ -> currMax
       | MemAddr(_, offset) -> max offset currMax
 
+let rec getTempSet instrList tempSet =
+    match instrList
+        with [] -> tempSet
+      | instr::instrs -> (match instr with
+                              Tmp2AddrMov(src, Tmp dest) -> (let () = H.add tempSet dest () in
+                                                             getTempSet instrs tempSet)
+                            | Tmp2AddrBinop(op, src, Tmp dest) -> (let () = H.add tempSet dest () in
+                                                             getTempSet instrs tempSet)
+                            | _ -> getTempSet instrs tempSet)
+
+let getTempList instrList = let tempSet = getTempSet instrList
+                                (H.create (List.length instrList)) in
+                            let addTempToList t () acc = t::acc in
+                            H.fold addTempToList tempSet []
+
 let regAlloc (instrList : tmp2AddrProg) =
   let regList = [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! *)
   let regArray = Array.of_list regList in
-  let interferenceGraph = LivenessAnalysis.analyzeLiveness in
+  let tempList = getTempList instrList in
+  let interferenceGraph = LivenessAnalysis.analyzeLiveness instrList tempList in
   let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
   let vertexOrdering = maxCardSearch interferenceGraph startVertex in
   let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
