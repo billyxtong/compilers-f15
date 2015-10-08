@@ -32,6 +32,19 @@ and condenseMovesRec curr_instrs start = function
    | instr::instrs -> (* anything else breaks the chain *)
          curr_instrs @ [instr] @ condenseMovesRec [] None instrs
 
-(* curr_instrs is the current run of moves we're on *)
-let condenseMoves instrs = condenseMovesRec [] None instrs
+(* (\* curr_instrs is the current run of moves we're on *\) *)
+(* let condenseMoves instrs = condenseMovesRec [] None instrs *)
 
+open PrintDatatypes
+
+let rec condenseMoves = function
+     [] -> []
+   | instr::[] -> instr::[]
+   | instr1::instr2::instrs ->
+        match (instr1, instr2) with
+             (AssemInstr (MOV (src1, dest1)),
+              AssemInstr (MOV (src2, dest2))) ->
+     if ((AssemLoc dest1) = src2) && ((AssemLoc dest2) = src1)
+     then instr1 :: condenseMoves instrs
+                   else instr1 :: condenseMoves(instr2::instrs)
+           | _ -> instr1 :: condenseMoves(instr2::instrs)
