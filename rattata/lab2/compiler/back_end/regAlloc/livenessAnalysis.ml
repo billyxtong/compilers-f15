@@ -34,21 +34,23 @@ let rec findLiveLinesRec t prog predsPerLine liveLinesSet succLine currLine =
     (* let () = (if t =2 then print_string("curr: " ^ string_of_int(currLine) *)
     (*                                     ^ " from " ^ string_of_int(succLine) ^"\n")) in *)
     if isDef t prog currLine then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
+            (* if it's defined here, we're done. Also, if it's defined on this line it's
+               always live on the next line,
+               I think. This is to deal with temps that are assigned but
+               never used *)
     try (let () = H.find liveLinesSet currLine in liveLinesSet)
         (* If we've already declared the var live here, we're done *)
-    with Not_found -> let () = H.add liveLinesSet currLine () in
+    with Not_found -> 
        (* Add it to liveLinesSet if it's live, otherwise do nothing. *)
          let () =
                 (if (isLive liveLinesSet succLine && not (isDef t prog currLine))
                   || isUsed t prog currLine (* It's live on this line *)
-                then H.replace liveLinesSet currLine ()) in
-         let () = (if isDef t prog currLine
-            (* if it's defined on this line it's always live on the next line,
-               I think. This is to deal with temps that are assigned but
-               never used *)
-                   then H.replace liveLinesSet succLine ()) in
-          (* Then make the recurisve calls in both cases *)
- let _ =
+                then
+                  (* let () = (if t=2 then print_string("live!\n")) in *)
+                  (* let () = (if t= 2 && (isLive liveLinesSet succLine) then print_string("used!\n")) in *)
+                  H.replace liveLinesSet currLine ()) in
+          (* Then continue backwards to its predecessors *)
+            let _ =
             List.map (findLiveLinesRec t prog predsPerLine
                               liveLinesSet currLine)
                  (Array.get predsPerLine currLine) in liveLinesSet
@@ -58,11 +60,11 @@ let addLineToList line () acc = line::acc
 let findLiveLines t prog predsPerLine =
     let startLine = (Array.length prog) - 1 in
     let result = H.create 500 in
-    (* let () = print_string(listArrayToString predsPerLine) in *)
+    (* let () = (if t=2 then print_string(listArrayToString predsPerLine)) in *)
     let liveLinesSet = findLiveLinesRec t prog predsPerLine
                        result startLine startLine in
     H.fold addLineToList liveLinesSet []
-    (* let () = (if t=2 then print_string(listToString t r) ) in r *)
+    (* let () = (if true then print_string(listToString t r) ) in r *)
 
 
 let rec findPredecessors (predecessorsArray : (int list) array)
