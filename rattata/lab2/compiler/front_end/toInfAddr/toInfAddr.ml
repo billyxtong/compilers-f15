@@ -184,12 +184,11 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
                                                 stmtsForElse)] in
             trans_cond idToTmpMap (bool_exp1, innerIfAst,
                                  stmtsForElse) 
-       | A.BoolConst c -> let priorInstr = TmpInfAddrBoolInstr
-                 (TmpInfAddrTest (TmpBoolArg (TmpConst c),
-                                  TmpBoolArg (TmpConst 1))) in
-                   make_cond_instrs idToTmpMap priorInstr stmtsForIf
-                      stmtsForElse JNE JE
-                 (* check to make sure you don't mix up je and jne *)
+              (* ONLY THE INNER ONE JUMPS TO TOP FIX THISSSSSSSSSSSSSS *)
+       | A.BoolConst c -> (match c with
+                              1 -> trans_stmts idToTmpMap stmtsForIf
+                            | 0 -> trans_stmts idToTmpMap stmtsForElse
+                            | _ -> assert(false))
        | A.GreaterThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)

@@ -6,12 +6,13 @@ open Graph
 
 let spillReg = Reg EDI
 
+let pushPopList = [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15; ECX; EDI]
+
 let listToString i a = String.concat "" (List.map (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
 
-let pushInstrs regList =
-    List.map (fun r -> PUSH r) regList
+let pushInstrs = List.map (fun r -> PUSH r) pushPopList
 
-let popInstrs = List.map (fun r -> POP r) (List.rev [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15])
+let popInstrs = List.map (fun r -> POP r) (List.rev pushPopList)
 
 let assemLocForColor regArray offsetIncr colorNum =
     if (colorNum < A.length regArray) then Reg(A.get regArray colorNum)
@@ -91,7 +92,7 @@ let regAlloc (instrList : tmp2AddrProg) =
   let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
       offsetIncr regArray (H.create 100) in
   let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
-  (pushInstrs regList) @ [SUBQ(Const finalOffset, Reg RSP)] @
+  (pushInstrs) @ [SUBQ(Const finalOffset, Reg RSP)] @
                 (List.concat (List.map (translate tmpToAssemLocMap finalOffset) instrList));
                 (* [POP(EBX)]; [POP(RSP)]; [POP(ESI)]; [POP(EDI)]; 
                 [POP(R12)]; [POP(R13)]; [POP(R14)]; [POP(R15)]; *)
