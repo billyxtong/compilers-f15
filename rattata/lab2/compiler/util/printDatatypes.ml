@@ -74,7 +74,7 @@ let intBinopToString (op: intBinop) =
 
 let boolInstrToString (instr : boolInstr) =
   match instr with
-        TEST(arg1, arg2) -> concat "" ["test "; assemArgToString(arg1); ", "; 
+        TEST(arg1, arg2) -> concat "" ["testl "; assemArgToString(arg1); ", "; 
                                                 assemLocToString(arg2)]
       | CMP(arg1, arg2) -> concat "" ["cmpl "; assemArgToString(arg1); ", "; 
                                                assemLocToString(arg2)]
