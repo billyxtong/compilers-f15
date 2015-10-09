@@ -1,9 +1,6 @@
-(* L1 Compiler
+(* L2 Compiler
  * Parse State System
- * Author: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
- * Annotations: Alex Vaynberg <alv@andrew.cmu.edu>
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
+ * Authors: Ben Plaut, William Tong
  *
  * This tracks filename and newline characters
  * so character positions in lexer tokens

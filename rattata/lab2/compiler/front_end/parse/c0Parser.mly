@@ -1,16 +1,7 @@
 %{
-(* L1 Compiler
- * L1 grammar
- * Author: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- *
- * Modified: Anand Subramanian <asubrama@andrew.cmu.edu> Fall 2010
- * Now conforms to the L1 fragment of C0
- *
- * Modified: Maxime Serrano <mserrano@andrew.cmu.edu> Fall 2014
- * Should be more up-to-date with 2014 spec
- *
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
+(* L2 Compiler
+ * L2 grammar
+ * Authors: Ben Plaut, William Tong
  *)
 
 open Core.Std

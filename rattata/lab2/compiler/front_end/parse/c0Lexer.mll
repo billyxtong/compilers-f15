@@ -1,18 +1,9 @@
 {
-(* L1 Compiler
+(* L2 Compiler
  * Lexer
- * Author: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- *
- * Modified: Anand Subramanian <asubrama@andrew.cmu.edu> Fall 2010
- * Lexes forward compatible fragment of C0
- *
- * Modified: Maxime Serrano <mserrano@andrew.cmu.edu> Fall 2014
- * Updated to match 2014 spec
- *
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
- *
- * Update this file to lex the necessary keywords and other tokens
+ * Authors: Ben Plaut and William Tong
+ * 
+ * Lexes the necessary keywords and other tokens
  * in order to make the grammar forward compatible with C0.
  *)
 
