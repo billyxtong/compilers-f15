@@ -1,0 +1,10 @@
+//test return 9
+
+void blooblah (int x) {
+     if (x > 5) {
+        return;
+
+int main () {
+    blooblah(5);
+    return 9;
+}    
