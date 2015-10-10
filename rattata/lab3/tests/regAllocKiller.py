@@ -1,6 +1,6 @@
 header = "//test return 666\n//Where is your god now?\n\n"
-num = 5000
-args1 = ['int bloo' + str(i) for i in xrange(num)]
+num = 666
+args1 = ['int bloo' + str(i+1) for i in xrange(num)]
 args1str = ", ".join(args1)
 args2 = ['int blah' + str(i) for i in xrange(num)]
 args2str = ", ".join(args2)
@@ -17,14 +17,15 @@ argsForBlah = ", ".join(argsForBlah)
 
 bloodef = 'int blooblah ' + args1 + " {\n\t"
 bloobody = "".join(['\t666;\n' for i in xrange(666)])
-bloobody += 'return bloo666;\n}'
+bloobody += "\t" + " + ". join(['bloo' + str(i+1) for i in xrange(num)])+ ";\n"
+bloobody += '\treturn 666;\n}'
 # bloobody = 'if (bloo0 == 0) return bloo0; else return blahbloo(' +argsForBloo + ");\n}\n\n" 
 blahdef = 'int blahbloo ' + args2 + " {\n\t"
 blahbody = 'if (blah0 == 0) return blah0; else return blooblah(' +argsForBlah + ");\n}\n\n"
 
 decl1 = "int blooblah" + args1 + ";\n"
 decl2 = "int blahbloo" + args2 + ";\n\n"
-with open("tests/test.l3", 'w') as f:
+with open("test.l3", 'w') as f:
     f.write(header)
     f.write(decl1)
     f.write(main)
