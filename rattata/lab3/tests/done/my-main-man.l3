@@ -1,0 +1,7 @@
+//test infloop
+//my main man
+
+int main () {
+    main();
+    return 0;
+    }
