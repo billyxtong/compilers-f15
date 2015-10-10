@@ -1,0 +1,12 @@
+//test abort
+
+void born_to_die (int x, bool y);
+
+int main () {
+    born_to_die(5, true);
+    return 0;
+    }
+
+void born_to_die (int x, bool y) {
+    assert(false);
+    }

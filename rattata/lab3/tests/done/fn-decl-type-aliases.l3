@@ -1,0 +1,11 @@
+//test return 0
+
+typedef int rob;
+typedef int prof_simmons;
+
+rob is_a_good_teacher ();
+prof_simmons is_a_good_teacher();
+
+int main () {
+    return 0;
+    }

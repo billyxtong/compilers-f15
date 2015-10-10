@@ -1,0 +1,8 @@
+//test error
+//fpt already defined in 15411-l3.h0
+
+typedef int fpt;
+
+int main () {
+   return 0;
+}   

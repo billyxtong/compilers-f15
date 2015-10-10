@@ -1,0 +1,14 @@
+//test return 149
+
+typedef int lala;
+
+lala blooblah(int x0, int x1, bool x2, lala x3);
+int blooblah(int y0, lala y1, bool y2, int y3);
+
+int main () {
+    return blooblah(0, 0, false, 0);
+    }
+
+lala blooblah(lala z0, int z1, bool z2, int z3) {
+   return 149;
+   }

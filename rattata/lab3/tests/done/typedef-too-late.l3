@@ -1,0 +1,8 @@
+//test error
+
+int main () {
+    too_late oh_well = true;
+    return 0;
+}    
+
+typedef bool too_late;

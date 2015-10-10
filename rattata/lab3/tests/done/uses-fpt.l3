@@ -1,0 +1,9 @@
+//test return 134
+
+fpt blooblah (int x) {
+    return x + 1;
+    }
+
+int main () {
+    return bloblah(43);
+}

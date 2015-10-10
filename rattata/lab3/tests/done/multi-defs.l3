@@ -1,0 +1,15 @@
+//test error
+
+typedef int other_int;
+
+int blooblah() {
+    return 0;
+    }
+
+other_int blooblah() {
+    return 0;
+}
+
+int main () {
+   return 0;
+   }

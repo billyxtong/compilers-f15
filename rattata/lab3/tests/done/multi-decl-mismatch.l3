@@ -1,0 +1,8 @@
+//test error
+
+int lala(int x, bool y);
+int lala(bool y, int x);
+
+int main () {
+    return 0;
+    }

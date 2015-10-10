@@ -1,0 +1,11 @@
+//test return 154
+
+typedef int blooblah;
+typedef blooblah blahbloo;
+
+int main () {
+    blooblah x = 0;
+    int y = x + 100;
+    blahbloo z = y + 54;
+    return z;
+}    

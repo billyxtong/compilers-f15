@@ -1,0 +1,6 @@
+//test error
+//the header file contains a definition
+
+int main () {
+   return 0;
+}
