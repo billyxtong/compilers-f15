@@ -6,7 +6,8 @@ module S = Set
 module M = Core.Std.Map  
 open Datatypesv1
 
-let listToString i a = String.concat "" (List.map (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
+let listToString i a = String.concat "" (List.map
+            (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
 
 let listArrayToString a = String.concat "" (Array.to_list(Array.mapi listToString a))
 
@@ -31,12 +32,16 @@ let isUsed t prog line =
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
        | _ -> false
 
-let seen seenLinesOnThisCall line = match M.find seenLinesOnThisCall line with None -> false | Some () -> true
+let seen seenLinesOnThisCall line = match M.find seenLinesOnThisCall line with
+            None -> false
+          | Some () -> true
 
-let rec findLiveLinesRec t prog seenLinesOnThisCall predsPerLine liveLinesSet seenLinesOverall succLine currLine =
-    let () = Array.set seenLinesOverall currLine true in
+let rec findLiveLinesForTmpRec t prog seenLinesOnThisCall predsPerLine liveLinesSet
+    seenLinesOverall succLine currLine =
+    let () = seenLinesOverall.(currLine) <- true in
     let () = (if isDef t prog currLine then H.replace liveLinesSet succLine ()) in
-    if seen seenLinesOnThisCall currLine then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
+    if seen seenLinesOnThisCall currLine
+    then (let () = H.replace liveLinesSet succLine () in liveLinesSet) else
             (* if it's defined here, we're done. Also, if it's defined on this line it's
                always live on the next line,
                I think. This is to deal with temps that are assigned but
@@ -50,12 +55,10 @@ let rec findLiveLinesRec t prog seenLinesOnThisCall predsPerLine liveLinesSet se
                 (if (isLive liveLinesSet succLine && not (isDef t prog currLine))
                   || isUsed t prog currLine (* It's live on this line *)
                 then
-                  (* let () = (if t=2 then print_string("live!\n")) in *)
-                  (* let () = (if t= 2 && (isLive liveLinesSet succLine) then print_string("used!\n")) in *)
                   H.replace liveLinesSet currLine ()) in
           (* Then continue backwards to its predecessors *)
             let _ =
-            List.map (findLiveLinesRec t prog newSeenLines predsPerLine
+            List.map (findLiveLinesForTmpRec t prog newSeenLines predsPerLine
                               liveLinesSet seenLinesOverall currLine)
                  (Array.get predsPerLine currLine) in liveLinesSet
 
@@ -64,22 +67,24 @@ let addLineToList line () acc = line::acc
 let allLinesTouched touchedLines = Array.fold_left
       (fun touch1 -> fun touch2 -> touch1 && touch2) true touchedLines
 
-let rec findLiveLinesButCheckThatEveryLineIsTouched t prog predsPerLine result startLine seenLinesOverall =
+let rec findLiveLinesForTmpButCheckThatEveryLineIsTouched t prog predsPerLine result
+    startLine seenLinesOverall =
     let seenLinesOnThisCall = Core.Std.Int.Map.empty in
     (* let () = print_string("line: " ^ string_of_int(startLine) ^ "\n") in *)
-    let liveLinesSet = findLiveLinesRec t prog seenLinesOnThisCall predsPerLine
+    let liveLinesSet = findLiveLinesForTmpRec t prog seenLinesOnThisCall predsPerLine
                        result seenLinesOverall startLine startLine  in
     if allLinesTouched seenLinesOverall then liveLinesSet
-    else findLiveLinesButCheckThatEveryLineIsTouched t prog predsPerLine result (startLine - 1)
+    else findLiveLinesForTmpButCheckThatEveryLineIsTouched t prog predsPerLine
+        result (startLine - 1)
         seenLinesOverall
     
     
 
-let findLiveLines t prog predsPerLine =
+let findLiveLinesForTmp t prog predsPerLine =
     let startLine = (Array.length prog) - 1 in
     let result = H.create 500 in
     let seenLinesOverall = Array.make (Array.length prog) false in
-    let liveLinesSet = findLiveLinesButCheckThatEveryLineIsTouched
+    let liveLinesSet = findLiveLinesForTmpButCheckThatEveryLineIsTouched
         t prog predsPerLine result startLine seenLinesOverall in
     (* let () = (if t=2 then print_string(listArrayToString predsPerLine)) in *)
     H.fold addLineToList liveLinesSet []
@@ -91,45 +96,46 @@ let rec findPredecessors (predecessorsArray : (int list) array)
   (* Note the -1 here to avoid index-out-of-range! *)
   if lineNum = (A.length progArray) - 1 then ()
   else (match A.get progArray lineNum with
-              Tmp2AddrJump(j, l) -> 
+              Tmp2AddrJump(j, l) ->
+      (* Billy please comment this *)
                 (let () = (match j with
-                                JMP_UNCOND -> ()
-                              | _ -> (A.set predecessorsArray (lineNum + 1) (lineNum ::
-                                                                           (A.get predecessorsArray (lineNum + 1))))) in
+                           JMP_UNCOND -> ()
+                         | _ -> (predecessorsArray.(lineNum + 1) <-
+                          (lineNum :: predecessorsArray.(lineNum + 1)))) in
                 let () = (A.iteri
                             (fun index -> fun instr -> 
                               (match instr with
                                      Tmp2AddrLabel(l') -> 
                                         if l = l'
-                                           (* why is this index + 1?? *)
-                                        then predecessorsArray.(index) <- (lineNum :: predecessorsArray.(index)) 
+                                        then predecessorsArray.(index) <-
+                                            (lineNum :: predecessorsArray.(index)) 
                                         else ()
                                    | _ -> () )) progArray)
                 in findPredecessors predecessorsArray progArray (lineNum + 1))
-            | _ -> let () = (A.set predecessorsArray (lineNum + 1) (lineNum ::
-                                                             (A.get predecessorsArray (lineNum + 1)))) in
+            | _ -> let () = predecessorsArray.(lineNum + 1) <-
+                          (lineNum :: predecessorsArray.(lineNum + 1)) in
                    findPredecessors predecessorsArray progArray (lineNum + 1))
 
 let rec drawAllEdges (line : int list) interferenceGraph =
   match line with
         [] -> ()
-      | temp :: line' -> (let () = L.iter (fun t -> G.addEdge interferenceGraph (temp, t)) line' in
+      | temp :: line' -> (let () = L.iter
+           (fun t -> G.addEdge interferenceGraph (temp, t)) line' in
                           drawAllEdges line' interferenceGraph)
 
 let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
     let () = G.initVertex interferenceGraph t in
-    let liveLinesForT = findLiveLines t prog predsPerLine in
-    let () = L.iter (fun line -> (A.set liveTmpsPerLine line (t::A.get liveTmpsPerLine line))) liveLinesForT
+    let liveLinesForT = findLiveLinesForTmp t prog predsPerLine in
+    let () = L.iter (fun line -> (liveTmpsPerLine.(line) <-
+                                (t:: liveTmpsPerLine.(line)))) liveLinesForT
         in ()
     
 
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
-  let () = L.iter (fun t -> handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine) temps in
-  (* let () = L.iter (fun t -> (let () = G.initVertex interferenceGraph t in *)
-  (*                            let liveLines = findLiveLines t prog predsPerLine in *)
-  (*                            L.iter (fun l -> (A.set liveTmpsPerLine l (t::liveTmpsPerLine.(l))) liveLines) temps in *)
+  let () = L.iter (fun t -> handleTemp t prog predsPerLine
+                      interferenceGraph liveTmpsPerLine) temps in
   let () = A.iter (fun line -> drawAllEdges line interferenceGraph) liveTmpsPerLine in
   interferenceGraph
 
