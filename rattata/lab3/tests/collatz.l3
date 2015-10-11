@@ -1,5 +1,6 @@
 //test return 25
 //returns number of collatz steps to reach 1
+//I promise I wrote this before I looked at the written hw :P
 
 int collatz(int n) {
     if (n == 1) return 0;

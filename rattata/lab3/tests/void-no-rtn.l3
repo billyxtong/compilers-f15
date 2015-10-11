@@ -3,6 +3,8 @@
 void blooblah (int x) {
      if (x > 5) {
         return;
+	}
+}	
 
 int main () {
     blooblah(5);

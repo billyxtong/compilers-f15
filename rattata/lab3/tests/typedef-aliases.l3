@@ -1,13 +1,13 @@
-//test return
+//test return 57
 
 typedef int stinky;
 typedef int pleasant;
 typedef int pooping_is_a_normal;
 
 int main () {
-    stinky poop = -1;
-    pleasant defecation = 1;
+    stinky poop = 45;
+    pleasant defecation = 12;
     pooping_is_a_normal body_process = poop + defecation;
     int result = body_process;
-    return result;
+    return 57;
 }

@@ -1,0 +1,8 @@
+//test error
+//can't use x as a variable nams anymore
+
+typedef int x;
+
+int main () {
+    int x = 4;
+}    
