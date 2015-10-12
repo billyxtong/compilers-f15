@@ -50,7 +50,7 @@ let elaborateSimpOpt(sOpt : simpOpt) =
 let rec elaborateElseOpt(eOpt : elseOpt) =
   match eOpt with
         EmptyElse -> []
-      | PreElabElse(pStmt) -> let () = print_string("no!\n") in elaboratePreElabStmt(pStmt)
+      | PreElabElse(pStmt) -> elaboratePreElabStmt(pStmt)
 
 and elaboratePreElabStmt (statement : preElabStmt) =
   match statement with
