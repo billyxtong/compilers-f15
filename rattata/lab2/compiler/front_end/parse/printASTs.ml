@@ -10,6 +10,7 @@ let generalBinopToString(op : generalBinop) =
         IntBinop(i) -> intBinopToString(i)
       | DOUBLE_EQ -> " == "
       | GT -> " > "
+      | LT -> " < "
       | LOG_AND -> " && "
 
 let rec preElabExprToString(preelabexpr : preElabExpr) =
