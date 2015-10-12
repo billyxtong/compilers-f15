@@ -66,7 +66,10 @@ let rec expand_log_binop e1 op e2 =
 %token <string> IDENT
 %token RETURN
 %token INT
+%token TYPEDEF       
+/* don't think main should be a token separate from ident anymore       
 %token MAIN
+       */
 %token PLUS MINUS STAR SLASH PERCENT
 %token ASSIGN PLUSEQ MINUSEQ STAREQ SLASHEQ PERCENTEQ
 %token LBRACE RBRACE
@@ -109,9 +112,24 @@ let rec expand_log_binop e1 op e2 =
 %%
 
 program :
-  INT MAIN LPAREN RPAREN block EOF { $5 }
+  /* empty */                  { [] }
+  | gdecl program              { $1 :: $2 }				 
   ;
 
+gdecl :
+    fdecl                      { $1 }
+  | fdefn                      { $1 }
+  | typedef                    { $1 }
+
+fdecl :
+    c0type IDENT paramlist     { A.FunDecl ($1, $2, $3 }
+
+fdefn :
+    c0type IDENT paramlist block { A.FunDef ($1, $2, $3, $4) }
+
+typedef :
+    TYPEDEF c0type IDENT         { A.Typdef ($1, $2) }
+					   
 block :
   LBRACE stmts RBRACE            { $2 }
     

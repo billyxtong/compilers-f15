@@ -124,10 +124,12 @@ rule initial =
   | "else"        { P.ELSE }
   | "while"       { P.WHILE }
   | "for"         { P.FOR }
+
+  | "typedef"     { P.TYPEDEF }
+
   | "break"       { assert false }
 
   | "struct"      { assert false }
-  | "typedef"     { assert false }
   | "continue"    { assert false }
   | "assert"      { assert false }
   | "NULL"        { assert false }
@@ -139,7 +141,10 @@ rule initial =
 
   | "return"    { P.RETURN }
   | "int"       { P.INT }
+
+/* don't think main should be a separate token anymore
   | "main"      { P.MAIN }
+  */
 
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }
