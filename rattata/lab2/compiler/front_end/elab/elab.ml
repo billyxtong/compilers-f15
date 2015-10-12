@@ -1,5 +1,7 @@
 open Ast
 
+
+let count = ref 1
 let rec elaboratePreElabExpr(expression : preElabExpr) =
   match expression with
         PreElabConstExpr(constant, typee) -> UntypedPostElabConstExpr(constant, typee)
@@ -51,6 +53,9 @@ let rec elaborateElseOpt(eOpt : elseOpt) =
       | PreElabElse(pStmt) -> elaboratePreElabStmt(pStmt)
 
 and elaboratePreElabStmt (statement : preElabStmt) =
+  let () = print_string("count = " ^ string_of_int(!count) ^ "\n") in
+  let () = count:= !count + 1 in
+  
   match statement with
         SimpStmt(s) -> elaborateSimpStmt(s)
       | Control(c) -> elaborateControl(c)
