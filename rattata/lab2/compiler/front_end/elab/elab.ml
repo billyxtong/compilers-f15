@@ -65,10 +65,10 @@ and elaborateControl (ctrl : control) : (Ast.untypedPostElabStmt list) =
                                                             elaboratePreElabStmt(pStmt), 
                                                             [])]
       | PreElabFor(sOpt1,pExpr,sOpt2,pStmt) -> 
-          let (outside, inside) = elaborateInitFor(sOpt1) in (outside @        
-          [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), 
-                                elaboratePreElabStmt(addSimpStmtToPreElabStmt(pStmt,sOpt2)),
-                                inside)])
+          let (outside, inside) = elaborateInitFor(sOpt1) in 
+          (outside @ [UntypedPostElabWhile(elaboratePreElabExpr(pExpr), 
+                                           elaboratePreElabStmt(addSimpStmtToPreElabStmt(pStmt,sOpt2)),
+                                           inside)])
       | PreElabReturn(pExpr) -> [UntypedPostElabReturn(elaboratePreElabExpr(pExpr))]
 
 and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements)

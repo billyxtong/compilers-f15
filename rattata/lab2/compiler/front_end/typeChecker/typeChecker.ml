@@ -81,7 +81,7 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
                    Some _ -> (ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");
                               raise ErrorMsg.Error)
                  | None -> (let newMap = M.add env id (typee, false) in 
-                    tc_statements newMap stms ret (typedAST @ [TypedPostElabDecl(id, typee)])))
+                    tc_statements newMap stms ret ((TypedPostElabDecl(id, typee)) :: typedAST)))
   | A.UntypedPostElabAssignStmt(id, e)::stms ->
        (let tcExpr = tc_expression env e in
           (match M.find env id with (* it's declared, good *)
@@ -89,15 +89,15 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
                    (match (tcExpr, typee) with
                           (IntExpr(_), INT) -> 
                             let newMap = M.add env id (typee, true) in  
-                            tc_statements newMap stms ret (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)])
+                            tc_statements newMap stms ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedAST)
                         | (BoolExpr(_), BOOL) -> 
                             let newMap = M.add env id (typee, true) in              
-                            tc_statements newMap stms ret (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)])
+                            tc_statements newMap stms ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedAST)
                         | _ -> (ErrorMsg.error None ("assignment expression didn't typecheck \n");
                                raise ErrorMsg.Error))
                | None -> (if ((isValidVarDecl id))
                           then (let newMap = M.add env id (INT, true) in              
-                                tc_statements newMap stms ret (typedAST @ [TypedPostElabAssignStmt(id, tcExpr)]))
+                                tc_statements newMap stms ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedAST))
                           else (ErrorMsg.error None ("undeclared test variable " ^ id ^ "\n");
                                 raise ErrorMsg.Error))))
   | A.UntypedPostElabIf(e, ast1, ast2)::stms -> 
@@ -112,7 +112,7 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
                                                     (Some (typee1, isInit1), Some (typee2, isInit2)) -> 
                                                                 (typee1, isInit1 && isInit2)
                                                   | (_, _) -> value))) in
-               tc_statements newenv stms newret (typedAST @ [A.TypedPostElabIf(exp1, newast1, newast2)])
+               tc_statements newenv stms newret ((TypedPostElabIf(exp1, List.rev newast1, List.rev newast2)) :: typedAST)
            | _ -> ErrorMsg.error None ("if expression didn't typecheck\n");
                   raise ErrorMsg.Error)
   | A.UntypedPostElabWhile(e, ast1, untypedInitAst)::stms -> 
@@ -122,7 +122,7 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
              BoolExpr(exp1) ->                
                (* let (_, newenv2, newast2) = tc_statements env untypedInitAst false [] in *)
                let (_, _, newast1) = tc_statements newenv2 ast1 ret [] in
-               tc_statements env stms ret (typedAST @ newast2 @ [A.TypedPostElabWhile(exp1, newast1)])
+               tc_statements env stms ret ((TypedPostElabWhile(exp1, List.rev newast1)) :: (newast2 @ typedAST))
            | _ -> ErrorMsg.error None ("while expression didn't typecheck\n");
                   raise ErrorMsg.Error)
   | A.UntypedPostElabReturn(e)::stms -> 
@@ -132,7 +132,7 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
          after don't *)
       let newMap = M.map env (fun (typee, _) -> (typee, true)) in
       (match tcExpr with
-             IntExpr(exp1) -> tc_statements newMap stms true (typedAST @ [A.TypedPostElabReturn(exp1)])
+             IntExpr(exp1) -> tc_statements newMap stms true ((TypedPostElabReturn(exp1)) :: typedAST)
            | _ -> ErrorMsg.error None ("return expression didn't typecheck\n");
                   raise ErrorMsg.Error)
              (* there was something else here related to the previous comment that I don't quite understand *)
@@ -140,4 +140,4 @@ let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedA
 and typecheck prog =
   let environment = Core.Std.String.Map.empty in
   let (ret, finalenv, typedast) = tc_statements environment prog false [] in
-  if ret then typedast else (ErrorMsg.error None "main does not return\n"; raise ErrorMsg.Error)
+  if ret then (List.rev typedast) else (ErrorMsg.error None "main does not return\n"; raise ErrorMsg.Error)
