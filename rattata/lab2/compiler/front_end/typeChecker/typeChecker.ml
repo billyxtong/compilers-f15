@@ -76,6 +76,17 @@ let rec tc_expression env (expression : A.untypedPostElabExpr) =
 let rec tc_statements env (untypedAST : untypedPostElabAST) (ret : bool) (typedAST : typedPostElabAST) =
   match untypedAST with
     [] -> (ret, env, typedAST)
+  | A.UntypedPostElabBlock(blockStmts)::stmts ->
+      let (blockRet, blockEnv, blockAst) = tc_statements env blockStmts ret [] in
+      let newRet = ret || blockRet in
+      (* We have returned if we return otherwise, or if the block returns *)
+      (* Declarations from the block don't count, but initializations do,
+         similar to if/else *)
+      let newenv = M.mapi env (fun ~key:id -> (fun ~data:value ->
+            (match M.find blockEnv id with
+                Some (typee, isInit) -> (typee, isInit)
+              | None -> assert(false) (* everything in env should be in blockEnv *)))) in
+      tc_statements newenv stmts newRet (blockAst @ typedAST)
   | A.UntypedPostElabDecl(id, typee)::stms ->
       (match M.find env id with
                    Some _ -> (ErrorMsg.error None ("redeclared variable " ^ id ^ "\n");

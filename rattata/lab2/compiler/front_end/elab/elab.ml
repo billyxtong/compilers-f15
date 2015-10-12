@@ -1,7 +1,5 @@
 open Ast
 
-
-let count = ref 1
 let rec elaboratePreElabExpr(expression : preElabExpr) =
   match expression with
         PreElabConstExpr(constant, typee) -> UntypedPostElabConstExpr(constant, typee)
@@ -24,7 +22,9 @@ let elaboratePreElabDecl(decl : preElabDecl) =
 let addSimpStmtToPreElabStmt(pStmt,sStmt) = 
   match (sStmt, pStmt) with
         (EmptySimp, _) -> pStmt
-      | (HasSimpStmt(s), Block(b)) -> Block(List.append b [SimpStmt(s)])
+    (* When you add a simpStmt to the end of a block, the block statements need
+       to be a separate inner block so that they have their own scope *)
+      | (HasSimpStmt(s), Block(b)) -> Block(Block b::SimpStmt(s)::[])
       | (HasSimpStmt(s), _) -> Block([pStmt; SimpStmt(s)])
 
 let elaborateSimpStmt (simpleStatement : simpStmt) =
@@ -50,12 +50,9 @@ let elaborateSimpOpt(sOpt : simpOpt) =
 let rec elaborateElseOpt(eOpt : elseOpt) =
   match eOpt with
         EmptyElse -> []
-      | PreElabElse(pStmt) -> elaboratePreElabStmt(pStmt)
+      | PreElabElse(pStmt) -> let () = print_string("no!\n") in elaboratePreElabStmt(pStmt)
 
 and elaboratePreElabStmt (statement : preElabStmt) =
-  let () = print_string("count = " ^ string_of_int(!count) ^ "\n") in
-  let () = count:= !count + 1 in
-  
   match statement with
         SimpStmt(s) -> elaborateSimpStmt(s)
       | Control(c) -> elaborateControl(c)
@@ -76,6 +73,12 @@ and elaborateControl (ctrl : control) : (Ast.untypedPostElabStmt list) =
                                            inside)])
       | PreElabReturn(pExpr) -> [UntypedPostElabReturn(elaboratePreElabExpr(pExpr))]
 
-and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements)
+and elaborateBlockStmts = function
+     [] -> []
+   | stmt::rest -> elaboratePreElabStmt stmt @ elaborateBlockStmts rest
 
-let elaborateAST (statements : preElabAST) = elaborateBlock(statements)
+and elaborateBlock stmts = UntypedPostElabBlock (elaborateBlockStmts stmts)::[]
+  
+(* and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements) *)
+
+let elaborateAST (statements : preElabAST) = elaborateBlockStmts(statements)

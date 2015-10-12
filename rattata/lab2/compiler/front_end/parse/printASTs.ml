@@ -12,6 +12,7 @@ let generalBinopToString(op : generalBinop) =
       | GT -> " > "
       | LT -> " < "
       | LOG_AND -> " && "
+      | _ -> assert(false)
 
 let rec preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
@@ -80,6 +81,7 @@ let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
       | UntypedPostElabNot(expr1) -> concat "" ["!"; untypedPostElabExprToString(expr1)]
       | UntypedPostElabTernary(e1, e2, e3) -> "(" ^ (untypedPostElabExprToString e1) ^ " ? " ^
               (untypedPostElabExprToString e2) ^ " : " ^ (untypedPostElabExprToString e3) ^ ")"
+      
 
 
 let rec untypedPostElabStmtToString(s : untypedPostElabStmt) = 
@@ -94,8 +96,8 @@ let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
                                                 ", "; untypedPostElabASTToString(init); ") {\n\t"; 
                                                       untypedPostElabASTToString(postelabast); "\n}"]
       | UntypedPostElabReturn(i) -> "return " ^ untypedPostElabExprToString(i)
-
-
+      | UntypedPostElabBlock(blockAst) -> "\t" ^ untypedPostElabASTToString blockAst
+                                          
 and untypedPostElabASTToString(stmts : untypedPostElabAST) =
   concat "\n" (List.map untypedPostElabStmtToString stmts) ^ "\n"
 

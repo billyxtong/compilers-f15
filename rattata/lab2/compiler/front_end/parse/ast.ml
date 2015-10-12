@@ -71,6 +71,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                                                    untypedPostElabAST *
                                                    untypedPostElabAST
                          | UntypedPostElabReturn of untypedPostElabExpr
+                         | UntypedPostElabBlock of untypedPostElabAST
  and untypedPostElabAST = untypedPostElabStmt list
 
 (* Pre-Elab AST *)
