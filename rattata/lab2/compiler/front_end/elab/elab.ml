@@ -52,7 +52,7 @@ let rec elaborateElseOpt(eOpt : elseOpt) =
         EmptyElse -> []
       | PreElabElse(pStmt) -> elaboratePreElabStmt(pStmt)
 
-and elaboratePreElabStmt (statement : preElabStmt) =
+and elaboratePreElabStmt (statement : preElabStmt) = 
   match statement with
         SimpStmt(s) -> elaborateSimpStmt(s)
       | Control(c) -> elaborateControl(c)

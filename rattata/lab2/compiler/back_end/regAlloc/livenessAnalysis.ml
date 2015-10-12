@@ -9,7 +9,8 @@ open Datatypesv1
 let listToString i a = String.concat "" (List.map
             (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
 
-let listArrayToString a = String.concat "" (Array.to_list(Array.mapi listToString a))
+let listArrayToString a = String.concat "" 
+                                  (Array.to_list(Array.mapi listToString a))
 
 let markedLive liveSet line = try let () = H.find liveSet line in true
                           with Not_found -> false
@@ -42,7 +43,8 @@ let rec findLiveLinesForTmpRec t prog predsPerLine liveLinesSet currLine =
     if isDef t prog currLine then () else
     (* If it's defined on this line, kill this recursive call *)
     if markedLive liveLinesSet currLine then () else
-        (* If we've already declared the var live here, kill this recursive call *)
+        (* If we've already declared the var live here, 
+           kill this recursive call *)
     (* We know it's live here, because we're marching backwards from a use and
        stopping when we hit a definition *)
     let () = H.add liveLinesSet currLine () in
@@ -57,7 +59,8 @@ let findLiveLinesForTmp t prog predsPerLine =
     (* Start from each line on which t is used *)
     let usedLines = List.filter (isUsed t prog) lineNumList in
     let result = H.create 500 in
-    let _ = List.map (findLiveLinesForTmpRec t prog predsPerLine result) usedLines in
+    let _ = List.map (findLiveLinesForTmpRec t prog predsPerLine result) 
+                        usedLines in
     H.fold addLineToList result []
 
 let rec findPredecessors (predecessorsArray : (int list) array)
@@ -65,38 +68,43 @@ let rec findPredecessors (predecessorsArray : (int list) array)
   (* Note the -1 here to avoid index-out-of-range! *)
   if lineNum = (A.length progArray) - 1 then ()
   else (match A.get progArray lineNum with
-              Tmp2AddrJump(j, l) ->
-      (* Billy please comment this *)
+              Tmp2AddrJump(j, l) -> (* jumps make funky predecessors! *)
                 (let () = (match j with
-                           JMP_UNCOND -> ()
+                           JMP_UNCOND -> () (* on unconditional jumps, 
+                           the current line isn't a predecessor of the next*)
                          | _ -> (predecessorsArray.(lineNum + 1) <-
                           (lineNum :: predecessorsArray.(lineNum + 1)))) in
+                          (* on conditional jumps, it is*)
                 let () = (A.iteri
                             (fun index -> fun instr -> 
                               (match instr with
-                                     Tmp2AddrLabel(l') -> 
-                                        if l = l'
+                                     Tmp2AddrLabel(l') -> (* we're interested in
+                                     finding the label that's jumped to*) 
+                                        if l = l' 
                                         then predecessorsArray.(index) <-
-                                            (lineNum :: predecessorsArray.(index)) 
-                                        else ()
+                                          (lineNum :: predecessorsArray.(index))
+                                        else () (* do nothing if wrong label *)
                                    | _ -> () )) progArray)
                 in findPredecessors predecessorsArray progArray (lineNum + 1))
             | _ -> let () = predecessorsArray.(lineNum + 1) <-
                           (lineNum :: predecessorsArray.(lineNum + 1)) in
+                   (* on non-jumps, the current line is only a predecessor
+                      of the next *)
                    findPredecessors predecessorsArray progArray (lineNum + 1))
 
 let drawEdgesForLine prog line liveTmpsOnLine interferenceGraph =
   if line == 0 then () (* no interference on line 0 *) else
   match getDefVar prog (line - 1) with
         None -> ()
-      | Some t -> L.iter (fun t' -> G.addEdge interferenceGraph (t, t')) liveTmpsOnLine
+      | Some t -> L.iter (fun t' -> G.addEdge interferenceGraph (t, t')) 
+                    liveTmpsOnLine
                     
 let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
     let () = G.initVertex interferenceGraph t in
     let liveLinesForT = findLiveLinesForTmp t prog predsPerLine in
     let () = L.iter (fun line -> (liveTmpsPerLine.(line) <-
                                 (t:: liveTmpsPerLine.(line)))) liveLinesForT
-        in ()
+    in ()
     
 
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
