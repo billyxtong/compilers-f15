@@ -98,6 +98,7 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
              | PreElabFor of simpOpt * preElabExpr * simpOpt * preElabStmt
              | PreElabReturn of preElabExpr
              | PreElabVoidReturn (* this takes no args *)
+             | PreElabAssert of preElabExpr
  and preElabStmt = SimpStmt of simpStmt
                  | Control of control
                  | Block of block
