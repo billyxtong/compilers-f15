@@ -94,4 +94,8 @@ type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrLabel of label
                    | TmpInfAddrReturn of tmpExpr
                    | TmpInfAddrAbort
-type tmpInfAddrProg = tmpInfAddrInstr list
+type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * ident list
+                                   * tmpInfAddrInstr list
+                         (* function name, param names,
+                            instruction list *)
+type tmpInfAddrProg = tmpInfAddrFunDef list

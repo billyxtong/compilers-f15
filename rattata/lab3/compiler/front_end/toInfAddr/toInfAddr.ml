@@ -6,14 +6,11 @@ open Core.Std
 (* Pretty much everything here is mutually recursive because of
    ternary operators *)
 
-let retLabel = GenLabel.create()
-let retTmp = Tmp (Temp.create())
-
 let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
             | Some t -> t)
 
-let rec handle_shifts idToTmpMap (e1, op, e2) =
+let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     let max_shift = A.IntConst 31 in
     let new_id = GenUnusedID.create () in
     let result_tmp = Temp.create() in
@@ -34,19 +31,19 @@ let rec handle_shifts idToTmpMap (e1, op, e2) =
                  (A.BaseCaseShift(e1, baseCaseShiftOp, e2)))::[] in
     let divByZero = A.TypedPostElabAssignStmt(new_id, A.IntExpr
                  (A.ASTBinop(A.IntConst 666, FAKEDIV, A.IntConst 0)))::[] in
-       (trans_cond newMap (condition, doTheShift, divByZero),
+       (trans_cond retTmp retLabel newMap (condition, doTheShift, divByZero),
        TmpIntArg (TmpLoc (Tmp result_tmp)))
 
-and trans_exp idToTmpMap = function
-      A.IntExpr e -> let (instrs, e') = trans_int_exp idToTmpMap e
+and trans_exp retTmp retLabel idToTmpMap = function
+      A.IntExpr e -> let (instrs, e') = trans_int_exp retTmp retLabel idToTmpMap e
                      in (instrs, TmpIntExpr e')
-    | A.BoolExpr e -> let (instrs, t) = trans_bool_exp idToTmpMap e None in
+    | A.BoolExpr e -> let (instrs, t) = trans_bool_exp retTmp retLabel idToTmpMap e None in
                       (instrs, TmpBoolExpr (TmpBoolArg (TmpLoc t)))
 
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
    but ternary *)
-and trans_int_exp idToTmpMap = function
+and trans_int_exp retTmp retLabel idToTmpMap = function
        A.IntConst c -> ([], TmpIntArg (TmpConst c))
      | A.IntIdent id -> 
           (match M.find idToTmpMap id with
@@ -56,14 +53,14 @@ and trans_int_exp idToTmpMap = function
            | Some t -> 
              ([], TmpIntArg (TmpLoc (Tmp t))))
      | A.ASTBinop (e1, LSHIFT, e2) ->
-         handle_shifts idToTmpMap (e1, LSHIFT, e2)
+         handle_shift retTmp retLabel idToTmpMap (e1, LSHIFT, e2)
      | A.ASTBinop (e1, RSHIFT, e2) ->
-         handle_shifts idToTmpMap (e1, RSHIFT, e2)
+         handle_shift retTmp retLabel idToTmpMap (e1, RSHIFT, e2)
      | A.BaseCaseShift (e1, shiftOp, e2) ->
          let (instrs_for_exp1, tmp_exp1) =
-          trans_int_exp idToTmpMap e1 in
+          trans_int_exp retTmp retLabel idToTmpMap e1 in
          let (instrs_for_exp2, tmp_exp2) =
-          trans_int_exp idToTmpMap e2 in
+          trans_int_exp retTmp retLabel idToTmpMap e2 in
      
          let actualShiftOp = (match shiftOp with
                                      A.ASTrshift -> RSHIFT
@@ -72,9 +69,9 @@ and trans_int_exp idToTmpMap = function
            TmpInfAddrBinopExpr (actualShiftOp, tmp_exp1, tmp_exp2))
      | A.ASTBinop (e1, op, e2) ->
          let (instrs_for_exp1, tmp_exp1) =
-             trans_int_exp idToTmpMap e1 in
+             trans_int_exp retTmp retLabel idToTmpMap e1 in
          let (instrs_for_exp2, tmp_exp2) =
-             trans_int_exp idToTmpMap e2 in
+             trans_int_exp retTmp retLabel idToTmpMap e2 in
          (instrs_for_exp1 @ instrs_for_exp2,
           TmpInfAddrBinopExpr (op, tmp_exp1, tmp_exp2))
          
@@ -86,14 +83,14 @@ and trans_int_exp idToTmpMap = function
                                             A.IntExpr e1)] in
          let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
                                             A.IntExpr e2)] in
-         (trans_cond newMap (c, astForIf, astForElse),
+         (trans_cond retTmp retLabel newMap (c, astForIf, astForElse),
           TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
    if (e) t = true; else t = false;
 *)
-and trans_bool_exp idToTmpMap e dest =
+and trans_bool_exp retTmp retLabel idToTmpMap e dest =
     let t = (match dest with
                  None -> Temp.create()
                | Some t' -> t') in
@@ -116,7 +113,7 @@ and trans_bool_exp idToTmpMap e dest =
                        (identForT, A.BoolExpr (A.BoolConst 0))] in
     (* Translating this if statement puts expression e in temp t.
        We also need to return the resulting location. *)
-    (trans_stmts newMap [A.TypedPostElabIf (e, ifStmts, elseStmts)],
+    (trans_stmts retTmp retLabel newMap [A.TypedPostElabIf (e, ifStmts, elseStmts)],
      Tmp t)
 
 (* For a while loop, typically we jump back to the top if the
@@ -125,27 +122,27 @@ and trans_bool_exp idToTmpMap e dest =
    deal with negation and such, the else might have to the jump
    back to the top. Of course, for a normal if statement,
    neither jumps to top. *)
-and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
+and make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf stmtsForElse
     ifJumpType elseJumpType =
     let elseLabel = GenLabel.create() in
     let endLabel = GenLabel.create() in
     if stmtsForIf = [] then
           (priorInstr
           ::TmpInfAddrJump(ifJumpType, endLabel)
-          ::trans_stmts idToTmpMap stmtsForElse
+          ::trans_stmts retTmp retLabel idToTmpMap stmtsForElse
           @ TmpInfAddrLabel(endLabel) :: []) else
     if stmtsForElse = [] then
           (priorInstr
           ::TmpInfAddrJump(elseJumpType, endLabel)
-          ::trans_stmts idToTmpMap stmtsForIf
+          ::trans_stmts retTmp retLabel idToTmpMap stmtsForIf
           @ TmpInfAddrLabel(endLabel) :: [])
     else
           (priorInstr
           ::TmpInfAddrJump(elseJumpType, elseLabel)
-          ::trans_stmts idToTmpMap stmtsForIf
+          ::trans_stmts retTmp retLabel idToTmpMap stmtsForIf
           @ TmpInfAddrJump(JMP_UNCOND, endLabel)
           ::TmpInfAddrLabel(elseLabel)
-          ::trans_stmts idToTmpMap stmtsForElse
+          ::trans_stmts retTmp retLabel idToTmpMap stmtsForElse
           @ TmpInfAddrLabel(endLabel) :: [])
 
 
@@ -156,13 +153,13 @@ and make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
    jump at the end of if and else. But for while, there will be
    a start label (and no else label), and there will be an
    unconditional jump to the start label after the if *)
-and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse) 
+and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse) 
   : tmpInfAddrInstr list =
      match condition with
          A.LogNot negCondition ->
         (* In this case, just switch the statements for if and else,
            AND ALSO THE JUMPTOTOPSTATUS *)
-              trans_cond idToTmpMap (negCondition, stmtsForElse,
+              trans_cond retTmp retLabel idToTmpMap (negCondition, stmtsForElse,
                                    stmtsForIf)
        | A.BoolTernary (c, bool_exp1, bool_exp2) ->
           (* BoolTernary means the expressions are bools
@@ -178,68 +175,68 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
                                               A.BoolExpr bool_exp1)] in
             let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
                                               A.BoolExpr bool_exp2)] in
-            let ternary_instrs = trans_cond newMap (c, astForIf, astForElse) in
+            let ternary_instrs = trans_cond retTmp retLabel newMap (c, astForIf, astForElse) in
             ternary_instrs @
-            trans_cond newMap (A.BoolIdent ternary_result_id, stmtsForIf,
+            trans_cond retTmp retLabel newMap (A.BoolIdent ternary_result_id, stmtsForIf,
                                stmtsForElse)
        | A.LogAnd (bool_exp1, bool_exp2) -> 
           (* For &&, we break it up into nested if statements, where each
              of them gets the "else" from the original. *)
            let innerIfAst = [A.TypedPostElabIf (bool_exp2, stmtsForIf,
                                                 stmtsForElse)] in
-            trans_cond idToTmpMap (bool_exp1, innerIfAst,
+            trans_cond retTmp retLabel idToTmpMap (bool_exp1, innerIfAst,
                                  stmtsForElse) 
               (* ONLY THE INNER ONE JUMPS TO TOP FIX THISSSSSSSSSSSSSS *)
        | A.BoolConst c -> (match c with
-                              1 -> trans_stmts idToTmpMap stmtsForIf
-                            | 0 -> trans_stmts idToTmpMap stmtsForElse
+                              1 -> trans_stmts retTmp retLabel idToTmpMap stmtsForIf
+                            | 0 -> trans_stmts retTmp retLabel idToTmpMap stmtsForElse
                             | _ -> assert(false))
        | A.GreaterThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
             let (instrs_for_exp1, tmp_exp1) =
-               trans_int_exp idToTmpMap int_exp1 in
+               trans_int_exp retTmp retLabel idToTmpMap int_exp1 in
             let (instrs_for_exp2, tmp_exp2) =
-               trans_int_exp idToTmpMap int_exp2 in
+               trans_int_exp retTmp retLabel idToTmpMap int_exp2 in
             let priorInstr = TmpInfAddrBoolInstr
                  (TmpInfAddrCmp(tmp_exp2, tmp_exp1)) in
             instrs_for_exp1 @ instrs_for_exp2 @
-              (make_cond_instrs idToTmpMap priorInstr stmtsForIf
+              (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JG JLE )
        | A.LessThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
             let (instrs_for_exp1, tmp_exp1) =
-               trans_int_exp idToTmpMap int_exp1 in
+               trans_int_exp retTmp retLabel idToTmpMap int_exp1 in
             let (instrs_for_exp2, tmp_exp2) =
-               trans_int_exp idToTmpMap int_exp2 in
+               trans_int_exp retTmp retLabel idToTmpMap int_exp2 in
             let priorInstr = TmpInfAddrBoolInstr
                  (TmpInfAddrCmp(tmp_exp2, tmp_exp1)) in
             instrs_for_exp1 @ instrs_for_exp2 @
-              (make_cond_instrs idToTmpMap priorInstr stmtsForIf
+              (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JL JGE )
        | A.IntEquals (int_exp1, int_exp2) ->
             let (instrs_for_exp1, tmp_exp1) =
-               trans_int_exp idToTmpMap int_exp1 in
+               trans_int_exp retTmp retLabel idToTmpMap int_exp1 in
             let (instrs_for_exp2, tmp_exp2) =
-               trans_int_exp idToTmpMap int_exp2 in
+               trans_int_exp retTmp retLabel idToTmpMap int_exp2 in
             let priorInstr = TmpInfAddrBoolInstr
             (TmpInfAddrCmp(tmp_exp2, tmp_exp1)) in
             instrs_for_exp1 @ instrs_for_exp2 @
-              (make_cond_instrs idToTmpMap priorInstr stmtsForIf stmtsForElse
+              (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf stmtsForElse
                  JE JNE )
        | A.BoolEquals (bool_exp1, bool_exp2) ->
-            (* See description of trans_bool_exp *)
+            (* See description of trans_bool_exp retTmp retLabel *)
             let (instrs_for_exp1, tmp_exp1) =
-               trans_bool_exp idToTmpMap bool_exp1 None in
+               trans_bool_exp retTmp retLabel idToTmpMap bool_exp1 None in
             let (instrs_for_exp2, tmp_exp2) =
-               trans_bool_exp idToTmpMap bool_exp2 None in
+               trans_bool_exp retTmp retLabel idToTmpMap bool_exp2 None in
             let priorInstr = TmpInfAddrBoolInstr
                 (TmpInfAddrCmp (TmpIntArg (TmpLoc tmp_exp1),
                                 TmpIntArg (TmpLoc tmp_exp2))) in
             (* The order of instrs_for_exp1/2 shouldn't matter *)
             instrs_for_exp1 @ instrs_for_exp2 @
-            (make_cond_instrs idToTmpMap priorInstr stmtsForIf
+            (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JE JNE )
        | A.BoolIdent id ->  
           (match M.find idToTmpMap id with
@@ -249,17 +246,17 @@ and trans_cond idToTmpMap (condition, stmtsForIf, stmtsForElse)
            | Some t -> let priorInstr = TmpInfAddrBoolInstr
                  (TmpInfAddrTest (TmpBoolArg (TmpLoc (Tmp t)),
                                   TmpBoolArg (TmpConst 1))) in
-                   make_cond_instrs idToTmpMap priorInstr stmtsForIf
+                   make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                       stmtsForElse JNE JE )
                  (* check to make sure you don't mix up je and jne *)
 
-and trans_stmts idToTmpMap = function
+and trans_stmts retTmp retLabel idToTmpMap = function
      A.TypedPostElabDecl (id, idType)::stmts ->
       (* Just create a single temp per variable for now,
          instead of creating one each assignment *)
         let t = Temp.create() in
         let newMap = M.add idToTmpMap id t in
-        trans_stmts newMap stmts
+        trans_stmts retTmp retLabel newMap stmts
    | A.TypedPostElabAssignStmt (id, A.BoolExpr e)::stmts ->
         let (instrs_for_move, Tmp new_t) =
           (* trans_bool_exp gives us the instructions it generated, and also
@@ -267,31 +264,31 @@ and trans_stmts idToTmpMap = function
              create a new one, new_t will just be whatever we passed in.
              We then update the binding in idToTmpMap (which does nothing
              if new_t is what we passed in) *)
-               trans_bool_exp idToTmpMap e (M.find idToTmpMap id) in
+               trans_bool_exp retTmp retLabel idToTmpMap e (M.find idToTmpMap id) in
         let newMap = M.add idToTmpMap id new_t in
-        instrs_for_move @ trans_stmts newMap stmts
+        instrs_for_move @ trans_stmts retTmp retLabel newMap stmts
    | A.TypedPostElabAssignStmt (id, A.IntExpr e)::stmts ->
-        let (instrs_for_e, eInfAddr) = trans_int_exp idToTmpMap e in
+        let (instrs_for_e, eInfAddr) = trans_int_exp retTmp retLabel idToTmpMap e in
         let t = get_or_make_tmp id idToTmpMap in
         let newMap = M.add idToTmpMap id t in
         instrs_for_e @
-        TmpInfAddrMov (TmpIntExpr eInfAddr, Tmp t)::trans_stmts newMap stmts
+        TmpInfAddrMov (TmpIntExpr eInfAddr, Tmp t)::trans_stmts retTmp retLabel newMap stmts
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
-       trans_cond idToTmpMap (e, ifStmts, elseStmts) @
-        trans_stmts idToTmpMap stmts
+       trans_cond retTmp retLabel idToTmpMap (e, ifStmts, elseStmts) @
+        trans_stmts retTmp retLabel idToTmpMap stmts
    | A.TypedPostElabWhile (e, whileStmts) :: stmts ->
         let topLabel = GenLabel.create() in
         let jumpToTopStmt = A.JumpUncond(topLabel) in
         (* Empty list because no else statements *)
         TmpInfAddrLabel topLabel::
-        trans_cond idToTmpMap (e, whileStmts @ [jumpToTopStmt], []) @
-        trans_stmts idToTmpMap stmts
+        trans_cond retTmp retLabel idToTmpMap (e, whileStmts @ [jumpToTopStmt], []) @
+        trans_stmts retTmp retLabel idToTmpMap stmts
    | A.JumpUncond target :: stmts ->
      (* This really shouldn't be an AST instruction
         but I need it for toInfAddr :( *)
-        TmpInfAddrJump(JMP_UNCOND, target)::trans_stmts idToTmpMap stmts
+        TmpInfAddrJump(JMP_UNCOND, target)::trans_stmts retTmp retLabel idToTmpMap stmts
    | A.TypedPostElabReturn e :: stmts ->
-        let (instrs_for_e, eInfAddr) = trans_int_exp idToTmpMap e in
+        let (instrs_for_e, eInfAddr) = trans_int_exp retTmp retLabel idToTmpMap e in
         (* Move our value to the ret tmp, then jump to the return *)
         instrs_for_e @
         TmpInfAddrMov(TmpIntExpr eInfAddr, retTmp)::
@@ -301,9 +298,29 @@ and trans_stmts idToTmpMap = function
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)
-let toInfAddr (ast: A.typedPostElabAST) =
-     let idToTmpMap = String.Map.empty in
+
+let initIdToTmpMap params =
+  (* Create temps for each of the params, and init the idToTmpMap
+     accordingly *)
+    let params_with_tmps = List.map params (fun (_,id) -> (id, Temp.create())) in
+    match String.Map.of_alist params_with_tmps with
+         `Duplicate_key _ -> failwith "params must have unique names"
+       | `Ok (result) -> result
+
+
+let trans_global_decl decl =
+  (* Each function has a unique retTmp and retLabel *)
+    let retLabel = GenLabel.create() in
+    let retTmp = Tmp (Temp.create()) in
+    match decl with
+        A.TypedPostElabFunDef (typee, fName, params, stmts) ->
+            let idToTmpMap = initIdToTmpMap params in
+            let param_ident_list = List.map params (fun (_, id) -> id) in
+            let infAddrStmts = trans_stmts retTmp retLabel idToTmpMap stmts in
+            let finalStmts = infAddrStmts @ TmpInfAddrLabel retLabel ::
+            TmpInfAddrReturn (TmpIntExpr (TmpIntArg (TmpLoc (retTmp))))::[] in
+            TmpInfAddrFunDef (fName, param_ident_list, finalStmts)
+
+let toInfAddr (funDefList: A.typedPostElabAST) =
      (* We will have a simple return label that all returns jump to *)
-     (trans_stmts idToTmpMap ast @
-      TmpInfAddrLabel retLabel ::
-      TmpInfAddrReturn (TmpIntExpr (TmpIntArg (TmpLoc (retTmp))))::[])
+     List.map funDefList trans_global_decl
