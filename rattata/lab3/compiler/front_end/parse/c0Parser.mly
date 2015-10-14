@@ -129,7 +129,7 @@ fdefn :
 
 typedef :
     TYPEDEF c0type IDENT SEMI         { A.Typedef ($2, $3) }
-
+	    
 param :
     c0type IDENT            { ($1, $2) }
 
@@ -214,8 +214,8 @@ arglistfollow :
 ;
   
 arglist :
-   LPAREN RPAREN               { [] }
- | LPAREN exp arglistfollow    { $2::$3 }	  
+   LPAREN RPAREN                     { [] }
+ | LPAREN exp arglistfollow RPAREN   { $2::$3 }	  
 ;
   
 lvalue :
