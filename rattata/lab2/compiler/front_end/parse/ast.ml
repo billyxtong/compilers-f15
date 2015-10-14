@@ -60,7 +60,8 @@ type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
                                                    untypedPostElabExpr
                          | UntypedPostElabNot of untypedPostElabExpr
                          | UntypedPostElabTernary of untypedPostElabExpr *
-                            untypedPostElabExpr * untypedPostElabExpr
+                                                     untypedPostElabExpr * 
+                                                     untypedPostElabExpr
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabAssignStmt of ident * 
                                                         untypedPostElabExpr
