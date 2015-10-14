@@ -83,3 +83,6 @@ and elaborateBlock stmts = UntypedPostElabBlock (elaborateBlockStmts stmts)::[]
 (* and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements) *)
 
 let elaborateAST (statements : preElabAST) = elaborateBlockStmts(statements)
+
+let elaborateOverallAST (preElab1 : preElabAST, preElab2 : preElabAST) =
+    (elaborateAST preElab1, elaborateAST preElab2)

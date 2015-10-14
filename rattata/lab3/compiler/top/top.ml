@@ -38,22 +38,34 @@ let spec =
 let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
   try
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
-   
-    let source = match files with
+
+    (* main_source is the .l1/2/3/4 file. This is to distinguish from
+       the header file *)
+    let main_source = match files with
     | [] -> say "Error: no input file provided"; raise EXIT
     | [filename] -> filename
     | _ -> say "Error: more than one input file"; raise EXIT
     in
 
+    (* Set up header file stuff *)
+    let header_file =
+       (try (* See if there is a specific header file corresponding
+              to this input file. If not, default to 15411-l13.h0 *)
+          let _ = In_channel.with_file
+              ((Filename.chop_extension main_source) ^ ".h0") in
+          (Filename.chop_extension main_source) ^ ".h0"
+        with _ -> "../runtime/15411-l3.h0")
+          (* not sure if I can actually specific the path this way *) in
+    
     (* Parse *)
-    say_if verbose (fun () -> "Parsing... " ^ source);
+    say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
-    let preElabAst = Parse.parse source in ();
+    let preElabOverallAst = Parse.parse main_source header_file in ();
     say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst));
 
     (* Elaborate *)
     say_if verbose (fun () -> "Elaborating... ");
-    let untypedPostElabAst = Elab.elaborateAST preElabAst in ();
+    let untypedPostElabOverallAst = Elab.elaborateAST preElabAst in ();
     say_if dump_upeAST (fun () -> 
       PrintASTs.untypedPostElabASTToString(untypedPostElabAst));
 
@@ -107,7 +119,7 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     
     (* Output assembly *)
     say_if verbose (fun () -> "Outputting assembly..."); 
-    let afname = source ^ ".s" in 
+    let afname = main_source ^ ".s" in 
     say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
 
     Out_channel.with_file afname

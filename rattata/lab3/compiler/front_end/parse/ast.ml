@@ -30,6 +30,8 @@ type intExpr = IntConst of const | IntIdent of ident
               | GreaterThan of intExpr * intExpr
               | LessThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
+              | IntFunCall of ident * typedPostElabExpr list
+                       (* the list is the arg list *)
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
@@ -37,43 +39,67 @@ type intExpr = IntConst of const | IntIdent of ident
               if e1 then e2 else e3. Similarly for the other
               ternary constructors *)
               | BoolTernary of boolExpr * boolExpr * boolExpr
-type typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr     
+and typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr
 type typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr
-                  | TypedPostElabIf of boolExpr * typedPostElabAST * 
-                                       typedPostElabAST
-                  | TypedPostElabWhile of boolExpr * typedPostElabAST
-                  | TypedPostElabReturn of intExpr
+                  | TypedPostElabIf of boolExpr * typedPostElabBlock * 
+                                       typedPostElabBlock
+                  | TypedPostElabWhile of boolExpr * typedPostElabBlock
+                  | TypedPostElabReturn of typedPostElabExpr
+                      (* functions can now return any type! *)
+                  | TypedPostElabAssert of typedPostElabExpr
+                  | TypedPostElabVoidReturn (* takes no args *)
                   | JumpUncond of label
- and typedPostElabAST = typedPostElabStmt list
+and typedPostElabBlock = typedPostElabStmt list
+type typedPostElabGlobalDecl =
+    (* After typechecking, we can throw out declarations and typedefs *)
+    TypedPostElabFunDef of c0type * ident * ident list * typedPostElabBlock
+        (* the ident is the function name, the ident list is the params.
+           It's not a param list because we don't care about the c0type
+           anymore (I think?) *)
+                               
+(* Note that typedAST doesn't have an "overall" version that contains
+   two asts. This is because we can combine the header ast and main ast
+   into one, after typechecking *)
 
  (* Untyped Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
+type param = c0type * ident (* do we want a constructor here? *)
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
                    (* Billy just ignore these ones underneath,
                       I'm just using them for parsing *)
                   | LT | LEQ | GEQ | LOG_OR | NEQ
-type untypedPostElabExpr = UntypedPostElabConstExpr of const * c0type
-                         | UntypedPostElabIdentExpr of ident
-                         | UntypedPostElabBinop of untypedPostElabExpr *
-                                                   generalBinop *
-                                                   untypedPostElabExpr
-                         | UntypedPostElabNot of untypedPostElabExpr
-                         | UntypedPostElabTernary of untypedPostElabExpr *
-                            untypedPostElabExpr * untypedPostElabExpr
+type untypedPostElabExpr =
+     UntypedPostElabConstExpr of const * c0type
+   | UntypedPostElabIdentExpr of ident
+   | UntypedPostElabBinop of untypedPostElabExpr *
+                             generalBinop * untypedPostElabExpr
+   | UntypedPostElabNot of untypedPostElabExpr
+   | UntypedPostElabTernary of untypedPostElabExpr *
+                   untypedPostElabExpr * untypedPostElabExpr
+   | UntypedPostElabFunCall of ident * untypedPostElabExpr list
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabAssignStmt of ident * 
                                                         untypedPostElabExpr
                          | UntypedPostElabIf of untypedPostElabExpr * 
-                                                untypedPostElabAST * 
-                                                untypedPostElabAST
+                                                untypedPostElabBlock * 
+                                                untypedPostElabBlock
                          | UntypedPostElabWhile of untypedPostElabExpr * 
-                                                   untypedPostElabAST *
-                                                   untypedPostElabAST
+                                                   untypedPostElabBlock *
+                                                   untypedPostElabBlock
                          | UntypedPostElabReturn of untypedPostElabExpr
-                         | UntypedPostElabBlock of untypedPostElabAST
- and untypedPostElabAST = untypedPostElabStmt list
+                         | UntypedPostElabVoidReturn (* no args *)
+                         | UntypedPostElabAssert of untypedPostElabExpr
+and untypedPostElabBlock = untypedPostElabStmt list
+                             
+type untypedPostElabGlobalDecl =
+      UntypedPostElabFunDecl of c0type * ident * param list
+    | UntypedPostElabFunDef of c0type * ident * param list *
+                               untypedPostElabBlock
+    | UntypedPostElabTypdef of c0type * ident                               
+type untypedPostElabAST = untypedPostElabGlobalDecl list
+type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 
 (* Pre-Elab AST *)
 type postOp = PLUSPLUS | MINUSMINUS    
@@ -103,9 +129,9 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
                  | Control of control
                  | Block of block
  and block = preElabStmt list
-type param = c0type * ident (* do we want a constructor here? *)
 type globalDecl = FunDecl of c0type * ident * param list
            | FunDef of c0type * ident * param list * block
            | Typedef of c0type * ident (* old type, and ident
                                           for new type name *)
 type preElabAST = globalDecl list
+type preElabOverallAST = preElabAST * preElabAST    

@@ -7,7 +7,5 @@
  * Gluing together the pieces produced by ocamllex and ocamlyacc
  *)
 
-(* parse filename = ast
- * will raise ErrorMsg.Error in case of lexing or parsing error
- *)
-val parse : string -> Ast.preElabAST
+(* First arg is the main source file, second is the header file *)
+val parse : string -> string -> Ast.preElabOverallAST
