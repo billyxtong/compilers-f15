@@ -56,11 +56,11 @@ type typedPostElabStmt = TypedPostElabDecl of ident * c0type
 and typedPostElabBlock = typedPostElabStmt list
 type typedPostElabGlobalDecl =
     (* After typechecking, we can throw out declarations and typedefs *)
-    TypedPostElabFunDef of c0type * ident * ident list * typedPostElabBlock
+    TypedPostElabFunDef of c0type * ident * param list * typedPostElabBlock
         (* the ident is the function name, the ident list is the params.
            It's not a param list because we don't care about the c0type
            anymore (I think?) *)
-                               
+type typedPostElabAST = typedPostElabGlobalDecl list                              
 (* Note that typedAST doesn't have an "overall" version that contains
    two asts. This is because we can combine the header ast and main ast
    into one, after typechecking *)
