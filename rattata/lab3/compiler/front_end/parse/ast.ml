@@ -26,11 +26,12 @@ type intExpr = IntConst of const | IntIdent of ident
    I need them in toInfAddr, so don't write print things for
    these *)
              | BaseCaseShift of intExpr * shiftOp * intExpr
+             | IntFunCall of ident * typedPostElabExpr list
  and boolExpr = BoolConst of const | BoolIdent of ident
               | GreaterThan of intExpr * intExpr
               | LessThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
-              | IntFunCall of ident * typedPostElabExpr list
+              | BoolFunCall of ident * typedPostElabExpr list
                        (* the list is the arg list *)
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
@@ -49,6 +50,8 @@ type typedPostElabStmt = TypedPostElabDecl of ident * c0type
                       (* functions can now return any type! *)
                   | TypedPostElabAssert of typedPostElabExpr
                   | TypedPostElabVoidReturn (* takes no args *)
+                  | VoidFunCall of ident * typedPostElabExpr list
+                  | Abort (* what's this for? *)
                   | JumpUncond of label
 and typedPostElabBlock = typedPostElabStmt list
 type typedPostElabGlobalDecl =
