@@ -36,9 +36,9 @@ let expand_asnop id op e =
 let expand_postop id op =
     match op with
        A.PLUSPLUS -> expand_asnop id A.PLUSEQ
-	      (A.PreElabConstExpr (1, A.INT))
+	      (A.PreElabConstExpr (1, D.INT))
      | A.MINUSMINUS -> expand_asnop id A.SUBEQ
-	      (A.PreElabConstExpr (1, A.INT))
+	      (A.PreElabConstExpr (1, D.INT))
 
 let rec expand_log_binop e1 op e2 =
     match op with
@@ -171,10 +171,10 @@ postop :
  | MINUSMINUS 	                 { A.MINUSMINUS }
     
 c0type :
-   INT                           { A.INT }
- | BOOL 		         { A.BOOL }
- | VOID                          { A.VOID }
- | IDENT                         { A.TypedefType $1 }
+   INT                           { D.INT }
+ | BOOL 		         { D.BOOL }
+ | VOID                          { D.VOID }
+ | IDENT                         { D.TypedefType $1 }
      
 simpoptNoDecl :
    /* empty */                   { A.EmptySimp }
@@ -259,10 +259,10 @@ exp :
 				     ($1, A.IntBinop D.LSHIFT, $3) }
 /* Unary */       
  | MINUS exp %prec UNARY      { A.PreElabBinop
-				(A.PreElabConstExpr (0, A.INT),
+				(A.PreElabConstExpr (0, D.INT),
 				  A.IntBinop D.SUB, $2 ) }
  | BIT_NOT exp %prec UNARY      { A.PreElabBinop
-				(A.PreElabConstExpr (-1, A.INT),
+				(A.PreElabConstExpr (-1, D.INT),
 				  A.IntBinop D.BIT_XOR, $2 ) }
 /* Comparison/Logical */
  | exp GT exp                  { expand_log_binop $1 A.GT $3 }
@@ -278,17 +278,17 @@ exp :
  ;
    
 boolconst :
-   TRUE               { A.PreElabConstExpr(1, A.BOOL) }
- | FALSE              { A.PreElabConstExpr(0, A.BOOL) }		     
+   TRUE               { A.PreElabConstExpr(1, D.BOOL) }
+ | FALSE              { A.PreElabConstExpr(0, D.BOOL) }		     
    
 intconst :
   DECCONST           { match Int32.to_int $1 with
-			   Some x -> A.PreElabConstExpr (x, A.INT)
+			   Some x -> A.PreElabConstExpr (x, D.INT)
 			 | None ->
 			       failwith "could not convert 32bit int"
 		     }
  | HEXCONST         { match Int32.to_int $1 with
-			   Some x -> A.PreElabConstExpr (x, A.INT)
+			   Some x -> A.PreElabConstExpr (x, D.INT)
 			 | None ->
 			       failwith "could not convert 32bit int"
 		     }

@@ -1,3 +1,7 @@
+(* ident and c0type have to be in here to avoid a circular build
+   error :( *)
+type c0type = INT | BOOL | VOID | TypedefType of ident    
+and ident = string
 (* everything in c0 is an int! *)              
 type const = int
 
@@ -29,6 +33,7 @@ type assemInstr = MOV of assemArg * assemLoc
                 | JUMP of jumpInstr
                 | BOOL_INSTR of boolInstr
                 | LABEL of label
+                | ABORT
 type assemProg = assemInstr list
 
 (* Assembly Code with wonky instructions (i.e. idiv, etc) *)
@@ -57,6 +62,7 @@ type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                    | Tmp2AddrJump of jumpInstr
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
+                   | Tmp2AddrAbort
 type tmp2AddrProg = tmp2AddrInstr list
 
 (* Three Address Code *)
@@ -67,6 +73,7 @@ type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
                    | Tmp3AddrJump of jumpInstr
                    | Tmp3AddrBoolInstr of tmpBoolInstr
                    | Tmp3AddrLabel of label
+                   | Tmp3AddrAbort
 type tmp3AddrProg = tmp3AddrInstr list
 
 (* Inf Address Code: any number of operands on right hand side *)
@@ -74,8 +81,10 @@ type tmpIntExpr = TmpIntArg of tmpArg
                 | TmpInfAddrBinopExpr of intBinop *
                                          tmpIntExpr * 
                                          tmpIntExpr
-type tmpBoolExpr = TmpBoolArg of tmpArg
-type tmpExpr = TmpBoolExpr of tmpBoolExpr
+                | TmpInfAddrIntFunCall of ident * tmpExpr list
+and tmpBoolExpr = TmpBoolArg of tmpArg
+                | TmpInfAddrBoolFunCall of ident * tmpExpr list
+and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
                         | TmpInfAddrCmp of tmpIntExpr * tmpIntExpr
@@ -83,5 +92,6 @@ type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
-                   | TmpInfAddrReturn of tmpExpr  
+                   | TmpInfAddrReturn of tmpExpr
+                   | TmpInfAddrAbort
 type tmpInfAddrProg = tmpInfAddrInstr list

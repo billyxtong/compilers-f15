@@ -12,8 +12,7 @@ open Datatypesv1
    A restriced grammar from the Pre-Elab AST. See the elaboration
    file (which I have not yet written) for more info. *)
 type shiftOp = ASTrshift | ASTlshift
-type c0type = INT | BOOL | VOID | TypedefType of ident    
-and ident = string
+type param = c0type * ident (* do we want a constructor here? *)
 (* intExpr and boolExpr have to be mutually recursive because
    of damn ternary operators *)
 type intExpr = IntConst of const | IntIdent of ident
@@ -60,7 +59,7 @@ type typedPostElabGlobalDecl =
         (* the ident is the function name, the ident list is the params.
            It's not a param list because we don't care about the c0type
            anymore (I think?) *)
-type typedPostElabAST = typedPostElabGlobalDecl list                              
+type typedPostElabAST = typedPostElabGlobalDecl list      
 (* Note that typedAST doesn't have an "overall" version that contains
    two asts. This is because we can combine the header ast and main ast
    into one, after typechecking *)
@@ -68,7 +67,6 @@ type typedPostElabAST = typedPostElabGlobalDecl list
  (* Untyped Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
-type param = c0type * ident (* do we want a constructor here? *)
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
                    (* Billy just ignore these ones underneath,
                       I'm just using them for parsing *)

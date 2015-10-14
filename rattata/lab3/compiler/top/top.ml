@@ -9,7 +9,6 @@
 open Core.Std
 open Datatypesv1
 open PrintDatatypes    
-module A = Ast
 
 let say = prerr_endline
 let newline = prerr_newline

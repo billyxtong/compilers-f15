@@ -37,6 +37,11 @@ let rec handle_shifts idToTmpMap (e1, op, e2) =
        (trans_cond newMap (condition, doTheShift, divByZero),
        TmpIntArg (TmpLoc (Tmp result_tmp)))
 
+and trans_exp idToTmpMap = function
+      A.IntExpr e -> let (instrs, e') = trans_int_exp idToTmpMap e
+                     in (instrs, TmpIntExpr e')
+    | A.BoolExpr e -> let (instrs, t) = trans_bool_exp idToTmpMap e None in
+                      (instrs, TmpBoolExpr (TmpBoolArg (TmpLoc t)))
 
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
