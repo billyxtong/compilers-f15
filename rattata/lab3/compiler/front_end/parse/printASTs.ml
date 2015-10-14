@@ -109,7 +109,11 @@ and untypedPostElabASTToString(stmts : untypedPostElabAST) =
 
 (* ============ Typed Post-Elab AST Print Functions ================= *)
 
-(*
+let shiftOpToString(s : shiftOp) =
+  match s with
+        ASTrshift -> " >> "
+      | ASTlshift -> " << "
+
 let rec intExprToString(iExpr : intExpr) = 
   match iExpr with
         IntConst(c) -> constToString(c)
@@ -118,34 +122,47 @@ let rec intExprToString(iExpr : intExpr) =
                                                       intBinopToString(op); 
                                                       intExprToString(expr2); 
                                                  ")"]
+      | IntTernary(b,i1,i2) -> concat "" [boolExprToString(b); " ? "; 
+                                          intExprToString(i1); " : "; 
+                                          intExprToString(i2)]
+      | BaseCaseShift(i1, shifty, i2) -> concat "" [intExprToString(i1); 
+                                                    shiftOpToString(shifty); 
+                                                    intExprToString(i2)]
 
-let rec boolExprToString(bExpr : boolExpr) =
+and boolExprToString(bExpr : boolExpr) =
   match bExpr with
-        BoolConst(c) -> constToString(c)
+        BoolConst(c) -> if c = 0 then "false" else "true"
       | BoolIdent(i) -> identToString(i)
       | GreaterThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " > "; intExprToString(iExpr2)]
+      | LessThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " < "; intExprToString(iExpr2)]
       | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
       | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
       | LogNot(bExpr) -> concat "" ["!"; boolExprToString bExpr]
       | LogAnd(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " && "; boolExprToString(bExpr2)]
+      | BoolTernary(b1, b2, b3) -> concat "" [boolExprToString(b1); " ? "; 
+                                              boolExprToString(b2); " : "; 
+                                              boolExprToString(b3)]
 
-let exprToString(e : expr) = 
+and typedPostElabExprToString(e : typedPostElabExpr) = 
   match e with
         IntExpr(i) -> intExprToString(i)
       | BoolExpr(b) -> boolExprToString(b)
 
-let assignStmtToString(i,e) = concat "" [identToString(i); " = "; exprToString(e)]
-
-let rec stmtToString(s : stmt) = 
+let rec typedPostElabStmtToString(s : typedPostElabStmt) = 
   match s with
-        Decl(i,c) -> concat "" [c0typeToString(c); identToString(i)]
-      | AssignStmt(a) -> assignStmtToString(a)
-      | If(b,p1,p2) -> concat "" ["if("; boolExprToString(b); 
-                                                  ") {\n\t"; postElabAstToString(p1); 
-                                                  "} else {\n\t"; postElabAstToString(p2); "\n}"]
-      | While(b,p) -> concat "" ["while("; boolExprToString(b);
-                                                ") {\n\t"; postElabAstToString(p); "\n}"]
-      | Return(i) -> "return " ^ intExprToString(i)
+        TypedPostElabDecl(i,c) -> concat "" [c0typeToString(c); identToString(i)]
+      | TypedPostElabAssignStmt(i, e) -> concat "" [identToString(i); " = "; 
+                                                    typedPostElabExprToString(e)]
+      | TypedPostElabIf(b,p1,p2) -> concat "" ["if("; 
+                                               boolExprToString(b); 
+                                               ") {\n\t"; 
+                                               typedPostElabASTToString(p1); 
+                                               "} else {\n\t"; 
+                                               typedPostElabASTToString(p2); "\n}"]
+      | TypedPostElabWhile(b,p) -> concat "" ["while("; boolExprToString(b);
+                                                ") {\n\t"; typedPostElabASTToString(p); "\n}"]
+      | TypedPostElabReturn(i) -> "return " ^ intExprToString(i)
+      | JumpUncond(l) -> "jmp .L" ^ labelToString(l)
 
-and postElabAstToString(stmts : stmt list) = concat "\n" (List.map stmtToString stmts) ^ "\n"
-*)
+and typedPostElabASTToString(stmts : typedPostElabStmt list) = concat "\n" (List.map typedPostElabStmtToString stmts) ^ "\n"
+

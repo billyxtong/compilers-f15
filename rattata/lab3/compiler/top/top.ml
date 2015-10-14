@@ -24,6 +24,7 @@ let spec =
   +> flag "--dump-parsing" no_arg ~doc:" Pretty print parsing messages"
   +> flag "--dump-ast" no_arg ~doc:" Pretty print the pre-elab AST"
   +> flag "--dump-upeAST" no_arg ~doc:" Pretty print the untyped post-elab AST"
+  +> flag "--dump-typedAST" no_arg ~doc:" Pretty print the typed post-elab AST"
   +> flag "--dump-infAddr" no_arg ~doc:" Pretty print the infAddr"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
@@ -34,7 +35,7 @@ let spec =
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
   +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
 
-let main files verbose dump_parsing dump_ast dump_upeAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
+let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
   try
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
    
@@ -58,7 +59,9 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_infAddr dump_assem
 
     (* Typecheck *)
     say_if verbose (fun () -> "Typechecking...");
-    let typedPostElabAst = TypeChecker.typecheck untypedPostElabAst in
+    let typedPostElabAst = TypeChecker.typecheck untypedPostElabAst in ();
+    say_if dump_typedAST (fun () ->
+      PrintASTs.typedPostElabASTToString(typedPostElabAst));
     if typecheck_only then exit 0;
 
 
