@@ -126,12 +126,12 @@ rule initial =
   | "for"         { P.FOR }
 
   | "typedef"     { P.TYPEDEF }
+  | "assert"      { P.ASSERT }
 
   | "break"       { assert false }
 
   | "struct"      { assert false }
   | "continue"    { assert false }
-  | "assert"      { assert false }
   | "NULL"        { assert false }
   | "alloc"       { assert false }
   | "alloc_array" { assert false }

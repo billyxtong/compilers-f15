@@ -197,7 +197,7 @@ control :
        { A.PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
  | RETURN SEMI                   { A.PreElabVoidReturn }
- | ASSERT LPAREN exp RPAREN      { A.PreElabAssert $3 }	  
+ | ASSERT LPAREN exp RPAREN SEMI      { A.PreElabAssert $3 }	  
 	  
 decl :
    c0type IDENT                     { A.NewVar ($2, $1)}
