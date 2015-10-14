@@ -10,7 +10,6 @@
 open Core.Std
 
 module A = Ast
-module S = Symbol
 module P = C0Parser
 
 let start = Lexing.lexeme_start
@@ -119,6 +118,7 @@ rule initial =
   | "true"        { P.TRUE }
   | "false"       { P.FALSE }
   | "bool"        { P.BOOL }
+  | "void"        { P.VOID }
 
   | "if"          { P.IF }
   | "else"        { P.ELSE }
@@ -135,16 +135,15 @@ rule initial =
   | "NULL"        { assert false }
   | "alloc"       { assert false }
   | "alloc_array" { assert false }
-  | "void"        { assert false }
   | "char"        { assert false }
   | "string"      { assert false }
 
   | "return"    { P.RETURN }
   | "int"       { P.INT }
 
-/* don't think main should be a separate token anymore
-  | "main"      { P.MAIN }
-  */
+(* don't think main should be a separate token anymore *)
+(*   | "main"      { P.MAIN } *)
+
 
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }

@@ -48,82 +48,82 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     in
 
     (* Set up header file stuff *)
-    let header_file =
-       (try (* See if there is a specific header file corresponding
-              to this input file. If not, default to 15411-l13.h0 *)
-          let _ = In_channel.with_file
-              ((Filename.chop_extension main_source) ^ ".h0") in
-          (Filename.chop_extension main_source) ^ ".h0"
-        with _ -> "../runtime/15411-l3.h0")
+    let header_file = "../runtime/15411-l3.h0" 
+       (* (try (\* See if there is a specific header file corresponding *)
+       (*        to this input file. If not, default to 15411-l13.h0 *\) *)
+       (*    let _ = In_channel.with_file *)
+       (*        ((Filename.chop_extension main_source) ^ ".h0") in *)
+       (*    (Filename.chop_extension main_source) ^ ".h0" *)
+       (*  with _ -> "../runtime/15411-l3.h0") *)
           (* not sure if I can actually specific the path this way *) in
     
     (* Parse *)
     say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
     let preElabOverallAst = Parse.parse main_source header_file in ();
-    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabAst));
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
 
-    (* Elaborate *)
-    say_if verbose (fun () -> "Elaborating... ");
-    let untypedPostElabOverallAst = Elab.elaborateAST preElabAst in ();
-    say_if dump_upeAST (fun () -> 
-      PrintASTs.untypedPostElabASTToString(untypedPostElabAst));
+    (* (\* Elaborate *\) *)
+    (* say_if verbose (fun () -> "Elaborating... "); *)
+    (* let untypedPostElabOverallAst = Elab.elaborateAST preElabAst in (); *)
+    (* say_if dump_upeAST (fun () ->  *)
+    (*   PrintASTs.untypedPostElabASTToString(untypedPostElabAst)); *)
 
-    (* Typecheck *)
-    say_if verbose (fun () -> "Typechecking...");
-    let typedPostElabAst = TypeChecker.typecheck untypedPostElabAst in ();
-    say_if dump_typedAST (fun () ->
-      PrintASTs.typedPostElabASTToString(typedPostElabAst));
-    if typecheck_only then exit 0;
+    (* (\* Typecheck *\) *)
+    (* say_if verbose (fun () -> "Typechecking..."); *)
+    (* let typedPostElabAst = TypeChecker.typecheck untypedPostElabAst in (); *)
+    (* say_if dump_typedAST (fun () -> *)
+    (*   PrintASTs.typedPostElabASTToString(typedPostElabAst)); *)
+    (* if typecheck_only then exit 0; *)
 
 
-    (* Convert Post-Elab AST to Infinte Addr *)
-    say_if verbose (fun () -> "converting to Infinite Address code");
-    let infAddr = ToInfAddr.toInfAddr typedPostElabAst in ();
-    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
+    (* (\* Convert Post-Elab AST to Infinte Addr *\) *)
+    (* say_if verbose (fun () -> "converting to Infinite Address code"); *)
+    (* let infAddr = ToInfAddr.toInfAddr typedPostElabAst in (); *)
+    (* say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
     
-    (* Convert Inf Addr (arbitrarily nested right hand side) *)
-    (*    to three address *)
-    let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in (); 
-    say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr);
+    (* (\* Convert Inf Addr (arbitrarily nested right hand side) *\) *)
+    (* (\*    to three address *\) *)
+    (* let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in ();  *)
+    (* say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr); *)
 
-    (* Three address to Two address *)
-    say_if verbose (fun () -> "3Addr to 2Addr...");
-    let twoAddr = To2Addr.to2Addr threeAddr in ();
-    say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
+    (* (\* Three address to Two address *\) *)
+    (* say_if verbose (fun () -> "3Addr to 2Addr..."); *)
+    (* let twoAddr = To2Addr.to2Addr threeAddr in (); *)
+    (* say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr); *)
     
-    (* Allocate Registers *)
-    say_if verbose (fun () -> "Allocating Registers...");
-    let almostAssem = RegAlloc.regAlloc twoAddr in
-    say_if dump_assem (fun () -> assemProgToString almostAssem);
+    (* (\* Allocate Registers *\) *)
+    (* say_if verbose (fun () -> "Allocating Registers..."); *)
+    (* let almostAssem = RegAlloc.regAlloc twoAddr in *)
+    (* say_if dump_assem (fun () -> assemProgToString almostAssem); *)
 
-    (* RemoveMemMemInstrs *)
-    say_if verbose (fun () -> "Removing mem-mem instrs..."); 
-    let noMemMemAssem = 
-       RemoveMemMemInstrs.removeMemMemInstrs almostAssem in 
-    say_if dump_NoMemMem (fun () ->
-        assemProgToString noMemMemAssem); 
+    (* (\* RemoveMemMemInstrs *\) *)
+    (* say_if verbose (fun () -> "Removing mem-mem instrs...");  *)
+    (* let noMemMemAssem =  *)
+    (*    RemoveMemMemInstrs.removeMemMemInstrs almostAssem in  *)
+    (* say_if dump_NoMemMem (fun () -> *)
+    (*     assemProgToString noMemMemAssem);  *)
 
-    (* Account for wonky instructions that require specific *)
-    (*   registers, like idiv *)
-    say_if verbose (fun () -> "Handling wonky instructions..."); 
-    let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in 
-    say_if dump_wonky (fun () -> assemProgWonkyToString 
-                          wonkyAssem); 
+    (* (\* Account for wonky instructions that require specific *\) *)
+    (* (\*   registers, like idiv *\) *)
+    (* say_if verbose (fun () -> "Handling wonky instructions...");  *)
+    (* let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in  *)
+    (* say_if dump_wonky (fun () -> assemProgWonkyToString  *)
+    (*                       wonkyAssem);  *)
 
-    let lala = CondenseMoves.condenseMoves wonkyAssem in
-    (* Format assembly *)
-    say_if verbose (fun () -> "Formatting assembly..."); 
-    let finalAssem = FormatAssem.formatAssem lala in 
-    say_if dump_final (fun () -> finalAssem); 
+    (* let lala = CondenseMoves.condenseMoves wonkyAssem in *)
+    (* (\* Format assembly *\) *)
+    (* say_if verbose (fun () -> "Formatting assembly...");  *)
+    (* let finalAssem = FormatAssem.formatAssem lala in  *)
+    (* say_if dump_final (fun () -> finalAssem);  *)
     
-    (* Output assembly *)
-    say_if verbose (fun () -> "Outputting assembly..."); 
-    let afname = main_source ^ ".s" in 
-    say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
+    (* (\* Output assembly *\) *)
+    (* say_if verbose (fun () -> "Outputting assembly...");  *)
+    (* let afname = main_source ^ ".s" in  *)
+    (* say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ..."); *)
 
-    Out_channel.with_file afname
-      ~f:(fun afstream -> output_string afstream finalAssem)
+    (* Out_channel.with_file afname *)
+    (*   ~f:(fun afstream -> output_string afstream finalAssem) *)
       
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1

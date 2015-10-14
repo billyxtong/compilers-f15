@@ -13,25 +13,25 @@ let expand_asnop id op e =
     match op with
        A.EQ -> A.SimpAssign (id, e)
      | A.PLUSEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.ADD, e))
+     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.ADD, e))
      | A.SUBEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.SUB, e))
+     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.SUB, e))
      | A.MULEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.MUL, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.MUL, e))
      | A.DIVEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.FAKEDIV, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.FAKEDIV, e))
      | A.MODEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.FAKEMOD, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.FAKEMOD, e))
      | A.AND_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.BIT_AND, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_AND, e))
      | A.OR_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.BIT_OR, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_OR, e))
      | A.XOR_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.BIT_XOR, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_XOR, e))
      | A.LSHIFT_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.LSHIFT, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.LSHIFT, e))
      | A.RSHIFT_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop A.RSHIFT, e))
+             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.RSHIFT, e))
 
 let expand_postop id op =
     match op with
@@ -122,13 +122,13 @@ gdecl :
   | typedef                    { $1 }
 
 fdecl :
-    c0type IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3 }
+    c0type IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3) }
 
 fdefn :
     c0type IDENT paramlist block { A.FunDef ($1, $2, $3, $4) }
 
 typedef :
-    TYPEDEF c0type IDENT SEMI         { A.Typdef ($1, $2) }
+    TYPEDEF c0type IDENT SEMI         { A.Typedef ($2, $3) }
 
 param :
     c0type IDENT            { ($1, $2) }
@@ -197,26 +197,29 @@ control :
        { A.PreElabFor ($3, $5, $7, $9) }
  | RETURN exp SEMI               { A.PreElabReturn $2 }
  | RETURN SEMI                   { A.PreElabVoidReturn }
- | ASSERT LPAREN exp RPAREN      { A.PreElabAssert $1 }	  
+ | ASSERT LPAREN exp RPAREN      { A.PreElabAssert $3 }	  
 	  
 decl :
    c0type IDENT                     { A.NewVar ($2, $1)}
  | c0type IDENT ASSIGN exp         { A.Init ($2, $1, $4) }
+	  /*
  | c0type MAIN                     { A.NewVar ("main", $1) }
  | c0type MAIN ASSIGN exp          { A.Init ("main", $1, $4) }
+	  */
  ;
 
 arglistfollow :
    /* empty */                 { [] }
  | COMMA exp arglistfollow     { $2::$3 }				 
-   
+;
+  
 arglist :
    LPAREN RPAREN               { [] }
  | LPAREN exp arglistfollow    { $2::$3 }	  
-   
+;
+  
 lvalue :
    IDENT                        { $1 }
- | MAIN                         { "main" }
  | LPAREN lvalue RPAREN         { $2 }
  ;
 
@@ -227,40 +230,40 @@ lvalue :
    because both ways lead to a correct parse. */
 exp :
   LPAREN exp RPAREN              { $2 }
- | IDENT arglist                 { A.PreElabFunCall $2 }	 
+ | IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
  | intconst                      { $1 }
  | boolconst                     { $1 } 
  | lvalue 			 { A.PreElabIdentExpr $1 }
  /* Int arithmetic */				 
  | exp PLUS exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.ADD, $3) }
+				     ($1, A.IntBinop D.ADD, $3) }
  | exp MINUS exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.SUB, $3) }
+				     ($1, A.IntBinop D.SUB, $3) }
  | exp STAR exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.MUL, $3) }
+				     ($1, A.IntBinop D.MUL, $3) }
  | exp SLASH exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.FAKEDIV, $3) }
+				     ($1, A.IntBinop D.FAKEDIV, $3) }
  | exp PERCENT exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.FAKEMOD, $3) }
+				     ($1, A.IntBinop D.FAKEMOD, $3) }
 /* Bitwise ops */       
  | exp BIT_OR exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.BIT_OR, $3) }
+				     ($1, A.IntBinop D.BIT_OR, $3) }
  | exp BIT_AND exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.BIT_AND, $3) }
+				     ($1, A.IntBinop D.BIT_AND, $3) }
  | exp XOR exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.BIT_XOR, $3) }
+				     ($1, A.IntBinop D.BIT_XOR, $3) }
 /* Shifts */       
  | exp RSHIFT exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.RSHIFT, $3) }
+				     ($1, A.IntBinop D.RSHIFT, $3) }
  | exp LSHIFT exp                  { A.PreElabBinop
-				     ($1, A.IntBinop A.LSHIFT, $3) }
+				     ($1, A.IntBinop D.LSHIFT, $3) }
 /* Unary */       
  | MINUS exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (0, A.INT),
-				  A.IntBinop A.SUB, $2 ) }
+				  A.IntBinop D.SUB, $2 ) }
  | BIT_NOT exp %prec UNARY      { A.PreElabBinop
 				(A.PreElabConstExpr (-1, A.INT),
-				  A.IntBinop A.BIT_XOR, $2 ) }
+				  A.IntBinop D.BIT_XOR, $2 ) }
 /* Comparison/Logical */
  | exp GT exp                  { expand_log_binop $1 A.GT $3 }
  | exp DOUBLE_EQ exp           { expand_log_binop $1 A.DOUBLE_EQ $3 }
