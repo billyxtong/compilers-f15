@@ -14,9 +14,6 @@ let reset () = anyErrors := false
 
 let msg str ext note =
   anyErrors := true;
-  (match ext with
-    None -> ()
-  | Some x -> print_string (Mark.show x));
   List.iter [":"; str; ":"; note; "\n"] ~f:print_string
 
 let error ext note =
