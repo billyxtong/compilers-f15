@@ -24,6 +24,7 @@ let rec preElabExprToString(preelabexpr : preElabExpr) =
       | PreElabNot(expr1) -> concat "" ["!"; preElabExprToString(expr1)]
       | PreElabTernary(e1, e2, e3) -> "(" ^ (preElabExprToString e1) ^ " ? " ^
               (preElabExprToString e2) ^ " : " ^ (preElabExprToString e3) ^ ")"
+      | PreElabFunCall(func, args) -> identToString(func) ^ "(" ^ (concat ", " (List.map preElabExprToString args)) ^ ")"
 
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
@@ -58,6 +59,8 @@ and controlToString(c : control) =
                                                         simpOptToString(sOpt2); ") {\n\t";
                                                         preElabStmtToString(pStmt); "\n}"]
       | PreElabReturn(pExpr) -> "return " ^ preElabExprToString(pExpr)
+      | PreElabVoidReturn -> "return"
+      | PreElabAssert(pExpr) -> "assert(" ^ preElabExprToString(pExpr) ^ ")"
 
 and preElabStmtToString(pStmt : preElabStmt) = 
   match pStmt with
@@ -67,7 +70,20 @@ and preElabStmtToString(pStmt : preElabStmt) =
 
 and blockToString(blk : block) = concat "\n" (List.map preElabStmtToString blk) ^ "\n" 
 
-let preElabASTToString(blk) = blockToString blk
+let paramToString(c, i) = c0typeToString(c) ^ identToString(i)
+
+let globalDeclToString(g : globalDecl) =
+  match g with
+        FunDecl(c, i, params) -> c0typeToString(c) ^ identToString(i) ^ "(" ^ 
+                                 (concat ", " List.map paramToString params) 
+                                 ^ ")"
+      | FunDef(c, i, params, stmts) -> 
+          c0typeToString(c) ^ identToString(i) ^ "(" ^ 
+          (concat ", " List.map paramToString params) ^ ") {\n" ^ 
+          blockToString(stmts) ^ "}"
+      | Typedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i)
+
+let preElabASTToString(decls : globalDecl list) = concat "\n" (List.map globalDeclToString decls) ^ "\n"
 
 (* ============ Untyped Post-Elab AST Print Functions ================= *)
 

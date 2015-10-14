@@ -1,10 +1,13 @@
 open Datatypesv1
 open String
+open Ast
 
 let c0typeToString (c : c0type) =
   match c with
         INT -> "int "
       | BOOL -> "bool "
+      | VOID -> "void "
+      | TypedefType(identifier) -> identToString(identifier) ^ " "
 
 let constToString (c : const) = string_of_int(c)
 
