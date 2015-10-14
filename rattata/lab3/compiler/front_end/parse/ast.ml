@@ -47,10 +47,13 @@ type typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabWhile of boolExpr * typedPostElabBlock
                   | TypedPostElabReturn of typedPostElabExpr
                       (* functions can now return any type! *)
-                  | TypedPostElabAssert of typedPostElabExpr
+                  | TypedPostElabAssert of boolExpr
                   | TypedPostElabVoidReturn (* takes no args *)
                   | VoidFunCall of ident * typedPostElabExpr list
-                  | Abort (* what's this for? *)
+                  | Abort (* what's this for?
+            assert(false) should raise SIGABRT. I need this in
+            typedAST for the same reason I need jumpUncond, and
+            you don't need to make prints for it *)
                   | JumpUncond of label
 and typedPostElabBlock = typedPostElabStmt list
 type typedPostElabGlobalDecl =

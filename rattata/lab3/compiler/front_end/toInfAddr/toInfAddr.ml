@@ -40,6 +40,13 @@ and trans_exp retTmp retLabel idToTmpMap = function
     | A.BoolExpr e -> let (instrs, t) = trans_bool_exp retTmp retLabel idToTmpMap e None in
                       (instrs, TmpBoolExpr (TmpBoolArg (TmpLoc t)))
 
+(* Returns a list of tmpExprs, resulting from calling trans_exp on each of the args *)
+and trans_fun_args retTmp retLabel idToTmpMap exp_list =
+      let instr_and_e_list = List.map exp_list (trans_exp retTmp retLabel idToTmpMap) in
+      let instrs = List.concat (List.map instr_and_e_list (fun (instrs, _) -> instrs)) in
+      let exps = List.map instr_and_e_list (fun (_, e) -> e) in
+      (instrs, exps)
+
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
    but ternary *)
@@ -85,6 +92,9 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
                                             A.IntExpr e2)] in
          (trans_cond retTmp retLabel newMap (c, astForIf, astForElse),
           TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
+     | A.IntFunCall (fName, argList) ->
+         let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
+         (instrs, TmpInfAddrIntFunCall(fName, argExps))
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
@@ -248,7 +258,14 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
                                   TmpBoolArg (TmpConst 1))) in
                    make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                       stmtsForElse JNE JE )
-                 (* check to make sure you don't mix up je and jne *)
+       | A.BoolFunCall(fName, argList) ->
+           let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
+           let result_id = GenUnusedID.create() in
+           let result_tmp = Temp.create() in
+           let newMap = M.add idToTmpMap result_id result_tmp in
+           TmpInfAddrMov(TmpBoolExpr (TmpInfAddrBoolFunCall(fName, argExps)),
+                         Tmp result_tmp)::
+           trans_cond retTmp retLabel newMap (A.BoolIdent result_id, stmtsForIf, stmtsForElse)
 
 and trans_stmts retTmp retLabel idToTmpMap = function
      A.TypedPostElabDecl (id, idType)::stmts ->
@@ -288,13 +305,23 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         but I need it for toInfAddr :( *)
         TmpInfAddrJump(JMP_UNCOND, target)::trans_stmts retTmp retLabel idToTmpMap stmts
    | A.TypedPostElabReturn e :: stmts ->
-        let (instrs_for_e, eInfAddr) = trans_int_exp retTmp retLabel idToTmpMap e in
+        let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
         (* Move our value to the ret tmp, then jump to the return *)
         instrs_for_e @
-        TmpInfAddrMov(TmpIntExpr eInfAddr, retTmp)::
+        TmpInfAddrMov(eInfAddr, retTmp)::
         TmpInfAddrJump(JMP_UNCOND, retLabel) :: []
-
-   | _ -> []
+   | A.Abort :: stmts -> TmpInfAddrVoidFunCall("abort", [])::[]
+           (* call the built-in abort function, and ignore the rest of the stmts *)
+   | A.TypedPostElabAssert e :: stmts ->
+        let callAbortAst = A.TypedPostElabIf (e, [A.Abort], stmts)::[] in
+        trans_stmts retTmp retLabel idToTmpMap callAbortAst
+   | A.VoidFunCall (fName, argList)::stmts ->
+        let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
+        instrs @ TmpInfAddrVoidFunCall(fName, argExps)::[]
+        @ trans_stmts retTmp retLabel idToTmpMap stmts
+   | A.TypedPostElabVoidReturn::stmts -> TmpInfAddrVoidReturn::
+                                         trans_stmts retTmp retLabel idToTmpMap stmts
+   | [] -> []
 
 (* We assume that this is run after typechecking, so everything is
    declared initialized, etc *)

@@ -93,7 +93,9 @@ type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
                    | TmpInfAddrReturn of tmpExpr
+                   | TmpInfAddrVoidReturn
                    | TmpInfAddrAbort
+                   | TmpInfAddrVoidFunCall of ident * tmpExpr list
 type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * ident list
                                    * tmpInfAddrInstr list
                          (* function name, param names,
