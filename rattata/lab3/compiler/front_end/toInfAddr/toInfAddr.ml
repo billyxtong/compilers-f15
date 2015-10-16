@@ -310,10 +310,11 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         instrs_for_e @
         TmpInfAddrMov(eInfAddr, retTmp)::
         TmpInfAddrJump(JMP_UNCOND, retLabel) :: []
-   | A.Abort :: stmts -> TmpInfAddrVoidFunCall("abort", [])::[]
-           (* call the built-in abort function, and ignore the rest of the stmts *)
    | A.TypedPostElabAssert e :: stmts ->
-        let callAbortAst = A.TypedPostElabIf (e, [A.Abort], stmts)::[] in
+     (* If e is true we proceed on, else we call the abort function, with
+     no arguments *)
+        let callAbortAst = A.TypedPostElabIf (e, stmts,
+                                     [A.VoidFunCall("abort", [])])::[] in
         trans_stmts retTmp retLabel idToTmpMap callAbortAst
    | A.VoidFunCall (fName, argList)::stmts ->
         let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in

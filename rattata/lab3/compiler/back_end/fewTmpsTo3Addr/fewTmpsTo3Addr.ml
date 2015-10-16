@@ -27,14 +27,6 @@ let rec munch_bool_instr = function
         instrs1 @ instrs2 @ Tmp3AddrMov(dest2, t3) ::
         Tmp3AddrBoolInstr (TmpCmp (dest1, t3))::[]
                                                
-  (* | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpLoc t) -> *)
-  (*       Tmp3AddrBoolInstr (TmpCmp (e1, t))::[] *)
-  (* | TmpInfAddrCmp (TmpIntArg e1, TmpIntArg TmpConst c) -> *)
-  (*       let t = Tmp (Temp.create()) in *)
-  (*       Tmp3AddrMov(TmpConst c, t) *)
-  (*       ::Tmp3AddrBoolInstr (TmpCmp (e1, t))::[] *)
-            
-
 (* d is the suggested destination, but we might have to generate more
    tmps anyway if there is a nested binop *)
 and munch_exp d e depth =
@@ -64,7 +56,16 @@ and munch_int_binop d (int_binop, e1, e2) depth =
     @ (if false (* TmpLoc d = dest1 *) then []
        else [Tmp3AddrBinop (int_binop, dest1, dest2, d)])
 
-
+(* takes a tmpExpr list and returns (instrs, tmpArgs) where instrs is a
+   list of all required instructions, and tmpArgs is a list of the
+   munched arguments *)
+and munch_fun_args = function
+    [] -> ([], [])
+  | arg::args -> let t = Tmp (Temp.create()) in
+                 let (curr_instrs, curr_dest) = munch_exp t arg 0 in
+                 let (rest_instrs, rest_dests) = munch_fun_args args in
+                 (curr_instrs @ rest_instrs, curr_dest::rest_dests)
+    
 (* munch_stm stm generates code to execute stm *)
 let munch_instr = function
     TmpInfAddrMov (e, t) ->
@@ -76,7 +77,12 @@ let munch_instr = function
        let (instrs, dest) = munch_exp (Tmp (Temp.create())) e 0 in
        instrs @ Tmp3AddrReturn dest :: []
   | TmpInfAddrLabel jumpLabel -> Tmp3AddrLabel jumpLabel :: []
-
+  | TmpInfAddrVoidFunCall (fName, args) -> 
+       let (instrs, dests) = munch_fun_args args in
+       (* The None means no destination for fun call *)
+       instrs @ Tmp3AddrFunCall(fName, dests, None)::[]
+  | TmpInfAddrVoidReturn -> Tmp3AddrVoidReturn
+           
 let rec finalPass = function
     [] -> []
   | instr::instrs -> match instr with
