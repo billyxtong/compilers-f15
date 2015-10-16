@@ -343,11 +343,14 @@ let trans_global_decl decl =
     match decl with
         A.TypedPostElabFunDef (typee, fName, params, stmts) ->
             let idToTmpMap = initIdToTmpMap params in
-            let param_ident_list = List.map params (fun (_, id) -> id) in
+            let param_tmp_list = List.map params (fun (_, id) ->
+                   match M.find idToTmpMap id with
+                       Some t -> Tmp t
+                     | None -> assert(false)) in
             let infAddrStmts = trans_stmts retTmp retLabel idToTmpMap stmts in
             let finalStmts = infAddrStmts @ TmpInfAddrLabel retLabel ::
             TmpInfAddrReturn (TmpIntExpr (TmpIntArg (TmpLoc (retTmp))))::[] in
-            TmpInfAddrFunDef (fName, param_ident_list, finalStmts)
+            TmpInfAddrFunDef (fName, param_tmp_list, finalStmts)
 
 let toInfAddr (funDefList: A.typedPostElabAST) =
      (* We will have a simple return label that all returns jump to *)

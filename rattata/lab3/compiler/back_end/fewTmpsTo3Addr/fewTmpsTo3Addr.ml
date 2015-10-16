@@ -11,13 +11,25 @@
 open Core.Std
 open Datatypesv1
 
+
 let rec munch_bool_instr = function
-    TmpInfAddrTest (TmpBoolArg e1, TmpBoolArg TmpLoc t) ->
-        Tmp3AddrBoolInstr (TmpTest (e1, t))::[]
-  | TmpInfAddrTest (TmpBoolArg e1, TmpBoolArg TmpConst c) ->
+    TmpInfAddrTest (bool_exp, TmpBoolArg TmpLoc t) ->
         let t = Tmp (Temp.create()) in
-        Tmp3AddrMov(TmpConst c, t)
-        ::Tmp3AddrBoolInstr (TmpTest (e1, t))::[]
+        let (instrs, dest) = munch_exp t (TmpBoolExpr bool_exp) 0 in
+        instrs @ Tmp3AddrBoolInstr (TmpTest (dest, t))::[]
+   | TmpInfAddrCmp (int_exp, TmpIntArg TmpLoc t) ->
+        let t = Tmp (Temp.create()) in
+        let (instrs, dest) = munch_exp t (TmpIntExpr int_exp) 0 in
+        instrs @ Tmp3AddrBoolInstr (TmpCmp (dest, t))::[]
+  | TmpInfAddrTest (bool_exp, non_tmp_exp) ->
+        let t1 = Tmp (Temp.create()) in
+        let t2 = Tmp (Temp.create()) in
+        let (instrs_for_arg, arg_dest) = munch_exp t1 (TmpBoolExpr bool_exp) 0 in
+        let (instrs_for_loc, loc_dest) = munch_exp t2 (TmpBoolExpr non_tmp_exp) 0 in
+        (* If loc_dest = t2 then the mov instr will do nothing and will be
+           removed later *)
+        instrs_for_arg @ instrs_for_loc @ Tmp3AddrMov(loc_dest, t2)
+        ::Tmp3AddrBoolInstr (TmpTest (arg_dest, t2))::[]
   | TmpInfAddrCmp (int_exp1, int_exp2) ->
         let t1 = Tmp (Temp.create()) in
         let t2 = Tmp (Temp.create()) in
@@ -35,8 +47,20 @@ and munch_exp d e depth =
          let t = if depth > 0 then Tmp (Temp.create()) else d in
          (munch_int_binop t (int_binop, int_e1, int_e2) (depth + 1),
           TmpLoc t)
+         (* Note: no nested bool exps because we unwrap them all in
+            toInfAddr! *)
    | TmpBoolExpr (TmpBoolArg e) -> ([], e)
    | TmpIntExpr (TmpIntArg e) -> ([], e)
+       (* Int and Bool function calls are identical from now on, I think *)
+   | TmpIntExpr (TmpInfAddrIntFunCall (fName, args)) ->
+       let t = Tmp (Temp.create()) in
+       let (instrs, dests) = munch_fun_args args in
+       (instrs @ Tmp3AddrFunCall (fName, dests, Some t)::[], TmpLoc t)
+   | TmpBoolExpr (TmpInfAddrBoolFunCall (fName, args)) ->
+       let t = Tmp (Temp.create()) in
+       let (instrs, dests) = munch_fun_args args in
+       (instrs @ Tmp3AddrFunCall (fName, dests, Some t)::[], TmpLoc t)
+       
 
 (* Note: all bool binops are removed in toInfAddr because we
    are clever :) *)
@@ -81,7 +105,7 @@ let munch_instr = function
        let (instrs, dests) = munch_fun_args args in
        (* The None means no destination for fun call *)
        instrs @ Tmp3AddrFunCall(fName, dests, None)::[]
-  | TmpInfAddrVoidReturn -> Tmp3AddrVoidReturn
+  | TmpInfAddrVoidReturn -> Tmp3AddrVoidReturn::[]
            
 let rec finalPass = function
     [] -> []
@@ -95,4 +119,10 @@ let rec to3AddrRec = function
     [] -> []
   | instr::instrs -> munch_instr instr @ to3AddrRec instrs
 
-let to3Addr instrs = finalPass (to3AddrRec instrs)
+let funInstrsTo3Addr instrs = finalPass (to3AddrRec instrs)
+
+let rec to3Addr = function
+     [] -> []
+   | TmpInfAddrFunDef(fName, args, instrs)::rest ->
+          Tmp3AddrFunDef(fName, args, funInstrsTo3Addr instrs)
+          :: to3Addr rest

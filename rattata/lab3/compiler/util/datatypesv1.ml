@@ -80,8 +80,10 @@ type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
                   the result anywhere *)
                    | Tmp3AddrVoidReturn
                    | Tmp3AddrFunCall of ident * tmpArg list * tmp option
-type tmp3AddrProg = tmp3AddrInstr list
-
+type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmp list *
+                                        tmp3AddrInstr list
+type tmp3AddrProg = tmp3AddrFunDef list
+    
 (* Inf Address Code: any number of operands on right hand side *)
 type tmpIntExpr = TmpIntArg of tmpArg
                 | TmpInfAddrBinopExpr of intBinop *
@@ -101,7 +103,7 @@ type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrReturn of tmpExpr
                    | TmpInfAddrVoidReturn
                    | TmpInfAddrVoidFunCall of ident * tmpExpr list
-type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * ident list
+type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * tmp list
                                    * tmpInfAddrInstr list
                          (* function name, param names,
                             instruction list *)
