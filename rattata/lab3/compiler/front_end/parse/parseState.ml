@@ -32,16 +32,3 @@ let rec look = function
   | (pos, [], n) ->
       (* first line pos is off by 1 *)
       (1, pos - 1)
-
-(* ext (leftpos, rightpos) = SOME((leftline, leftcol),
-                                  (rightline, rightcol), filename)
- * return NONE for invalid position (0,0)
- *)
-let ext = function
-    (0, 0) -> None
-  | (left, right) ->
-      let lines = !currLines in
-      let len = List.length lines in
-      Some (look (left, lines, len),
-            look (right, lines, len),
-            !currFilename)

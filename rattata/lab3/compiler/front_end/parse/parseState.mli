@@ -15,6 +15,3 @@ val setfile : string -> unit
 
 (* newline(pos) adds pos to current newline positions *)
 val newline : int -> unit
-
-(* returns the current position information based on two integer offsets *)
-val ext : int * int -> Mark.ext option

@@ -32,7 +32,7 @@ let decnumber s lexbuf =
     P.DECCONST (Int32.of_string (if s = "2147483648" then "0x80000000"
                                  else s))
   with Failure _ ->
-    ErrorMsg.error (ParseState.ext (start lexbuf, l_end lexbuf))
+    ErrorMsg.error
       ("cannot parse integral constant `" ^ text lexbuf ^ "'");
     P.DECCONST Int32.zero
 
@@ -40,13 +40,13 @@ let hexnumber s lexbuf =
   try
     P.HEXCONST (Int32.of_string s)
   with Failure _ ->
-    ErrorMsg.error (ParseState.ext (start lexbuf, l_end lexbuf))
+    ErrorMsg.error
       ("cannot parse integral constant `" ^ text lexbuf ^ "'");
     P.HEXCONST Int32.zero
 
 let eof () =
   (if !commentLevel > 0 then
-    ErrorMsg.error (ParseState.ext (!commentPos, !commentPos))
+    ErrorMsg.error 
       "unterminated comment");
   P.EOF
 
@@ -151,13 +151,13 @@ rule initial =
   | id as name  { P.IDENT name }
 
   | "/*"        { enterComment lexbuf; comment lexbuf }
-  | "*/"        { ErrorMsg.error (ParseState.ext (start lexbuf, start lexbuf))
+  | "*/"        { ErrorMsg.error 
                     "unbalanced comments"; initial lexbuf }
 
   | "//"        { comment_line lexbuf }
   | '#'         { assert false }
   | eof         { eof () }
-  | _           { ErrorMsg.error (ParseState.ext (start lexbuf, start lexbuf))
+  | _           { ErrorMsg.error 
                     ("illegal character: \"" ^ text lexbuf ^ "\"");
                   initial lexbuf }
 
