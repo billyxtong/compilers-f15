@@ -13,9 +13,9 @@ val reset : unit -> unit
 val anyErrors : bool ref
 
 (* sets the error flag and prints out an error message, does NOT raise ERROR *)
-val error : Mark.ext option -> string -> unit
+val error : string -> unit
 (* same, but does not increment error count *)
-val warn : Mark.ext option -> string -> unit
+val warn : string -> unit
 
 (* generic code stopping exception *)
 exception Error

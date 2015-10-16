@@ -12,14 +12,14 @@ let anyErrors = ref false
 
 let reset () = anyErrors := false
 
-let msg str ext note =
+let msg str note =
   anyErrors := true;
   List.iter [":"; str; ":"; note; "\n"] ~f:print_string
 
-let error ext note =
+let error note =
   anyErrors := true;
-  msg "error" ext note
+  msg "error" note
 
-let warn ext note = msg "warning" ext note
+let warn note = msg "warning" note
 
 exception Error
