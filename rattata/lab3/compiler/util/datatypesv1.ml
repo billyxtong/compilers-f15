@@ -65,7 +65,9 @@ type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                     (* tmp option because voids have no dest *)
                    | Tmp2AddrVoidReturn
                    | Tmp2AddrFunCall of ident * tmpArg list * tmp option
-type tmp2AddrProg = tmp2AddrInstr list
+type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmp list *
+                                        tmp2AddrInstr list
+type tmp2AddrProg = tmp2AddrFunDef list
 
 (* Three Address Code *)
 type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp

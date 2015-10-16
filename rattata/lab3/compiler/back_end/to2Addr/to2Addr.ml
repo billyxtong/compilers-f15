@@ -25,7 +25,15 @@ let instrTo2Addr = function
   | Tmp3AddrJump j -> Tmp2AddrJump j::[]
   | Tmp3AddrLabel jumpLabel -> Tmp2AddrLabel jumpLabel::[]
   | Tmp3AddrBoolInstr instr -> Tmp2AddrBoolInstr instr::[]
+  | Tmp3AddrVoidReturn -> Tmp2AddrVoidReturn::[]
+  | Tmp3AddrFunCall (fName, args, dest) -> Tmp2AddrFunCall (fName, args, dest)::[]
+
+let rec funTo2Addr = function
+   [] -> []
+ | instr::instrs -> instrTo2Addr instr @ funTo2Addr instrs
 
 let rec to2Addr = function
    [] -> []
- | instr::instrs -> instrTo2Addr instr @ to2Addr instrs
+ | Tmp3AddrFunDef(fName, args, instrs)::rest ->
+   Tmp2AddrFunDef(fName, args, funTo2Addr instrs)
+   :: to2Addr rest
