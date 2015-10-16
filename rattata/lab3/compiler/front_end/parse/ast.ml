@@ -95,13 +95,14 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabReturn of untypedPostElabExpr
                          | UntypedPostElabVoidReturn (* no args *)
                          | UntypedPostElabAssert of untypedPostElabExpr
+                         | UntypedPostElabExprStmt of untypedPostElabExpr
 and untypedPostElabBlock = untypedPostElabStmt list
                              
 type untypedPostElabGlobalDecl =
       UntypedPostElabFunDecl of c0type * ident * param list
     | UntypedPostElabFunDef of c0type * ident * param list *
                                untypedPostElabBlock
-    | UntypedPostElabTypdef of c0type * ident                               
+    | UntypedPostElabTypedef of c0type * ident                               
 type untypedPostElabAST = untypedPostElabGlobalDecl list
 type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 

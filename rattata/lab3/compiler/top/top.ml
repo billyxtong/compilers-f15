@@ -63,21 +63,21 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     let preElabOverallAst = Parse.parse main_source header_file in ();
     say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
 
-    (* (\* Elaborate *\) *)
-    (* say_if verbose (fun () -> "Elaborating... "); *)
-    (* let untypedPostElabOverallAst = Elab.elaborateAST preElabAst in (); *)
-    (* say_if dump_upeAST (fun () ->  *)
-    (*   PrintASTs.untypedPostElabASTToString(untypedPostElabAst)); *)
+    (* Elaborate *)
+    say_if verbose (fun () -> "Elaborating... ");
+    let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
+    (*say_if dump_upeAST (fun () ->
+      PrintASTs.untypedPostElabASTToString(untypedPostElabAst));*)
 
-    (* (\* Typecheck *\) *)
-    (* say_if verbose (fun () -> "Typechecking..."); *)
-    (* let typedPostElabAst = TypeChecker.typecheck untypedPostElabAst in (); *)
-    (* say_if dump_typedAST (fun () -> *)
-    (*   PrintASTs.typedPostElabASTToString(typedPostElabAst)); *)
-    (* if typecheck_only then exit 0; *)
+    (* Typecheck *)
+    say_if verbose (fun () -> "Typechecking...");
+    let typedPostElabAst = TypeChecker.typecheck untypedPostElabOverallAst in ();
+    (*say_if dump_typedAST (fun () ->
+      PrintASTs.typedPostElabASTToString(typedPostElabAst));
+    if typecheck_only then exit 0;*)
 
 
-    (* (\* Convert Post-Elab AST to Infinte Addr *\) *)
+    (* (\* convert Post-Elab AST to Infinte Addr *\) *)
     (* say_if verbose (fun () -> "converting to Infinite Address code"); *)
     (* let infAddr = ToInfAddr.toInfAddr typedPostElabAst in (); *)
     (* say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)

@@ -10,6 +10,7 @@ let rec elaboratePreElabExpr(expression : preElabExpr) =
       | PreElabNot(expression') -> UntypedPostElabNot(elaboratePreElabExpr(expression'))
       | PreElabTernary(e1, e2, e3) -> UntypedPostElabTernary(elaboratePreElabExpr e1,
                                           elaboratePreElabExpr e2, elaboratePreElabExpr e3)
+      | PreElabFunCall(i, exprs) -> UntypedPostElabFunCall(i, List.map elaboratePreElabExpr exprs)
 
 let elaboratePreElabDecl(decl : preElabDecl) = 
   match decl with
@@ -73,16 +74,22 @@ and elaborateControl (ctrl : control) : (Ast.untypedPostElabStmt list) =
                                            elaboratePreElabStmt(addSimpStmtToPreElabStmt(pStmt,sOpt2)),
                                            inside)])
       | PreElabReturn(pExpr) -> [UntypedPostElabReturn(elaboratePreElabExpr(pExpr))]
+      | PreElabVoidReturn -> [UntypedPostElabVoidReturn]
+      | PreElabAssert(e) -> [UntypedPostElabAssert(elaboratePreElabExpr e)]
 
 and elaborateBlockStmts = function
      [] -> []
    | stmt::rest -> elaboratePreElabStmt stmt @ elaborateBlockStmts rest
 
-and elaborateBlock stmts = UntypedPostElabBlock (elaborateBlockStmts stmts)::[]
-  
-(* and elaborateBlock (statements : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt statements) *)
+and elaborateBlock (stmts : preElabStmt list) = UntypedPostElabBlock(elaborateBlockStmts stmts)::[]
 
-let elaborateAST (statements : preElabAST) = elaborateBlockStmts(statements)
+let elaborateDecl (decl : globalDecl) =
+  match decl with
+        FunDecl(c,i,ps) -> UntypedPostElabFunDecl(c,i,ps)
+      | FunDef(c,i,ps) -> UntypedPostElabFunDef(c,i,ps)
+      | Typedef(c,i) -> UntypedPostElabTypedef(c,i)
 
-let elaborateOverallAST (preElab1 : preElabAST, preElab2 : preElabAST) =
+let elaborateAST (decls : preElabAST) = List.map elaborateDecl decls
+
+let elaborateOverallAST (preElab1 : preElabAST) (preElab2 : preElabAST) =
     (elaborateAST preElab1, elaborateAST preElab2)
