@@ -15,7 +15,7 @@ let isValidVarDecl (identifier : ident) =
   then true 
   else false
 
-let argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) =
+let rec argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) =
   match (arguments, paramTypes) with
         ([], []) -> true
       | ([], p :: ps) -> false
@@ -103,14 +103,14 @@ let rec tc_expression env (expression : untypedPostElabExpr) =
                   raise ErrorMsg.Error)
 
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
-let tc_header headerEnv (header : untypedPostElabAST) = 
+let rec tc_header headerEnv (header : untypedPostElabAST) = 
   match header with
         [] -> ()
       | fdecl :: fdecls -> 
           (match fdecl with
                  UntypedPostElabFunDecl(funcType, funcName, funcParams) -> 
-                   (let () = M.add headerEnv funcName (funcType, (List.map (fun (c, i) -> c) funcParams), false, true) in
-                    tc_header headerEnv fdecls)
+                   (let newHeaderEnv = M.add headerEnv funcName (funcType, (List.map (fun (c, i) -> c) funcParams), false, true) in
+                    tc_header newHeaderEnv fdecls)
                | _ -> (ErrorMsg.error ("function def'n or typedef in header file \n");
                        raise ErrorMsg.Error))
 
@@ -119,6 +119,7 @@ let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
         ([], []) -> true
       | ([], p :: ps) -> false
       | (p :: ps, []) -> false
+        (* what is p2??? *)
       | (p :: ps, (typee, _) :: newParams) -> if (p = INT && typee = INT) || (p = BOOL && p2 = BOOL) 
                                   then matchParamListTypes ps newParams else false
 
@@ -134,13 +135,14 @@ let lowestTypedefType (typedefType : c0type) tbl =
         TypedefType(identifier) -> 
           (match M.find tbl identifier with
                  Some(anotherType) -> anotherType
+             (* The second case here is never used because all Somes are already matched...what is it for? *)
                | Some _ -> ErrorMsg.error ("not a typedef \n");
                            raise ErrorMsg.Error
                | None -> ErrorMsg.error ("undefined typedef \n");
                          raise ErrorMsg.Error)
       | _ -> typedefType
 
-let tc_prog progEnv (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
+let rec tc_prog progEnv (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
   match prog with
         [] -> typedAST
       | gdecl :: gdecls ->
@@ -149,56 +151,57 @@ let tc_prog progEnv (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                    (match M.find progEnv funcName with
                           Some (fType, paramTypes, isDefined, isExternal) ->
                             if isExternal
-                            then ErrorMsg.error ("trying to redeclare func that was declared in header \n");
-                                 raise ErrorMsg.Error
+                            then (ErrorMsg.error ("trying to redeclare func that was declared in header \n");
+                                 raise ErrorMsg.Error)
                             else
                               if not ((matchFuncTypes fType funcType) && (matchParamListTypes paramTypes funcParams))
-                              then ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
-                                   raise ErrorMsg.Error
+                              then (ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
+                                   raise ErrorMsg.Error)
                               else
                                 tc_prog progEnv gdecls typedAST
                         | Some _ -> ErrorMsg.error ("function names can't shadow typedefs \n");
                                     raise ErrorMsg.Error
                         | None -> 
-                            let () = M.add progEnv funcName 
-                            (lowestTypedefType(funcType), (List.map (fun (c, i) -> c) funcParams), false, false) in
-                            tc_prog progEnv gdecls typedAST)
+                            let newProgEnv = M.add progEnv funcName 
+                            (lowestTypedefType funcType typeEnv, (List.map (fun (c, i) -> c) funcParams), false, false) in
+                            tc_prog newProgEnv gdecls typedAST)
                | UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) -> 
                    (match M.find progEnv funcName with
                           Some (fType, paramTypes, isDefined, isExternal) ->
                             if (isDefined || isExternal)
-                            then ErrorMsg.error ("trying to define already defined OR external function \n");
-                                 raise ErrorMsg.Error
+                            then (ErrorMsg.error ("trying to define already defined OR external function \n");
+                                 raise ErrorMsg.Error)
                             else
                               if not ((matchFuncTypes fType funcType) && (matchParamListTypes paramTypes funcParams))
-                              then ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
-                                   raise ErrorMsg.Error
+                              then (ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
+                                   raise ErrorMsg.Error)
                               else
-                                let () = M.add progEnv funcName 
+                                let newProgEnv = M.add progEnv funcName 
                                   (fType, paramTypes, true, false) in
                                 let funcEnv = Core.Std.String.Map.empty in
+                                (* Need to pass in overall environment to tc statments!! BILLY DO THIS *)
                                 let typeCheckedBlock = tc_statements funcEnv funcBody fType false [] in
-                                  tc_prog progEnv gdecls (TypedPostElabFunDef(funcType, funcName, 
+                                  tc_prog newProgEnv gdecls (TypedPostElabFunDef(funcType, funcName, 
                                   funcParams, List.rev typeCheckedBlock)::typedAST)
                          | None -> (if funcName = "main" && 
-                                        ((List.length funcParams > 0) || lowestTypedefType(funcType) != INT))
-                                    then ErrorMsg.error ("trying to illegally define main \n");
-                                         raise ErrorMsg.Error
+                                        ((List.length funcParams > 0) || lowestTypedefType(funcType) != INT)
+                                    then (ErrorMsg.error ("trying to illegally define main \n");
+                                         raise ErrorMsg.Error)
                                     else
-                                      let () = M.add progEnv funcName 
+                                      (let newProgEnv = M.add progEnv funcName 
                                           (funcType, (List.map (fun (c, i) -> c) funcParams), true, false) in
                                       let funcEnv = Core.Std.String.Map.empty in
                                       let typeCheckedBlock = tc_statements funcEnv funcBody false [] in
-                                      tc_prog progEnv gdecls (TypedPostElabFunDef(funcType, funcName, 
-                                      funcParams, List.rev typeCheckedBlock)::typedAST))
-               | UntypedPostElabTypeDef(typeDefType, typeDefName) -> 
+                                      tc_prog newProgEnv gdecls (TypedPostElabFunDef(funcType, funcName, 
+                                      funcParams, List.rev typeCheckedBlock)::typedAST))))
+               | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
                    (match M.find progEnv typeDefName with
                           Some _ -> ErrorMsg.error ("cannot shadow previously declared typedef/func names \n");
                                     raise ErrorMsg.Error
-                        | None -> let () = M.add progEnv typeDefName (lowestTypedefType(typeDefType)) in
-                                  tc_prog progEnv gdecls typedAST)  
+                        | None -> let newProgEnv = M.add progEnv typeDefName (lowestTypedefType(typeDefType)) in
+                                  tc_prog newProgEnv gdecls typedAST)  
 
-let rec tc_statements env (untypedAST : untypedPostElabAST) (fRetType : c0type)
+and tc_statements env (untypedAST : untypedPostElabAST) (fRetType : c0type)
                           (ret : bool) (typedAST : typedPostElabAST) =
   match untypedAST with
     [] -> (ret, env, typedAST)
@@ -297,3 +300,5 @@ and typecheck ((untypedHeaderAST, untypedProgAST) : untypedPostElabOverallAST) =
   let typedHeaderAST = tc_prog environment untypedHeaderAST  in
   let typedProgAST = tc_prog environment untypedProgAST  in
   (List.rev (typedProgAST @ typedHeaderAST))
+
+(* Need to create env for typedefs; this is separate from progEnv, which is the function environments. *)
