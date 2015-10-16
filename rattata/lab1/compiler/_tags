@@ -1,3 +1,0 @@
-true: annot, bin_annot, thread
-true: package(core,sexplib.syntax,comparelib.syntax)
-true: syntax(camlp4o)

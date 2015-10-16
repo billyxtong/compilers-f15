@@ -1,6 +1,0 @@
-//test return -10
-int main() {
-  int TMAX = 2147483647;
-  int TMIN = TMAX + 1;
-  return -10;
-}
