@@ -14,17 +14,24 @@ let listArrayToString a = String.concat "" (Array.to_list(Array.mapi listToStrin
 let markedLive liveSet line = try let () = H.find liveSet line in true
                           with Not_found -> false
 
-let getDefVar prog line =
+let getDefVars prog line ?(params=[]) =
+  (* We'll consider all parameters to be defined on line -1 *)
+  (* I'm having params default to [] so that I don't to modify liveness to pass
+     it around everywhere, since we only need it when drawing the graph anyway *)
+    if line = -1 then params else
     match Array.get prog line with
-         Tmp2AddrMov(src, Tmp dest) -> Some dest
-       | Tmp2AddrBinop(op, src, Tmp dest) -> Some dest
-       | _ -> None
+         Tmp2AddrMov(src, Tmp dest) -> dest::[]
+       | Tmp2AddrBinop(op, src, Tmp dest) -> dest::[]
+       | Tmp2AddrFunCall(fName, args, Some (Tmp dest)) -> dest::[]
+       | _ -> []
   
 
 let isDef t prog line =
-    match getDefVar prog line with
-          Some t' -> t = t'
-        | None -> false
+  (* idk why it's making me have params as an arg here >:( *)
+    match getDefVars prog line ~params:[] with
+          t'::[] -> t = t'
+        | [] -> false
+        | _ -> assert(false)
 
 let isUsed t prog line =
     match Array.get prog line with
@@ -36,6 +43,8 @@ let isUsed t prog line =
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
        | Tmp2AddrBoolInstr (TmpTest (arg, loc)) ->
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
+       | Tmp2AddrFunCall(fName, args, dest) ->
+            List.exists (fun t' -> TmpLoc (Tmp t) = t') args
        | _ -> false
 
 let rec findLiveLinesForTmpRec t prog predsPerLine liveLinesSet currLine =
@@ -85,11 +94,14 @@ let rec findPredecessors (predecessorsArray : (int list) array)
                           (lineNum :: predecessorsArray.(lineNum + 1)) in
                    findPredecessors predecessorsArray progArray (lineNum + 1))
 
-let drawEdgesForLine prog line liveTmpsOnLine interferenceGraph =
+let drawEdgesForTmp interferenceGraph liveTmpsOnLine t =
+    L.iter (fun t' -> G.addEdge interferenceGraph (t, t')) liveTmpsOnLine
+
+let drawEdgesForLine prog line liveTmpsOnLine interferenceGraph params =
   if line == 0 then () (* no interference on line 0 *) else
-  match getDefVar prog (line - 1) with
-        None -> ()
-      | Some t -> L.iter (fun t' -> G.addEdge interferenceGraph (t, t')) liveTmpsOnLine
+  L.iter (drawEdgesForTmp interferenceGraph liveTmpsOnLine)
+         (getDefVars prog (line - 1 ) ~params:params)
+      
                     
 let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
     let () = G.initVertex interferenceGraph t in
@@ -99,20 +111,19 @@ let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
         in ()
     
 
-let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
+let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine params =
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
   let () = L.iter (fun t -> handleTemp t prog predsPerLine
                       interferenceGraph liveTmpsPerLine) temps in
   let lineNums = Array.mapi (fun i -> fun _ -> i) prog in
   let () = A.iter (fun lineNum -> drawEdgesForLine prog lineNum
-      (liveTmpsPerLine.(lineNum)) interferenceGraph) lineNums in
+      (liveTmpsPerLine.(lineNum)) interferenceGraph params ) lineNums in
   interferenceGraph
 
-let analyzeLiveness (prog : tmp2AddrProg) temps =
-  let progArray = A.of_list prog in
+let analyzeLiveness (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) temps params =
+  let progArray = A.of_list instrs in
   let len = A.length progArray in
   let lineToPredecessorsArray = A.make len [] in
   let () = findPredecessors lineToPredecessorsArray progArray 0 in
-  drawGraph temps progArray lineToPredecessorsArray
-  
+  drawGraph temps progArray lineToPredecessorsArray params
