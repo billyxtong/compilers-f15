@@ -160,7 +160,9 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
                | _ -> (ErrorMsg.error ("function def'n in header file \n");
                        raise ErrorMsg.Error))
 
-
+let rec init_func_env = function
+    [] -> Core.Std.String.Map.empty
+  | (typee, id)::ps -> M.add (init_func_env ps) id (typee, true)
 
 let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
   match prog with
@@ -173,7 +175,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                             (ErrorMsg.error ("trying to shadow used name\n");
                              raise ErrorMsg.Error)
                         | (None, Some (fType, paramTypes, isDefined, isExternal)) ->
-                            if isExternal
+                            (if isExternal
                             then (ErrorMsg.error ("trying to redeclare func that was declared in header \n");
                                  raise ErrorMsg.Error)
                             else
@@ -181,7 +183,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                               then (ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
-                                tc_prog funcMap typedefMap gdecls typedAST
+                                tc_prog funcMap typedefMap gdecls typedAST)
                         | (None, None) -> 
                             let newFuncMap = M.add funcMap funcName 
                             (lowestTypedefType funcType typedefMap, (List.map (fun (c, i) -> c) funcParams), false, false) in
@@ -191,7 +193,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                           (Some _, _) -> (ErrorMsg.error ("trying to shadow used name \n");
                                           raise ErrorMsg.Error)
                         | (None, Some (fType, paramTypes, isDefined, isExternal)) ->
-                            if (isDefined || isExternal)
+                            (if (isDefined || isExternal)
                             then (ErrorMsg.error ("trying to define predefined/ external function \n");
                                  raise ErrorMsg.Error)
                             else
@@ -201,12 +203,11 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                               else
                                 let newFuncMap = M.add funcMap funcName 
                                   (fType, paramTypes, true, false) in
-                                let funcVarMap = Core.Std.String.Map.empty in
-                                (* Need to pass in overall environment to tc statments!! BILLY DO THIS *)
-                                let typeCheckedBlock = tc_statements newFuncMap typedefMap funcVarMap 
+                                let funcVarMap = init_func_env funcParams in
+                                let (_, _, typeCheckedBlock) = tc_statements newFuncMap typedefMap funcVarMap 
                                                        funcBody fType false [] in
                                   tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, funcName, 
-                                  funcParams, List.rev typeCheckedBlock)::typedAST)
+                                  funcParams, List.rev typeCheckedBlock)::typedAST))
                          | (None, None) -> 
                              (if funcName = "main" && 
                                  ((List.length funcParams > 0) || lowestTypedefType funcType typedefMap != INT)
@@ -223,7 +224,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                                  tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, funcName, 
                                  funcParams, List.rev typeCheckedFuncBody)::typedAST))))
                | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
-                   (match (M.find typedefMap typedefName, M.find funcMap typeDefName) with
+                   (match (M.find typedefMap typeDefName, M.find funcMap typeDefName) with
                           (None, None) -> 
                             let newTypedefMap = M.add typedefMap typeDefName 
                                         (lowestTypedefType typeDefType typedefMap) in
@@ -253,9 +254,9 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
              (None, None, None) -> 
                (let newVarMap = M.add varMap id (typee, false) in 
                 tc_statements funcMap typedefMap newVarMap 
-                stms funcRetType ret ((TypedPostElabDecl(id, typee)) :: typedBlock)))
+                stms funcRetType ret ((TypedPostElabDecl(id, typee)) :: typedBlock))
            | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
-                   raise ErrorMsg.Error)
+                   raise ErrorMsg.Error))
   | A.UntypedPostElabAssignStmt(id, e)::stms ->
        (let tcExpr = tc_expression funcMap typedefMap varMap e in
           (match M.find varMap id with (* it's declared, good *)
@@ -268,13 +269,13 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
                         | (BoolExpr(_), BOOL) -> 
                             let newVarMap = M.add varMap id (typee, true) in              
                             tc_statements funcMap typedefMap newVarMap 
-                            stms fRetType ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedBlock)
+                            stms funcRetType ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedBlock)
                         | _ -> (ErrorMsg.error ("assignment expression didn't typecheck \n");
                                raise ErrorMsg.Error))
                | None -> (if ((isValidVarDecl id))
                           then (let newVarMap = M.add varMap id (INT, true) in              
                                 tc_statements funcMap typedefMap newVarMap 
-                                stms fRetType ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedBlock))
+                                stms funcRetType ret ((TypedPostElabAssignStmt(id, tcExpr)) :: typedBlock))
                           else (ErrorMsg.error ("undeclared test variable " ^ id ^ "\n");
                                 raise ErrorMsg.Error))))
   | A.UntypedPostElabIf(e, block1, block2)::stms -> 
@@ -313,40 +314,51 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
              IntExpr(exp1) -> 
                (match funcRetType with
                       INT -> tc_statements funcMap typedefMap newMap 
-                             stms funcRetType true ((TypedPostElabReturn(exp1)) :: typedBlock)
-                    | _ -> ErrorMsg.error ("return expression didn't typecheck\n");
-                           raise ErrorMsg.Error)
+                             stms funcRetType true ((TypedPostElabReturn(IntExpr exp1)) :: typedBlock)
+                    | _ -> (ErrorMsg.error ("return expression didn't typecheck\n");
+                           raise ErrorMsg.Error))
            | BoolExpr(exp1) -> 
                (match funcRetType with
                       BOOL -> tc_statements funcMap typedefMap newMap 
-                              stms funcRetType true ((TypedPostElabReturn(exp1)) :: typedBlock)
-                    | _ -> ErrorMsg.error ("return expression didn't typecheck\n");
+                              stms funcRetType true ((TypedPostElabReturn(BoolExpr exp1)) :: typedBlock)
+                    | _ -> (ErrorMsg.error ("return expression didn't typecheck\n");
                            raise ErrorMsg.Error))
+           | VoidExpr(exp1) -> (ErrorMsg.error ("can't return void \n");
+                           raise ErrorMsg.Error))
+      
   | A.UntypedPostElabVoidReturn::stms -> 
       (match funcRetType with
-             VOID -> tc_statements funcMap typedefMap newMap 
+             VOID -> tc_statements funcMap typedefMap varMap 
                      stms funcRetType true (TypedPostElabVoidReturn :: typedBlock)
            | _ -> ErrorMsg.error ("non-void function must return non-void value \n");
                   raise ErrorMsg.Error)
   | A.UntypedPostElabAssert(e)::stms ->
       let tcExpr = tc_expression funcMap typedefMap varMap e in
       (match tcExpr with
-             BoolExpr(expr1) -> tc_statements funcMap typedefMap newMap 
-                                stms funcRetType ret (TypedPostElabAssert(tcExpr) :: typedBlock)
+             BoolExpr(expr1) -> tc_statements funcMap typedefMap varMap 
+                                stms funcRetType ret (TypedPostElabAssert(expr1) :: typedBlock)
            | _ -> (ErrorMsg.error ("assert must have boolean expression \n");
                   raise ErrorMsg.Error))
   | A.UntypedPostElabExprStmt(e)::stms ->
       let tcExpr = tc_expression funcMap typedefMap varMap e in
       (match tcExpr with
-             VoidExpr(stmt) -> tc_statements funcMap typedefMap newMap 
+             VoidExpr(stmt) -> tc_statements funcMap typedefMap varMap 
                                stms funcRetType ret (stmt :: typedBlock)
            | _ -> tc_statements funcMap typedefMap varMap 
                   stms funcRetType ret (TypedPostElabAssignStmt(GenUnusedID.create(), tcExpr) :: typedBlock))
        
-and typecheck ((untypedHeaderAST, untypedProgAST) : untypedPostElabOverallAST) =
+and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   let funcMap = Core.Std.String.Map.empty in
   let typedefMap = Core.Std.String.Map.empty in
   let () = tc_header funcMap typedefMap untypedHeaderAST in
   let typedProgAST = tc_prog funcMap typedefMap untypedProgAST [] in
-  (List.rev (typedProgAST @ typedHeaderAST))
+  List.rev typedProgAST
 
+(* BUGS:
+basic typedef: typedef int poop, poop x = 0 (also shouldn't be able to use function names as types
+used functions must be defined
+non-void functions must return
+cannot use id's as types until typedef'd
+local vars can shadow function names (f is a function, int f is allowed)
+   
+*)
