@@ -31,5 +31,5 @@ let parse main_filename header_filename =
       in (main_ast, header_ast)
   with
   | Parsing.Parse_error ->
-    ErrorMsg.error None "Parse error"; raise ErrorMsg.Error
-  | Sys_error s -> ErrorMsg.error None s; raise ErrorMsg.Error
+    ErrorMsg.error "Parse error"; raise ErrorMsg.Error
+  | Sys_error s -> ErrorMsg.error s; raise ErrorMsg.Error

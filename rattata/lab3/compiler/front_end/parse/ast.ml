@@ -39,8 +39,10 @@ type intExpr = IntConst of const | IntIdent of ident
               if e1 then e2 else e3. Similarly for the other
               ternary constructors *)
               | BoolTernary of boolExpr * boolExpr * boolExpr
-and typedPostElabExpr = IntExpr of intExpr | BoolExpr of boolExpr
-type typedPostElabStmt = TypedPostElabDecl of ident * c0type
+and typedPostElabExpr = IntExpr of intExpr | 
+                        BoolExpr of boolExpr | 
+                        VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
+and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr
                   | TypedPostElabIf of boolExpr * typedPostElabBlock * 
                                        typedPostElabBlock
