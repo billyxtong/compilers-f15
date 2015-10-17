@@ -66,36 +66,36 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     (* Elaborate *)
     say_if verbose (fun () -> "Elaborating... ");
     let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
-    (*say_if dump_upeAST (fun () ->
-      PrintASTs.untypedPostElabASTToString(untypedPostElabAst));*)
+    say_if dump_upeAST (fun () ->
+      PrintASTs.untypedPostElabASTToString(untypedPostElabAst));
 
     (* Typecheck *)
     say_if verbose (fun () -> "Typechecking...");
     let typedPostElabAst = TypeChecker.typecheck untypedPostElabOverallAst in ();
-    (*say_if dump_typedAST (fun () ->
+    say_if dump_typedAST (fun () ->
       PrintASTs.typedPostElabASTToString(typedPostElabAst));
-    if typecheck_only then exit 0;*)
+    if typecheck_only then exit 0;
 
 
-    (* (\* convert Post-Elab AST to Infinte Addr *\) *)
-    (* say_if verbose (fun () -> "converting to Infinite Address code"); *)
-    (* let infAddr = ToInfAddr.toInfAddr typedPostElabAst in (); *)
-    (* say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr); *)
+    (* convert Post-Elab AST to Infinte Addr *)
+    say_if verbose (fun () -> "converting to Infinite Address code");
+    let infAddr = ToInfAddr.toInfAddr typedPostElabAst in ();
+    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
     
-    (* (\* Convert Inf Addr (arbitrarily nested right hand side) *\) *)
-    (* (\*    to three address *\) *)
-    (* let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in ();  *)
-    (* say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr); *)
+    (* Convert Inf Addr (arbitrarily nested right hand side) *)
+    (*    to three address *)
+    let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in ();
+    say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr);
 
-    (* (\* Three address to Two address *\) *)
-    (* say_if verbose (fun () -> "3Addr to 2Addr..."); *)
-    (* let twoAddr = To2Addr.to2Addr threeAddr in (); *)
-    (* say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr); *)
+    (* Three address to Two address *)
+    say_if verbose (fun () -> "3Addr to 2Addr...");
+    let twoAddr = To2Addr.to2Addr threeAddr in ();
+    say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
     
-    (* (\* Allocate Registers *\) *)
-    (* say_if verbose (fun () -> "Allocating Registers..."); *)
-    (* let almostAssem = RegAlloc.regAlloc twoAddr in *)
-    (* say_if dump_assem (fun () -> assemProgToString almostAssem); *)
+    (* Allocate Registers *)
+    say_if verbose (fun () -> "Allocating Registers...");
+    let almostAssem = RegAlloc.regAlloc twoAddr in
+    say_if dump_assem (fun () -> assemProgToString almostAssem);
 
     (* (\* RemoveMemMemInstrs *\) *)
     (* say_if verbose (fun () -> "Removing mem-mem instrs...");  *)
