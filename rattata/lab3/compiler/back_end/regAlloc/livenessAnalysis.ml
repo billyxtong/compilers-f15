@@ -14,11 +14,7 @@ let listArrayToString a = String.concat "" (Array.to_list(Array.mapi listToStrin
 let markedLive liveSet line = try let () = H.find liveSet line in true
                           with Not_found -> false
 
-let getDefVars prog line ?(params=[]) =
-  (* We'll consider all parameters to be defined on line -1 *)
-  (* I'm having params default to [] so that I don't to modify liveness to pass
-     it around everywhere, since we only need it when drawing the graph anyway *)
-    if line = -1 then params else
+let getDefVars prog line =
     match Array.get prog line with
          Tmp2AddrMov(src, Tmp dest) -> dest::[]
        | Tmp2AddrBinop(op, src, Tmp dest) -> dest::[]
@@ -28,7 +24,7 @@ let getDefVars prog line ?(params=[]) =
 
 let isDef t prog line =
   (* idk why it's making me have params as an arg here >:( *)
-    match getDefVars prog line ~params:[] with
+    match getDefVars prog line with
           t'::[] -> t = t'
         | [] -> false
         | _ -> assert(false)
@@ -97,10 +93,10 @@ let rec findPredecessors (predecessorsArray : (int list) array)
 let drawEdgesForTmp interferenceGraph liveTmpsOnLine t =
     L.iter (fun t' -> G.addEdge interferenceGraph (t, t')) liveTmpsOnLine
 
-let drawEdgesForLine prog line liveTmpsOnLine interferenceGraph params =
+let drawEdgesForLine prog line liveTmpsOnLine interferenceGraph =
   if line == 0 then () (* no interference on line 0 *) else
   L.iter (drawEdgesForTmp interferenceGraph liveTmpsOnLine)
-         (getDefVars prog (line - 1 ) ~params:params)
+         (getDefVars prog (line - 1 ))
       
                     
 let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
@@ -111,19 +107,19 @@ let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
         in ()
     
 
-let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine params =
+let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
   let () = L.iter (fun t -> handleTemp t prog predsPerLine
                       interferenceGraph liveTmpsPerLine) temps in
   let lineNums = Array.mapi (fun i -> fun _ -> i) prog in
   let () = A.iter (fun lineNum -> drawEdgesForLine prog lineNum
-      (liveTmpsPerLine.(lineNum)) interferenceGraph params ) lineNums in
+      (liveTmpsPerLine.(lineNum)) interferenceGraph) lineNums in
   interferenceGraph
 
-let analyzeLiveness (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) temps params =
+let analyzeLiveness (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) temps =
   let progArray = A.of_list instrs in
   let len = A.length progArray in
   let lineToPredecessorsArray = A.make len [] in
   let () = findPredecessors lineToPredecessorsArray progArray 0 in
-  drawGraph temps progArray lineToPredecessorsArray params
+  drawGraph temps progArray lineToPredecessorsArray
