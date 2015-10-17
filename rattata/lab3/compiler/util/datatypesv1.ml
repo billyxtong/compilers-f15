@@ -34,8 +34,7 @@ type assemInstr = MOV of assemArg * assemLoc
                 | BOOL_INSTR of boolInstr
                 | LABEL of label
                 | CALL of ident
-type assemFunDef = AssemFunDef of ident * assemLoc list *
-                                        assemInstr list
+type assemFunDef = AssemFunDef of ident * assemInstr list
 type assemProg = assemFunDef list
 
 (* Assembly Code with wonky instructions (i.e. idiv, etc) *)
