@@ -92,6 +92,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                          | UntypedPostElabVoidReturn (* no args *)
                          | UntypedPostElabAssert of untypedPostElabExpr
                          | UntypedPostElabExprStmt of untypedPostElabExpr
+                         | UntypedPostElabBlock of untypedPostElabBlock
 and untypedPostElabBlock = untypedPostElabStmt list
                              
 type untypedPostElabGlobalDecl =
