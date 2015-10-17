@@ -320,8 +320,7 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
         instrs @ TmpInfAddrVoidFunCall(fName, argExps)::[]
         @ trans_stmts retTmp retLabel idToTmpMap stmts
-   | A.TypedPostElabVoidReturn::stmts -> TmpInfAddrVoidReturn::
-                                         trans_stmts retTmp retLabel idToTmpMap stmts
+   | A.TypedPostElabVoidReturn::stmts -> TmpInfAddrJump(JMP_UNCOND, retLabel)::[]
    | [] -> []
 
 (* We assume that this is run after typechecking, so everything is

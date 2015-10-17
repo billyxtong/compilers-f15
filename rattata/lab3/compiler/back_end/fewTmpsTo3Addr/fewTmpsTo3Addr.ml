@@ -105,7 +105,6 @@ let munch_instr = function
        let (instrs, dests) = munch_fun_args args in
        (* The None means no destination for fun call *)
        instrs @ Tmp3AddrFunCall(fName, dests, None)::[]
-  | TmpInfAddrVoidReturn -> Tmp3AddrVoidReturn::[]
            
 let rec finalPass = function
     [] -> []

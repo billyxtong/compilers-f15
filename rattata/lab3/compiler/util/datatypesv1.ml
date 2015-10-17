@@ -34,8 +34,7 @@ type assemInstr = MOV of assemArg * assemLoc
                 | BOOL_INSTR of boolInstr
                 | LABEL of label
                 | CALL of ident
-type assemFunDef = AssemFunDef of ident * assemLoc list *
-                                        assemInstr list
+type assemFunDef = AssemFunDef of ident * assemInstr list
 type assemProg = assemFunDef list
 
 (* Assembly Code with wonky instructions (i.e. idiv, etc) *)
@@ -65,7 +64,6 @@ type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
                     (* tmp option because voids have no dest *)
-                   | Tmp2AddrVoidReturn
                    | Tmp2AddrFunCall of ident * tmpArg list * tmp option
 type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmp list *
                                         tmp2AddrInstr list
@@ -82,7 +80,6 @@ type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
                   (* function name, arg list, dest. Dest is an
                   option because void function don't need to move
                   the result anywhere *)
-                   | Tmp3AddrVoidReturn
                    | Tmp3AddrFunCall of ident * tmpArg list * tmp option
 type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmp list *
                                         tmp3AddrInstr list
@@ -105,7 +102,6 @@ type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
                    | TmpInfAddrReturn of tmpExpr
-                   | TmpInfAddrVoidReturn
                    | TmpInfAddrVoidFunCall of ident * tmpExpr list
 type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * tmp list
                                    * tmpInfAddrInstr list
