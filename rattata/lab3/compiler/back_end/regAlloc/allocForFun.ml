@@ -6,10 +6,6 @@ open Graph
 
 let spillReg = Reg EDI
 
-let regArray = Array.of_list [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15]
-  (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
-
-
 let pushPopList = [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15; ECX; EDI]
 
 let listToString i a = String.concat "" (List.map
@@ -19,7 +15,7 @@ let pushInstrs = List.map (fun r -> PUSH r) pushPopList
 
 let popInstrs = List.map (fun r -> POP r) (List.rev pushPopList)
 
-let assemLocForColor offsetIncr colorNum =
+let assemLocForColor regArray offsetIncr colorNum =
     if (colorNum < A.length regArray) then Reg(A.get regArray colorNum)
     (* If there are 8 registers but this color is 10 (indexed from 0),
        that means we need there are at least 11 colors, which means we need
@@ -30,14 +26,14 @@ let assemLocForColor offsetIncr colorNum =
 (* colorList consists of tuples (t, colorForTmp) where t is the temp number
    and color is the color of t. We need t in order to add it to the
    map properly *)
-let rec makeTmpToAssemLocMap tmpToColorMap tmpList offsetIncr resultMap =
+let rec makeTmpToAssemLocMap tmpToColorMap tmpList offsetIncr regArray resultMap =
     match tmpList with
         [] -> resultMap
       | t::tmps ->
            let color = H.find tmpToColorMap t in
-           let currAssemLoc = assemLocForColor offsetIncr color in
+           let currAssemLoc = assemLocForColor regArray offsetIncr color in
            let () = H.add resultMap (Tmp t) currAssemLoc in
-           makeTmpToAssemLocMap tmpToColorMap tmps offsetIncr resultMap
+           makeTmpToAssemLocMap tmpToColorMap tmps offsetIncr regArray resultMap
 
 let translateTmpArg tbl = function
     TmpConst c -> Const c
@@ -47,9 +43,7 @@ let translateTmpArg tbl = function
                     wrote to it. This can happen if the variable was never initialized,
                          but it was ok because the line was unreachable *)
                  with Not_found -> AssemLoc (MemAddr(RSP, -666)))
-
-
-
+                     
 let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
         Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, H.find tbl dest)::[]
@@ -63,8 +57,7 @@ let translate tbl finalOffset (instr : tmp2AddrInstr) : assemInstr list =
               BOOL_INSTR (TEST (translateTmpArg tbl arg, H.find tbl t))::[]
       | Tmp2AddrBoolInstr TmpCmp(arg, t) ->
               BOOL_INSTR (CMP (translateTmpArg tbl arg, H.find tbl t))::[]
-      | Tmp2AddrFunCall(fName, args, dest) ->
-              pushInstrs @ 
+      | Tmp2AddrFunCall(fName, args, dest) -> assert(false)
 
 let combineForMaxOffset t loc currMax =
     match loc with
@@ -86,8 +79,13 @@ let getTempList instrList params = let tempSet = getTempSet instrList
                             let addTempToList t () acc = t::acc in
                             H.fold addTempToList tempSet [] @ params
 
+(* let getAllocableRegs regList params = *)
+(*     match (regList, params) = *)
 
 let regAlloc (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
+  let regList = [EBX; ESI; R8; R9; R10; R11; R12; R13; R14; R15] in
+  (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
+  let regArray = Array.of_list regList in
   let tempList = getTempList instrList params in
   let interferenceGraph = LivenessAnalysis.analyzeLiveness instrList tempList params in
   let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
@@ -96,7 +94,7 @@ let regAlloc (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFun
   let offsetIncr = 4 in
   (* we need a list of tmps to go through; just use vertexOrdering *)
   let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
-      offsetIncr (H.create 100) in
+      offsetIncr regArray (H.create 100) in
   let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
   (pushInstrs) @ [SUBQ(Const finalOffset, Reg RSP)] @
                 (List.concat (List.map (translate tmpToAssemLocMap finalOffset) instrList))
