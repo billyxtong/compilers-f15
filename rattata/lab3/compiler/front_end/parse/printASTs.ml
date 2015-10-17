@@ -105,8 +105,9 @@ let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
                                                      untypedPostElabExprToString expr2; ")"]
       | UntypedPostElabNot(expr1) -> concat "" ["!"; untypedPostElabExprToString(expr1)]
       | UntypedPostElabTernary(e1, e2, e3) -> "(" ^ (untypedPostElabExprToString e1) ^ " ? " ^
-              (untypedPostElabExprToString e2) ^ " : " ^ (untypedPostElabExprToString e3) ^ ")"
-      
+              (untypedPostElabExprToString e2) ^ " : " ^ (untypedPostElabExprToString e3) ^ ")" 
+      | UntypedPostElabFunCall(func, args) -> 
+          identToString(func) ^ "(" ^ (concat ", " (List.map untypedPostElabExprToString args)) ^ ")"
 
 
 let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
@@ -121,16 +122,29 @@ let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
                                                 ", "; untypedPostElabASTToString(init); ") {\n\t";
                                                       untypedPostElabASTToString(postelabast); "\n}"]
       | UntypedPostElabReturn(i) -> "return " ^ untypedPostElabExprToString(i)
-      | UntypedPostElabBlock(blockAst) -> "\t" ^ untypedPostElabASTToString blockAst
+      | UntypedPostElabBlock(blockAst) -> "\t" ^ untypedPostElabBlockToString blockAst
+      | UntypedPostElabAssert(pExpr) -> "assert(" ^ untypedPostElabExprToString(pExpr) ^ ")"
+      | UntypedPostElabVoidReturn -> "return"
+      | UntypedPostElabExprStmt(pExpr) -> untypedPostElabExprToString(pExpr) ^ "\n"
+
                                           
-and untypedPostElabASTToString(stmts : untypedPostElabAST) =
+and untypedPostElabBlockToString(stmts : untypedPostElabBlock) =
   concat "\n" (List.map untypedPostElabStmtToString stmts) ^ "\n"
 
+let untypedPostElabGlobalDeclToString(g : untypedPostElabGlobalDecl) =
+  match g with
+        UntypedPostElabFunDecl(c, i, params) -> c0typeToString(c) ^ identToString(i) ^ "(" ^ 
+                                 (concat ", " (List.map paramToString params)) 
+                                 ^ ")"
+      | UntypedPostElabFunDef(c, i, params, stmts) -> 
+          c0typeToString(c) ^ identToString(i) ^ "(" ^ 
+          (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
+          untypedPostElabBlockToString(stmts) ^ "}"
+      | UntypedPostElabTypedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i)
 
-
-
-
-
+let untypedPostElabOverallASTToString (mainDecls, headerDecls) =
+    "MAIN:\n" ^ (concat "\n" (List.map untypedPostElabGlobalDeclToString mainDecls) ^ "\n\n")
+    ^ "HEADER:\n" ^ (concat "\n" (List.map untypedPostElabGlobalDeclToString headerDecls) ^ "\n")
 
 (* ============ Typed Post-Elab AST Print Functions ================= *)
 
@@ -153,7 +167,8 @@ let rec intExprToString(iExpr : intExpr) =
       | BaseCaseShift(i1, shifty, i2) -> concat "" [intExprToString(i1);
                                                     shiftOpToString(shifty);
                                                     intExprToString(i2)]
-
+      | IntFunCall(func, args) -> 
+          identToString(func) ^ "(" ^ (concat ", " (List.map typedPostElabExprToString args)) ^ ")"
 and boolExprToString(bExpr : boolExpr) =
   match bExpr with
         BoolConst(c) -> if c = 0 then "false" else "true"
@@ -167,11 +182,14 @@ and boolExprToString(bExpr : boolExpr) =
       | BoolTernary(b1, b2, b3) -> concat "" [boolExprToString(b1); " ? ";
                                               boolExprToString(b2); " : ";
                                               boolExprToString(b3)]
+      | BoolFunCall(func, args) -> 
+          identToString(func) ^ "(" ^ (concat ", " (List.map typedPostElabExprToString args)) ^ ")"
 
 and typedPostElabExprToString(e : typedPostElabExpr) =
   match e with
         IntExpr(i) -> intExprToString(i)
       | BoolExpr(b) -> boolExprToString(b)
+      | VoidExpr(stmt) -> typedPostElabStmtToString(stmt)
 
 let rec typedPostElabStmtToString(s : typedPostElabStmt) =
   match s with
@@ -188,6 +206,19 @@ let rec typedPostElabStmtToString(s : typedPostElabStmt) =
                                                 ") {\n\t"; typedPostElabASTToString(p); "\n}"]
       | TypedPostElabReturn(i) -> "return " ^ intExprToString(i)
       | JumpUncond(l) -> "jmp .L" ^ labelToString(l)
+      | TypedPostElabAssert(pExpr) -> "assert(" ^ boolExprToString(pExpr) ^ ")"
+      | TypedPostElabVoidReturn -> "return"
+      | VoidFunCall(func,args) -> 
+          identToString(func) ^ "(" ^ (concat ", " (List.map typedPostElabExprToString args)) ^ ")"
 
-and typedPostElabASTToString(stmts : typedPostElabStmt list) = concat "\n" (List.map typedPostElabStmtToString stmts) ^ "\n"
+and typedPostElabBlockToString(stmts : typedPostElabStmt list) = 
+  concat "\n" (List.map typedPostElabStmtToString stmts) ^ "\n"
 
+
+let typedPostElabGlobalDeclToString(TypedPostElabFunDef(c, i, params, stmts) : typedPostElabGlobalDecl) =
+    c0typeToString(c) ^ identToString(i) ^ "(" ^ 
+    (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
+    typedPostElabBlockToString(stmts) ^ "}"
+
+let typedPostElabASTToString (typedFunDefs : typedPostElabGlobalDecl list) =
+    concat "\n" (List.map typedPostElabGlobalDeclToString typedFunDefs) ^ "\n"
