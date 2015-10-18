@@ -138,7 +138,7 @@ let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExp
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
 let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) = 
   match header with
-        [] -> ()
+        [] -> (headerFuncMap, headerTypedefMap)
       | fdecl :: fdecls -> 
           (match fdecl with
                  UntypedPostElabTypedef(t, i) ->
@@ -163,7 +163,7 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
                         | (None, None) -> 
                             (let newHeaderFuncMap = M.add headerFuncMap funcName 
                              (lowestTypedefType funcType headerTypedefMap, 
-                             (List.map (fun (c, i) -> c) funcParams), false, true) in
+                             (List.map (fun (c, i) -> c) funcParams), true, true) in
                              tc_header newHeaderFuncMap headerTypedefMap fdecls))
                | _ -> (ErrorMsg.error ("function def'n in header file \n");
                        raise ErrorMsg.Error))
@@ -370,8 +370,8 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
 and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   let funcMap = Core.Std.String.Map.empty in
   let typedefMap = Core.Std.String.Map.empty in
-  let () = tc_header funcMap typedefMap untypedHeaderAST in
-  let typedProgAST = tc_prog funcMap typedefMap untypedProgAST [] in
+  let (headerFuncMap, headerTypedefMap) = tc_header funcMap typedefMap untypedHeaderAST in
+  let typedProgAST = tc_prog headerFuncMap headerTypedefMap untypedProgAST [] in
   List.rev typedProgAST
 
 (* BUGS:
