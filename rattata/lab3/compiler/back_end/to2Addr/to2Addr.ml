@@ -39,8 +39,11 @@ let instrTo2Addr paramToTmpMap = function
       (* At the beginning of the function, move all of the args into new tmps.
          Keep live ranges of pre-colored tmps short! We're doing it here because
          we only have to match against one constructor here *)
-         
-      Tmp2AddrFunCall (fName, args, dest)::[]
+      let newArgs = List.map (trans_arg paramToTmpMap) args in
+      let newDest = (match dest with
+                         Some dest' -> Some (trans_loc paramToTmpMap dest')
+                       | None -> None) in
+      Tmp2AddrFunCall (fName, newArgs, newDest)::[]
 
 let rec funTo2Addr paramToTmpMap = function
    [] -> []
