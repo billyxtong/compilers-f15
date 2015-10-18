@@ -49,7 +49,8 @@ let getArgDest paramRegArray i =
     if i < Array.length paramRegArray then Reg paramRegArray.(i) else
     (* This will the correct offset AFTER WE DECREASE RSP *)
     (* We put all the args above RSP *)
-    MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray + 1))
+    MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray))
+      (* this puts the 7th arg at 0(rsp) BEFORE the call. Which should be 8(rsp) after *)
 
 let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
     (* 1. Figure out how many args we'll need to put on the stack.
@@ -107,11 +108,11 @@ let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr) :
         translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest
                                                  
 
-let combineForMaxOffset t loc currMax =
+(* We want to find the amount of memory allocated for this function's local vars:
+   the largest distance below RBP on the stack *)
+let maxDistBelowRBPOnStack t loc currMax =
     match loc with
-      | MemAddr(RSP, offset) -> max offset currMax
-             (* Only offsets from RSP count! There might also be offsets from
-                RBP: The args to the function would be above RBP *)
+      | MemAddr(RBP, offset) -> max (-offset) currMax
       | _ -> currMax
 
 let rec getTempSet instrList tempSet =
@@ -139,8 +140,8 @@ let mappingForParam argOffsetAboveRbp paramRegArray i =
        rest will be in offsets of 8 bytes above what was RSP on
        entrance to the function. HOWEVER since the  *)
     if i < Array.length paramRegArray then Reg paramRegArray.(i) else
-    let offsetFromArgStart = bytesForArg * (i - (Array.length paramRegArray) + 1) in
-           (* + 1 because if i == length, it should be 8 *)
+    let offsetFromArgStart = bytesForArg * (i - (Array.length paramRegArray)) in
+           (* there's no +1  because if i == length, it should be 0 *)
     MemAddr(RBP, argOffsetAboveRbp + offsetFromArgStart)
 
 let addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params =
@@ -179,7 +180,7 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assem
   let argOffsetAboveRbp = argSize * (List.length pushInstrs + 1)
                                     (* +1 for return address *) in
   let () = addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params in
-  let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
+  let finalOffset = H.fold maxDistBelowRBPOnStack tmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)
   let finalInstrs = pushInstrs @
