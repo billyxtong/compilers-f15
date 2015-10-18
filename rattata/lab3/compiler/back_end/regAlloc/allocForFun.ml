@@ -20,7 +20,7 @@ let assemLocForColor regArray offsetIncr colorNum =
        that means we need there are at least 11 colors, which means we need
        at least 3 * (size of one tmp) bytes of stack memory. Since the
        first stack spot is 4(rsp), we add one *)
-    else MemAddr(RBP, - ((colorNum - (A.length regArray) + 1) * offsetIncr))
+    else MemAddr(RBP, (colorNum - (A.length regArray) + 1) * offsetIncr)
 
 (* colorList consists of tuples (t, colorForTmp) where t is the temp number
    and color is the color of t. We need t in order to add it to the
@@ -171,8 +171,8 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assem
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
   let allocdRegs = getUsedRegs maxColor allocableRegList in
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
-  (* Move RSP into RBP before we change RSP! *)
+  (* Move RSP into RBP AFTER we change RSP! since we're doing positive offsets from RBP *)
   let finalInstrs = pushInstrs @
-  MOVQ(AssemLoc (Reg RSP), Reg RBP) :: SUBQ(Const finalOffset, Reg RSP)::[] @
+  SUBQ(Const finalOffset, Reg RSP)::MOVQ(AssemLoc (Reg RSP), Reg RBP) :: [] @
   (List.concat (List.map (translate tmpToAssemLocMap allocdRegs finalOffset paramRegArray) instrs)) in
   AssemFunDef(fName, finalInstrs)
