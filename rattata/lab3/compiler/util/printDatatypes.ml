@@ -133,7 +133,7 @@ let assemInstrToString(instr : assemInstr) =
       | CALL(i) -> "call " ^ identToString(i)
 
 let assemFunDefToString(AssemFunDef(funcName, instrList)) =
-  ".globl" ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
+  ".globl " ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
   "_c0_" ^ identToString(funcName)  ^ ":\n" ^ 
   (concat "\n" (List.map assemInstrToString instrList))
 
@@ -149,7 +149,7 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
            assemArgToString(divisor)]
 
 let assemFunDefWonkyToString(WonkyFunDef(funcName, instrList)) =
-  ".globl" ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
+  ".globl " ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
   "_c0_" ^ identToString(funcName)  ^ ":\n" ^ 
   (concat "\n" (List.map assemInstrWonkyToString instrList))
 
