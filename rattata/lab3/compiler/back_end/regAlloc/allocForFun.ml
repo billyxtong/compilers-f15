@@ -148,7 +148,7 @@ let getUsedRegs maxColor allocableRegList =
     List.map (fun (i,p) -> p) filtered
 
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
-  let paramRegArray = Array.of_list [EDX; ECX; R8; R9] in
+  let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
   let allocableRegList = [EBX; R10; R11; R12; R13; R14; R15; RBP] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
