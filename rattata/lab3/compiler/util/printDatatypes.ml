@@ -133,7 +133,8 @@ let assemInstrToString(instr : assemInstr) =
       | CALL(i) -> "call " ^ identToString(i)
 
 let assemFunDefToString(AssemFunDef(funcName, instrList)) =
-  identToString(funcName) ^ ":\n" ^ 
+  ".globl" ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
+  "_c0_" ^ identToString(funcName)  ^ ":\n" ^ 
   (concat "\n" (List.map assemInstrToString instrList))
 
 let assemProgToString(assemprog : assemFunDef list) = 
@@ -147,8 +148,13 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
            concat "" ["idivl "; 
            assemArgToString(divisor)]
 
-let assemProgWonkyToString(wonkyAssemProg : assemProgWonky) = 
-  concat "\n" (List.map assemInstrWonkyToString wonkyAssemProg) ^ "\n"
+let assemFunDefWonkyToString(WonkyFunDef(funcName, instrList)) =
+  ".globl" ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
+  "_c0_" ^ identToString(funcName)  ^ ":\n" ^ 
+  (concat "\n" (List.map assemInstrWonkyToString instrList))
+
+let assemProgWonkyToString(prog: assemProgWonky) = 
+  concat "\n" (List.map assemFunDefWonkyToString prog) ^ "\n"
 
 let tmpToString(Tmp(t) : tmp) = concat "" ["t"; string_of_int t]
 

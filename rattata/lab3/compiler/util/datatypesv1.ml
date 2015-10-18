@@ -44,7 +44,8 @@ type assemProg = assemFunDef list
 type assemInstrWonky = AssemInstr of assemInstr
                    | CDQ (* needed for idiv *)
                    | IDIV of assemArg
-type assemProgWonky = assemInstrWonky list
+type wonkyFunDef = WonkyFunDef of ident * assemInstrWonky list
+type assemProgWonky = wonkyFunDef list
 
 (* Below here allows tmps, but also allows actual assembly instructions.
    Note: Because we allow actual assembly instructions, memory

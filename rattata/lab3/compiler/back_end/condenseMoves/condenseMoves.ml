@@ -20,4 +20,8 @@ let rec condenseMovesDoubles = function
                    else instr1 :: condenseMovesDoubles(instr2::instrs)
            | _ -> instr1 :: condenseMovesDoubles(instr2::instrs)
 
-let condenseMoves instrs = condenseMovesDoubles(removeNullMoves instrs)
+let condenseMovesForFun instrs = condenseMovesDoubles(removeNullMoves instrs)
+
+let condenseMoves prog = List.map
+    (fun (WonkyFunDef(fName, instrs)) ->
+       WonkyFunDef(fName, condenseMovesForFun instrs)) prog

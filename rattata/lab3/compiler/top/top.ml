@@ -97,33 +97,33 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     let almostAssem = RegAlloc.regAlloc twoAddr in
     say_if dump_assem (fun () -> assemProgToString almostAssem);
 
-    (* (\* RemoveMemMemInstrs *\) *)
-    (* say_if verbose (fun () -> "Removing mem-mem instrs...");  *)
-    (* let noMemMemAssem =  *)
-    (*    RemoveMemMemInstrs.removeMemMemInstrs almostAssem in  *)
-    (* say_if dump_NoMemMem (fun () -> *)
-    (*     assemProgToString noMemMemAssem);  *)
+    (* RemoveMemMemInstrs *)
+    say_if verbose (fun () -> "Removing mem-mem instrs...");
+    let noMemMemAssem =
+       RemoveMemMemInstrs.removeMemMemInstrs almostAssem in
+    say_if dump_NoMemMem (fun () ->
+        assemProgToString noMemMemAssem);
 
-    (* (\* Account for wonky instructions that require specific *\) *)
-    (* (\*   registers, like idiv *\) *)
-    (* say_if verbose (fun () -> "Handling wonky instructions...");  *)
-    (* let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in  *)
-    (* say_if dump_wonky (fun () -> assemProgWonkyToString  *)
-    (*                       wonkyAssem);  *)
+    (* Account for wonky instructions that require specific *)
+    (*   registers, like idiv *)
+    say_if verbose (fun () -> "Handling wonky instructions...");
+    let wonkyAssem = ToWonkyAssem.toWonkyAssem noMemMemAssem in
+    say_if dump_wonky (fun () -> assemProgWonkyToString
+                          wonkyAssem);
 
-    (* let lala = CondenseMoves.condenseMoves wonkyAssem in *)
-    (* (\* Format assembly *\) *)
-    (* say_if verbose (fun () -> "Formatting assembly...");  *)
-    (* let finalAssem = FormatAssem.formatAssem lala in  *)
-    (* say_if dump_final (fun () -> finalAssem);  *)
+    let lala = CondenseMoves.condenseMoves wonkyAssem in
+    (* Format assembly *)
+    say_if verbose (fun () -> "Formatting assembly...");
+    let finalAssem = FormatAssem.formatAssem lala in
+    say_if dump_final (fun () -> finalAssem);
     
-    (* (\* Output assembly *\) *)
-    (* say_if verbose (fun () -> "Outputting assembly...");  *)
-    (* let afname = main_source ^ ".s" in  *)
-    (* say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ..."); *)
+    (* Output assembly *)
+    say_if verbose (fun () -> "Outputting assembly...");
+    let afname = main_source ^ ".s" in
+    say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
 
-    (* Out_channel.with_file afname *)
-    (*   ~f:(fun afstream -> output_string afstream finalAssem) *)
+    Out_channel.with_file afname
+      ~f:(fun afstream -> output_string afstream finalAssem)
       
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1

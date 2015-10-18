@@ -11,9 +11,9 @@ let instrToWonky = function
         AssemInstr(MOV(AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
         ::AssemInstr(MOV(AssemLoc (Reg EDX), dest))::[]
   | INT_BINOP(MUL, src, MemAddr memDest) ->
-        AssemInstr(MOV (AssemLoc (MemAddr memDest), RegAlloc.spillReg))
-        ::AssemInstr(INT_BINOP(MUL, src, RegAlloc.spillReg))
-        ::AssemInstr(MOV(AssemLoc RegAlloc.spillReg, MemAddr memDest))::[]
+        AssemInstr(MOV (AssemLoc (MemAddr memDest), AllocForFun.spillReg))
+        ::AssemInstr(INT_BINOP(MUL, src, AllocForFun.spillReg))
+        ::AssemInstr(MOV(AssemLoc AllocForFun.spillReg, MemAddr memDest))::[]
   | INT_BINOP(LSHIFT, src, dest) ->
         AssemInstr(MOV(src, Reg ECX))
         ::AssemInstr(INT_BINOP (LSHIFT, AssemLoc(Reg ECX), dest))
@@ -24,6 +24,11 @@ let instrToWonky = function
         ::[]
   | instr -> [AssemInstr instr]
 
+let rec funToWonkyAssem = function
+    [] -> []
+  | instr::instrs -> instrToWonky instr @ funToWonkyAssem instrs
+
 let rec toWonkyAssem = function
     [] -> []
-  | instr::instrs -> instrToWonky instr @ toWonkyAssem instrs
+  | AssemFunDef(fName, instrs)::rest ->
+       WonkyFunDef(fName, funToWonkyAssem instrs) :: toWonkyAssem rest
