@@ -162,7 +162,7 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
 
 let rec init_func_env = function
     [] -> Core.Std.String.Map.empty
-  | (typee, id)::ps -> M.add (init_func_env ps) id (typee, true)
+  | (typee, id)::ps ->  M.add (init_func_env ps) id (typee, true)
 
 let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
   match prog with
@@ -188,7 +188,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                             let newFuncMap = M.add funcMap funcName 
                             (lowestTypedefType funcType typedefMap, (List.map (fun (c, i) -> c) funcParams), false, false) in
                             tc_prog newFuncMap typedefMap gdecls typedAST)
-               | UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) -> 
+               | UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) ->
                    (match (M.find typedefMap funcName, M.find funcMap funcName) with
                           (Some _, _) -> (ErrorMsg.error ("trying to shadow used name \n");
                                           raise ErrorMsg.Error)
@@ -217,7 +217,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                                 (let newFuncMap = M.add funcMap funcName 
                                   (lowestTypedefType funcType typedefMap, 
                                   (List.map (fun (c, i) -> c) funcParams), true, false) in
-                                 let funcVarMap = Core.Std.String.Map.empty in
+                                 let funcVarMap = init_func_env funcParams in
                                  let (_, _, typeCheckedFuncBody) = 
                                    tc_statements newFuncMap typedefMap funcVarMap 
                                    funcBody funcType false [] in
@@ -304,7 +304,7 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
                ((TypedPostElabWhile(exp1, List.rev tcBlock1)) :: (tcBlock2 @ typedBlock))
            | _ -> ErrorMsg.error ("while expression didn't typecheck\n");
                   raise ErrorMsg.Error)
-  | A.UntypedPostElabReturn(e)::stms -> 
+  | A.UntypedPostElabReturn(e)::stms ->
       let tcExpr = tc_expression funcMap typedefMap varMap e in
       (* apparently all variables defined before the first return
          get to be treated as initialized...although those declared
