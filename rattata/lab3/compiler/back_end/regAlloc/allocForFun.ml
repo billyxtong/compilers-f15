@@ -20,7 +20,7 @@ let assemLocForColor regArray offsetIncr colorNum =
        that means we need there are at least 11 colors, which means we need
        at least 3 * (size of one tmp) bytes of stack memory. Since the
        first stack spot is 4(rsp), we add one *)
-    else MemAddr(RSP, (colorNum - (A.length regArray) + 1) * offsetIncr)
+    else MemAddr(RBP, - ((colorNum - (A.length regArray) + 1) * offsetIncr))
 
 (* colorList consists of tuples (t, colorForTmp) where t is the temp number
    and color is the color of t. We need t in order to add it to the
@@ -48,7 +48,7 @@ let getArgDest paramRegArray i =
        8th arg goes 16 above RSP, etc *)
     if i < Array.length paramRegArray then Reg paramRegArray.(i) else
     (* This will the correct offset AFTER WE DECREASE RSP *)
-    MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray + 1))
+    MemAddr(RBP, bytesForArg * (i - Array.length paramRegArray + 1))
 
 let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
     (* 1. Figure out how many args we'll need to put on the stack.
@@ -63,7 +63,9 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
     let numStackArgs = max 0 (List.length args - (Array.length paramRegArray)) in
                  (* numStackArgs can't be less than 0, even if the right term is *)
     let spaceForArgs = bytesForArg * numStackArgs in
-    let is16ByteAligned = (finalOffset + spaceForArgs) mod 16 = 8 in
+    let is16ByteAligned = (finalOffset + spaceForArgs) mod 16 = 0 in
+    (* mod 16 = 0 because we always push RBP which takes 8 bytes *)
+    (* CHANGEEEEEEEEEEEEEEEEEEEEEEEEEEEEE *)
     let rspShiftAmount = (if is16ByteAligned then spaceForArgs
                           else spaceForArgs + 8) in
             (* Adding 8 makes it 16-byte-aligned if it isn't *)
@@ -73,7 +75,7 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
        for void function calls *)
     (* See which registers we need to save (only the ones we're using *)
     let pushRegsInstrs = List.map (fun r -> PUSH r) allocdRegs in
-    let popRegsInstrs = List.map (fun r -> POP r) allocdRegs in
+    let popRegsInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) in
     let resultInstr = (match dest with
                           None -> []
                         | Some t -> MOV(AssemLoc (Reg EAX), H.find tbl t)::[]) in
@@ -88,7 +90,9 @@ let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr) :
         Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, H.find tbl dest)::[]
       | Tmp2AddrBinop(binop, arg, dest) ->
               INT_BINOP(binop, translateTmpArg tbl arg, H.find tbl dest)::[]
-      | Tmp2AddrReturn(arg) -> let popInstrs = List.map (fun r -> POP r) allocdRegs in
+      | Tmp2AddrReturn(arg) ->
+        (* Need to pop in opposite order as pushed *)
+        let popInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) @ [POP RBP] in
                                MOV(translateTmpArg tbl arg, Reg EAX)::
                                ADDQ(Const finalOffset, Reg RSP)::[]
                                @ (popInstrs)@ RETURN::[]
@@ -149,7 +153,7 @@ let getUsedRegs maxColor allocableRegList =
 
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
-  let allocableRegList = [EBX; R10; R11; R12; R13; R14; R15; RBP] in
+  let allocableRegList = [EBX; R10; R11; R12; R13; R14; R15] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
   let tempList = getTempList instrs in
@@ -166,8 +170,9 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assem
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
   let allocdRegs = getUsedRegs maxColor allocableRegList in
-  let pushInstrs = List.map (fun r -> PUSH r) allocdRegs in  
+  let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
   (* Move RSP into RBP before we change RSP! *)
-  let finalInstrs = pushInstrs @ SUBQ(Const finalOffset, Reg RSP)::[] @
+  let finalInstrs = pushInstrs @
+  MOVQ(AssemLoc (Reg RSP), Reg RBP) :: SUBQ(Const finalOffset, Reg RSP)::[] @
   (List.concat (List.map (translate tmpToAssemLocMap allocdRegs finalOffset paramRegArray) instrs)) in
   AssemFunDef(fName, finalInstrs)
