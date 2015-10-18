@@ -66,8 +66,10 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
                  (* numStackArgs can't be less than 0, even if the right term is *)
     let spaceForArgs = bytesForArg * numStackArgs in
     let is16ByteAligned = (finalOffset + spaceForArgs) mod 16 = 0 in
-    (* mod 16 = 0 because we always push RBP which takes 8 bytes *)
-    (* CHANGEEEEEEEEEEEEEEEEEEEEEEEEEEEEE *)
+    (* mod 16 = 0 because we always push RBP which takes 8 bytes, and every
+    other time we push registers before a function call, we push twice:
+    once at the top of this function, and once before the call. Because we're a
+    little silly. *)
     let rspShiftAmount = (if is16ByteAligned then spaceForArgs
                           else spaceForArgs + 8) in
             (* Adding 8 makes it 16-byte-aligned if it isn't *)
