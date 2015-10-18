@@ -54,7 +54,7 @@ let translateTmpArg tbl = function
 let getArgDest paramRegArray i =
     (* First 6 args go into paramRegArray. 7th arg goes 8 above RSP,
        8th arg goes 16 above RSP, etc *)
-    if i < Array.length paramRegArray then paramRegArray.(i) else
+    if i < Array.length paramRegArray then Reg paramRegArray.(i) else
     (* This will the correct offset AFTER WE DECREASE RSP *)
     MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray + 1))
 
@@ -136,15 +136,15 @@ let mappingForParam paramRegArray i =
 
 let addParamMappings tmpToAssemLocMap paramRegArray params =
     List.iteri (fun i -> fun p ->
-        H.add tmpToAssemLocMap p (mappingForParam paramRegArray i))
+        H.add tmpToAssemLocMap p (mappingForParam paramRegArray i)) params
 
-let regAlloc (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
+let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
   let allocableRegList = [EBX; R10; R11; R12; R13; R14; R15] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
-  let tempList = getTempList instrList in
-  let interferenceGraph = LivenessAnalysis.analyzeLiveness instrList tempList params in
+  let tempList = getTempList instrs in
+  let interferenceGraph = LivenessAnalysis.analyzeLiveness instrs tempList in
   let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
   let vertexOrdering = maxCardSearch interferenceGraph startVertex in
   let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
@@ -155,10 +155,7 @@ let regAlloc (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFun
   let () = addParamMappings tmpToAssemLocMap paramRegArray params in
   let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
   (* Move RSP into RBP before we change RSP! *)
-  (pushCalleeInstrs) @ MOVQ(TmpLoc (Reg RSP), Reg RBP)::SUBQ(Const finalOffset, Reg RSP)::[] @
-  (List.concat (List.map (translate tmpToAssemLocMap finalOffset paramRegArray) instrList))
-
-(* NEED TO ACTUALLY MOVE ARGS INTO THE CORRESPONDING REGISTERS *)
-(* TODO: not assume that external functions preserve caller-saved registers *)
-(* ALIGN RSP!!!!! *)
-(* WHAT IF THERE ARE MORE THAN 6 ARGS *)
+  let finalInstrs = (pushCalleeInstrs)
+                    @ MOVQ(AssemLoc (Reg RSP), Reg RBP)::SUBQ(Const finalOffset, Reg RSP)::[] @
+  (List.concat (List.map (translate tmpToAssemLocMap finalOffset paramRegArray) instrs)) in
+  AssemFunDef(fName, finalInstrs)

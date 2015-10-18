@@ -3,15 +3,6 @@ open PrintDatatypes
 open Ast
 open String
 
-let identToString(i : ident) = i
-
-let c0typeToString (c : c0type) =
-  match c with
-        INT -> "int "
-      | BOOL -> "bool "
-      | VOID -> "void "
-      | TypedefType(identifier) -> identToString(identifier) ^ " "
-
 let generalBinopToString(op : generalBinop) = 
   match op with
         IntBinop(i) -> intBinopToString(i)
@@ -116,11 +107,11 @@ let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
       | UntypedPostElabAssignStmt(identifier,untypedexpr) -> concat "" [identToString(identifier); " = ";
                                                                         untypedPostElabExprToString(untypedexpr)]
       | UntypedPostElabIf(expression,postelabast1,postelabast2) -> concat "" ["if("; untypedPostElabExprToString(expression);
-                                                  ") {\n\t"; untypedPostElabASTToString(postelabast1);
-                                                  "} \nelse {\n\t"; untypedPostElabASTToString(postelabast2); "\n}"]
+                                                  ") {\n\t"; untypedPostElabBlockToString(postelabast1);
+                                                  "} \nelse {\n\t"; untypedPostElabBlockToString(postelabast2); "\n}"]
       | UntypedPostElabWhile(expression,postelabast,init) -> concat "" ["while("; untypedPostElabExprToString(expression);
-                                                ", "; untypedPostElabASTToString(init); ") {\n\t";
-                                                      untypedPostElabASTToString(postelabast); "\n}"]
+                                                ", "; untypedPostElabBlockToString(init); ") {\n\t";
+                                                      untypedPostElabBlockToString(postelabast); "\n}"]
       | UntypedPostElabReturn(i) -> "return " ^ untypedPostElabExprToString(i)
       | UntypedPostElabBlock(blockAst) -> "\t" ^ untypedPostElabBlockToString blockAst
       | UntypedPostElabAssert(pExpr) -> "assert(" ^ untypedPostElabExprToString(pExpr) ^ ")"
@@ -191,7 +182,7 @@ and typedPostElabExprToString(e : typedPostElabExpr) =
       | BoolExpr(b) -> boolExprToString(b)
       | VoidExpr(stmt) -> typedPostElabStmtToString(stmt)
 
-let rec typedPostElabStmtToString(s : typedPostElabStmt) =
+and typedPostElabStmtToString(s : typedPostElabStmt) =
   match s with
         TypedPostElabDecl(i,c) -> concat "" [c0typeToString(c); identToString(i)]
       | TypedPostElabAssignStmt(i, e) -> concat "" [identToString(i); " = ";
@@ -199,12 +190,12 @@ let rec typedPostElabStmtToString(s : typedPostElabStmt) =
       | TypedPostElabIf(b,p1,p2) -> concat "" ["if(";
                                                boolExprToString(b);
                                                ") {\n\t";
-                                               typedPostElabASTToString(p1);
+                                               typedPostElabBlockToString(p1);
                                                "} else {\n\t";
-                                               typedPostElabASTToString(p2); "\n}"]
+                                               typedPostElabBlockToString(p2); "\n}"]
       | TypedPostElabWhile(b,p) -> concat "" ["while("; boolExprToString(b);
-                                                ") {\n\t"; typedPostElabASTToString(p); "\n}"]
-      | TypedPostElabReturn(i) -> "return " ^ intExprToString(i)
+                                                ") {\n\t"; typedPostElabBlockToString(p); "\n}"]
+      | TypedPostElabReturn(i) -> "return " ^ typedPostElabExprToString(i)
       | JumpUncond(l) -> "jmp .L" ^ labelToString(l)
       | TypedPostElabAssert(pExpr) -> "assert(" ^ boolExprToString(pExpr) ^ ")"
       | TypedPostElabVoidReturn -> "return"

@@ -23,7 +23,6 @@ let getDefVars prog line =
   
 
 let isDef t prog line =
-  (* idk why it's making me have params as an arg here >:( *)
     match getDefVars prog line with
           t'::[] -> t = t'
         | [] -> false
@@ -117,7 +116,7 @@ let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
       (liveTmpsPerLine.(lineNum)) interferenceGraph) lineNums in
   interferenceGraph
 
-let analyzeLiveness (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) temps =
+let analyzeLiveness (instrs : tmp2AddrInstr list) temps =
   let progArray = A.of_list instrs in
   let len = A.length progArray in
   let lineToPredecessorsArray = A.make len [] in

@@ -8,7 +8,7 @@
 
 open Core.Std
 open Datatypesv1
-(*open PrintDatatypes    *)
+open PrintDatatypes
 
 let say = prerr_endline
 let newline = prerr_newline
@@ -61,13 +61,13 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
     let preElabOverallAst = Parse.parse main_source header_file in ();
-    (*say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));*)
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
 
     (* Elaborate *)
     say_if verbose (fun () -> "Elaborating... ");
     let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
     say_if dump_upeAST (fun () ->
-      PrintASTs.untypedPostElabASTToString(untypedPostElabAst));
+      PrintASTs.untypedPostElabOverallASTToString(untypedPostElabOverallAst));
 
     (* Typecheck *)
     say_if verbose (fun () -> "Typechecking...");
