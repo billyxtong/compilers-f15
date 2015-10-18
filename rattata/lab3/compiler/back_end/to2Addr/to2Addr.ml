@@ -29,7 +29,12 @@ let instrTo2Addr paramToTmpMap = function
                         trans_arg paramToTmpMap arg2)
   | Tmp3AddrJump j -> Tmp2AddrJump j::[]
   | Tmp3AddrLabel jumpLabel -> Tmp2AddrLabel jumpLabel::[]
-  | Tmp3AddrBoolInstr instr -> Tmp2AddrBoolInstr instr::[]
+  | Tmp3AddrBoolInstr (TmpTest (arg, loc)) ->
+        Tmp2AddrBoolInstr (TmpTest (trans_arg paramToTmpMap arg,
+                                    trans_loc paramToTmpMap loc))::[]
+  | Tmp3AddrBoolInstr (TmpCmp (arg, loc)) ->
+        Tmp2AddrBoolInstr (TmpCmp (trans_arg paramToTmpMap arg,
+                                    trans_loc paramToTmpMap loc))::[]
   | Tmp3AddrFunCall (fName, args, dest) ->
       (* At the beginning of the function, move all of the args into new tmps.
          Keep live ranges of pre-colored tmps short! We're doing it here because
