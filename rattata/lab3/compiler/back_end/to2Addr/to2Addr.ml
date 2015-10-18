@@ -25,7 +25,7 @@ let instrTo2Addr paramToTmpMap = function
                                              trans_loc paramToTmpMap dest)]
   | Tmp3AddrReturn arg -> [Tmp2AddrReturn (trans_arg paramToTmpMap arg)]
   | Tmp3AddrBinop (op, arg1, arg2, dest) ->
-     binopTo2Addr dest (op, trans_arg paramToTmpMap arg1,
+     binopTo2Addr (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
                         trans_arg paramToTmpMap arg2)
   | Tmp3AddrJump j -> Tmp2AddrJump j::[]
   | Tmp3AddrLabel jumpLabel -> Tmp2AddrLabel jumpLabel::[]
