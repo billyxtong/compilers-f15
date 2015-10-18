@@ -55,11 +55,15 @@ let rec matchParamListTypes (paramTypes : c0type list) (params : param list) typ
 let matchFuncTypes funcType1 funcType2 typedefMap =
   if (lowestTypedefType funcType1 typedefMap) = (lowestTypedefType funcType2 typedefMap)
   then true else false
-  (*
-        (INT, INT) -> true
-      | (BOOL, BOOL) -> true
-      | (VOID, VOID) -> true
-      | _ -> false*)
+
+let rec uniqueParamNames (params : param list) nameTable typedefMap =
+  match params with
+        [] -> true
+      | (datType, datName) :: ps -> 
+          (match (M.find nameTable datName, M.find typedefMap datName) with
+                 (None, None) -> uniqueParamNames ps (M.add nameTable datName ()) typedefMap
+               | _ -> false)
+
 
 let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExpr) =
   match expression with
@@ -122,8 +126,10 @@ let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExp
            | _ -> (ErrorMsg.error ("ternary expression didn't typecheck \n");
                   raise ErrorMsg.Error))
   | UntypedPostElabFunCall(i, argList) -> 
-      (match M.find funcEnv i with
-             Some(funcType, funcParams, isDefined, isExternal) -> 
+      (match (M.find varEnv i, M.find funcEnv i) with
+             (Some _, _) -> (ErrorMsg.error ("cannot call this function while var with same name is in scope \n");
+                             raise ErrorMsg.Error)
+           | (None, Some(funcType, funcParams, isDefined, isExternal)) -> 
                let () = (if not isDefined 
                          then H.replace declaredAndUsedButUndefinedFunctionTable i ()
                          else ()) in
@@ -150,7 +156,11 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
         [] -> (headerFuncMap, headerTypedefMap)
       | fdecl :: fdecls -> 
           (match fdecl with
-                 UntypedPostElabTypedef(t, i) ->
+                 UntypedPostElabTypedef(t, i) -> 
+                 if t = VOID then
+                    (ErrorMsg.error ("apparently you can't typedef voids which is stupid but whatever \n");
+                     raise ErrorMsg.Error)
+                 else
                    (match (M.find headerTypedefMap i, M.find headerFuncMap i) with
                           (None, None) -> 
                             let newHeaderTypedefMap = M.add headerTypedefMap i 
@@ -158,7 +168,12 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
                             tc_header headerFuncMap newHeaderTypedefMap fdecls
                         | _ -> (ErrorMsg.error ("typedef cannot shadow previously declared typedef/func names \n");
                                 raise ErrorMsg.Error))
-               | UntypedPostElabFunDecl(funcType, funcName, funcParams) -> 
+               | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
+                   let nameTable = Core.Std.String.Map.empty in
+                   if not (uniqueParamNames funcParams nameTable headerTypedefMap) then 
+                      (ErrorMsg.error ("bad param names \n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find headerTypedefMap funcName, M.find headerFuncMap funcName) with
                           (Some _, _) -> 
                             (ErrorMsg.error ("function cannot shadow previously declared typedef/func name\n");
@@ -185,12 +200,26 @@ let rec init_func_env typedefMap params =
 
 let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
   match prog with
-        [] -> if H.length declaredAndUsedButUndefinedFunctionTable = 0 then typedAST
-              else (ErrorMsg.error ("you got some used but undeclared functions\n");
+        [] -> if not (H.length declaredAndUsedButUndefinedFunctionTable = 0)
+              then (ErrorMsg.error ("you got some used but undeclared functions\n");
                     raise ErrorMsg.Error)
+              else 
+                (match M.find funcMap "main" with
+                       Some(_, _, isDefined, isExternal) -> 
+                        if not isDefined then 
+                          (ErrorMsg.error ("main undefined\n");
+                           raise ErrorMsg.Error)
+                        else typedAST
+                     | None -> (ErrorMsg.error ("main undeclared\n");
+                                raise ErrorMsg.Error))
       | gdecl :: gdecls ->
           (match gdecl with
                  UntypedPostElabFunDecl(funcType, funcName, funcParams) -> 
+                   let nameTable = Core.Std.String.Map.empty in
+                   if not (uniqueParamNames funcParams nameTable typedefMap) then 
+                      (ErrorMsg.error ("bad param names \n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find typedefMap funcName, M.find funcMap funcName) with
                           (Some _, _) -> 
                             (ErrorMsg.error ("trying to shadow used name\n");
@@ -213,6 +242,11 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                             false, false) in
                             tc_prog newFuncMap typedefMap gdecls typedAST)
                | UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) ->
+                   let nameTable = Core.Std.String.Map.empty in
+                   if not (uniqueParamNames funcParams nameTable typedefMap) then 
+                      (ErrorMsg.error ("bad param names \n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find typedefMap funcName, M.find funcMap funcName) with
                           (Some _, _) -> (ErrorMsg.error ("trying to shadow used name \n");
                                           raise ErrorMsg.Error)
@@ -260,6 +294,10 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                                   tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, newFuncName, 
                                   funcParams, List.rev typeCheckedFuncBody)::typedAST))))
                | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
+                    if typeDefType = VOID then
+                    (ErrorMsg.error ("apparently you can't typedef voids which is stupid but whatever \n");
+                     raise ErrorMsg.Error)
+                    else
                    (match (M.find typedefMap typeDefName, M.find funcMap typeDefName) with
                           (None, None) -> 
                             let newTypedefMap = M.add typedefMap typeDefName 
