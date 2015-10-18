@@ -1,12 +1,4 @@
-(* L1 Compiler
- * Assembly Code Generator for FAKE assembly
- * Author: Alex Vaynberg <alv@andrew.cmu.edu>
- * Based on code by: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
- *
- * Implements a "convenient munch" algorithm
- *)
+(* Implements a "convenient munch" algorithm *)
 
 open Core.Std
 open Datatypesv1
@@ -14,12 +6,12 @@ open Datatypesv1
 
 let rec munch_bool_instr = function
     TmpInfAddrTest (bool_exp, TmpBoolArg TmpLoc t) ->
-        let t = Tmp (Temp.create()) in
-        let (instrs, dest) = munch_exp t (TmpBoolExpr bool_exp) 0 in
+        let t' = Tmp (Temp.create()) in
+        let (instrs, dest) = munch_exp t' (TmpBoolExpr bool_exp) 0 in
         instrs @ Tmp3AddrBoolInstr (TmpTest (dest, t))::[]
    | TmpInfAddrCmp (int_exp, TmpIntArg TmpLoc t) ->
-        let t = Tmp (Temp.create()) in
-        let (instrs, dest) = munch_exp t (TmpIntExpr int_exp) 0 in
+        let t' = Tmp (Temp.create()) in
+        let (instrs, dest) = munch_exp t' (TmpIntExpr int_exp) 0 in
         instrs @ Tmp3AddrBoolInstr (TmpCmp (dest, t))::[]
   | TmpInfAddrTest (bool_exp, non_tmp_exp) ->
         let t1 = Tmp (Temp.create()) in
