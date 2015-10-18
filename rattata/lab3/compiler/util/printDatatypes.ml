@@ -3,10 +3,6 @@ open String
 open Ast
 let identToString(i : ident) = i
 
-let internalFunIdentToString (fName : ident) = "_c0_" ^ fName
-
-let externalFunIdentToString (fName : ident) = fName
-
 let c0typeToString (c : c0type) =
   match c with
         INT -> "int "
@@ -134,11 +130,11 @@ let assemInstrToString(instr : assemInstr) =
       | JUMP(jInstr) -> jumpInstrToString(jInstr)
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
       | LABEL(l) -> labelToString(l) ^ ":"
-      | CALL(i) -> "call " ^ internalFunIdentToString(i)
+      | CALL(i) -> "call " ^ identToString(i)
 
 let assemFunDefToString(AssemFunDef(funcName, instrList)) =
-  ".globl " ^ internalFunIdentToString(funcName) ^ "\n" ^
-  internalFunIdentToString(funcName)  ^ ":\n" ^ 
+  ".globl " ^ identToString(funcName) ^ "\n" ^
+  identToString(funcName)  ^ ":\n" ^ 
   (concat "\n" (List.map assemInstrToString instrList)) ^ "\n"
 
 let assemProgToString(assemprog : assemFunDef list) = 
@@ -153,8 +149,8 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
            assemArgToString(divisor)]
 
 let assemFunDefWonkyToString(WonkyFunDef(funcName, instrList)) =
-  ".globl " ^ internalFunIdentToString(funcName) ^ "\n" ^
-  internalFunIdentToString(funcName)  ^ ":\n" ^ 
+  ".globl " ^ identToString(funcName) ^ "\n" ^
+  identToString(funcName)  ^ ":\n" ^ 
   (concat "\n" (List.map assemInstrWonkyToString instrList)) ^ "\n"
 
 let assemProgWonkyToString(prog: assemProgWonky) = 

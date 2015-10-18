@@ -111,13 +111,15 @@ let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExp
                   raise ErrorMsg.Error))
   | UntypedPostElabFunCall(i, argList) -> 
       (match M.find funcEnv i with
-             Some(funcType, funcParams, _, _) -> 
+             Some(funcType, funcParams, _, isExternal) -> 
                let typedArgs = List.map (tc_expression funcEnv typedefEnv varEnv) argList in
+               let newFuncName = if isExternal then i else "_c0_" ^ i in
+               (* internal functions must be called with prefix _c0_ *)
                if (argsMatch typedArgs funcParams) then 
                (match funcType with
-                      INT -> IntExpr(IntFunCall(i, typedArgs))
-                    | BOOL -> BoolExpr(BoolFunCall(i, typedArgs))
-                    | VOID -> VoidExpr(VoidFunCall(i, typedArgs))
+                      INT -> IntExpr(IntFunCall(newFuncName, typedArgs))
+                    | BOOL -> BoolExpr(BoolFunCall(newFuncName, typedArgs))
+                    | VOID -> VoidExpr(VoidFunCall(newFuncName, typedArgs))
                     | TypedefType(_) -> 
                         (ErrorMsg.error ("shouldn't get here; 
                                           functions should have lowest typedef type \n");
@@ -206,7 +208,10 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                                 let funcVarMap = init_func_env funcParams in
                                 let (_, _, typeCheckedBlock) = tc_statements newFuncMap typedefMap funcVarMap 
                                                        funcBody fType false [] in
-                                  tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, funcName, 
+                                let newFuncName = "_c0_" ^ funcName in
+                                (* We're supposed to call internal functions with the prefix _c0_. I'm doing it
+                                   here because we know exactly which are internal/external at this point *)
+                                  tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, newFuncName, 
                                   funcParams, List.rev typeCheckedBlock)::typedAST))
                          | (None, None) -> 
                              (if funcName = "main" && 
@@ -221,7 +226,8 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                                  let (_, _, typeCheckedFuncBody) = 
                                    tc_statements newFuncMap typedefMap funcVarMap 
                                    funcBody funcType false [] in
-                                 tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, funcName, 
+                                let newFuncName = "_c0_" ^ funcName in
+                                 tc_prog newFuncMap typedefMap gdecls (TypedPostElabFunDef(funcType, newFuncName, 
                                  funcParams, List.rev typeCheckedFuncBody)::typedAST))))
                | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
                    (match (M.find typedefMap typeDefName, M.find funcMap typeDefName) with
