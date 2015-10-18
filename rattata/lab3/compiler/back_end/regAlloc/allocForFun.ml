@@ -20,7 +20,7 @@ let assemLocForColor regArray offsetIncr colorNum =
        that means we need there are at least 11 colors, which means we need
        at least 3 * (size of one tmp) bytes of stack memory. Since the
        first stack spot is 4(rsp), we add one *)
-    else MemAddr(RBP, (colorNum - (A.length regArray) + 1) * offsetIncr)
+    else MemAddr(RBP, - ((colorNum - (A.length regArray) + 1) * offsetIncr))
 
 (* colorList consists of tuples (t, colorForTmp) where t is the temp number
    and color is the color of t. We need t in order to add it to the
@@ -48,7 +48,8 @@ let getArgDest paramRegArray i =
        8th arg goes 16 above RSP, etc *)
     if i < Array.length paramRegArray then Reg paramRegArray.(i) else
     (* This will the correct offset AFTER WE DECREASE RSP *)
-    MemAddr(RBP, bytesForArg * (i - Array.length paramRegArray + 1))
+    (* We put all the args above RSP *)
+    MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray + 1))
 
 let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
     (* 1. Figure out how many args we'll need to put on the stack.
@@ -108,8 +109,10 @@ let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr) :
 
 let combineForMaxOffset t loc currMax =
     match loc with
-        Reg _ -> currMax
-      | MemAddr(_, offset) -> max offset currMax
+      | MemAddr(RSP, offset) -> max offset currMax
+             (* Only offsets from RSP count! There might also be offsets from
+                RBP: The args to the function would be above RBP *)
+      | _ -> currMax
 
 let rec getTempSet instrList tempSet =
     match instrList
@@ -131,16 +134,19 @@ let getTempList instrList = let tempSet = getTempSet instrList
                                 (H.create (List.length instrList)) in
                             let addTempToList t () acc = t::acc in
                             H.fold addTempToList tempSet []
-let mappingForParam paramRegArray i =
+let mappingForParam argOffsetAboveRbp paramRegArray i =
     (* We know that the first 6 params will be mapped to registers, and the
-       rest will be in offsets of 8 bytes above RBP (what was RSP on
-       entrance to the function) *)
+       rest will be in offsets of 8 bytes above what was RSP on
+       entrance to the function. HOWEVER since the  *)
     if i < Array.length paramRegArray then Reg paramRegArray.(i) else
-    MemAddr(RBP, bytesForArg * (i - (Array.length paramRegArray) + 1))
+    let offsetFromArgStart = bytesForArg * (i - (Array.length paramRegArray) + 1) in
+           (* + 1 because if i == length, it should be 8 *)
+    MemAddr(RBP, argOffsetAboveRbp + offsetFromArgStart)
 
-let addParamMappings tmpToAssemLocMap paramRegArray params =
+let addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params =
     List.iteri (fun i -> fun p ->
-        H.add tmpToAssemLocMap p (mappingForParam paramRegArray i)) params
+        H.add tmpToAssemLocMap p (mappingForParam argOffsetAboveRbp
+                                    paramRegArray i)) params
 
 let combineForMaxColor t color currMax = max color currMax
 
@@ -161,18 +167,25 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assem
   let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
   let vertexOrdering = maxCardSearch interferenceGraph startVertex in
   let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
-  let offsetIncr = 4 in
-  (* we need a list of tmps to go through; just use vertexOrdering *)
-  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
-      offsetIncr regArray (H.create 100) in
-  let () = addParamMappings tmpToAssemLocMap paramRegArray params in
-  let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
   let allocdRegs = getUsedRegs maxColor allocableRegList in
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
-  (* Move RSP into RBP AFTER we change RSP! since we're doing positive offsets from RBP *)
+  let offsetIncr = 4 in
+  (* we need a list of tmps to go through; just use vertexOrdering *)
+  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
+      offsetIncr regArray (H.create 100) in
+  let argSize = 8 in
+  let argOffsetAboveRbp = argSize * (List.length pushInstrs + 1)
+                                    (* +1 for return address *) in
+  let () = addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params in
+  let finalOffset = H.fold combineForMaxOffset tmpToAssemLocMap 0 in
+  (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
+     args on the stack above it *)
   let finalInstrs = pushInstrs @
-  SUBQ(Const finalOffset, Reg RSP)::MOVQ(AssemLoc (Reg RSP), Reg RBP) :: [] @
+  MOVQ(AssemLoc (Reg RSP), Reg RBP) :: SUBQ(Const finalOffset, Reg RSP):: [] @
   (List.concat (List.map (translate tmpToAssemLocMap allocdRegs finalOffset paramRegArray) instrs)) in
   AssemFunDef(fName, finalInstrs)
+
+(* MAKE SURE NUMBER OF PUSH/POPS MATCH UP/SUM TO AN EVEN NUMBER
+   BECAUSE OF 16 BYTE ALIGNEMNT *)
