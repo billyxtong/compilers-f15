@@ -48,7 +48,7 @@ let translateTmpArg tbl = function
                  (* The "with" means there's a tmp that is used, but we
                     never assigned an AssemLoc to it because we never
                     wrote to it. This can happen if the variable was never initialized,
-                         but it was ok because the line was unreachable *)
+                    but it was ok because the line was unreachable *)
                  with Not_found -> AssemLoc (MemAddr(RSP, -666)))
 
 let getArgDest paramRegArray i =
@@ -143,7 +143,7 @@ let addParamMappings tmpToAssemLocMap paramRegArray params =
         H.add tmpToAssemLocMap p (mappingForParam paramRegArray i)) params
 
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
-  let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
+  let paramRegArray = Array.of_list [EDX; ECX; R8; R9] in
   let allocableRegList = [EBX; R10; R11; R12; R13; R14; R15] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
