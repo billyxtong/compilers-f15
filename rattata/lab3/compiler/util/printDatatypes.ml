@@ -135,7 +135,7 @@ let assemInstrToString(instr : assemInstr) =
 let assemFunDefToString(AssemFunDef(funcName, instrList)) =
   ".globl " ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
   "_c0_" ^ identToString(funcName)  ^ ":\n" ^ 
-  (concat "\n" (List.map assemInstrToString instrList))
+  (concat "\n" (List.map assemInstrToString instrList)) ^ "\n"
 
 let assemProgToString(assemprog : assemFunDef list) = 
   concat "\n" (List.map assemFunDefToString assemprog) ^ "\n"
@@ -151,7 +151,7 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
 let assemFunDefWonkyToString(WonkyFunDef(funcName, instrList)) =
   ".globl " ^ "_c0_" ^ identToString(funcName) ^ "\n" ^
   "_c0_" ^ identToString(funcName)  ^ ":\n" ^ 
-  (concat "\n" (List.map assemInstrWonkyToString instrList))
+  (concat "\n" (List.map assemInstrWonkyToString instrList)) ^ "\n"
 
 let assemProgWonkyToString(prog: assemProgWonky) = 
   concat "\n" (List.map assemFunDefWonkyToString prog) ^ "\n"
@@ -194,7 +194,7 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
 
 let tmp2AddrFunDefToString (Tmp2AddrFunDef (i,temps,instrList)) =
   identToString(i) ^ "(" ^ (concat ", " (List.map tmpToString temps)) ^ ") {\n" ^
-  (concat "\n" (List.map tmp2AddrInstrToString instrList)) ^ "}"
+  (concat "\n" (List.map tmp2AddrInstrToString instrList)) ^ "}\n"
 
 let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
   (* We want a newline at the end *)
@@ -224,7 +224,7 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
 
 let tmp3AddrFunDefToString (Tmp3AddrFunDef (i,temps,instrList)) =
   identToString(i) ^ "(" ^ (concat ", " (List.map tmpToString temps)) ^ ") {\n" ^
-  (concat "\n" (List.map tmp3AddrInstrToString instrList)) ^ "}"
+  (concat "\n" (List.map tmp3AddrInstrToString instrList)) ^ "}\n"
 
 
 let tmp3AddrProgToString(tmp3addrprog : tmp3AddrProg) = 
@@ -237,13 +237,13 @@ let rec tmpIntExprToString(tmpintexpr : tmpIntExpr) =
                                                             " "; intBinopToString(op); 
                                                             " "; tmpIntExprToString(expr2); ")"]
       | TmpInfAddrIntFunCall(i,args) ->
-          identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")\n"
+          identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")"
 
 and tmpBoolExprToString(bExpr : tmpBoolExpr) = 
   match bExpr with
         TmpBoolArg(t) -> tmpArgToString(t)
       | TmpInfAddrBoolFunCall(i,args) ->
-          identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")\n"
+          identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")"
 
 
 and tmpExprToString(tExpr : tmpExpr) =
@@ -264,11 +264,11 @@ let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
       | TmpInfAddrLabel(l) -> labelToString(l)
       | TmpInfAddrReturn(tExpr) -> concat "" ["return "; tmpExprToString(tExpr)]
       | TmpInfAddrVoidFunCall(i,args) ->
-          identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")\n"
+          identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")"
 
 let tmpInfAddrFunDefToString (TmpInfAddrFunDef (i,temps,instrList)) =
   identToString(i) ^ "(" ^ (concat ", " (List.map tmpToString temps)) ^ ") {\n" ^
-  (concat "\n" (List.map tmpInfAddrInstrToString instrList)) ^ "}"
+  (concat "\n" (List.map tmpInfAddrInstrToString instrList)) ^ "}\n"
 
 
 let tmpInfAddrProgToString(instrs : tmpInfAddrFunDef list) = 
