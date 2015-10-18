@@ -10,6 +10,8 @@ open Datatypesv1
 module M = Core.Std.Map
 open String
 module H = Hashtbl
+open PrintDatatypes
+open PrintASTs
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 
@@ -17,33 +19,6 @@ let isValidVarDecl (identifier : ident) =
   if sub identifier 0 1 = "\\" 
   then true 
   else false
-
-let rec argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) =
-  match (arguments, paramTypes) with
-        ([], []) -> true
-      | ([], p :: ps) -> false
-      | (arg :: args, []) -> false
-      | (arg :: args, p :: ps) ->
-          (match (arg, p) with
-                 (IntExpr(_), INT) -> argsMatch args ps
-               | (BoolExpr(_), BOOL) -> argsMatch args ps
-               | _ -> false)
-
-let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
-  match (paramTypes, params) with
-        ([], []) -> true
-      | ([], p :: ps) -> false
-      | (p :: ps, []) -> false
-      | (p :: ps, (typee, _) :: remainingParams) -> 
-          if ((p = INT && typee = INT) || (p = BOOL && typee = BOOL))
-          then matchParamListTypes ps remainingParams else false
-
-let matchFuncTypes funcType1 funcType2 =
-  match (funcType1, funcType2) with
-        (INT, INT) -> true
-      | (BOOL, BOOL) -> true
-      | (VOID, VOID) -> true
-      | _ -> false
 
 let lowestTypedefType (typedefType : c0type) tbl =
   match typedefType with
@@ -53,6 +28,38 @@ let lowestTypedefType (typedefType : c0type) tbl =
                | None -> (ErrorMsg.error ("undefined typedef \n");
                          raise ErrorMsg.Error))
       | _ -> typedefType
+
+let rec argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) typedefMap =
+  match (arguments, paramTypes) with
+        ([], []) -> true
+      | ([], p :: ps) -> false
+      | (arg :: args, []) -> false
+      | (arg :: args, p :: ps) ->
+          (match (arg, lowestTypedefType p typedefMap) with
+                 (IntExpr(_), INT) -> argsMatch args ps typedefMap
+               | (BoolExpr(_), BOOL) -> argsMatch args ps typedefMap
+               | _ -> false)
+
+
+let rec matchParamListTypes (paramTypes : c0type list) (params : param list) typedefMap =
+  match (paramTypes, params) with
+        ([], []) -> true
+      | ([], p :: ps) -> false
+      | (p :: ps, []) -> false
+      | (p :: ps, (typee, _) :: remainingParams) -> 
+          let pType = lowestTypedefType p typedefMap in
+          let paramType = lowestTypedefType typee typedefMap in
+          if ((pType = INT && paramType = INT) || (pType = BOOL && paramType = BOOL))
+          then matchParamListTypes ps remainingParams typedefMap else false
+
+let matchFuncTypes funcType1 funcType2 typedefMap =
+  if (lowestTypedefType funcType1 typedefMap) = (lowestTypedefType funcType2 typedefMap)
+  then true else false
+  (*
+        (INT, INT) -> true
+      | (BOOL, BOOL) -> true
+      | (VOID, VOID) -> true
+      | _ -> false*)
 
 let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExpr) =
   match expression with
@@ -66,7 +73,9 @@ let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExp
                      (if isInitialized (* declared and initialized, all good *)
                       then (match typee with
                                   INT -> IntExpr(IntIdent(id))
-                                | BOOL -> BoolExpr(BoolIdent(id)))
+                                | BOOL -> BoolExpr(BoolIdent(id))
+                                | _ -> (ErrorMsg.error ("bad type\n");
+                                        raise ErrorMsg.Error))
                       else (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                             raise ErrorMsg.Error))
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
@@ -121,7 +130,7 @@ let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExp
                let typedArgs = List.map (tc_expression funcEnv typedefEnv varEnv) argList in
                let newFuncName = if isExternal then i else "_c0_" ^ i in
                (* internal functions must be called with prefix _c0_ *)
-               if (argsMatch typedArgs funcParams) then 
+               if (argsMatch typedArgs funcParams typedefEnv) then 
                (match funcType with
                       INT -> IntExpr(IntFunCall(newFuncName, typedArgs))
                     | BOOL -> BoolExpr(BoolFunCall(newFuncName, typedArgs))
@@ -155,7 +164,8 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
                             (ErrorMsg.error ("function cannot shadow previously declared typedef/func name\n");
                              raise ErrorMsg.Error)
                         | (None, Some (fType, paramTypes, isDefined, isExternal)) ->
-                            if not ((matchFuncTypes fType funcType) && (matchParamListTypes paramTypes funcParams))
+                            if not ((matchFuncTypes fType funcType headerTypedefMap) && 
+                                    (matchParamListTypes paramTypes funcParams headerTypedefMap))
                             then (ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
                                   raise ErrorMsg.Error)
                             else
@@ -168,9 +178,10 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
                | _ -> (ErrorMsg.error ("function def'n in header file \n");
                        raise ErrorMsg.Error))
 
-let rec init_func_env = function
-    [] -> Core.Std.String.Map.empty
-  | (typee, id)::ps ->  M.add (init_func_env ps) id (typee, true)
+let rec init_func_env typedefMap params = 
+  match params with
+        [] -> Core.Std.String.Map.empty
+      | (typee, id)::ps ->  M.add (init_func_env typedefMap ps) id (lowestTypedefType typee typedefMap, true)
 
 let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
   match prog with
@@ -189,14 +200,17 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                             then (ErrorMsg.error ("trying to redeclare func that was declared in header \n");
                                  raise ErrorMsg.Error)
                             else
-                              if not ((matchFuncTypes fType funcType) && (matchParamListTypes paramTypes funcParams))
+                              if not ((matchFuncTypes fType funcType typedefMap) && 
+                                      (matchParamListTypes paramTypes funcParams typedefMap))
                               then (ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
                                 tc_prog funcMap typedefMap gdecls typedAST)
                         | (None, None) -> 
                             let newFuncMap = M.add funcMap funcName 
-                            (lowestTypedefType funcType typedefMap, (List.map (fun (c, i) -> c) funcParams), false, false) in
+                            (lowestTypedefType funcType typedefMap, 
+                            (List.map (fun (c, i) -> lowestTypedefType c typedefMap) funcParams), 
+                            false, false) in
                             tc_prog newFuncMap typedefMap gdecls typedAST)
                | UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) ->
                    (match (M.find typedefMap funcName, M.find funcMap funcName) with
@@ -207,16 +221,18 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                             then (ErrorMsg.error ("trying to define predefined/ external function \n");
                                  raise ErrorMsg.Error)
                             else
-                              if not ((matchFuncTypes fType funcType) && (matchParamListTypes paramTypes funcParams))
+                              if not ((matchFuncTypes fType funcType typedefMap) && 
+                                      (matchParamListTypes paramTypes funcParams typedefMap))
                               then (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
                                 let () = H.remove declaredAndUsedButUndefinedFunctionTable funcName in
                                 let newFuncMap = M.add funcMap funcName 
                                   (fType, paramTypes, true, false) in
-                                let funcVarMap = init_func_env funcParams in
-                                let (_, _, typeCheckedBlock) = tc_statements newFuncMap typedefMap funcVarMap 
-                                                       funcBody fType false [] in
+                                let funcVarMap = init_func_env typedefMap funcParams in
+                                let (_, _, typeCheckedBlock) = 
+                                  tc_statements newFuncMap typedefMap funcVarMap 
+                                  funcBody (lowestTypedefType fType typedefMap) false [] in
                                 let newFuncName = "_c0_" ^ funcName in
                                 (* We're supposed to call internal functions with the prefix _c0_. I'm doing it
                                    here because we know exactly which are internal/external at this point *)
@@ -230,11 +246,12 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                               else
                                 (let newFuncMap = M.add funcMap funcName 
                                   (lowestTypedefType funcType typedefMap, 
-                                  (List.map (fun (c, i) -> c) funcParams), true, false) in
-                                 let funcVarMap = init_func_env funcParams in
+                                  (List.map (fun (c, i) -> lowestTypedefType c typedefMap) funcParams), 
+                                  true, false) in
+                                 let funcVarMap = init_func_env typedefMap funcParams in
                                  let (ret, _, typeCheckedFuncBody) = 
                                    tc_statements newFuncMap typedefMap funcVarMap 
-                                   funcBody funcType false [] in
+                                   funcBody (lowestTypedefType funcType typedefMap) false [] in
                                  if ((not ret) && (not (funcType = VOID))) then
                                   (ErrorMsg.error ("non-void functions must return \n");
                                    raise ErrorMsg.Error)
@@ -272,6 +289,10 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
       (match (M.find typedefMap id, M.find varMap id) with
              (None, None) -> 
                (let actualType = lowestTypedefType typee typedefMap in
+                if actualType = VOID then 
+                  (ErrorMsg.error ("vars can't have type void\n");
+                   raise ErrorMsg.Error)
+                else
                  let newVarMap = M.add varMap id (actualType, false) in 
                 tc_statements funcMap typedefMap newVarMap 
                 stms funcRetType ret ((TypedPostElabDecl(id, actualType)) :: typedBlock))
@@ -335,13 +356,13 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
                (match funcRetType with
                       INT -> tc_statements funcMap typedefMap newMap 
                              stms funcRetType true ((TypedPostElabReturn(IntExpr exp1)) :: typedBlock)
-                    | _ -> (ErrorMsg.error ("return expression didn't typecheck\n");
-                           raise ErrorMsg.Error))
+                    | _ -> (ErrorMsg.error ("int return expression didn't typecheck\n");
+                            raise ErrorMsg.Error))
            | BoolExpr(exp1) -> 
                (match funcRetType with
                       BOOL -> tc_statements funcMap typedefMap newMap 
                               stms funcRetType true ((TypedPostElabReturn(BoolExpr exp1)) :: typedBlock)
-                    | _ -> (ErrorMsg.error ("return expression didn't typecheck\n");
+                    | _ -> (ErrorMsg.error ("bool return expression didn't typecheck\n");
                            raise ErrorMsg.Error))
            | VoidExpr(exp1) -> (ErrorMsg.error ("can't return void \n");
                            raise ErrorMsg.Error))
