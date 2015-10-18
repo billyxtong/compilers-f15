@@ -68,7 +68,8 @@ let translateFunCall tbl finalOffset paramRegArray fName args dest =
        6. Restore RSP
        7. Move result from EAX to wherever we want (if there is a result)
     *)
-    let numStackArgs = List.length args - (Array.length paramRegArray) in
+    let numStackArgs = max 0 (List.length args - (Array.length paramRegArray)) in
+                 (* numStackArgs can't be less than 0, even if the right term is *)
     let spaceForArgs = bytesForArg * numStackArgs in
     let is16ByteAligned = (finalOffset + spaceForArgs) mod 16 = 8 in
     let rspShiftAmount = (if is16ByteAligned then spaceForArgs
@@ -120,6 +121,9 @@ let rec getTempSet instrList tempSet =
                    Tmp2AddrMov(src, Tmp dest) -> (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
                  | Tmp2AddrBinop(op, src, Tmp dest) -> (let () = H.replace tempSet dest () in
+                                                             getTempSet instrs tempSet)
+                 | Tmp2AddrFunCall(fName, args, Some (Tmp dest)) ->
+                                              (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
                  | _ -> getTempSet instrs tempSet)
 
