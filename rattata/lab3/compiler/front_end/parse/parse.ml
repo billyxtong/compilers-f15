@@ -20,14 +20,17 @@ let parse main_filename header_filename =
         let ast = C0Parser.program C0Lexer.initial lexbuf in
         let _ = if !ErrorMsg.anyErrors then raise ErrorMsg.Error else () in
         ast)) in
-     let header_ast = (In_channel.with_file header_filename ~f:(
+     let header_ast =
+       (match header_filename with
+           None -> []
+         | Some filename -> (In_channel.with_file filename ~f:(
       fun chan ->
         let lexbuf = Lexing.from_channel chan in
         let _ = ErrorMsg.reset ()
-        and _ = ParseState.setfile header_filename in
+        and _ = ParseState.setfile filename in
         let ast = C0Parser.program C0Lexer.initial lexbuf in
         let _ = if !ErrorMsg.anyErrors then raise ErrorMsg.Error else () in
-        ast))
+        ast)))
       in (main_ast, header_ast)
   with
   | Parsing.Parse_error ->

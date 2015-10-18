@@ -1,11 +1,3 @@
-(* L1 Compiler
- * Top Level Environment
- * Author: Kaustuv Chaudhuri <kaustuv+@cs.cmu.edu>
- * Modified: Alex Vaynberg <alv@andrew.cmu.edu>
- * Modified: Frank Pfenning <fp@cs.cmu.edu>
- * Converted to OCaml by Michael Duggan <md5i@cs.cmu.edu>
- *)
-
 open Core.Std
 open Datatypesv1
 open PrintDatatypes
@@ -19,6 +11,7 @@ let spec =
   let open Command.Spec in
   empty
   +> anon (sequence ("files" %: string))
+  +> flag "-l" (optional string) ~doc:" Header file"
   +> flag "--verbose" ~aliases:["-v"] no_arg ~doc:" Verbose messages"
   +> flag "--dump-parsing" no_arg ~doc:" Pretty print parsing messages"
   +> flag "--dump-ast" no_arg ~doc:" Pretty print the pre-elab AST"
@@ -34,7 +27,7 @@ let spec =
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
   +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
 
-let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
   try
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
@@ -46,17 +39,6 @@ let main files verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infA
     | _ -> say "Error: more than one input file"; raise EXIT
     in
 
-    (* Set up header file stuff *)
-    (* MAKE THIS NOW ALWAYS USE THIS HEADERRRRRRRRRRRRRRRRRRRRRRR *)
-    let header_file = "../runtime/15411-l3.h0" 
-       (* (try (\* See if there is a specific header file corresponding *)
-       (*        to this input file. If not, default to 15411-l13.h0 *\) *)
-       (*    let _ = In_channel.with_file *)
-       (*        ((Filename.chop_extension main_source) ^ ".h0") in *)
-       (*    (Filename.chop_extension main_source) ^ ".h0" *)
-       (*  with _ -> "../runtime/15411-l3.h0") *)
-          (* not sure if I can actually specific the path this way *) in
-    
     (* Parse *)
     say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
