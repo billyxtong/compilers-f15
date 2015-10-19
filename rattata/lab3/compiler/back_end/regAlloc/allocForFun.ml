@@ -4,12 +4,9 @@ open PrintDatatypes
 module A = Array
 open Graph  
 
-let spillReg = Reg EDI
+let spillReg = Reg R15
 
 let bytesForArg = 8
-
-let calleeSavedList = [RBP; EBX; R12; R13; R14; R15]
-let callerSavedList = [ECX; EDI; ESI; R8; R9; R10; R11]
 
 let listToString i a = String.concat "" (List.map
             (fun x -> string_of_int(i)^": " ^string_of_int(x) ^ ", ") a @["\n"])
@@ -162,7 +159,7 @@ let getUsedRegs maxColor allocableRegList =
 
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
-  let allocableRegList = [EBX; R10; R11; R12; R13; R14; R15] in
+  let allocableRegList = [EBX; R10; R11; R12; R13; R14] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
   let tempList = getTempList instrs in
