@@ -225,11 +225,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                             (ErrorMsg.error ("trying to shadow used name\n");
                              raise ErrorMsg.Error)
                         | (None, Some (fType, paramTypes, isDefined, isExternal)) ->
-                            (if isExternal
-                            then (ErrorMsg.error ("trying to redeclare func that was declared in header \n");
-                                 raise ErrorMsg.Error)
-                            else
-                              if not ((matchFuncTypes fType funcType typedefMap) && 
+                              (if not ((matchFuncTypes fType funcType typedefMap) && 
                                       (matchParamListTypes paramTypes funcParams typedefMap))
                               then (ErrorMsg.error ("trying to redeclare func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
@@ -435,6 +431,8 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   let funcMap = Core.Std.String.Map.empty in
   let typedefMap = Core.Std.String.Map.empty in
   let (headerFuncMap, headerTypedefMap) = tc_header funcMap typedefMap untypedHeaderAST in
+  (* the main function is considered to always be declared at the top of the main file!
+     It still needs to be defined eventually of course *)
   let typedProgAST = tc_prog headerFuncMap headerTypedefMap untypedProgAST [] in
   List.rev typedProgAST
 
