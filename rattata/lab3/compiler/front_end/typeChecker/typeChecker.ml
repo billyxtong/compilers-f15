@@ -386,29 +386,32 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
                   raise ErrorMsg.Error)
   | A.UntypedPostElabReturn(e)::stms ->
       let tcExpr = tc_expression funcMap typedefMap varMap e in
-      (* apparently all variables defined before the first return
+      (* apparently all variables declared before the first return
          get to be treated as initialized...although those declared
          after don't *)
-      let newMap = M.map varMap (fun (typee, _) -> (typee, true)) in
+      let newVarMap = M.map varMap (fun (typee, _) -> (typee, true)) in
       (match tcExpr with
              IntExpr(exp1) -> 
                (match funcRetType with
-                      INT -> tc_statements funcMap typedefMap newMap 
+                      INT -> tc_statements funcMap typedefMap newVarMap 
                              stms funcRetType true ((TypedPostElabReturn(IntExpr exp1)) :: typedBlock)
                     | _ -> (ErrorMsg.error ("int return expression didn't typecheck\n");
                             raise ErrorMsg.Error))
            | BoolExpr(exp1) -> 
                (match funcRetType with
-                      BOOL -> tc_statements funcMap typedefMap newMap 
+                      BOOL -> tc_statements funcMap typedefMap newVarMap 
                               stms funcRetType true ((TypedPostElabReturn(BoolExpr exp1)) :: typedBlock)
                     | _ -> (ErrorMsg.error ("bool return expression didn't typecheck\n");
                            raise ErrorMsg.Error))
            | VoidExpr(exp1) -> (ErrorMsg.error ("can't return void \n");
                            raise ErrorMsg.Error))
       
-  | A.UntypedPostElabVoidReturn::stms -> 
+  | A.UntypedPostElabVoidReturn::stms ->
+      (* Same as above, variables declared are treated as initalized in
+         unreachable code... *)
+      let newVarMap = M.map varMap (fun (typee, _) -> (typee, true)) in
       (match funcRetType with
-             VOID -> tc_statements funcMap typedefMap varMap 
+             VOID -> tc_statements funcMap typedefMap newVarMap 
                      stms funcRetType true (TypedPostElabVoidReturn :: typedBlock)
            | _ -> ErrorMsg.error ("non-void function must return non-void value \n");
                   raise ErrorMsg.Error)
