@@ -455,6 +455,10 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   let (headerFuncMap, headerTypedefMap) = tc_header funcMap typedefMap untypedHeaderAST in
   (* the main function is considered to always be declared at the top of the main file!
      It still needs to be defined eventually of course *)
+  let () = (match M.find headerFuncMap "main" with
+                   Some _ -> (ErrorMsg.error ("main cannot be declared in header \n");
+                              raise ErrorMsg.Error)
+                 | None -> ()) in
   let funcMapWithMain = M.add headerFuncMap "main" (INT, [], false, false) in
   (* type is INT, no params, isDefined = false, isExternal = false *)
   let typedProgAST = tc_prog funcMapWithMain headerTypedefMap untypedProgAST [] in
