@@ -24,14 +24,19 @@ let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
                             | _ -> assert(false)) in
     let isNonNegative = A.GreaterThan(e2, A.IntConst (-1)) in
     let isSmallEnough = A.LogNot (A.GreaterThan(e2, max_shift)) in
+    (* Here's the trick: we actually have to evaluate the left hand size
+       (the thing being shifted) first, because of side effects. *)
+    let lhs_id = GenUnusedID.create () in
+    let evaluateLHS = A.TypedPostElabAssignStmt(lhs_id, A.IntExpr e1) in
     let condition = A.LogAnd (isNonNegative, isSmallEnough) in
           (* If shift is too big, or is negative, div by zero.
              Else, do the shift *)
     let doTheShift = A.TypedPostElabAssignStmt(new_id, A.IntExpr
-                 (A.BaseCaseShift(e1, baseCaseShiftOp, e2)))::[] in
+                 (A.BaseCaseShift(A.IntIdent lhs_id, baseCaseShiftOp, e2)))::[] in
     let divByZero = A.TypedPostElabAssignStmt(new_id, A.IntExpr
                  (A.ASTBinop(A.IntConst 666, FAKEDIV, A.IntConst 0)))::[] in
-       (trans_cond retTmp retLabel newMap (condition, doTheShift, divByZero),
+    let shiftCond = A.TypedPostElabIf(condition, doTheShift, divByZero) in
+       (trans_stmts retTmp retLabel newMap (evaluateLHS::shiftCond::[]),
        TmpIntArg (TmpLoc (Tmp result_tmp)))
 
 and trans_exp retTmp retLabel idToTmpMap = function
