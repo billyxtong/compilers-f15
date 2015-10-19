@@ -260,7 +260,6 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                               then (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
-                                let () = print_string("name: " ^ funcName ^ "\n") in
                                 let () = H.remove declaredAndUsedButUndefinedFunctionTable funcName in
                                 let newFuncMap = M.add funcMap funcName 
                                   (fType, paramTypes, true, false) in
@@ -440,6 +439,5 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   List.rev typedProgAST
 
 (* BUGS:
-used functions must be defined. If defined after, must be declared before use.
-   
+used functions must be defined. If defined after, must be declared before use.   
 *)
