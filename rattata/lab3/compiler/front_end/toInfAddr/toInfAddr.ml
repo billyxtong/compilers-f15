@@ -114,8 +114,8 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
             It shouldn't be an issue for BoolFunCalls because we always evaluate
             bools beforehand anyway (bool x = y) becomes
             (if (y) x = true else x = false) *)
-         (TmpInfAddrMov(TmpIntExpr (TmpInfAddrIntFunCall(fName, argExps)), dest) ::instrs,
-         TmpIntArg (TmpLoc dest))
+         (instrs @ TmpInfAddrMov(TmpIntExpr (TmpInfAddrIntFunCall(fName, argExps)), dest)
+          ::[], TmpIntArg (TmpLoc dest))
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
