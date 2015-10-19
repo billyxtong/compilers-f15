@@ -77,7 +77,8 @@ and elaborateControl (ctrl : control) : (Ast.untypedPostElabStmt list) =
       | PreElabVoidReturn -> [UntypedPostElabVoidReturn]
       | PreElabAssert(e) -> [UntypedPostElabAssert(elaboratePreElabExpr e)]
 
-and elaborateBlock (stmts : preElabStmt list) = List.flatten (List.map elaboratePreElabStmt stmts)
+and elaborateBlock (stmts : preElabStmt list) = UntypedPostElabBlock
+    (List.flatten (List.map elaboratePreElabStmt stmts))::[]
 
 let elaborateDecl (decl : globalDecl) =
   match decl with
