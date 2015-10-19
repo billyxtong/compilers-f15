@@ -46,7 +46,7 @@ let rec matchParamListTypes (paramTypes : c0type list) (params : param list) typ
         ([], []) -> true
       | ([], p :: ps) -> false
       | (p :: ps, []) -> false
-      | (p :: ps, (typee, _) :: remainingParams) -> 
+      | (p :: ps, (typee, _) :: remainingParams) ->
           let pType = lowestTypedefType p typedefMap in
           let paramType = lowestTypedefType typee typedefMap in
           if ((pType = INT && paramType = INT) || (pType = BOOL && paramType = BOOL))
@@ -174,6 +174,10 @@ let rec tc_header headerFuncMap headerTypedefMap (header : untypedPostElabAST) =
                       (ErrorMsg.error ("bad param names \n");
                                 raise ErrorMsg.Error)
                    else
+                   if List.exists (fun (typee, id) -> typee = VOID) funcParams then
+                      (ErrorMsg.error ("can't have void as param type \n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find headerTypedefMap funcName, M.find headerFuncMap funcName) with
                           (Some _, _) -> 
                             (ErrorMsg.error ("function cannot shadow previously declared typedef/func name\n");
@@ -220,6 +224,10 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                       (ErrorMsg.error ("bad param names \n");
                                 raise ErrorMsg.Error)
                    else
+                   if List.exists (fun (typee, id) -> typee = VOID) funcParams then
+                      (ErrorMsg.error ("can't have void as param type \n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find typedefMap funcName, M.find funcMap funcName) with
                           (Some _, _) -> 
                             (ErrorMsg.error ("trying to shadow used name\n");
@@ -241,6 +249,10 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable typedefMap) then 
                       (ErrorMsg.error ("bad param names \n");
+                                raise ErrorMsg.Error)
+                   else
+                   if List.exists (fun (typee, id) -> typee = VOID) funcParams then
+                      (ErrorMsg.error ("can't have void as param type \n");
                                 raise ErrorMsg.Error)
                    else
                    (match (M.find typedefMap funcName, M.find funcMap funcName) with
