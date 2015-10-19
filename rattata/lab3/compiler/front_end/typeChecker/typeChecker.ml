@@ -260,13 +260,18 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                               then (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
+                                let () = print_string("name: " ^ funcName ^ "\n") in
                                 let () = H.remove declaredAndUsedButUndefinedFunctionTable funcName in
                                 let newFuncMap = M.add funcMap funcName 
                                   (fType, paramTypes, true, false) in
                                 let funcVarMap = init_func_env typedefMap funcParams in
-                                let (_, _, typeCheckedBlock) = 
+                                (* Make sure the function returns! *)
+                                let (ret, _, typeCheckedBlock) = 
                                   tc_statements newFuncMap typedefMap funcVarMap 
                                   funcBody (lowestTypedefType fType typedefMap) false [] in
+                                 if ((not ret) && (not (funcType = VOID))) then
+                                  (ErrorMsg.error ("non-void functions must return \n");
+                                   raise ErrorMsg.Error) else
                                 let newFuncName = "_c0_" ^ funcName in
                                 (* We're supposed to call internal functions with the prefix _c0_. I'm doing it
                                    here because we know exactly which are internal/external at this point *)
@@ -283,6 +288,7 @@ let rec tc_prog funcMap typedefMap (prog : untypedPostElabAST) (typedAST : typed
                                   (List.map (fun (c, i) -> lowestTypedefType c typedefMap) funcParams), 
                                   true, false) in
                                  let funcVarMap = init_func_env typedefMap funcParams in
+                                 (* Make sure the function returns! *)
                                  let (ret, _, typeCheckedFuncBody) = 
                                    tc_statements newFuncMap typedefMap funcVarMap 
                                    funcBody (lowestTypedefType funcType typedefMap) false [] in
