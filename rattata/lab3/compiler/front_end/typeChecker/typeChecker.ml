@@ -78,7 +78,7 @@ let rec tc_expression funcEnv typedefEnv varEnv (expression : untypedPostElabExp
                       then (match typee with
                                   INT -> IntExpr(IntIdent(id))
                                 | BOOL -> BoolExpr(BoolIdent(id))
-                                | _ -> (ErrorMsg.error ("bad type\n");
+                                | _ -> (ErrorMsg.error ("bad type " ^ id ^ "\n");
                                         raise ErrorMsg.Error))
                       else (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                             raise ErrorMsg.Error))
@@ -339,20 +339,27 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
   | A.UntypedPostElabInitDecl(id, typee, e)::stms ->
     (* Added by Ben: see explanation in ast.ml *)
        (let tcExpr = tc_expression funcMap typedefMap varMap e in
+        let actualDeclType = lowestTypedefType typee typedefMap in
       (match (M.find typedefMap id, M.find varMap id) with
              (None, None) -> 
-               (let actualType = lowestTypedefType typee typedefMap in
-                if actualType = VOID then 
+                if actualDeclType = VOID then 
                   (ErrorMsg.error ("vars can't have type void\n");
                    raise ErrorMsg.Error)
                 else
-                  (* it's initalized! *)
-                 let newVarMap = M.add varMap id (actualType, true) in 
-                tc_statements funcMap typedefMap newVarMap
-                    (* The assign comes first because we're building the typedAST in reverse *)
-                stms funcRetType ret (TypedPostElabAssignStmt(id, tcExpr) ::
-                                       TypedPostElabDecl(id, actualType)
-                                      :: typedBlock))
+                   let newTypedAST = (TypedPostElabAssignStmt(id, tcExpr)
+                                     :: TypedPostElabDecl(id, actualDeclType):: typedBlock) in
+
+                   (match (tcExpr, actualDeclType) with
+                          (IntExpr(_), INT) -> 
+                            let newVarMap = M.add varMap id (actualDeclType, true) in  
+                            tc_statements funcMap typedefMap newVarMap 
+                            stms funcRetType ret newTypedAST
+                        | (BoolExpr(_), BOOL) -> 
+                            let newVarMap = M.add varMap id (actualDeclType, true) in              
+                            tc_statements funcMap typedefMap newVarMap 
+                            stms funcRetType ret newTypedAST
+                        | _ -> (ErrorMsg.error ("assignment expression didn't typecheck" ^ id ^"\n");
+                               raise ErrorMsg.Error))
            | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
                    raise ErrorMsg.Error)))
   | A.UntypedPostElabDecl(id, typee)::stms ->
