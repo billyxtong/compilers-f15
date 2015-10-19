@@ -105,7 +105,17 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
           TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
      | A.IntFunCall (fName, argList) ->
          let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
-         (instrs, TmpInfAddrIntFunCall(fName, argExps))
+         let dest = Tmp (Temp.create()) in
+         (* We need to move this call into a dest, because of
+            the a(divbyzero(), loopforever == 0) case: loopforever == 0
+            will generate some instructions so be evaluated first. So
+            every time a function call is an argument, it needs to
+            be evaluated before (but we'll just do it for all function calls).
+            It shouldn't be an issue for BoolFunCalls because we always evaluate
+            bools beforehand anyway (bool x = y) becomes
+            (if (y) x = true else x = false) *)
+         (TmpInfAddrMov(TmpIntExpr (TmpInfAddrIntFunCall(fName, argExps)), dest) ::instrs,
+         TmpIntArg (TmpLoc dest))
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
@@ -270,6 +280,7 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
                    make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                       stmtsForElse JNE JE )
        | A.BoolFunCall(fName, argList) ->
+         
            let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
            let result_id = GenUnusedID.create() in
            let result_tmp = Temp.create() in
