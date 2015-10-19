@@ -53,10 +53,15 @@ and trans_exp retTmp retLabel idToTmpMap = function
 
 (* Returns a list of tmpExprs, resulting from calling trans_exp on each of the args *)
 and trans_fun_args retTmp retLabel idToTmpMap exp_list =
+  (* Here's the deal: we have to make sure to evaluate the args from left to right.
+     So we need to put them each into new tmps before we make the function call. *)
+      let newTmps = Array.of_list(List.map exp_list (fun _ -> Tmp (Temp.create()))) in
       let instr_and_e_list = List.map exp_list (trans_exp retTmp retLabel idToTmpMap) in
-      let instrs = List.concat (List.map instr_and_e_list (fun (instrs, _) -> instrs)) in
-      let exps = List.map instr_and_e_list (fun (_, e) -> e) in
-      (instrs, exps)
+      let instrs = List.concat (List.mapi instr_and_e_list
+        (fun i -> fun (instrs, e) -> instrs @ [TmpInfAddrMov(e, newTmps.(i))])) in
+      let newTmpExprs = List.map (Array.to_list newTmps)
+            (fun t -> TmpIntExpr (TmpIntArg (TmpLoc t))) in
+      (instrs, newTmpExprs)
 
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
@@ -105,17 +110,7 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
           TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
      | A.IntFunCall (fName, argList) ->
          let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
-         let dest = Tmp (Temp.create()) in
-         (* We need to move this call into a dest, because of
-            the a(divbyzero(), loopforever == 0) case: loopforever == 0
-            will generate some instructions so be evaluated first. So
-            every time a function call is an argument, it needs to
-            be evaluated before (but we'll just do it for all function calls).
-            It shouldn't be an issue for BoolFunCalls because we always evaluate
-            bools beforehand anyway (bool x = y) becomes
-            (if (y) x = true else x = false) *)
-         (instrs @ TmpInfAddrMov(TmpIntExpr (TmpInfAddrIntFunCall(fName, argExps)), dest)
-          ::[], TmpIntArg (TmpLoc dest))
+         (instrs, TmpInfAddrIntFunCall(fName, argExps))
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
