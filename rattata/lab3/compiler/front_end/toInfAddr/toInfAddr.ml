@@ -263,8 +263,8 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
            let result_id = GenUnusedID.create() in
            let result_tmp = Temp.create() in
            let newMap = M.add idToTmpMap result_id result_tmp in
-           TmpInfAddrMov(TmpBoolExpr (TmpInfAddrBoolFunCall(fName, argExps)),
-                         Tmp result_tmp)::
+           instrs @ TmpInfAddrMov(TmpBoolExpr (TmpInfAddrBoolFunCall(fName, argExps)),
+                                    Tmp result_tmp)::[] @
            trans_cond retTmp retLabel newMap (A.BoolIdent result_id, stmtsForIf, stmtsForElse)
 
 and trans_stmts retTmp retLabel idToTmpMap = function
