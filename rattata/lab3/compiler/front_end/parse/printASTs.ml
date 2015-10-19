@@ -104,6 +104,7 @@ let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
 let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
   match s with
         UntypedPostElabDecl(identifier,constant) -> concat "" [c0typeToString(constant); identToString(identifier)]
+      | UntypedPostElabInitDecl(identifier,constant, e) -> concat "" [c0typeToString(constant); identToString(identifier); " = "; untypedPostElabExprToString e]
       | UntypedPostElabAssignStmt(identifier,untypedexpr) -> concat "" [identToString(identifier); " = ";
                                                                         untypedPostElabExprToString(untypedexpr)]
       | UntypedPostElabIf(expression,postelabast1,postelabast2) -> concat "" ["if("; untypedPostElabExprToString(expression);

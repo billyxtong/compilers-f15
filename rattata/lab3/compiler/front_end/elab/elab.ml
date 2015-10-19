@@ -15,10 +15,8 @@ let rec elaboratePreElabExpr(expression : preElabExpr) =
 let elaboratePreElabDecl(decl : preElabDecl) = 
   match decl with
         NewVar(identifier, typee) -> [UntypedPostElabDecl(identifier, typee)]
-      | Init(identifier, typee, expression) -> 
-          [UntypedPostElabDecl(identifier, typee); 
-           UntypedPostElabAssignStmt(identifier, 
-                        elaboratePreElabExpr(expression))]
+      | Init(identifier, typee, expression) -> [UntypedPostElabInitDecl(identifier, typee,
+                                                 elaboratePreElabExpr expression)]
 
 
 let addSimpStmtToPreElabStmt(pStmt,sStmt) = 

@@ -82,6 +82,15 @@ type untypedPostElabExpr =
                    untypedPostElabExpr * untypedPostElabExpr
    | UntypedPostElabFunCall of ident * untypedPostElabExpr list
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
+      (* Decls are int x, AssignStmts are x = 4, InitDecls are int x = 4.
+         We can't elaborate InitDecls to Decl + Assign for the following
+         super annoying reason: if "f" is a function, then int f = f()
+         is ok, because the var f isn't in scope yet when we
+         typecheck the RHS. BUT if we elaborate this to
+         "int f; f = f()", then the var is in scope and it will
+         throw an typechecking error *)
+                         | UntypedPostElabInitDecl of ident * c0type 
+                                       * untypedPostElabExpr
                          | UntypedPostElabAssignStmt of ident * 
                                                         untypedPostElabExpr
                          | UntypedPostElabIf of untypedPostElabExpr * 

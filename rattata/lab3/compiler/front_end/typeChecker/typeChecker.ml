@@ -324,6 +324,25 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
                 Some (typee, isInit) -> (typee, isInit)
               | None -> assert(false) (* everything in varMap should be in blockVarMap *)))) in
       tc_statements funcMap typedefMap newVarMap stmts funcRetType newRet (blockBlock @ typedBlock)
+  | A.UntypedPostElabInitDecl(id, typee, e)::stms ->
+    (* Added by Ben: see explanation in ast.ml *)
+       (let tcExpr = tc_expression funcMap typedefMap varMap e in
+      (match (M.find typedefMap id, M.find varMap id) with
+             (None, None) -> 
+               (let actualType = lowestTypedefType typee typedefMap in
+                if actualType = VOID then 
+                  (ErrorMsg.error ("vars can't have type void\n");
+                   raise ErrorMsg.Error)
+                else
+                  (* it's initalized! *)
+                 let newVarMap = M.add varMap id (actualType, true) in 
+                tc_statements funcMap typedefMap newVarMap
+                    (* The assign comes first because we're building the typedAST in reverse *)
+                stms funcRetType ret (TypedPostElabAssignStmt(id, tcExpr) ::
+                                       TypedPostElabDecl(id, actualType)
+                                      :: typedBlock))
+           | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
+                   raise ErrorMsg.Error)))
   | A.UntypedPostElabDecl(id, typee)::stms ->
       (match (M.find typedefMap id, M.find varMap id) with
              (None, None) -> 
