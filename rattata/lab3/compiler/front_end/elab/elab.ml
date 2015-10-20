@@ -56,7 +56,10 @@ and elaboratePreElabStmt (statement : preElabStmt) =
   match statement with
         SimpStmt(s) -> elaborateSimpStmt(s)
       | Control(c) -> elaborateControl(c)
-      | Block(b) -> elaborateBlock(b)
+      | Block(b) -> 
+          (match b with
+                 [Block(b')] -> elaborateBlock(b')
+               | _ -> elaborateBlock(b))
 
 and elaborateControl (ctrl : control) : (Ast.untypedPostElabStmt list) =
   match ctrl with

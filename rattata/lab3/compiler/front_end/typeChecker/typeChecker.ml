@@ -15,6 +15,8 @@ open PrintASTs
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 
+let blockCounter : int ref = ref 0
+
 let isValidVarDecl (identifier : ident) = 
   if sub identifier 0 1 = "\\" 
   then true 
@@ -326,6 +328,8 @@ and tc_statements funcMap typedefMap varMap (untypedBlock : untypedPostElabBlock
   match untypedBlock with
     [] -> (ret, varMap, typedBlock)
   | A.UntypedPostElabBlock(blockStmts)::stmts ->
+      (* let () = (blockCounter := !blockCounter + 1) in
+      let () = print_string ("block number " ^ string_of_int(!blockCounter) ^ "\n") in*)
       let (blockRet, blockVarMap, blockBlock) = tc_statements funcMap typedefMap varMap blockStmts funcRetType ret [] in
       let newRet = (ret || blockRet) in
       (* We have returned if we return otherwise, or if the block returns *)
