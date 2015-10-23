@@ -57,7 +57,7 @@ let rec expand_log_binop e1 op e2 =
 
 %token EOF
 %token STRUCT TYPEDEF IF ELSE WHILE FOR CONTINUE BREAK
-%token ASSERT TRUE FALSE NULL ALLOC ALLOCARRY
+%token ASSERT TRUE FALSE NULL ALLOC ALLOC_ARRY
 %token BOOL VOID CHAR STRING
 %token SEMI
 %token COMMA
@@ -66,10 +66,7 @@ let rec expand_log_binop e1 op e2 =
 %token <string> IDENT
 %token RETURN
 %token INT
-%token TYPEDEF       
-/* don't think main should be a token separate from ident anymore       
-%token MAIN
-       */
+%token TYPEDEF
 %token PLUS MINUS STAR SLASH PERCENT
 %token ASSIGN PLUSEQ MINUSEQ STAREQ SLASHEQ PERCENTEQ
 %token LBRACE RBRACE
@@ -81,7 +78,9 @@ let rec expand_log_binop e1 op e2 =
 %token BIT_NOT BIT_AND BIT_OR XOR
 %token AND_EQ OR_EQ XOR_EQ
 %token LSHIFT RSHIFT LSHIFT_EQ RSHIFT_EQ
-%token COLON QUESMARK       
+%token COLON QUESMARK
+%token LBRACK RBRACK
+%token DOT ARROW       
 /* UNARY and ASNOP and LOG_BINOP are dummy terminals.
  * We need dummy terminals if we wish to assign a precedence
  * to a rule that does not correspond to the precedence of
@@ -105,7 +104,7 @@ let rec expand_log_binop e1 op e2 =
 %left PLUS MINUS
 %left STAR SLASH PERCENT
 %right UNARY
-%left LPAREN
+%left LPAREN LBRACK ARROW DOT
 
 %start program
 
@@ -120,6 +119,8 @@ gdecl :
     fdecl                      { $1 }
   | fdefn                      { $1 }
   | typedef                    { $1 }
+  | sdecl                      { $1 }
+  | sdef                       { $1 }			       
 
 fdecl :
     c0type IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3) }
@@ -129,6 +130,19 @@ fdefn :
 
 typedef :
     TYPEDEF c0type IDENT SEMI         { A.Typedef ($2, $3) }
+
+sdecl :
+    STRUCT IDENT SEMI         { A.StructDecl $2 }
+
+sdef :
+    STRUCT IDENT LBRACE fieldlist RBRACE SEMI { A.StructDef ($2, $4) }
+
+field :
+    c0type IDENT         { A.PreElabField ($1, $2) }
+
+fieldlist :
+    /* empty */          { [] }
+  | field fieldlist      { $1::$2 }
 	    
 param :
     c0type IDENT            { ($1, $2) }
@@ -175,6 +189,9 @@ c0type :
  | BOOL 		         { D.BOOL }
  | VOID                          { D.VOID }
  | IDENT                         { D.TypedefType $1 }
+ | c0type STAR                   { D.Pointer $1 }
+ | c0type LBRACK RBRACK          { D.Array $1 }
+ | STRUCT IDENT                  { D.Struct $2 }	  
      
 simpoptNoDecl :
    /* empty */                   { A.EmptySimp }
@@ -221,6 +238,8 @@ arglist :
 lvalue :
    IDENT                        { $1 }
  | LPAREN lvalue RPAREN         { $2 }
+ | lvalue DOT IDENT             { A.PreElabField ($1, $3) }
+ | STAR lvalue                  { A.PreElabFieldDeref $2 }	  
  ;
 
 /* There's a shift/reduce conflict for something like

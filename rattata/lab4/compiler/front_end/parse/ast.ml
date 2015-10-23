@@ -14,7 +14,15 @@ open Datatypesv1
 type shiftOp = ASTrshift | ASTlshift
 type param = c0type * ident 
 (* intExpr and boolExpr have to be mutually recursive because
-   of ternary operators *)
+   of damn ternary operators *)
+(* new in L4: lvalues are no longer just var names *)
+type lvalue = Var of ident | (* when we're assigning to a var *)
+              PreElabFieldLVal of lvalue * ident |
+              (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
+              DerefLVal of lvalue | (* handles ( *pointerName ) *)
+              ArrayAccessLVal of lvalue * preElabExpr (* handles array[index] *)
+              (* assuming you're stripping away of parens in parsing?  
+               * so (lvalue) doesn't need to be a type (That's correct. - Ben) *)
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
              | IntTernary of boolExpr * intExpr * intExpr
@@ -130,13 +138,6 @@ type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 
 (* Pre-Elab AST *)
 
-(* new in L4: lvalues are no longer just var names *)
-type lvalue = Var of ident | (* when we're assigning to a var *)
-              Field of lvalue * ident | (* handles both struct.fieldName and struct -> fieldName *)
-              Dereference of lvalue | (* handles ( *pointerName ) *)
-              ArrayAccess of lvalue * preElabExpr (* handles array[index] *)
-              (* assuming you're stripping away of parens in parsing? 
-               * so (lvalue) doesn't need to be a type *)
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
@@ -148,20 +149,20 @@ type preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
                  | PreElabFunCall of ident * preElabExpr list
                  (* new in L4: everything below. Replaced a lot of "exp" with idents. Is that correct? *)
-                 | PreElabFieldAccess of ident * ident 
+                 | PreElabFieldExpr of ident * ident 
                  (* new in L4: handles exp.ident and exp -> ident*)
-                 | PreElabPointerAlloc of c0type 
+                 | PreElabAlloc of c0type 
                  (* new in L4: allocates one pointer of type c0type *)
-                 | PreElabPointerDereference of ident
+                 | PreElabDerefExpr of ident
                  (* new in L4: dereferences ident. assuming your parsing makes it unambiguous... *)
                  | PreElabArrayAlloc of c0type * preElabExpr 
                  (* new in L4: allocates an array*)
-                 | PreElabArrayAccess of ident * preElabExpr
+                 | PreElabArrayAccessExpr of ident * preElabExpr
                  (* new in L4: accesses array of name ident at index preElabExpr *) 
 type preElabDecl = NewVar of ident * c0type
                  | Init of ident * c0type * preElabExpr
 type simpStmt = PreElabDecl of preElabDecl     
-              | SimpAssign of lvalue * preElabExpr (* changed in L4: lvalue in place of ident*)
+              | SimpAssign of lvalue * assignOp * preElabExpr (* changed in L4: lvalue in place of ident, also we need the assignOp now *)
               | SimpStmtExpr of preElabExpr
 type simpOpt = EmptySimp | HasSimpStmt of simpStmt
 type elseOpt = EmptyElse | PreElabElse of preElabStmt
@@ -175,11 +176,11 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
                  | Control of control
                  | Block of block
  and block = preElabStmt list
-type field = Field of c0type * ident (* new for L4 *)
+type field = PreElabField of c0type * ident (* new for L4 *)
 type globalDecl = FunDecl of c0type * ident * param list
            | FunDef of c0type * ident * param list * block
            | Typedef of c0type * ident 
-           | StructDecl of ident (* new for L4 *)
-           | StructDef of ident * field list (* new for L4 *)
+           | PreElabStructDecl of ident (* new for L4 *)
+           | PreElabStructDef of ident * field list (* new for L4 *)
 type preElabAST = globalDecl list
 type preElabOverallAST = preElabAST * preElabAST    
