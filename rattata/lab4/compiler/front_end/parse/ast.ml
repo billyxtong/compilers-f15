@@ -13,16 +13,10 @@ open Datatypesv1
    file for more info. *)
 type shiftOp = ASTrshift | ASTlshift
 type param = c0type * ident 
+type field = c0type * ident (* for structs: new for L4 *)
 (* intExpr and boolExpr have to be mutually recursive because
    of damn ternary operators *)
 (* new in L4: lvalues are no longer just var names *)
-type lvalue = Var of ident | (* when we're assigning to a var *)
-              PreElabFieldLVal of lvalue * ident |
-              (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
-              DerefLVal of lvalue | (* handles ( *pointerName ) *)
-              ArrayAccessLVal of lvalue * preElabExpr (* handles array[index] *)
-              (* assuming you're stripping away of parens in parsing?  
-               * so (lvalue) doesn't need to be a type (That's correct. - Ben) *)
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
              | IntTernary of boolExpr * intExpr * intExpr
@@ -47,10 +41,10 @@ type intExpr = IntConst of const | IntIdent of ident
               if e1 then e2 else e3. Similarly for the other
               ternary constructors *)
               | BoolTernary of boolExpr * boolExpr * boolExpr
-and typedPostElabExpr = IntExpr of intExpr | 
-                        BoolExpr of boolExpr | 
-                        VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
-                        NullExpr (* new in L4 *)
+and typedPostElabExpr = IntExpr of intExpr
+                       | BoolExpr of boolExpr
+                       | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
+                       | NullExpr (* new in L4 *)
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr
                   | TypedPostElabIf of boolExpr * typedPostElabBlock * 
@@ -81,7 +75,11 @@ type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND
                    (* Billy just ignore these ones underneath,
                       I'm just using them for parsing *)
                   | LT | LEQ | GEQ | LOG_OR | NEQ
-type untypedPostElabExpr =
+type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
+              UntypedPostElabFieldLVal of untypedPostElabLVal * ident |
+              UntypedPostElabDerefLVal of untypedPostElabLVal |
+              UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr 
+and untypedPostElabExpr =
      UntypedPostElabConstExpr of const * c0type
    | UntypedPostElabNullExpr
    | UntypedPostElabIdentExpr of ident
@@ -111,7 +109,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
          throw an typechecking error *)
                          | UntypedPostElabInitDecl of ident * c0type 
                                        * untypedPostElabExpr
-                         | UntypedPostElabAssignStmt of lvalue * 
+                         | UntypedPostElabAssignStmt of untypedPostElabLVal * 
                                                         untypedPostElabExpr
                          | UntypedPostElabIf of untypedPostElabExpr * 
                                                 untypedPostElabBlock * 
@@ -141,28 +139,33 @@ type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
-type preElabExpr = PreElabConstExpr of const * c0type
+type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
+              PreElabFieldLVal of preElabLVal * ident |
+              (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
+              PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
+              PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
+              (* assuming you're stripping away of parens in parsing?  
+               * so (preElabLVal) doesn't need to be a type (That's correct. - Ben) *)
+and preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabNullExpr (* new in L4: represents NULL *)
-                 | PreElabIdentExpr of lvalue (* new in L4: changed from ident *)
+                 | PreElabIdentExpr of preElabLVal (* new in L4: changed from ident *)
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
                  | PreElabFunCall of ident * preElabExpr list
                  (* new in L4: everything below. Replaced a lot of "exp" with idents. Is that correct? *)
-                 | PreElabFieldExpr of ident * ident 
-                 (* new in L4: handles exp.ident and exp -> ident*)
+                 (* Not all of them should be idents. You can do something like f().x if
+                    f returns a struct. -Ben. *)
+                 | PreElabFieldAccessExpr of preElabExpr * ident (* accesses field with name ident *)
                  | PreElabAlloc of c0type 
-                 (* new in L4: allocates one pointer of type c0type *)
-                 | PreElabDerefExpr of ident
-                 (* new in L4: dereferences ident. assuming your parsing makes it unambiguous... *)
+                 | PreElabDerefExpr of preElabExpr
                  | PreElabArrayAlloc of c0type * preElabExpr 
-                 (* new in L4: allocates an array*)
-                 | PreElabArrayAccessExpr of ident * preElabExpr
-                 (* new in L4: accesses array of name ident at index preElabExpr *) 
+                 | PreElabArrayAccessExpr of preElabExpr * preElabExpr
 type preElabDecl = NewVar of ident * c0type
                  | Init of ident * c0type * preElabExpr
 type simpStmt = PreElabDecl of preElabDecl     
-              | SimpAssign of lvalue * assignOp * preElabExpr (* changed in L4: lvalue in place of ident, also we need the assignOp now *)
+              | SimpAssign of preElabLVal * assignOp * preElabExpr
+              (* changed in L4: preElabLVal in place of ident, also we need the assignOp now *)
               | SimpStmtExpr of preElabExpr
 type simpOpt = EmptySimp | HasSimpStmt of simpStmt
 type elseOpt = EmptyElse | PreElabElse of preElabStmt
@@ -176,7 +179,6 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
                  | Control of control
                  | Block of block
  and block = preElabStmt list
-type field = PreElabField of c0type * ident (* new for L4 *)
 type globalDecl = FunDecl of c0type * ident * param list
            | FunDef of c0type * ident * param list * block
            | Typedef of c0type * ident 

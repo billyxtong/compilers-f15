@@ -9,36 +9,12 @@ open Core.Std
 module A = Ast
 module D = Datatypesv1
 
-let expand_asnop id op e =
+let expand_postop lval op =
     match op with
-       A.EQ -> A.SimpAssign (id, e)
-     | A.PLUSEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.ADD, e))
-     | A.SUBEQ -> A.SimpAssign (id,
-     	     A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.SUB, e))
-     | A.MULEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.MUL, e))
-     | A.DIVEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.FAKEDIV, e))
-     | A.MODEQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.FAKEMOD, e))
-     | A.AND_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_AND, e))
-     | A.OR_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_OR, e))
-     | A.XOR_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.BIT_XOR, e))
-     | A.LSHIFT_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.LSHIFT, e))
-     | A.RSHIFT_EQ -> A.SimpAssign (id,
-             A.PreElabBinop(A.PreElabIdentExpr id, A.IntBinop D.RSHIFT, e))
-
-let expand_postop id op =
-    match op with
-       A.PLUSPLUS -> expand_asnop id A.PLUSEQ
-	      (A.PreElabConstExpr (1, D.INT))
-     | A.MINUSMINUS -> expand_asnop id A.SUBEQ
-	      (A.PreElabConstExpr (1, D.INT))
+       A.PLUSPLUS -> A.SimpAssign(lval, A.PLUSEQ,
+	      A.PreElabConstExpr (1, D.INT))
+     | A.MINUSMINUS -> A.SimpAssign(lval, A.SUBEQ,
+	      A.PreElabConstExpr (1, D.INT))
 
 let rec expand_log_binop e1 op e2 =
     match op with
@@ -57,7 +33,7 @@ let rec expand_log_binop e1 op e2 =
 
 %token EOF
 %token STRUCT TYPEDEF IF ELSE WHILE FOR CONTINUE BREAK
-%token ASSERT TRUE FALSE NULL ALLOC ALLOC_ARRY
+%token ASSERT TRUE FALSE NULL ALLOC ALLOC_ARRAY
 %token BOOL VOID CHAR STRING
 %token SEMI
 %token COMMA
@@ -132,13 +108,13 @@ typedef :
     TYPEDEF c0type IDENT SEMI         { A.Typedef ($2, $3) }
 
 sdecl :
-    STRUCT IDENT SEMI         { A.StructDecl $2 }
+    STRUCT IDENT SEMI         { A.PreElabStructDecl $2 }
 
 sdef :
-    STRUCT IDENT LBRACE fieldlist RBRACE SEMI { A.StructDef ($2, $4) }
+    STRUCT IDENT LBRACE fieldlist RBRACE SEMI { A.PreElabStructDef ($2, $4) }
 
 field :
-    c0type IDENT         { A.PreElabField ($1, $2) }
+    c0type IDENT         { ($1, $2) }
 
 fieldlist :
     /* empty */          { [] }
@@ -175,7 +151,7 @@ simp :
  | simpNoDecl               { $1 }  
    
 simpNoDecl :
-   lvalue asnop exp %prec ASNOP  { expand_asnop $1 $2 $3 }
+   lvalue asnop exp %prec ASNOP  { A.SimpAssign ($1, $2, $3) }
  | exp                           { A.SimpStmtExpr $1 }
  | lvalue postop		 { expand_postop $1 $2 }
   ;
@@ -236,10 +212,13 @@ arglist :
 ;
   
 lvalue :
-   IDENT                        { $1 }
+   IDENT                        { A.PreElabVarLVal $1 }
  | LPAREN lvalue RPAREN         { $2 }
- | lvalue DOT IDENT             { A.PreElabField ($1, $3) }
- | STAR lvalue                  { A.PreElabFieldDeref $2 }	  
+ | lvalue DOT IDENT             { A.PreElabFieldLVal ($1, $3) }
+ | STAR lvalue                  { A.PreElabDerefLVal $2 }
+ | lvalue LBRACK exp RBRACK     { A.PreElabArrayAccessLVal ($1, $3) }
+ | lvalue ARROW IDENT           { A.PreElabFieldLVal
+				    (A.PreElabDerefLVal $1, $3) }	  
  ;
 
 /* There's a shift/reduce conflict for something like
@@ -249,6 +228,18 @@ lvalue :
    because both ways lead to a correct parse. */
 exp :
   LPAREN exp RPAREN              { $2 }
+ /* Pointer stuff */	
+ | NULL	                         { A.PreElabNullExpr }
+ | exp DOT IDENT                 { A.PreElabFieldAccessExpr ($1, $3) }
+ | exp ARROW IDENT               { A.PreElabFieldAccessExpr
+				     (A.PreElabDerefExpr $1, $3) }
+ | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
+ | STAR exp                      { A.PreElabDerefExpr $2 }
+ | ALLOC_ARRAY LPAREN c0type COMMA exp RPAREN
+	                       { A.PreElabArrayAlloc ($3, $5) }
+ | exp LBRACK exp RBRACK    { A.PreElabArrayAccessExpr ($1, $3) }
+
+ /* Misc */       
  | IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
  | intconst                      { $1 }
  | boolconst                     { $1 } 

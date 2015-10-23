@@ -11,7 +11,7 @@
 open Core.Std
 
 let parse_file filename = 
-    In_channel.with_file main_filename ~f:(
+    In_channel.with_file filename ~f:(
       fun chan ->
         let lexbuf = Lexing.from_channel chan in
         let _ = ErrorMsg.reset ()
