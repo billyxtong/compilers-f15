@@ -67,6 +67,10 @@ rule initial =
   | '}'         { P.RBRACE }
   | '('         { P.LPAREN }
   | ')'         { P.RPAREN }
+  | '['         { P.LBRACK }
+  | ']'         { P.RBRACK }
+  | '.'         { P.DOT }
+  | "->"        { P.ARROW }
 
   | ';'         { P.SEMI }
   | ','         { P.COMMA }
@@ -130,11 +134,11 @@ rule initial =
 
   | "break"       { assert false }
 
-  | "struct"      { assert false }
+  | "struct"      { P.STRUCT }
   | "continue"    { assert false }
-  | "NULL"        { assert false }
-  | "alloc"       { assert false }
-  | "alloc_array" { assert false }
+  | "NULL"        { P.NULL }
+  | "alloc"       { P.ALLOC }
+  | "alloc_array" { P.ALLOC_ARRAY }
   | "char"        { assert false }
   | "string"      { assert false }
 
