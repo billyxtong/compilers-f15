@@ -1,4 +1,4 @@
-(* L2 Compiler
+(* L4 Compiler
  * Parser
  * Authors: Ben Plaut, William Tong
  * Gluing together the pieces produced by ocamllex and ocamlyacc
@@ -10,27 +10,23 @@
 
 open Core.Std
 
-let parse main_filename header_filename =
-  try
-    let main_ast = (In_channel.with_file main_filename ~f:(
-      fun chan ->
-        let lexbuf = Lexing.from_channel chan in
-        let _ = ErrorMsg.reset ()
-        and _ = ParseState.setfile main_filename in
-        let ast = C0Parser.program C0Lexer.initial lexbuf in
-        let _ = if !ErrorMsg.anyErrors then raise ErrorMsg.Error else () in
-        ast)) in
-     let header_ast =
-       (match header_filename with
-           None -> []
-         | Some filename -> (In_channel.with_file filename ~f:(
+let parse_file filename = 
+    In_channel.with_file main_filename ~f:(
       fun chan ->
         let lexbuf = Lexing.from_channel chan in
         let _ = ErrorMsg.reset ()
         and _ = ParseState.setfile filename in
         let ast = C0Parser.program C0Lexer.initial lexbuf in
         let _ = if !ErrorMsg.anyErrors then raise ErrorMsg.Error else () in
-        ast)))
+        ast)
+
+let parse main_filename header_filename =
+  try
+     let header_ast =
+       (match header_filename with
+           None -> []
+         | Some filename -> parse_file filename) in
+     let main_ast = parse_file main_filename
       in (main_ast, header_ast)
   with
   | Parsing.Parse_error ->
