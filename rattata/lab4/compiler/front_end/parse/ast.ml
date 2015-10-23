@@ -1,4 +1,4 @@
-(* L2 Compiler
+(* L4 Compiler
  * Abstract Syntax Trees
  * Authors: Ben Plaut, William Tong
  * 
@@ -9,12 +9,12 @@
 open Datatypesv1
 
 (* Typed Post-Elab AST
-   A restriced grammar from the Pre-Elab AST. See the elaboration
-   file (which I have not yet written) for more info. *)
+   A restricted grammar from the Pre-Elab AST. See the elaboration
+   file for more info. *)
 type shiftOp = ASTrshift | ASTlshift
-type param = c0type * ident (* do we want a constructor here? *)
+type param = c0type * ident 
 (* intExpr and boolExpr have to be mutually recursive because
-   of damn ternary operators *)
+   of ternary operators *)
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
              | IntTernary of boolExpr * intExpr * intExpr
@@ -42,6 +42,7 @@ type intExpr = IntConst of const | IntIdent of ident
 and typedPostElabExpr = IntExpr of intExpr | 
                         BoolExpr of boolExpr | 
                         VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
+                        NullExpr (* new in L4 *)
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr
                   | TypedPostElabIf of boolExpr * typedPostElabBlock * 
@@ -74,6 +75,7 @@ type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND
                   | LT | LEQ | GEQ | LOG_OR | NEQ
 type untypedPostElabExpr =
      UntypedPostElabConstExpr of const * c0type
+   | UntypedPostElabNullExpr
    | UntypedPostElabIdentExpr of ident
    | UntypedPostElabBinop of untypedPostElabExpr *
                              generalBinop * untypedPostElabExpr
@@ -81,6 +83,16 @@ type untypedPostElabExpr =
    | UntypedPostElabTernary of untypedPostElabExpr *
                    untypedPostElabExpr * untypedPostElabExpr
    | UntypedPostElabFunCall of ident * untypedPostElabExpr list
+   | UntypedPostElabFieldAccess of ident * ident 
+                 (* new in L4: handles exp.ident and exp -> ident*)
+                 | UntypedPostElabPointerAlloc of c0type 
+                 (* new in L4: allocates one pointer of type c0type *)
+                 | UntypedPostElabPointerDereference of ident
+                 (* new in L4: dereferences ident. assuming your parsing makes it unambiguous... *)
+                 | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
+                 (* new in L4: allocates an array*)
+                 | UntypedPostElabArrayAccess of ident * untypedPostElabExpr
+                 (* new in L4: accesses array of name ident at index preElabExpr *)
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
       (* Decls are int x, AssignStmts are x = 4, InitDecls are int x = 4.
          We can't elaborate InitDecls to Decl + Assign for the following
@@ -91,7 +103,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
          throw an typechecking error *)
                          | UntypedPostElabInitDecl of ident * c0type 
                                        * untypedPostElabExpr
-                         | UntypedPostElabAssignStmt of ident * 
+                         | UntypedPostElabAssignStmt of lvalue * 
                                                         untypedPostElabExpr
                          | UntypedPostElabIf of untypedPostElabExpr * 
                                                 untypedPostElabBlock * 
@@ -110,7 +122,9 @@ type untypedPostElabGlobalDecl =
       UntypedPostElabFunDecl of c0type * ident * param list
     | UntypedPostElabFunDef of c0type * ident * param list *
                                untypedPostElabBlock
-    | UntypedPostElabTypedef of c0type * ident                               
+    | UntypedPostElabTypedef of c0type * ident         
+    | UntypedPostElabStructDecl of ident (* new for L4 *)
+    | UntypedPostElabStructDef of ident * field list (* new for L4 *)
 type untypedPostElabAST = untypedPostElabGlobalDecl list
 type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 
@@ -128,7 +142,7 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabNullExpr (* new in L4: represents NULL *)
-                 | PreElabIdentExpr of ident
+                 | PreElabIdentExpr of lvalue (* new in L4: changed from ident *)
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
@@ -147,7 +161,7 @@ type preElabExpr = PreElabConstExpr of const * c0type
 type preElabDecl = NewVar of ident * c0type
                  | Init of ident * c0type * preElabExpr
 type simpStmt = PreElabDecl of preElabDecl     
-              | SimpAssign of ident * preElabExpr
+              | SimpAssign of lvalue * preElabExpr (* changed in L4: lvalue in place of ident*)
               | SimpStmtExpr of preElabExpr
 type simpOpt = EmptySimp | HasSimpStmt of simpStmt
 type elseOpt = EmptyElse | PreElabElse of preElabStmt
