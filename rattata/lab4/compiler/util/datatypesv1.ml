@@ -119,7 +119,15 @@ type tmp3AddrProg = tmp3AddrFunDef list
    field access using movs, etc. But by the time we're converting
    to 3Addr, all mem ops should be simplified. *)
 type tmpSharedTypeExpr = TmpInfAddrFunCall of ident * tmpExpr list
-                       | TmpInfAddrFieldAccess of tmpPtrExpr * ident
+                       | TmpInfAddrFieldAccess of ident * tmpPtrExpr
+                                                  * ident
+                      (* first ident is the struct type name, for
+                         example, "a" in "struct a {int x;};".
+                         second ident is the field name. We need to
+                         know the struct name so that we know the
+                         proper memory offset to get the field
+                         (and there might be multiple structs with a
+                         field named x *)
                        | TmpInfAddrArrayAccess of tmpPtrExpr * tmpIntExpr
                       (* Again, the tmpIntExpr here is the index, not the
                          offset *)
@@ -128,8 +136,8 @@ and tmpPtrExpr = TmpPtrArg of tmpArg
                | TmpPtrSharedExpr of tmpSharedTypeExpr
                | TmpAlloc of c0type
                | TmpAllocArray of c0type * int
-               | TmpInfAddrAdd64 of tmpPtrExpr * tmpPtrExpr
-               | TmpInfAddrSub64 of tmpPtrExpr * tmpPtrExpr
+               | TmpInfAddrAdd64 of tmpPtrExpr * tmpIntExpr
+               | TmpInfAddrSub64 of tmpPtrExpr * tmpIntExpr
 and tmpIntExpr = TmpIntArg of tmpArg
                | TmpIntSharedExpr of tmpSharedTypeExpr
                | TmpInfAddrBinopExpr of intBinop * tmpIntExpr * 

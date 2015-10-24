@@ -4,7 +4,7 @@ module H = Hashtbl
    length of the array in the address (a-8), where a is the
    pointer that we use for this array in the rest of the program *)
 
-(* This maps each struct name to (m, size), where size is the total
+(* This maps each struct type name to (m, size), where size is the total
    size of the struct and m is
    another map: one that maps each field name to the offset
    from the base pointer to the struct *)
@@ -35,24 +35,24 @@ let rec makeStructInnerMap fields offset map =
            let () = H.add map fieldName currFieldOffset in
            makeStructInnerMap rest nextFieldOffset map
                 
-let updateStructDefsMap structName fields =
+let updateStructDefsMap structTypeName fields =
    (* First create the inner map. Assuming the base pointer of the
       struct is 8-byte aligned, this ensures that ints/bools are
       4-byte aligned, and pointers are 8-byte aligned *)
       let initialOffset = 0 in
       let innerMap = H.create (List.length fields) in
       let structTotalSize = makeStructInnerMap fields initialOffset innerMap in
-      H.add structDefsMap structName (innerMap, structTotalSize)
+      H.add structDefsMap structTypeName (innerMap, structTotalSize)
 
 let getSizeForType = function
      INT -> smallFieldSize
    | BOOL -> smallFieldSize
    | Pointer _ -> ptrFieldSize
    | Array _ -> ptrFieldSize
-   | Struct structName ->
-        try let (_, structSize) = H.find structDefsMap structName in
+   | Struct structTypeName ->
+        try let (_, structSize) = H.find structDefsMap structTypeName in
             structSize
-        with Not_found -> (let () = print_string("struct " ^ structName
+        with Not_found -> (let () = print_string("struct " ^ structTypeName
                              ^ "not defined before alloc\n") in
                            assert(false))
 
@@ -63,19 +63,18 @@ let rec handleSharedExpr typee = function
        let (e_result, instrs) = handleMemForExpr ptrExp in
        (TmpInfAddrDeref e_result, instrs)
    (* | TmpInfAddrFieldAccess(structPtr, fieldName) -> *)
-   (*     try let (fieldOffsets, _) = H.find structDefsMap structName in *)
-   (*     with Not_found -> (let () = print_string("struct " ^ structName *)
+   (*     try let (fieldOffsets, _) = H.find structDefsMap structTypeName in *)
+   (*     with Not_found -> (let () = print_string("struct " ^ structTypeName *)
    (*                                            ^ "not defined before alloc\n") in *)
    (*                      assert(false)) *)
    | TmpInfAddrArrayAccess (ptrExp, indexExpr) ->
+       let (ptr_final, ptr_instrs) = handleMemForExpr ptrExp in
        let (index_final, index_instrs) = handleMemForExpr indexExpr in
        let elemSize = getSizeForType typee in
-       let (ptr_final, ptr_instrs) = handleMemForExpr ptrExp in
        (* The number of elems is stored at the address ptr_final - 8 *)
-       let numElemsPtr = TmpInfAddrSub64(ptr_final, TmpPtrArg (TmpConst 8)) in
-       let numElemsExpr = TmpIntSharedExpr (TmpInfAddDeref numElemsPtr)) in
-       (* Create a new tmp for the final pointer location, then deref it *)
-       let accessPtrTmp = Tmp (Temp.create()) in
+       let numElemsPtr = TmpInfAddrSub64(ptr_final, TmpIntArg (TmpConst 8)) in
+       let numElemsExpr = TmpIntSharedExpr (TmpInfAddDeref numElemsPtr) in
+       let resultTmp = Tmp (Temp.create()) in
        let errorLabel = GenLabel.create() in
        let doTheAccessLabel = GenLabel.create() in
        (* Note that the operand order for cmp has already been reversed!
@@ -86,9 +85,22 @@ let rec handleSharedExpr typee = function
        let indexUpperCheck = TmpInfAddrCmp32(
            TmpIntExpr (numElemsExpr, TmpIntExpr index_final))::
                              TmpInfAddrJump(JGE, errorLabel)::
-                             TmpInfAddrJump(JL, doTheAccessLabel)::[]
-       let throwError = dsafdsaf
-       let doTheAcess = fdsafdsa
+                             TmpInfAddrJump(JL, doTheAccessLabel)::[] in
+       let throwError = TmpInfAddrVoidFunCall("raise",
+                              TmpIntExpr (TmpIntArg (TmpConst 12))) in
+       let accessOffsetExpr = TmpInfAddrBinop(MUL, getSizeForType typee,
+                                              numElemsExpr) in
+       let accessPtrExpr = TmpInfAddrAdd64(ptr_final, accessOffsetExpr) in
+       let doTheAccess = TmpInfAddrMov(TmpInfAddrDeref accessPtrExpr,
+                                       resultTmp) in
+      (* Ok now actually put all of the instructions together *)
+      (* The array pointer is evaluated first, I checked *)
+      let allInstrs = ptr_instrs @ index_instrs @ indexLowerCheck
+             @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
+             ::TmpInfAddrLabel(doTheAccessLabel)::doTheAccess::[] in
+      (resultTmp, allInstrs)
+
+                             
 
        
 
@@ -132,7 +144,7 @@ let handleMemForFunDef (fName, tmpParams, instrs) =
 let rec handleMemStuff (prog: tmpInfAddrGlobalDecl list) =
     match prog with
        [] -> []
-     | TmpStructDef(structName, fields)::rest ->
-         let () = updateStructDefsMap structName fields in handleMemStuff rest
+     | TmpStructDef(structTypeName, fields)::rest ->
+         let () = updateStructDefsMap structTypeName fields in handleMemStuff rest
      | TmpInfAddrFunDef(fName, tmpParams, instrs)::rest ->
          handleMemForFunDef(fName, tmpParams, instrs)::handleMemStuff rest
