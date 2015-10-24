@@ -1,6 +1,8 @@
 (* ident and c0type have to be in here to avoid a circular build
    error :( *)
-type c0type = INT | BOOL | VOID | TypedefType of ident | Pointer of c0type | Array of c0type | Struct of ident 
+type c0type = INT | BOOL | VOID | TypedefType of ident | Pointer of c0type
+            | Array of c0type
+            | Struct of ident 
 and ident = string
 (* everything in c0 is an int! *)              
 type const = int
@@ -8,8 +10,10 @@ type const = int
 type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 (* the int is the memory offest from the register *)
-type memAddr = reg * int
-
+type memAddr = DirectOffset of reg * int
+             | ArrayStyleOffset of reg * reg * int
+       (* Direct is 4(rsp) which is *(rsp + 4), ArrayStyle is (rsp, rbx, 4),
+          which is *(rsp + rbx * 4) *)
 (* These are for actual assembly instructions. Tmps are not allowed. *)
 type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
               | BIT_AND | BIT_OR | BIT_XOR
@@ -78,6 +82,7 @@ type tmp2AddrProg = tmp2AddrFunDef list
 type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp
 type tmp3AddrInstr = Tmp3AddrMov32 of tmpArg *  tmp
                    | Tmp3AddrMov64 of tmpArg *  tmp
+                (* ptr derefences are subsumed by mov *)
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn32 of tmpArg
                    | Tmp3AddrReturn64 of tmpArg
@@ -88,23 +93,37 @@ type tmp3AddrInstr = Tmp3AddrMov32 of tmpArg *  tmp
                   option because void function don't need to move
                   the result anywhere *)
                    | Tmp3AddrFunCall of ident * tmpArg list * tmp option
+               (* alloc, alloc_array become call malloc *)
 type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmp list *
                                         tmp3AddrInstr list
 type tmp3AddrProg = tmp3AddrFunDef list
 
-
-
-
 (* Inf Address Code: any number of operands on right hand side *)
-type tmpIntExpr = TmpIntArg of tmpArg
-                | TmpInfAddrBinopExpr of intBinop *
-                                         tmpIntExpr * 
+(* There are still types for unsimplified memory operations
+   (alloc_array, field access, etc) because I'm first going to convert
+   to infAddr without touching those. Then, in a second pass, I will
+   turn them all into the simplified instructions (call malloc,
+   field access using movs, etc. But by the time we're converting
+   to 3Addr, all mem ops should be simplified. *)
+type tmpSharedTypeExpr = TmpInfAddrFunCall of ident * tmpExpr list
+                       | TmpInfAddrFieldAccess of tmpPtrExpr * ident
+                       | TmpInfAddrArrayAccess of tmpPtrExpr * tmpIntExpr
+                      (* Again, the tmpIntExpr here is the index, not the
+                         offset *)
+                       | TmpInfAddrDeref of tmpPtrExpr
+and tmpPtrExpr = TmpPtrArg of tmpArg
+               | TmpPtrSharedExpr of tmpSharedTypeExpr
+               | TmpAlloc of c0type
+               | TmpAllocArray of c0type * int
+and tmpIntExpr = TmpIntArg of tmpArg
+               | TmpIntSharedExpr of tmpSharedTypeExpr
+               | TmpInfAddrBinopExpr of intBinop * tmpIntExpr * 
                                          tmpIntExpr
-                | TmpInfAddrIntFunCall of ident * tmpExpr list
 and tmpBoolExpr = TmpBoolArg of tmpArg
-                | TmpInfAddrBoolFunCall of ident * tmpExpr list
+                | TmpBoolSharedExpr of tmpSharedTypeExpr
 and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
+             | TmpPtrExpr of tmpPtrExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
                         | TmpInfAddrCmp of tmpExpr * tmpExpr
 type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
@@ -115,8 +134,11 @@ type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
                    | TmpInfAddrReturn32 of tmpExpr
                    | TmpInfAddrReturn64 of tmpExpr
                    | TmpInfAddrVoidFunCall of ident * tmpExpr list
-type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * tmp list
-                                   * tmpInfAddrInstr list
-                         (* function name, param names,
-                            instruction list *)
-type tmpInfAddrProg = tmpInfAddrFunDef list
+type tmpField = c0type * ident                                                
+type tmpInfAddrGlobalDecl =
+    TmpInfAddrFunDef of ident * tmp list * tmpInfAddrInstr list
+    (* function name, param names, instruction list *)
+  | TmpStructDef of ident * tmpField list
+    (* still need struct defs until the second pass of converting
+       to infAddr where we simplify mem instrs *)
+type tmpInfAddrProg = tmpInfAddrGlobalDecl list
