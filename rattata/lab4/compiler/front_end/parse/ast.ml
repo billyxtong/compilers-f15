@@ -14,18 +14,10 @@ open Datatypesv1
 type shiftOp = ASTrshift | ASTlshift
 type param = c0type * ident 
 type field = c0type * ident (* for structs: new for L4 *)
-(* intExpr and boolExpr have to be mutually recursive because
-   of damn ternary operators *)
 (* new in L4: lvalues are no longer just var names *)
 type intExpr = IntConst of const | IntIdent of ident
              | ASTBinop of intExpr * intBinop * intExpr
              | IntTernary of boolExpr * intExpr * intExpr
-(* We need the BaseCaseShift thing, because we turn ASTBinops of shifts
-   into and if/else statement that divs by zero if the shift is
-   too large, but we need a base case. This, and shiftOp, are like
-   the jump_uncond type in that I just added them here because
-   I need them in toInfAddr, so don't write print things for
-   these *)
              | BaseCaseShift of intExpr * shiftOp * intExpr
              | IntFunCall of ident * typedPostElabExpr list
  and boolExpr = BoolConst of const | BoolIdent of ident
@@ -33,52 +25,65 @@ type intExpr = IntConst of const | IntIdent of ident
               | LessThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
               | BoolFunCall of ident * typedPostElabExpr list
-                       (* the list is the arg list *)
               | BoolEquals of boolExpr * boolExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
-           (* BoolTernary (e1, e2, e3) means
-              if e1 then e2 else e3. Similarly for the other
-              ternary constructors *)
               | BoolTernary of boolExpr * boolExpr * boolExpr
+type memExpr =  TypedPostElabFieldAccess of typedPostElabExpr 
+                                          * typedPostElabExpr 
+              (* new in L4 *)
+              | TypedPostElabPointerAlloc of c0type 
+              (* new in L4 *)
+              | TypedPostElabPointerDereference of typedPostElabExpr
+              (* new in L4 *)
+              | TypedPostElabArrayAlloc of c0type * intExpr 
+              (* new in L4 
+               * Must allocate some integer number of cells *)
+              | TypedPostElabArrayAccess of typedPostElabExpr * intExpr
+              (* new in L4 
+               * Index must be some integer number *)
+ and typedPostElabLVal = TypedPostElabVarLVal of ident |
+              TypedPostElabFieldLVal of typedPostElabLVal * ident |
+              TypedPostElabDerefLVal of typedPostElabLVal |
+              TypedPostElabArrayAccessLVal of typedPostElabLVal 
+                                            * typedPostElabExpr
+(* are these correct? 
+ * 1. Having a memExpr type
+ * 2. Keeping the memExpr and typedPostElabLVal types more or less identical to 
+ *    the analogous untypedAST ones
+ * 3. Note: Functions can now return pointers, structs, and arrays, so we need
+ *    to expand the typechecking of function calls (more new datatypes?)  *)
 and typedPostElabExpr = IntExpr of intExpr
                        | BoolExpr of boolExpr
-                       | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
-                       | NullExpr (* new in L4 *)
+                       | VoidExpr of typedPostElabStmt (* for void func calls *)
+                       | NullExpr (* new in L4: "NULL;" is a valid stmt *)
+                       | MemExpr of memExpr
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of ident * typedPostElabExpr
                   | TypedPostElabIf of boolExpr * typedPostElabBlock * 
                                        typedPostElabBlock
                   | TypedPostElabWhile of boolExpr * typedPostElabBlock
                   | TypedPostElabReturn of typedPostElabExpr
-                      (* functions can now return any type! *)
                   | TypedPostElabAssert of boolExpr
-                  | TypedPostElabVoidReturn (* takes no args *)
+                  | TypedPostElabVoidReturn 
                   | VoidFunCall of ident * typedPostElabExpr list
                   | JumpUncond of label
 and typedPostElabBlock = typedPostElabStmt list
 type typedPostElabGlobalDecl =
-    (* After typechecking, we can throw out declarations and typedefs *)
     TypedPostElabFunDef of c0type * ident * param list * typedPostElabBlock
-        (* the ident is the function name, the ident list is the params.
-           It's not a param list because we don't care about the c0type
-           anymore (I think?) *)
-type typedPostElabAST = typedPostElabGlobalDecl list      
-(* Note that typedAST doesn't have an "overall" version that contains
-   two asts. This is because we can combine the header ast and main ast
-   into one, after typechecking *)
+type typedPostElabAST = typedPostElabGlobalDecl list
 
  (* Untyped Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
 type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
-                   (* Billy just ignore these ones underneath,
-                      I'm just using them for parsing *)
                   | LT | LEQ | GEQ | LOG_OR | NEQ
 type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
               UntypedPostElabFieldLVal of untypedPostElabLVal * ident |
               UntypedPostElabDerefLVal of untypedPostElabLVal |
-              UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr 
+              UntypedPostElabArrayAccessLVal of untypedPostElabLVal 
+                                              * untypedPostElabExpr 
+(* new in L4: similar to preElab *)
 and untypedPostElabExpr =
      UntypedPostElabConstExpr of const * c0type
    | UntypedPostElabNullExpr
@@ -89,16 +94,19 @@ and untypedPostElabExpr =
    | UntypedPostElabTernary of untypedPostElabExpr *
                    untypedPostElabExpr * untypedPostElabExpr
    | UntypedPostElabFunCall of ident * untypedPostElabExpr list
-   | UntypedPostElabFieldAccess of ident * ident 
-                 (* new in L4: handles exp.ident and exp -> ident*)
+   | UntypedPostElabFieldAccess of untypedPostElabExpr * ident 
+                 (* new in L4 
+                  * Changed idents to untypedPostElabExprs
+                  * because of what you mentioned earlier. -Billy *)
                  | UntypedPostElabPointerAlloc of c0type 
-                 (* new in L4: allocates one pointer of type c0type *)
-                 | UntypedPostElabPointerDereference of ident
-                 (* new in L4: dereferences ident. assuming your parsing makes it unambiguous... *)
+                 (* new in L4 *)
+                 | UntypedPostElabPointerDereference of untypedPostElabExpr
+                 (* new in L4 *)
                  | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
-                 (* new in L4: allocates an array*)
-                 | UntypedPostElabArrayAccess of ident * untypedPostElabExpr
-                 (* new in L4: accesses array of name ident at index preElabExpr *)
+                 (* new in L4 *)
+                 | UntypedPostElabArrayAccess of untypedPostElabExpr 
+                                               * untypedPostElabExpr
+                 (* new in L4 *)
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
       (* Decls are int x, AssignStmts are x = 4, InitDecls are int x = 4.
          We can't elaborate InitDecls to Decl + Assign for the following
@@ -118,7 +126,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                                                    untypedPostElabBlock *
                                                    untypedPostElabBlock
                          | UntypedPostElabReturn of untypedPostElabExpr
-                         | UntypedPostElabVoidReturn (* no args *)
+                         | UntypedPostElabVoidReturn 
                          | UntypedPostElabAssert of untypedPostElabExpr
                          | UntypedPostElabExprStmt of untypedPostElabExpr
                          | UntypedPostElabBlock of untypedPostElabBlock
@@ -139,13 +147,12 @@ type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 type postOp = PLUSPLUS | MINUSMINUS    
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
-type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
+(* new in L4: lvalues take the place of idents b/c we can now assign to 
+ *            pointers, struct fields, and array cells *)
+type preElabLVal = PreElabVarLVal of ident | 
               PreElabFieldLVal of preElabLVal * ident |
-              (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
-              PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
-              PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
-              (* assuming you're stripping away of parens in parsing?  
-               * so (preElabLVal) doesn't need to be a type (That's correct. - Ben) *)
+              PreElabDerefLVal of preElabLVal | 
+              PreElabArrayAccessLVal of preElabLVal * preElabExpr 
 and preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabNullExpr (* new in L4: represents NULL *)
                  | PreElabIdentExpr of preElabLVal (* new in L4: changed from ident *)
@@ -153,10 +160,8 @@ and preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabNot of preElabExpr
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
                  | PreElabFunCall of ident * preElabExpr list
-                 (* new in L4: everything below. Replaced a lot of "exp" with idents. Is that correct? *)
-                 (* Not all of them should be idents. You can do something like f().x if
-                    f returns a struct. -Ben. *)
-                 | PreElabFieldAccessExpr of preElabExpr * ident (* accesses field with name ident *)
+                 (* new in L4: everything below *)
+                 | PreElabFieldAccessExpr of preElabExpr * ident 
                  | PreElabAlloc of c0type 
                  | PreElabDerefExpr of preElabExpr
                  | PreElabArrayAlloc of c0type * preElabExpr 
