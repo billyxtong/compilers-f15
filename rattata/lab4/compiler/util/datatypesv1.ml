@@ -17,15 +17,16 @@ type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type boolInstr = TEST of assemArg * assemLoc
-               | CMP of assemArg * assemLoc
+               | CMP32 of assemArg * assemLoc
+               | CMP64 of assemArg * assemLoc
 type assemIntInstr = intBinop * assemArg * assemLoc
 type jump = JNE | JE | JG | JLE | JL | JGE | JMP_UNCOND 
 type label = int
 type jumpInstr = jump * label
-type assemInstr = MOV of assemArg * assemLoc
-                | MOVQ of assemArg * assemLoc
-                | SUBQ of assemArg * assemLoc
-                | ADDQ of assemArg * assemLoc
+type assemInstr = MOV32 of assemArg * assemLoc
+                | MOV64 of assemArg * assemLoc
+                | SUB64 of assemArg * assemLoc
+                | ADD64 of assemArg * assemLoc
                 | INT_BINOP of assemIntInstr
                 | PUSH of reg
                 | POP of reg
@@ -56,11 +57,14 @@ type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
 (* Two Address Code *)
 type tmpBoolInstr = TmpTest of tmpArg * tmp
-                  | TmpCmp of tmpArg * tmp
+                  | TmpCmp32 of tmpArg * tmp
+                  | TmpCmp64 of tmpArg * tmp (* for pointers *)
 type tmp2AddrBinop = intBinop * tmpArg * tmp
-type tmp2AddrInstr = Tmp2AddrMov of tmpArg * tmp
+type tmp2AddrInstr = Tmp2AddrMov32 of tmpArg * tmp
+                   | Tmp2AddrMov64 of tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
-                   | Tmp2AddrReturn of tmpArg
+                   | Tmp2AddrReturn32 of tmpArg
+                   | Tmp2AddrReturn64 of tmpArg
                    | Tmp2AddrJump of jumpInstr
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
@@ -72,9 +76,11 @@ type tmp2AddrProg = tmp2AddrFunDef list
 
 (* Three Address Code *)
 type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp
-type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
+type tmp3AddrInstr = Tmp3AddrMov32 of tmpArg *  tmp
+                   | Tmp3AddrMov64 of tmpArg *  tmp
                    | Tmp3AddrBinop of tmp3AddrBinop
-                   | Tmp3AddrReturn of tmpArg
+                   | Tmp3AddrReturn32 of tmpArg
+                   | Tmp3AddrReturn64 of tmpArg
                    | Tmp3AddrJump of jumpInstr
                    | Tmp3AddrBoolInstr of tmpBoolInstr
                    | Tmp3AddrLabel of label
@@ -85,7 +91,10 @@ type tmp3AddrInstr = Tmp3AddrMov of tmpArg *  tmp
 type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmp list *
                                         tmp3AddrInstr list
 type tmp3AddrProg = tmp3AddrFunDef list
-    
+
+
+
+
 (* Inf Address Code: any number of operands on right hand side *)
 type tmpIntExpr = TmpIntArg of tmpArg
                 | TmpInfAddrBinopExpr of intBinop *
@@ -97,12 +106,14 @@ and tmpBoolExpr = TmpBoolArg of tmpArg
 and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
-                        | TmpInfAddrCmp of tmpIntExpr * tmpIntExpr
-type tmpInfAddrInstr = TmpInfAddrMov of tmpExpr * tmp
+                        | TmpInfAddrCmp of tmpExpr * tmpExpr
+type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
+                   | TmpInfAddrMov64 of tmpExpr * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
-                   | TmpInfAddrReturn of tmpExpr
+                   | TmpInfAddrReturn32 of tmpExpr
+                   | TmpInfAddrReturn64 of tmpExpr
                    | TmpInfAddrVoidFunCall of ident * tmpExpr list
 type tmpInfAddrFunDef = TmpInfAddrFunDef of ident * tmp list
                                    * tmpInfAddrInstr list

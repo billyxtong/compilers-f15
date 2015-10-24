@@ -16,9 +16,25 @@ type param = c0type * ident
 type field = c0type * ident (* for structs: new for L4 *)
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
+
+    (* new in L4 *)                                 
+   | UntypedPostElabFieldAccessExpr of untypedPostElab * ident 
+   | UntypedPostElabAlloc of c0type 
+   | UntypedPostElabDerefExpr of ident
+   | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
+   | UntypedPostElabArrayAccessExpr of ident * untypedPostElabExpr
+
+(* Note: <sometype><someexp>, such as IntTernary, BoolTernary,
+   means the result of the ternary is an Int/Bool/Ptr. So
+   PtrDeref means the *)
+type ptrExpr = Null
+             | PtrIdent of ident
+             | PtrFunCall of ident * typedPostElabExpr list
+             | PtrFieldAccess of ptrExpr * ident
+                 (* field access takes a pointer to the struct *)
+             | PtrDeref
 (* intExpr and boolExpr have to be mutually recursive because
    of damn ternary operators *)
-(* new in L4: lvalues are no longer just var names *)
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
                     | FieldAccess of ptrExpr
@@ -46,6 +62,9 @@ type intExpr = IntConst of const | IntIdent of ident
               if e1 then e2 else e3. Similarly for the other
               ternary constructors *)
               | BoolTernary of boolExpr * boolExpr * boolExpr
+           (* new for L4 *)
+              | BoolDeref of ptrExpr
+(* new in L4: lvalues are no longer just var names *)                 
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
               TypedPostElabFieldLVal of typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
@@ -53,7 +72,7 @@ and typedPostElabLVal = TypedPostElabVarLVal of ident |
 and typedPostElabExpr = IntExpr of intExpr
                        | BoolExpr of boolExpr
                        | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
-                       | NullExpr (* new in L4 *)
+                       | PtrExpr ptrExpr (* new in L4 *)
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of typedPostElabLVal *
                                           assignOp * typedPostElabExpr
@@ -100,7 +119,7 @@ and untypedPostElabExpr =
                    untypedPostElabExpr * untypedPostElabExpr
    | UntypedPostElabFunCall of ident * untypedPostElabExpr list
     (* new in L4 *)                                 
-   | UntypedPostElabFieldAccessExpr of untypedPostElab * ident 
+   | UntypedPostElabFieldAccessExpr of untypedPostElabExpr * ident 
    | UntypedPostElabAlloc of c0type 
    | UntypedPostElabDerefExpr of untypedPostElabExpr
    | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
