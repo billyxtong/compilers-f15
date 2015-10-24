@@ -33,6 +33,10 @@ type jump = JNE | JE | JG | JLE | JL | JGE | JMP_UNCOND
 type label = int
 type jumpInstr = jump * label
 type assemInstr = MOV32 of assemArg * assemLoc
+          (* These are the three 64 bit instructions we're using,
+             and they're specified separately everywhere. Because
+             I don't really want to allow all of the other binops
+             for 64 bits *)
                 | MOV64 of assemArg * assemLoc
                 | SUB64 of assemArg * assemLoc
                 | ADD64 of assemArg * assemLoc
@@ -71,6 +75,8 @@ type tmpBoolInstr = TmpTest of tmpArg * tmp
 type tmp2AddrBinop = intBinop * tmpArg * tmp
 type tmp2AddrInstr = Tmp2AddrMov32 of tmpArg * tmp
                    | Tmp2AddrMov64 of tmpArg * tmp
+                   | Tmp2AddrAdd64 of tmpArg * tmp
+                   | Tmp2AddrSub64 of tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
                    | Tmp2AddrReturn32 of tmpArg
                    | Tmp2AddrReturn64 of tmpArg
@@ -88,6 +94,8 @@ type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp
 type tmp3AddrInstr = Tmp3AddrMov32 of tmpArg *  tmp
                    | Tmp3AddrMov64 of tmpArg *  tmp
                 (* ptr derefences are subsumed by mov *)
+                   | Tmp3AddrAdd64 of tmpArg * tmp
+                   | Tmp3AddrSub64 of tmpArg * tmp
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn32 of tmpArg
                    | Tmp3AddrReturn64 of tmpArg
@@ -133,6 +141,8 @@ and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
                         | TmpInfAddrCmp of tmpExpr * tmpExpr
 type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
                    | TmpInfAddrMov64 of tmpExpr * tmp
+                   | TmpInfAddrAdd64 of tmpArg * tmp
+                   | TmpInfAddrSub64 of tmpArg * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
