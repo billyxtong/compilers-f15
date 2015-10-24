@@ -24,46 +24,39 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
    | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
    | UntypedPostElabArrayAccessExpr of ident * untypedPostElabExpr
 
-(* Note: <sometype><someexp>, such as IntTernary, BoolTernary,
-   means the result of the ternary is an Int/Bool/Ptr. So
-   PtrDeref means the *)
-type ptrExpr = Null
-             | PtrIdent of ident
-             | PtrFunCall of ident * typedPostElabExpr list
-             | PtrFieldAccess of ptrExpr * ident
-                 (* field access takes a pointer to the struct *)
-             | PtrDeref
-(* intExpr and boolExpr have to be mutually recursive because
-   of damn ternary operators *)
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
-                    | FieldAccess of ptrExpr
-type intExpr = IntConst of const | IntIdent of ident
-             | ASTBinop of intExpr * intBinop * intExpr
-             | IntTernary of boolExpr * intExpr * intExpr
+                    | FieldAccess of ptrExpr * ident
+                       (* structs must be stored in pointers! *)
+                    | ArrayAccess of ptrExpr * intExpr
+   (* intExpr is the index, not the mem offset. We can get the mem offset
+      because we know the type of the array based on what
+                          constructor this is wrapped in *)
+                    | Deref of ptrExpr
+                    | Ident of ident
+and ptrExpr = Null
+            | PtrSharedExpr of sharedTypeExpr
+            | Alloc of c0type
+            | AllocArray of c0type * intExpr
+and intExpr = IntConst of const
+            | IntSharedExpr of sharedTypeExpr
+            | ASTBinop of intExpr * intBinop * intExpr
 (* We need the BaseCaseShift thing, because we turn ASTBinops of shifts
    into and if/else statement that divs by zero if the shift is
    too large, but we need a base case. This, and shiftOp, are like
    the jump_uncond type in that I just added them here because
    I need them in toInfAddr, so don't write print things for
    these *)
-             | BaseCaseShift of intExpr * shiftOp * intExpr
-             | IntFunCall of ident * typedPostElabExpr list
- and boolExpr = BoolConst of const | BoolIdent of ident
+            | BaseCaseShift of intExpr * shiftOp * intExpr
+ and boolExpr = BoolConst of const
+              | BoolSharedExpr of sharedTypeExpr
               | GreaterThan of intExpr * intExpr
               | LessThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
-              | BoolFunCall of ident * typedPostElabExpr list
-                       (* the list is the arg list *)
               | BoolEquals of boolExpr * boolExpr
+              | PtrEquals of ptrExpr * ptrExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
-           (* BoolTernary (e1, e2, e3) means
-              if e1 then e2 else e3. Similarly for the other
-              ternary constructors *)
-              | BoolTernary of boolExpr * boolExpr * boolExpr
-           (* new for L4 *)
-              | BoolDeref of ptrExpr
 (* new in L4: lvalues are no longer just var names *)                 
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
               TypedPostElabFieldLVal of typedPostElabLVal * ident |
@@ -72,7 +65,7 @@ and typedPostElabLVal = TypedPostElabVarLVal of ident |
 and typedPostElabExpr = IntExpr of intExpr
                        | BoolExpr of boolExpr
                        | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
-                       | PtrExpr ptrExpr (* new in L4 *)
+                       | PtrExpr of ptrExpr (* new in L4 *)
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of typedPostElabLVal *
                                           assignOp * typedPostElabExpr
