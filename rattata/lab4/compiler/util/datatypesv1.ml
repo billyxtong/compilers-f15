@@ -128,6 +128,8 @@ and tmpPtrExpr = TmpPtrArg of tmpArg
                | TmpPtrSharedExpr of tmpSharedTypeExpr
                | TmpAlloc of c0type
                | TmpAllocArray of c0type * int
+               | TmpInfAddrAdd64 of tmpPtrExpr * tmpPtrExpr
+               | TmpInfAddrSub64 of tmpPtrExpr * tmpPtrExpr
 and tmpIntExpr = TmpIntArg of tmpArg
                | TmpIntSharedExpr of tmpSharedTypeExpr
                | TmpInfAddrBinopExpr of intBinop * tmpIntExpr * 
@@ -138,11 +140,12 @@ and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
              | TmpPtrExpr of tmpPtrExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
-                        | TmpInfAddrCmp of tmpExpr * tmpExpr
+(* Note: by this point, we've already reversed the operationds for
+   cmp. That is, cmp (a,b) followed by jg will jump if b > a *)
+                        | TmpInfAddrCmp32 of tmpExpr * tmpExpr
+                        | TmpInfAddrCmp64 of tmpExpr * tmpExpr
 type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
-                   | TmpInfAddrMov64 of tmpExpr * tmp
-                   | TmpInfAddrAdd64 of tmpArg * tmp
-                   | TmpInfAddrSub64 of tmpArg * tmp
+                   | TmpInfAddrMov64 of tmpPtrExpr * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label

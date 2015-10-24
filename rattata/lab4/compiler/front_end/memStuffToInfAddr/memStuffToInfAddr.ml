@@ -56,8 +56,44 @@ let getSizeForType = function
                              ^ "not defined before alloc\n") in
                            assert(false))
 
+(* we need the type in order to calculate array offsets *)
+let rec handleSharedExpr typee = function
+     TmpInfAddrFunCall (fName, args) -> (TmpInfAddrFunCall(fName, args), [])
+   | TmpInfAddrDeref (ptrExp) ->
+       let (e_result, instrs) = handleMemForExpr ptrExp in
+       (TmpInfAddrDeref e_result, instrs)
+   (* | TmpInfAddrFieldAccess(structPtr, fieldName) -> *)
+   (*     try let (fieldOffsets, _) = H.find structDefsMap structName in *)
+   (*     with Not_found -> (let () = print_string("struct " ^ structName *)
+   (*                                            ^ "not defined before alloc\n") in *)
+   (*                      assert(false)) *)
+   | TmpInfAddrArrayAccess (ptrExp, indexExpr) ->
+       let (index_final, index_instrs) = handleMemForExpr indexExpr in
+       let elemSize = getSizeForType typee in
+       let (ptr_final, ptr_instrs) = handleMemForExpr ptrExp in
+       (* The number of elems is stored at the address ptr_final - 8 *)
+       let numElemsPtr = TmpInfAddrSub64(ptr_final, TmpPtrArg (TmpConst 8)) in
+       let numElemsExpr = TmpIntSharedExpr (TmpInfAddDeref numElemsPtr)) in
+       (* Create a new tmp for the final pointer location, then deref it *)
+       let accessPtrTmp = Tmp (Temp.create()) in
+       let errorLabel = GenLabel.create() in
+       let doTheAccessLabel = GenLabel.create() in
+       (* Note that the operand order for cmp has already been reversed!
+          So cmp (a,b) followed by jg will jump is b > a *)
+       let indexLowerCheck = TmpInfAddrCmp32(
+           TmpIntExpr (TmpIntArg (TmpConst 0)), TmpIntExpr index_final)::
+                             TmpInfAddrJump(JL, errorLabel)::[] in
+       let indexUpperCheck = TmpInfAddrCmp32(
+           TmpIntExpr (numElemsExpr, TmpIntExpr index_final))::
+                             TmpInfAddrJump(JGE, errorLabel)::
+                             TmpInfAddrJump(JL, doTheAccessLabel)::[]
+       let throwError = dsafdsaf
+       let doTheAcess = fdsafdsa
+
+       
+
 (* returns (e, instrs) pair *)
-let handleMemForExpr = function
+and handleMemForExpr = function
       TmpBoolExpr (TmpBoolArg arg) -> (TmpBoolExpr (TmpBoolArg arg), [])
     | TmpPtrExpr (TmpPtrArg arg) -> (TmpPtrExpr (TmpPtrArg arg), [])
     | TmpIntExpr (TmpIntArg arg) -> (TmpIntExpr (TmpIntArg arg), [])
