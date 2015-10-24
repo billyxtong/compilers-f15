@@ -489,6 +489,6 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   let typedProgAST = tc_prog untypedProgAST [] in
   List.rev typedProgAST
 
-(* BUGS:
-used functions must be defined. If defined after, must be declared before use.   
-*)
+(* Note: please check all of the typing rules for structs, becayse they're
+   pretty complicated. Check out the lecture notes on structs, as well
+   as the handout. *)
