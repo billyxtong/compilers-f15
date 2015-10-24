@@ -10,10 +10,15 @@ type const = int
 type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 (* the int is the memory offest from the register *)
-type memAddr = DirectOffset of reg * int
-             | ArrayStyleOffset of reg * reg * int
+(* type memAddr = DirectOffset of reg * int *)
+(*              | ArrayStyleOffset of reg * reg * int *)
        (* Direct is 4(rsp) which is *(rsp + 4), ArrayStyle is (rsp, rbx, 4),
           which is *(rsp + rbx * 4) *)
+
+(* actually I think I'm just going to use old memAddr type for now
+   (which is only direct offsets *)
+type memAddr = reg * int                                   
+
 (* These are for actual assembly instructions. Tmps are not allowed. *)
 type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
               | BIT_AND | BIT_OR | BIT_XOR
@@ -134,7 +139,8 @@ type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
                    | TmpInfAddrReturn32 of tmpExpr
                    | TmpInfAddrReturn64 of tmpExpr
                    | TmpInfAddrVoidFunCall of ident * tmpExpr list
-type tmpField = c0type * ident                                                
+type tmpField = c0type * ident
+                
 type tmpInfAddrGlobalDecl =
     TmpInfAddrFunDef of ident * tmp list * tmpInfAddrInstr list
     (* function name, param names, instruction list *)
