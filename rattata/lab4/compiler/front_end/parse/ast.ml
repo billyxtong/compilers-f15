@@ -17,13 +17,6 @@ type field = c0type * ident (* for structs: new for L4 *)
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 
-    (* new in L4 *)                                 
-   | UntypedPostElabFieldAccessExpr of untypedPostElab * ident 
-   | UntypedPostElabAlloc of c0type 
-   | UntypedPostElabDerefExpr of ident
-   | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
-   | UntypedPostElabArrayAccessExpr of ident * untypedPostElabExpr
-
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
                     | FieldAccess of ptrExpr * ident
