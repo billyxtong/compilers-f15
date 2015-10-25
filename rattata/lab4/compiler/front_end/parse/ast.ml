@@ -19,7 +19,7 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
-                    | FieldAccess of ptrExpr * ident
+                    | FieldAccess of ident * ptrExpr * ident
                        (* structs must be stored in pointers! *)
                     | ArrayAccess of ptrExpr * intExpr
    (* intExpr is the index, not the mem offset. We can get the mem offset
