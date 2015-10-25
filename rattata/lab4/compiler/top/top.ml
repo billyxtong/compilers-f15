@@ -1,6 +1,6 @@
 open Core.Std
 open Datatypesv1
-open PrintDatatypes
+(* open PrintDatatypes *)
 
 let say = prerr_endline
 let newline = prerr_newline
@@ -59,14 +59,19 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     if typecheck_only then exit 0;
 
 
-    (* convert Post-Elab AST to Infinte Addr *)
-    say_if verbose (fun () -> "converting to Infinite Address code");
-    let infAddr = ToInfAddr.toInfAddr typedPostElabAst in ();
+    (* convert Post-Elab AST to Infinte Addr, except for memory stuff *)
+    say_if verbose (fun () -> "converting to infAddr, except memory stuff");
+    let infAddr = GeneralToInfAddr.toInfAddr typedPostElabAst in ();
+    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
+
+    (* convert memory stuff to Inf Addr *)
+    say_if verbose (fun () -> "converting memory stuff to Inf Addr");
+    let infAddrWithMem = MemStuffToInfAddr.handleMemStuff infAddr in ();
     say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
     
     (* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *)
-    let threeAddr = FewTmpsTo3Addr.to3Addr infAddr in ();
+    let threeAddr = FewTmpsTo3Addr.to3Addr infAddrWithMem in ();
     say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr);
 
     (* Three address to Two address *)
@@ -99,7 +104,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let finalAssem = FormatAssem.formatAssem lala in
     say_if dump_final (fun () -> finalAssem);
     
-    (* Output assembly *)
+e    (* Output assembly *)
     say_if verbose (fun () -> "Outputting assembly...");
     let afname = main_source ^ ".s" in
     say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
