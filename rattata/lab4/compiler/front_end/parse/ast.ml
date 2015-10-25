@@ -156,7 +156,7 @@ type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
               PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
 and preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabNullExpr (* new in L4: represents NULL *)
-                 | PreElabIdentExpr of preElabLVal (* new in L4: changed from ident *)
+                 | PreElabIdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
