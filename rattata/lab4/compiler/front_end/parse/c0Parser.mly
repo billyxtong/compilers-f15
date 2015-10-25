@@ -28,7 +28,15 @@ let rec expand_log_binop e1 op e2 =
      | A.GEQ -> A.PreElabNot (expand_log_binop e1 A.LT e2)
      | A.LT -> A.PreElabBinop (e1, A.LT, e2)
      | _ -> failwith "this should only be called with logical binops"
-				    
+
+let rec lvalToExp = function
+     A.PreElabVarLVal id -> A.PreElabIdentExpr id
+   | A.PreElabFieldLVal (structNameExpr, fieldName) ->
+        A.PreElabFieldAccessExpr (lvalToExp structNameExpr, fieldName)
+   | A.PreElabDerefLVal ptr -> A.PreElabDerefExpr (lvalToExp ptr)
+   | A.PreElabArrayAccessLVal (arrayExpr, indexExpr) ->
+        A.PreElabArrayAccessExpr (lvalToExp arrayExpr, indexExpr)
+		     
 %}
 
 %token EOF
@@ -227,23 +235,17 @@ lvalue :
    and reduce via LPAREN lvalue RPAREN. But this should be ok,
    because both ways lead to a correct parse. */
 exp :
-  LPAREN exp RPAREN              { $2 }
  /* Pointer stuff */	
- | NULL	                         { A.PreElabNullExpr }
- | exp DOT IDENT                 { A.PreElabFieldAccessExpr ($1, $3) }
- | exp ARROW IDENT               { A.PreElabFieldAccessExpr
-				     (A.PreElabDerefExpr $1, $3) }
+   NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
- | STAR exp                      { A.PreElabDerefExpr $2 }
  | ALLOC_ARRAY LPAREN c0type COMMA exp RPAREN
 	                       { A.PreElabArrayAlloc ($3, $5) }
- | exp LBRACK exp RBRACK    { A.PreElabArrayAccessExpr ($1, $3) }
 
  /* Misc */       
  | IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
  | intconst                      { $1 }
  | boolconst                     { $1 } 
- | lvalue 			 { A.PreElabIdentExpr $1 }
+ | lvalue 			 { lvalToExp $1 }
  /* Int arithmetic */				 
  | exp PLUS exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.ADD, $3) }
