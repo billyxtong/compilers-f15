@@ -1,16 +1,28 @@
 open Ast
 
+let rec elaboratePreElabLVal(lval : preElabLVal) =
+  match lval with
+        PreElabVarLVal(i) -> UntypedPostElabVarLVal(i)
+      | PreElabFieldLVal(p,i) -> UntypedPostElabFieldLVal(elaboratePreElabLVal(p), i)
+      | PreElabDerefLVal(p) -> UntypedPostElabDerefLVal(elaboratePreElabLVal(p))
+      | PreElabArrayAccessLVal(p,e) -> UntypedPostElabArrayAccessLVal(elaboratePreElabLVal(p),elaboratePreElabExpr(e))
 
-let rec elaboratePreElabExpr(expression : preElabExpr) =
+and elaboratePreElabExpr(expression : preElabExpr) =
   match expression with
         PreElabConstExpr(constant, typee) -> UntypedPostElabConstExpr(constant, typee)
-      | PreElabIdentExpr(identifier) -> UntypedPostElabIdentExpr(identifier)
+      | PreElabNullExpr -> UntypedPostElabNullExpr
+      | PreElabIdentExpr(lval) -> UntypedPostElabIdentExpr(elaboratePreElabLVal(lval))
       | PreElabBinop(expr1, op, expr2) -> UntypedPostElabBinop(elaboratePreElabExpr(expr1), 
                                                            op, elaboratePreElabExpr(expr2))
       | PreElabNot(expression') -> UntypedPostElabNot(elaboratePreElabExpr(expression'))
       | PreElabTernary(e1, e2, e3) -> UntypedPostElabTernary(elaboratePreElabExpr e1,
                                           elaboratePreElabExpr e2, elaboratePreElabExpr e3)
       | PreElabFunCall(i, exprs) -> UntypedPostElabFunCall(i, List.map elaboratePreElabExpr exprs)
+      | PreElabFieldAccessExpr(e,i) -> UntypedPostElabFieldAccessExpr(elaboratePreElabExpr(e), i)
+      | PreElabAlloc(c) -> UntypedPostElabAlloc(c)
+      | PreElabDerefExpr(e) -> UntypedPostElabDerefExpr(elaboratePreElabExpr(e))
+      | PreElabArrayAlloc(c,e) -> UntypedPostElabArrayAlloc(c, elaboratePreElabExpr(e))
+      | PreElabArrayAccessExpr(e1, e2) -> UntypedPostElabArrayAccessExpr(elaboratePreElabExpr(e1), elaboratePreElabExpr(e2))
 
 let elaboratePreElabDecl(decl : preElabDecl) = 
   match decl with
@@ -30,7 +42,8 @@ let addSimpStmtToPreElabStmt(pStmt,sStmt) =
 let elaborateSimpStmt (simpleStatement : simpStmt) =
   match simpleStatement with
         PreElabDecl(p) -> elaboratePreElabDecl(p)
-      | SimpAssign(identifier, expression) -> [UntypedPostElabAssignStmt(identifier, elaboratePreElabExpr(expression))]
+      | SimpAssign(lval,op,exp) -> [UntypedPostElabAssignStmt(elaboratePreElabLVal(lval), 
+                                    op, elaboratePreElabExpr(exp))]
       | SimpStmtExpr(p) -> [UntypedPostElabExprStmt(elaboratePreElabExpr p)]
 
 let elaborateInitFor(sOpt : simpOpt) =
@@ -39,7 +52,7 @@ let elaborateInitFor(sOpt : simpOpt) =
       | HasSimpStmt(sStmt) -> 
           (match sStmt with
                  PreElabDecl(p) -> ([], elaborateSimpStmt(sStmt))
-               | SimpAssign(i,e) -> ([UntypedPostElabAssignStmt(i, elaboratePreElabExpr(e))], [])
+               | SimpAssign(lval,op,exp) -> (elaborateSimpStmt(sStmt), [])
                | SimpStmtExpr(p) -> (elaborateSimpStmt(sStmt), []))
 
 let elaborateSimpOpt(sOpt : simpOpt) = 
@@ -86,6 +99,8 @@ let elaborateDecl (decl : globalDecl) =
         FunDecl(c,i,ps) -> UntypedPostElabFunDecl(c,i,ps)
       | FunDef(c,i,ps,body) -> UntypedPostElabFunDef(c,i,ps,elaborateBlock body)
       | Typedef(c,i) -> UntypedPostElabTypedef(c,i)
+      | PreElabStructDecl(i) -> UntypedPostElabStructDecl(i)
+      | PreElabStructDef(i,fs) -> UntypedPostElabStructDef(i,fs)
 
 let elaborateAST (decls : preElabAST) = List.map elaborateDecl decls
 

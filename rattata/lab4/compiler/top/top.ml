@@ -50,7 +50,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
     say_if dump_upeAST (fun () ->
       PrintASTs.untypedPostElabOverallASTToString(untypedPostElabOverallAst));
-
+(*
     (* Typecheck *)
     say_if verbose (fun () -> "Typechecking...");
     let typedPostElabAst = TypeChecker.typecheck untypedPostElabOverallAst in ();
@@ -78,7 +78,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if verbose (fun () -> "3Addr to 2Addr...");
     let twoAddr = To2Addr.to2Addr threeAddr in ();
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
-    
+     
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers...");
     let almostAssem = RegAlloc.regAlloc twoAddr in
@@ -111,7 +111,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
 
     Out_channel.with_file afname
       ~f:(fun afstream -> output_string afstream finalAssem)
-      
+*)      
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1
   | EXIT -> exit 1

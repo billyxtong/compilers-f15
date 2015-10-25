@@ -138,7 +138,7 @@ and untypedPostElabExprToString(expression : untypedPostElabExpr) =
   match expression with
         UntypedPostElabConstExpr(c,t) -> constToString c
       | UntypedPostElabNullExpr -> "NULL"
-      | UntypedPostElabIdentExpr(i) -> identToString i
+      | UntypedPostElabIdentExpr(lval) -> untypedPostElabLValToString lval
       | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; 
                           untypedPostElabExprToString expr1; " ";
                           generalBinopToString op;
