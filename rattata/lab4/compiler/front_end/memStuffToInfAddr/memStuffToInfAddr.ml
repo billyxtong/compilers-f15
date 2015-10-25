@@ -185,6 +185,8 @@ and handleArrayAccess elemType ptrExp indexExpr =
                              TmpInfAddrJump(JGE, errorLabel)::
                              TmpInfAddrJump(JL, doTheAccessLabel)::[] in
        let throwError = TmpInfAddrVoidFunCall("raise",
+                 (* We're supposed to raise signal 12 (sigusr2) on
+                    memor errors *)
                               TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
        let accessOffsetExpr = TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (getSizeForType elemType)),
