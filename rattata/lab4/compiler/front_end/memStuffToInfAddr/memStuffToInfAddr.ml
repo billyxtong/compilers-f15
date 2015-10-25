@@ -58,12 +58,27 @@ let getSizeForType = function
    | VOID -> assert(false)
    | TypedefType _ -> assert(false)
 
+let tmpToTypedExpr t exprType = match exprType with
+                         INT -> TmpIntExpr (TmpIntArg (TmpLoc t))
+                       | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc t))
+                       | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc t))
+                       | _ -> assert(false)
+
 let sharedExprToTypedExpr exprType sharedExpr =
      match exprType with
          INT -> TmpIntExpr (TmpIntSharedExpr sharedExpr)
        | BOOL -> TmpBoolExpr (TmpBoolSharedExpr sharedExpr)
        | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr sharedExpr)
        | _ -> assert(false)
+
+let makeAccessInstr elemType resultTmp accessPtrExpr = match elemType with
+                    BOOL -> TmpInfAddrMov32(TmpBoolExpr (TmpBoolSharedExpr
+                               (TmpInfAddrDeref accessPtrExpr)), resultTmp)
+                  | INT -> TmpInfAddrMov32(TmpIntExpr (TmpIntSharedExpr
+                               (TmpInfAddrDeref accessPtrExpr)), resultTmp)
+                  | Pointer _ -> TmpInfAddrMov64(TmpPtrSharedExpr
+                               (TmpInfAddrDeref accessPtrExpr), resultTmp)
+                  | _ -> assert(false)
 
 (* we need the type in order to calculate array offsets *)
 let rec handleSharedExpr exprType = function
@@ -72,11 +87,8 @@ let rec handleSharedExpr exprType = function
    | TmpInfAddrDeref (ptrExp) ->
        let (TmpPtrExpr e_result, instrs) = handleMemForExpr (TmpPtrExpr ptrExp) in
        (sharedExprToTypedExpr exprType (TmpInfAddrDeref e_result), instrs)
-   | TmpInfAddrFieldAccess(structTypeName, structPtr, fieldName) -> assert(false)
-       (* try let (fieldOffsets, _) = H.find structDefsMap structTypeName in *)
-       (* with Not_found -> (let () = print_string("struct " ^ structTypeName *)
-       (*                                        ^ "not defined before alloc\n") in *)
-       (*                  assert(false)) *)
+   | TmpInfAddrFieldAccess(structTypeName, structPtr, fieldName) ->
+       handleStructAccess exprType structTypeName structPtr fieldName
    | TmpInfAddrArrayAccess (ptrExp, indexExpr) ->
        handleArrayAccess exprType ptrExp indexExpr
 
@@ -106,16 +118,29 @@ and handleMemForExpr = function
               TmpIntExpr (TmpIntArg (TmpConst (getSizeForType typee)))::[]))),
               [])
                                          
-    | TmpBoolExpr (TmpBoolSharedExpr e) ->
-         let (e_result, instrs) = handleSharedExpr BOOL e in
-         (TmpBoolExpr (TmpBoolSharedExpr e_result), instrs)
-    | TmpIntExpr (TmpIntSharedExpr e) -> 
-         let (e_result, instrs) = handleSharedExpr INT e in
-         (TmpBoolExpr (TmpBoolSharedExpr e_result), instrs)
-    (* | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr Pointer *)
+    | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
+    | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
+    | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
+                      (* Note: we just need to know that it's a pointer,
+                         we don't care what type. I'm putting VOID in
+                         because if for some reason we do use the
+                         pointer time, this will probably throw an error
+                         and let us know that something weird is afoot. *)
     | _ -> failwith "not yet implemented"          
 
-  
+and handleStructAccess exprType structTypeName structPtr fieldName =
+    try
+        let (fieldOffsets, _) = H.find structDefsMap structTypeName in
+        let accessOffset = H.find fieldOffsets fieldName in
+        let resultTmp = Tmp (Temp.create()) in
+        let fieldPtrExpr = TmpInfAddrAdd64 (structPtr,
+                             TmpIntArg (TmpConst accessOffset)) in
+        let accessInstr = makeAccessInstr exprType resultTmp fieldPtrExpr in
+        (tmpToTypedExpr resultTmp exprType, accessInstr::[])
+    with Not_found -> let () = print_string("struct " ^ structTypeName
+                           ^ "not defined before alloc\n") in assert(false)
+
+
 and handleArrayAccess elemType ptrExp indexExpr =
        let (TmpPtrExpr ptr_final, ptr_instrs) =
            handleMemForExpr (TmpPtrExpr ptrExp) in
@@ -143,25 +168,14 @@ and handleArrayAccess elemType ptrExp indexExpr =
                           TmpIntArg (TmpConst (getSizeForType elemType)),
                                               numElemsExpr) in
        let accessPtrExpr = TmpInfAddrAdd64(ptr_final, accessOffsetExpr) in
-       let doTheAccess = (match elemType with
-                    BOOL -> TmpInfAddrMov32(TmpBoolExpr (TmpBoolSharedExpr
-                               (TmpInfAddrDeref accessPtrExpr)), resultTmp)
-                  | INT -> TmpInfAddrMov32(TmpIntExpr (TmpIntSharedExpr
-                               (TmpInfAddrDeref accessPtrExpr)), resultTmp)
-                  | Pointer _ -> TmpInfAddrMov64(TmpPtrSharedExpr
-                               (TmpInfAddrDeref accessPtrExpr), resultTmp)
-                  | _ -> assert(false)) in
+       let doTheAccess = makeAccessInstr elemType resultTmp accessPtrExpr in
       (* Ok now actually put all of the instructions together *)
       (* The array pointer is evaluated first, I checked *)
       let allInstrs = ptr_instrs @ index_instrs @ indexLowerCheck
              @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
              ::TmpInfAddrLabel(doTheAccessLabel)::doTheAccess::[] in
-      let resultTmpExpr = (match elemType with
-                         INT -> TmpIntExpr (TmpIntArg (TmpLoc resultTmp))
-                       | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc resultTmp))
-                       | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc resultTmp))
-                       | _ -> assert(false))
-      in (resultTmpExpr, allInstrs)
+      let resultTmpExpr = tmpToTypedExpr resultTmp elemType in
+      (resultTmpExpr, allInstrs)
 
 let handleMemForInstr = function
       TmpInfAddrJump j -> TmpInfAddrJump j::[]
