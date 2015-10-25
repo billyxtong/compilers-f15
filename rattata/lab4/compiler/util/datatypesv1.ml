@@ -22,24 +22,19 @@ type memAddr = reg * int
 (* These are for actual assembly instructions. Tmps are not allowed. *)
 type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
               | BIT_AND | BIT_OR | BIT_XOR
-              | RSHIFT | LSHIFT              
+              | RSHIFT | LSHIFT
+type ptrBinop = PTR_ADD | PTR_SUB
+type size = BIT32 | BIT64                
 type assemLoc = Reg of reg | MemAddr of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type boolInstr = TEST of assemArg * assemLoc
-               | CMP32 of assemArg * assemLoc
-               | CMP64 of assemArg * assemLoc
+               | CMP of size * assemArg * assemLoc
 type assemIntInstr = intBinop * assemArg * assemLoc
 type jump = JNE | JE | JG | JLE | JL | JGE | JMP_UNCOND 
 type label = int
 type jumpInstr = jump * label
-type assemInstr = MOV32 of assemArg * assemLoc
-          (* These are the three 64 bit instructions we're using,
-             and they're specified separately everywhere. Because
-             I don't really want to allow all of the other binops
-             for 64 bits *)
-                | MOV64 of assemArg * assemLoc
-                | SUB64 of assemArg * assemLoc
-                | ADD64 of assemArg * assemLoc
+type assemInstr = MOV of size * assemArg * assemLoc
+                | PTR_BINOP of ptrBinop * assemArg * assemLoc
                 | INT_BINOP of assemIntInstr
                 | PUSH of reg
                 | POP of reg
@@ -70,16 +65,12 @@ type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
 (* Two Address Code *)
 type tmpBoolInstr = TmpTest of tmpArg * tmp
-                  | TmpCmp32 of tmpArg * tmp
-                  | TmpCmp64 of tmpArg * tmp (* for pointers *)
+                  | TmpCmp of size * tmpArg * tmp
 type tmp2AddrBinop = intBinop * tmpArg * tmp
-type tmp2AddrInstr = Tmp2AddrMov32 of tmpArg * tmp
-                   | Tmp2AddrMov64 of tmpArg * tmp
-                   | Tmp2AddrAdd64 of tmpArg * tmp
-                   | Tmp2AddrSub64 of tmpArg * tmp
+type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
+                   | Tmp2AddrPtrBinop of ptrBinop * tmpArg * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
-                   | Tmp2AddrReturn32 of tmpArg
-                   | Tmp2AddrReturn64 of tmpArg
+                   | Tmp2AddrReturn of size * tmpArg
                    | Tmp2AddrJump of jumpInstr
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
@@ -91,14 +82,11 @@ type tmp2AddrProg = tmp2AddrFunDef list
 
 (* Three Address Code *)
 type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp
-type tmp3AddrInstr = Tmp3AddrMov32 of tmpArg *  tmp
-                   | Tmp3AddrMov64 of tmpArg *  tmp
+type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg *  tmp
                 (* ptr derefences are subsumed by mov *)
-                   | Tmp3AddrAdd64 of tmpArg * tmp
-                   | Tmp3AddrSub64 of tmpArg * tmp
+                   | Tmp3AddrPtrBinop of ptrBinop * tmpArg * tmp
                    | Tmp3AddrBinop of tmp3AddrBinop
-                   | Tmp3AddrReturn32 of tmpArg
-                   | Tmp3AddrReturn64 of tmpArg
+                   | Tmp3AddrReturn of size * tmpArg
                    | Tmp3AddrJump of jumpInstr
                    | Tmp3AddrBoolInstr of tmpBoolInstr
                    | Tmp3AddrLabel of label
@@ -136,8 +124,7 @@ and tmpPtrExpr = TmpPtrArg of tmpArg
                | TmpPtrSharedExpr of tmpSharedTypeExpr
                | TmpAlloc of c0type
                | TmpAllocArray of c0type * int
-               | TmpInfAddrAdd64 of tmpPtrExpr * tmpIntExpr
-               | TmpInfAddrSub64 of tmpPtrExpr * tmpIntExpr
+               | TmpInfAddrPtrBinop of ptrBinop * tmpPtrExpr * tmpIntExpr
 and tmpIntExpr = TmpIntArg of tmpArg
                | TmpIntSharedExpr of tmpSharedTypeExpr
                | TmpInfAddrBinopExpr of intBinop * tmpIntExpr * 

@@ -117,7 +117,14 @@ and handleMemForExpr = function
              (TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
               TmpIntExpr (TmpIntArg (TmpConst (getSizeForType typee)))::[]))),
               [])
-                                         
+    | TmpPtrExpr (TmpAllocArray (elemType, numElems)) ->
+       (* Remember! We allocate an extra 8 bytes and store the length
+          in the address p - 8, where p is the address we return here. *)
+      (* Not sure if we need to deal with initializing memory here? *)
+       let sizeForMalloc = getSizeForType elemType + 8 in 
+       (TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
+             TmpIntExpr (TmpIntArg (TmpConst sizeForMalloc))::[]))),
+              [])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
     | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
@@ -126,14 +133,27 @@ and handleMemForExpr = function
                          because if for some reason we do use the
                          pointer time, this will probably throw an error
                          and let us know that something weird is afoot. *)
-    | _ -> failwith "not yet implemented"          
+    | TmpPtrExpr (TmpInfAddrPtrBinop(op, ptrExp, intExp)) ->
+        (* Again, make sure we evaluate ptrExp before intExp, see above *)
+        let (TmpPtrExpr ptr_result, instrs1) =
+          handleMemForExpr (TmpPtrExpr ptrExp) in
+        let (TmpIntExpr int_result, instrs2) =
+          handleMemForExpr (TmpIntExpr intExp) in
+        let (final_ptr_expr, final_instrs1) =
+             (match instrs2 with
+                 [] -> (ptr_result, instrs1)
+               | _ -> (let t = Tmp (Temp.create()) in (TmpPtrArg (TmpLoc t),
+                       instrs1 @ TmpInfAddrMov64(ptr_result, t)::[])))
+            in
+        (TmpPtrExpr (TmpInfAddrPtrBinop(op, final_ptr_expr, int_result)),
+         final_instrs1 @ instrs2)
 
 and handleStructAccess exprType structTypeName structPtr fieldName =
     try
         let (fieldOffsets, _) = H.find structDefsMap structTypeName in
         let accessOffset = H.find fieldOffsets fieldName in
         let resultTmp = Tmp (Temp.create()) in
-        let fieldPtrExpr = TmpInfAddrAdd64 (structPtr,
+        let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtr,
                              TmpIntArg (TmpConst accessOffset)) in
         let accessInstr = makeAccessInstr exprType resultTmp fieldPtrExpr in
         (tmpToTypedExpr resultTmp exprType, accessInstr::[])
@@ -148,7 +168,8 @@ and handleArrayAccess elemType ptrExp indexExpr =
            handleMemForExpr (TmpIntExpr indexExpr) in
        let elemSize = getSizeForType elemType in
        (* The number of elems is stored at the address ptr_final - 8 *)
-       let numElemsPtr = TmpInfAddrSub64(ptr_final, TmpIntArg (TmpConst 8)) in
+       let numElemsPtr = TmpInfAddrPtrBinop(PTR_SUB, ptr_final,
+                                            TmpIntArg (TmpConst 8)) in
        let numElemsExpr = TmpIntSharedExpr (TmpInfAddrDeref numElemsPtr) in
        let resultTmp = Tmp (Temp.create()) in
        let errorLabel = GenLabel.create() in
@@ -167,7 +188,8 @@ and handleArrayAccess elemType ptrExp indexExpr =
        let accessOffsetExpr = TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (getSizeForType elemType)),
                                               numElemsExpr) in
-       let accessPtrExpr = TmpInfAddrAdd64(ptr_final, accessOffsetExpr) in
+       let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD, ptr_final,
+                                              accessOffsetExpr) in
        let doTheAccess = makeAccessInstr elemType resultTmp accessPtrExpr in
       (* Ok now actually put all of the instructions together *)
       (* The array pointer is evaluated first, I checked *)
