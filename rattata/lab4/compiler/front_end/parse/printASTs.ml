@@ -3,6 +3,9 @@ open PrintDatatypes
 open Ast
 open String
 
+(* ============ Pre-Elab AST Print Functions ================= *)
+
+
 let generalBinopToString(op : generalBinop) = 
   match op with
         IntBinop(i) -> intBinopToString(i)
@@ -12,10 +15,19 @@ let generalBinopToString(op : generalBinop) =
       | LOG_AND -> " && "
       | _ -> assert(false)
 
-let rec preElabExprToString(preelabexpr : preElabExpr) =
+let rec preElabLValToString(lval : preElabLVal) =
+  match lval with
+        PreElabVarLVal(i) -> identToString(i)
+      | PreElabFieldLVal(p,i) -> preElabLValToString(p) ^ "->" ^ identToString(i)
+      | PreElabDerefLVal(p) -> "*" ^ preElabLValToString(p)
+      | PreElabArrayAccessLVal(p,e) -> preElabLValToString(p) ^ "[" ^ preElabExprToString(e) ^ "]"
+
+
+and preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
         PreElabConstExpr(c,t) -> constToString c
-      | PreElabIdentExpr(i) -> identToString i
+      | PreElabNullExpr -> "NULL"
+      | PreElabIdentExpr(l) -> preElabLValToString l
       | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; " ";
                                                      generalBinopToString op; 
                                                      preElabExprToString expr2; ")"]
@@ -23,16 +35,36 @@ let rec preElabExprToString(preelabexpr : preElabExpr) =
       | PreElabTernary(e1, e2, e3) -> "(" ^ (preElabExprToString e1) ^ " ? " ^
               (preElabExprToString e2) ^ " : " ^ (preElabExprToString e3) ^ ")"
       | PreElabFunCall(func, args) -> identToString(func) ^ "(" ^ (concat ", " (List.map preElabExprToString args)) ^ ")"
+      | PreElabFieldAccessExpr(e,i) -> preElabExprToString(e) ^ "->" ^ identToString(i)
+      | PreElabAlloc(t) -> "alloc(" ^ c0typeToString(t) ^ ")"
+      | PreElabDerefExpr(e) -> "*" ^ preElabExprToString(e)
+      | PreElabArrayAlloc(t,e) -> "alloc_array(" ^ c0typeToString(t) ^ ", " ^ preElabExprToString(e) ^ ")"
+      | PreElabArrayAccessExpr(e1,e2) -> preElabExprToString(e1) ^ "[" ^ preElabExprToString(e2) ^ "]"
 
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
         NewVar(i,t) -> c0typeToString(t) ^ identToString(i)
       | Init(i,t,p) -> concat "" [c0typeToString(t); identToString(i); " = "; preElabExprToString(p)]
 
+let assignOpToString(op : assignOp) =
+  match op with
+        EQ -> " = "
+     |  PLUSEQ -> " += "
+     |  SUBEQ -> " -= "
+     |  MULEQ -> " *= "
+     |  DIVEQ -> " /= "
+     |  MODEQ -> " %= "
+     |  AND_EQ -> " &= "
+     |  OR_EQ -> " |= "
+     |  XOR_EQ -> " ^= "
+     |  LSHIFT_EQ -> " >>= "
+     |  RSHIFT_EQ -> " <<= "
+
+
 let simpStmtToString(statement : simpStmt) =
   match statement with
         PreElabDecl(p) -> preElabDeclToString(p)
-      | SimpAssign(i,p) -> concat "" [identToString(i); " = "; preElabExprToString(p)]
+      | SimpAssign(l,a,e) -> concat "" [preElabLValToString(l); assignOpToString(a); preElabExprToString(e)]
       | SimpStmtExpr(p) -> preElabExprToString(p)
 
 let simpOptToString(sOpt : simpOpt) = 
@@ -70,6 +102,8 @@ and blockToString(blk : block) = concat "\n" (List.map preElabStmtToString blk) 
 
 let paramToString(c, i) = c0typeToString(c) ^ identToString(i)
 
+let fieldToString(c, i) = c0typeToString(c) ^ identToString(i) ^ ";\n"
+
 let globalDeclToString(g : globalDecl) =
   match g with
         FunDecl(c, i, params) -> c0typeToString(c) ^ identToString(i) ^ "(" ^ 
@@ -80,6 +114,9 @@ let globalDeclToString(g : globalDecl) =
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           blockToString(stmts) ^ "}"
       | Typedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i)
+      | PreElabStructDecl(i) -> "struct " ^ identToString(i) ^ ";"
+      | PreElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
+                                   (concat "" (List.map fieldToString fs)) ^ "};"
 
 let preElabASTToString (mainDecls, headerDecls) =
     "MAIN:\n" ^ (concat "\n" (List.map globalDeclToString mainDecls) ^ "\n\n")
@@ -87,26 +124,54 @@ let preElabASTToString (mainDecls, headerDecls) =
 
 (* ============ Untyped Post-Elab AST Print Functions ================= *)
 
-let rec untypedPostElabExprToString(expression : untypedPostElabExpr) =
+let rec untypedPostElabLValToString(lval : untypedPostElabLVal) =
+  match lval with
+        UntypedPostElabVarLVal(i) -> identToString(i)
+      | UntypedPostElabFieldLVal(p,i) -> untypedPostElabLValToString(p) ^ "->"  
+                                            ^ identToString(i)
+      | UntypedPostElabDerefLVal(p) -> "*" ^ untypedPostElabLValToString(p)
+      | UntypedPostElabArrayAccessLVal(p,e) -> untypedPostElabLValToString(p)
+                               ^ "[" ^ untypedPostElabExprToString(e) ^ "]"
+
+
+and untypedPostElabExprToString(expression : untypedPostElabExpr) =
   match expression with
         UntypedPostElabConstExpr(c,t) -> constToString c
+      | UntypedPostElabNullExpr -> "NULL"
       | UntypedPostElabIdentExpr(i) -> identToString i
-      | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; untypedPostElabExprToString expr1; " ";
-                                                     generalBinopToString op;
-                                                     untypedPostElabExprToString expr2; ")"]
-      | UntypedPostElabNot(expr1) -> concat "" ["!"; untypedPostElabExprToString(expr1)]
-      | UntypedPostElabTernary(e1, e2, e3) -> "(" ^ (untypedPostElabExprToString e1) ^ " ? " ^
-              (untypedPostElabExprToString e2) ^ " : " ^ (untypedPostElabExprToString e3) ^ ")" 
+      | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; 
+                          untypedPostElabExprToString expr1; " ";
+                          generalBinopToString op;
+                          untypedPostElabExprToString expr2; ")"]
+      | UntypedPostElabNot(expr1) -> concat "" ["!"; 
+                untypedPostElabExprToString(expr1)]
+      | UntypedPostElabTernary(e1, e2, e3) -> "(" ^ 
+              (untypedPostElabExprToString e1) ^ " ? " ^
+              (untypedPostElabExprToString e2) ^ " : " ^ 
+              (untypedPostElabExprToString e3) ^ ")" 
       | UntypedPostElabFunCall(func, args) -> 
-          identToString(func) ^ "(" ^ (concat ", " (List.map untypedPostElabExprToString args)) ^ ")"
-
+          identToString(func) ^ "(" ^ (concat ", " 
+                (List.map untypedPostElabExprToString args)) ^ ")"
+      | UntypedPostElabFieldAccessExpr(e,i) -> untypedPostElabExprToString(e) 
+                                                  ^ "->" ^ identToString(i)
+      | UntypedPostElabAlloc(t) -> "alloc(" ^ c0typeToString(t) ^ ")"
+      | UntypedPostElabDerefExpr(e) -> "*" ^ untypedPostElabExprToString(e)
+      | UntypedPostElabArrayAlloc(t,e) -> "alloc_array(" ^ c0typeToString(t) 
+                                ^ ", " ^ untypedPostElabExprToString(e) ^ ")"
+      | UntypedPostElabArrayAccessExpr(e1,e2) -> untypedPostElabExprToString(e1)
+                              ^ "[" ^ untypedPostElabExprToString(e2) ^ "]"
 
 let rec untypedPostElabStmtToString(s : untypedPostElabStmt) =
   match s with
-        UntypedPostElabDecl(identifier,constant) -> concat "" [c0typeToString(constant); identToString(identifier)]
-      | UntypedPostElabInitDecl(identifier,constant, e) -> concat "" [c0typeToString(constant); identToString(identifier); " = "; untypedPostElabExprToString e]
-      | UntypedPostElabAssignStmt(identifier,untypedexpr) -> concat "" [identToString(identifier); " = ";
-                                                                        untypedPostElabExprToString(untypedexpr)]
+        UntypedPostElabDecl(identifier,constant) -> concat "" 
+              [c0typeToString(constant); identToString(identifier)]
+      | UntypedPostElabInitDecl(identifier,constant, e) -> concat "" 
+                    [c0typeToString(constant); 
+                     identToString(identifier); " = "; 
+                     untypedPostElabExprToString e]
+      | UntypedPostElabAssignStmt(lval, op, untypedexpr) -> concat "" 
+                [untypedPostElabLValToString(lval); assignOpToString(op);
+                 untypedPostElabExprToString(untypedexpr)]
       | UntypedPostElabIf(expression,postelabast1,postelabast2) -> concat "" ["if("; untypedPostElabExprToString(expression);
                                                   ") {\n\t"; untypedPostElabBlockToString(postelabast1);
                                                   "} \nelse {\n\t"; untypedPostElabBlockToString(postelabast2); "\n}"]
@@ -133,6 +198,9 @@ let untypedPostElabGlobalDeclToString(g : untypedPostElabGlobalDecl) =
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           untypedPostElabBlockToString(stmts) ^ "}"
       | UntypedPostElabTypedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i)
+      | UntypedPostElabStructDecl(i) -> "struct " ^ identToString(i) ^ ";"
+      | UntypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
+                                   (concat "" (List.map fieldToString fs)) ^ "};"
 
 let untypedPostElabOverallASTToString (mainDecls, headerDecls) =
     "MAIN:\n" ^ (concat "\n" (List.map untypedPostElabGlobalDeclToString mainDecls) ^ "\n\n")
@@ -145,48 +213,68 @@ let shiftOpToString(s : shiftOp) =
         ASTrshift -> " >> "
       | ASTlshift -> " << "
 
-let rec intExprToString(iExpr : intExpr) =
+let rec sharedTypeExprToString(s : sharedTypeExpr) =
+  match s with
+        Ternary(b,e1,e2) -> concat "" [boolExprToString(b); " ? ";
+                                       typedPostElabExprToString(e1); " : ";
+                                       typedPostElabExprToString(e2)]
+      | FunCall(func,args) -> identToString(func) ^ "(" ^ (concat ", " 
+                      (List.map typedPostElabExprToString args)) ^ ")"
+      | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "->" ^ identToString(i2) ^
+                                  "(" ^ identToString(i2) ^ ")"
+      | ArrayAccess(p,i) -> ptrExprToString(p) ^ "[" ^ intExprToString(i) ^ "]"
+      | Deref(p) -> "*" ^ ptrExprToString(p)
+      | Ident(i) -> identToString(i)
+      
+and ptrExprToString(p : ptrExpr) =
+  match p with
+        Null -> "NULL"
+      | PtrSharedExpr(s) -> sharedTypeExprToString(s)
+      | Alloc(c) -> "alloc(" ^ c0typeToString(c) ^ ")"
+      | AllocArray(c,i) -> "alloc_array(" ^ c0typeToString(c) ^ ", " ^
+                                      intExprToString(i) ^ ")"
+
+and intExprToString(iExpr : intExpr) =
   match iExpr with
         IntConst(c) -> constToString(c)
-      | IntIdent(i) -> identToString(i)
+      | IntSharedExpr(s) -> sharedTypeExprToString(s)
       | ASTBinop(expr1, op, expr2) -> concat "" ["("; intExprToString(expr1);
                                                       intBinopToString(op);
                                                       intExprToString(expr2);
                                                  ")"]
-      | IntTernary(b,i1,i2) -> concat "" [boolExprToString(b); " ? ";
-                                          intExprToString(i1); " : ";
-                                          intExprToString(i2)]
-      | BaseCaseShift(i1, shifty, i2) -> concat "" [intExprToString(i1);
-                                                    shiftOpToString(shifty);
-                                                    intExprToString(i2)]
-      | IntFunCall(func, args) -> 
-          identToString(func) ^ "(" ^ (concat ", " (List.map typedPostElabExprToString args)) ^ ")"
+      
 and boolExprToString(bExpr : boolExpr) =
   match bExpr with
         BoolConst(c) -> if c = 0 then "false" else "true"
-      | BoolIdent(i) -> identToString(i)
+      | BoolSharedExpr(s) -> sharedTypeExprToString(s)
       | GreaterThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " > "; intExprToString(iExpr2)]
       | LessThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " < "; intExprToString(iExpr2)]
       | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
       | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
+      | PtrEquals(pExpr1,pExpr2) -> concat "" [ptrExprToString(pExpr1); " == "; ptrExprToString(pExpr2)]
       | LogNot(bExpr) -> concat "" ["!"; boolExprToString bExpr]
       | LogAnd(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " && "; boolExprToString(bExpr2)]
-      | BoolTernary(b1, b2, b3) -> concat "" [boolExprToString(b1); " ? ";
-                                              boolExprToString(b2); " : ";
-                                              boolExprToString(b3)]
-      | BoolFunCall(func, args) -> 
-          identToString(func) ^ "(" ^ (concat ", " (List.map typedPostElabExprToString args)) ^ ")"
+      
+and typedPostElabLValToString(lval : typedPostElabLVal) =
+  match lval with
+        TypedPostElabVarLVal(i) -> identToString(i)
+      | TypedPostElabFieldLVal(p,i) -> typedPostElabLValToString(p) ^ "->"  
+                                            ^ identToString(i)
+      | TypedPostElabDerefLVal(p) -> "*" ^ typedPostElabLValToString(p)
+      | TypedPostElabArrayAccessLVal(p,e) -> typedPostElabLValToString(p)
+                               ^ "[" ^ typedPostElabExprToString(e) ^ "]"
 
 and typedPostElabExprToString(e : typedPostElabExpr) =
   match e with
         IntExpr(i) -> intExprToString(i)
       | BoolExpr(b) -> boolExprToString(b)
       | VoidExpr(stmt) -> typedPostElabStmtToString(stmt)
+      | PtrExpr(p) -> ptrExprToString(p)
 
 and typedPostElabStmtToString(s : typedPostElabStmt) =
   match s with
         TypedPostElabDecl(i,c) -> concat "" [c0typeToString(c); identToString(i)]
-      | TypedPostElabAssignStmt(i, e) -> concat "" [identToString(i); " = ";
+      | TypedPostElabAssignStmt(lval, op, e) -> concat "" [typedPostElabLValToString(lval); assignOpToString(op);
                                                     typedPostElabExprToString(e)]
       | TypedPostElabIf(b,p1,p2) -> concat "" ["if(";
                                                boolExprToString(b);
@@ -207,10 +295,14 @@ and typedPostElabBlockToString(stmts : typedPostElabStmt list) =
   concat "\n" (List.map typedPostElabStmtToString stmts) ^ "\n"
 
 
-let typedPostElabGlobalDeclToString(TypedPostElabFunDef(c, i, params, stmts) : typedPostElabGlobalDecl) =
-    c0typeToString(c) ^ identToString(i) ^ "(" ^ 
-    (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
-    typedPostElabBlockToString(stmts) ^ "}"
+let typedPostElabGlobalDeclToString(decl : typedPostElabGlobalDecl) =
+  match decl with 
+        TypedPostElabFunDef(c, i, params, stmts) ->
+          c0typeToString(c) ^ identToString(i) ^ "(" ^ 
+          (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
+          typedPostElabBlockToString(stmts) ^ "}"
+      | TypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
+                                   (concat "" (List.map fieldToString fs)) ^ "};"
 
 let typedPostElabASTToString (typedFunDefs : typedPostElabGlobalDecl list) =
     concat "\n" (List.map typedPostElabGlobalDeclToString typedFunDefs) ^ "\n"

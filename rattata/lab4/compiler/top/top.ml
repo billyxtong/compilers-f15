@@ -104,7 +104,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let finalAssem = FormatAssem.formatAssem lala in
     say_if dump_final (fun () -> finalAssem);
     
-e    (* Output assembly *)
+    (* Output assembly *)
     say_if verbose (fun () -> "Outputting assembly...");
     let afname = main_source ^ ".s" in
     say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");

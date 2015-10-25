@@ -123,7 +123,7 @@ type tmpSharedTypeExpr = TmpInfAddrFunCall of ident * tmpExpr list
 and tmpPtrExpr = TmpPtrArg of tmpArg
                | TmpPtrSharedExpr of tmpSharedTypeExpr
                | TmpAlloc of c0type
-               | TmpAllocArray of c0type * int
+               | TmpAllocArray of c0type * tmpIntExpr
                | TmpInfAddrPtrBinop of ptrBinop * tmpPtrExpr * tmpIntExpr
 and tmpIntExpr = TmpIntArg of tmpArg
                | TmpIntSharedExpr of tmpSharedTypeExpr
@@ -135,7 +135,7 @@ and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
              | TmpPtrExpr of tmpPtrExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
-(* Note: by this point, we've already reversed the operationds for
+(* Note: by this point, we've already reversed the operations for
    cmp. That is, cmp (a,b) followed by jg will jump if b > a *)
                         | TmpInfAddrCmp of size * tmpExpr * tmpExpr
 type tmpInfAddrInstr = TmpInfAddrMov of size * tmpExpr * tmp

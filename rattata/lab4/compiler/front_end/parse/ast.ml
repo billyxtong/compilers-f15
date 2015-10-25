@@ -20,7 +20,8 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
                     | FieldAccess of ident * ptrExpr * ident
-                       (* structs must be stored in pointers! *)
+                       (* first ident: type name of struct 
+                        * second ident: actual struct pointer *)
                     | ArrayAccess of ptrExpr * intExpr
    (* intExpr is the index, not the mem offset. We can get the mem offset
       because we know the type of the array based on what
@@ -50,7 +51,7 @@ and intExpr = IntConst of const
               | PtrEquals of ptrExpr * ptrExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
-(* new in L4: lvalues are no longer just var names *)                 
+(* new in L4: lvalues are no longer just var names *)        
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
               TypedPostElabFieldLVal of typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
@@ -153,8 +154,6 @@ type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
               (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
               PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
               PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
-              (* assuming you're stripping away of parens in parsing?  
-               * so (preElabLVal) doesn't need to be a type (That's correct. - Ben) *)
 and preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabNullExpr (* new in L4: represents NULL *)
                  | PreElabIdentExpr of preElabLVal (* new in L4: changed from ident *)

@@ -16,7 +16,7 @@ let markedLive liveSet line = try let () = H.find liveSet line in true
 
 let getDefVars prog line =
     match Array.get prog line with
-         Tmp2AddrMov(src, Tmp dest) -> dest::[]
+         Tmp2AddrMov(s, src, Tmp dest) -> dest::[]
        | Tmp2AddrBinop(op, src, Tmp dest) -> dest::[]
        | Tmp2AddrFunCall(fName, args, Some (Tmp dest)) -> dest::[]
        | _ -> []
@@ -30,11 +30,11 @@ let isDef t prog line =
 
 let isUsed t prog line =
     match Array.get prog line with
-         Tmp2AddrMov(src, dest) -> (src = TmpLoc (Tmp t))
+         Tmp2AddrMov(s, src, dest) -> (src = TmpLoc (Tmp t))
        | Tmp2AddrBinop(op, src, dest) -> ((src = (TmpLoc (Tmp t)))
                                            || (dest = Tmp t))
-       | Tmp2AddrReturn arg -> (arg = TmpLoc (Tmp t))
-       | Tmp2AddrBoolInstr (TmpCmp (arg, loc)) ->
+       | Tmp2AddrReturn (s, arg) -> (arg = TmpLoc (Tmp t))
+       | Tmp2AddrBoolInstr (TmpCmp (s, arg, loc)) ->
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
        | Tmp2AddrBoolInstr (TmpTest (arg, loc)) ->
               ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
