@@ -137,15 +137,12 @@ and tmpExpr = TmpBoolExpr of tmpBoolExpr
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
 (* Note: by this point, we've already reversed the operationds for
    cmp. That is, cmp (a,b) followed by jg will jump if b > a *)
-                        | TmpInfAddrCmp32 of tmpExpr * tmpExpr
-                        | TmpInfAddrCmp64 of tmpExpr * tmpExpr
-type tmpInfAddrInstr = TmpInfAddrMov32 of tmpExpr * tmp
-                   | TmpInfAddrMov64 of tmpPtrExpr * tmp
+                        | TmpInfAddrCmp of size * tmpExpr * tmpExpr
+type tmpInfAddrInstr = TmpInfAddrMov of size * tmpExpr * tmp
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
-                   | TmpInfAddrReturn32 of tmpExpr
-                   | TmpInfAddrReturn64 of tmpExpr
+                   | TmpInfAddrReturn of size * tmpExpr
                    | TmpInfAddrVoidFunCall of ident * tmpExpr list
 type tmpField = c0type * ident
                 

@@ -72,12 +72,12 @@ let sharedExprToTypedExpr exprType sharedExpr =
        | _ -> assert(false)
 
 let makeAccessInstr elemType resultTmp accessPtrExpr = match elemType with
-                    BOOL -> TmpInfAddrMov32(TmpBoolExpr (TmpBoolSharedExpr
+                    BOOL -> TmpInfAddrMov(BIT32, TmpBoolExpr (TmpBoolSharedExpr
                                (TmpInfAddrDeref accessPtrExpr)), resultTmp)
-                  | INT -> TmpInfAddrMov32(TmpIntExpr (TmpIntSharedExpr
+                  | INT -> TmpInfAddrMov(BIT32, TmpIntExpr (TmpIntSharedExpr
                                (TmpInfAddrDeref accessPtrExpr)), resultTmp)
-                  | Pointer _ -> TmpInfAddrMov64(TmpPtrSharedExpr
-                               (TmpInfAddrDeref accessPtrExpr), resultTmp)
+                  | Pointer _ -> TmpInfAddrMov(BIT64, TmpPtrExpr (TmpPtrSharedExpr
+                               (TmpInfAddrDeref accessPtrExpr)), resultTmp)
                   | _ -> assert(false)
 
 (* we need the type in order to calculate array offsets *)
@@ -108,7 +108,7 @@ and handleMemForExpr = function
              (match instrs2 with
                  [] -> (e1_result, instrs1)
                | _ -> (let t = Tmp (Temp.create()) in (TmpIntArg (TmpLoc t),
-                       instrs1 @ TmpInfAddrMov32(TmpIntExpr e1_result, t)::[])))
+                       instrs1 @ TmpInfAddrMov(BIT32, TmpIntExpr e1_result, t)::[])))
             in
         (TmpIntExpr (TmpInfAddrBinopExpr(op, final_e1, e2_result)),
          final_instrs1 @ instrs2)
@@ -139,11 +139,12 @@ and handleMemForExpr = function
           handleMemForExpr (TmpPtrExpr ptrExp) in
         let (TmpIntExpr int_result, instrs2) =
           handleMemForExpr (TmpIntExpr intExp) in
-        let (final_ptr_expr, final_instrs1) =
+        let (final_ptr_expr, final_instrs1) = 
              (match instrs2 with
                  [] -> (ptr_result, instrs1)
                | _ -> (let t = Tmp (Temp.create()) in (TmpPtrArg (TmpLoc t),
-                       instrs1 @ TmpInfAddrMov64(ptr_result, t)::[])))
+                       instrs1 @
+                       TmpInfAddrMov(BIT64, TmpPtrExpr ptr_result, t)::[])))
             in
         (TmpPtrExpr (TmpInfAddrPtrBinop(op, final_ptr_expr, int_result)),
          final_instrs1 @ instrs2)
@@ -176,10 +177,10 @@ and handleArrayAccess elemType ptrExp indexExpr =
        let doTheAccessLabel = GenLabel.create() in
        (* Note that the operand order for cmp has already been reversed!
           So cmp (a,b) followed by jg will jump is b > a *)
-       let indexLowerCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp32(
+       let indexLowerCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp(BIT32,
            TmpIntExpr (TmpIntArg (TmpConst 0)), TmpIntExpr index_final))::
            TmpInfAddrJump(JL, errorLabel)::[] in
-       let indexUpperCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp32(
+       let indexUpperCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp(BIT32,
            TmpIntExpr numElemsExpr, TmpIntExpr index_final))::
                              TmpInfAddrJump(JGE, errorLabel)::
                              TmpInfAddrJump(JL, doTheAccessLabel)::[] in
