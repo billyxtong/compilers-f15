@@ -97,7 +97,7 @@ type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
 and untypedPostElabExpr =
      UntypedPostElabConstExpr of const * c0type
    | UntypedPostElabNullExpr
-   | UntypedPostElabIdentExpr of untypedPostElabLVal
+   | UntypedPostElabIdentExpr of ident
    | UntypedPostElabBinop of untypedPostElabExpr *
                              generalBinop * untypedPostElabExpr
    | UntypedPostElabNot of untypedPostElabExpr

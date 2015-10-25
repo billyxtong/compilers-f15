@@ -11,7 +11,7 @@ and elaboratePreElabExpr(expression : preElabExpr) =
   match expression with
         PreElabConstExpr(constant, typee) -> UntypedPostElabConstExpr(constant, typee)
       | PreElabNullExpr -> UntypedPostElabNullExpr
-      | PreElabIdentExpr(lval) -> UntypedPostElabIdentExpr(elaboratePreElabLVal(lval))
+      | PreElabIdentExpr(id) -> UntypedPostElabIdentExpr(id)
       | PreElabBinop(expr1, op, expr2) -> UntypedPostElabBinop(elaboratePreElabExpr(expr1), 
                                                            op, elaboratePreElabExpr(expr2))
       | PreElabNot(expression') -> UntypedPostElabNot(elaboratePreElabExpr(expression'))

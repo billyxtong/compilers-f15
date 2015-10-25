@@ -27,7 +27,7 @@ and preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
         PreElabConstExpr(c,t) -> constToString c
       | PreElabNullExpr -> "NULL"
-      | PreElabIdentExpr(l) -> preElabLValToString l
+      | PreElabIdentExpr(id) -> identToString id
       | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; " ";
                                                      generalBinopToString op; 
                                                      preElabExprToString expr2; ")"]
@@ -138,7 +138,7 @@ and untypedPostElabExprToString(expression : untypedPostElabExpr) =
   match expression with
         UntypedPostElabConstExpr(c,t) -> constToString c
       | UntypedPostElabNullExpr -> "NULL"
-      | UntypedPostElabIdentExpr(lval) -> untypedPostElabLValToString lval
+      | UntypedPostElabIdentExpr(id) -> id
       | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; 
                           untypedPostElabExprToString expr1; " ";
                           generalBinopToString op;
