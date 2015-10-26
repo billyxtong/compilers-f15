@@ -29,13 +29,21 @@ let rec expand_log_binop e1 op e2 =
      | A.LT -> A.PreElabBinop (e1, A.LT, e2)
      | _ -> failwith "this should only be called with logical binops"
 
-let rec lvalToExp = function
-     A.PreElabVarLVal id -> A.PreElabIdentExpr id
-   | A.PreElabFieldLVal (structNameExpr, fieldName) ->
-        A.PreElabFieldAccessExpr (lvalToExp structNameExpr, fieldName)
-   | A.PreElabDerefLVal ptr -> A.PreElabDerefExpr (lvalToExp ptr)
-   | A.PreElabArrayAccessLVal (arrayExpr, indexExpr) ->
-        A.PreElabArrayAccessExpr (lvalToExp arrayExpr, indexExpr)
+let rec expToLVal = function
+    A.PreElabConstExpr -> assert(false)
+  | A.PreElabNullExpr -> assert(false)
+  | A.PreElabIdentExpr id -> PreElabVarLVal IDENT
+  | A.PreElabBinop _ -> assert(false)
+  | A.PreElabNot _ -> assert(false)
+  | A.PreElabTernary _ -> assert(false)
+  | A.PreElabFunCall _ -> assert(false)
+  | A.PreElabFieldAccessExpr (structExpr, fieldName) ->
+       A.PreElabFieldLVal (expToLVal structExpr, fieldName)
+  | A.PreElabAlloc _ -> assert(false)
+  | A.PreElabArrayAlloc _ -> assert(false)
+  | A.PreElabDerefExpr ptr -> A.PreElabDerefLVal (expToLVal ptr)
+  | A.PreElabArrayAccessExpr (arrayExpr, indexExpr) ->
+       A.PreElabArrayAccessLVal (expToLVal arrayExpr, indexExpr)
 		     
 %}
 
@@ -159,9 +167,9 @@ simp :
  | simpNoDecl               { $1 }  
    
 simpNoDecl :
-   lvalue asnop exp %prec ASNOP  { A.SimpAssign ($1, $2, $3) }
+   exp asnop exp %prec ASNOP  { A.SimpAssign (expToLVal $1, $2, $3) }
  | exp                           { A.SimpStmtExpr $1 }
- | lvalue postop		 { expand_postop $1 $2 }
+ | exp postop		 { expand_postop (expToLVal $1) $2 }
   ;
 
 postop :
@@ -219,33 +227,23 @@ arglist :
  | LPAREN exp arglistfollow RPAREN   { $2::$3 }	  
 ;
   
-lvalue :
-   IDENT                        { A.PreElabVarLVal $1 }
- | LPAREN lvalue RPAREN         { $2 }
- | lvalue DOT IDENT             { A.PreElabFieldLVal ($1, $3) }
- | STAR lvalue                  { A.PreElabDerefLVal $2 }
- | lvalue LBRACK exp RBRACK     { A.PreElabArrayAccessLVal ($1, $3) }
- | lvalue ARROW IDENT           { A.PreElabFieldLVal
-				    (A.PreElabDerefLVal $1, $3) }	  
- ;
-
-/* There's a shift/reduce conflict for something like
-   (lvalue | ) because do you reduce the lvalue into an exp first
-   and then do LPAREN exp RPAREN or do you shift RPAREN first and
-   and reduce via LPAREN lvalue RPAREN. But this should be ok,
-   because both ways lead to a correct parse. */
 exp :
+   LPAREN exp RPAREN { $2 }
  /* Pointer stuff */	
-   NULL	                         { A.PreElabNullExpr }
+ | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
  | ALLOC_ARRAY LPAREN c0type COMMA exp RPAREN
 	                       { A.PreElabArrayAlloc ($3, $5) }
+ | exp DOT IDENT               { A.PreElabFieldAccessExpr ($1, $3) }
+ | exp ARROW IDENT             { A.PreElabFieldAccessExpr
+				   (A.PreElabDerefExpr $1, $3) }
+ | exp LBRACK exp RBRACK       { A.PreElabArrayAccessExpr ($1, $3) }
+ | STAR exp                    { A.PreElabDerefExpr $2 }       
 
  /* Misc */       
  | IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
  | intconst                      { $1 }
  | boolconst                     { $1 } 
- | lvalue 			 { lvalToExp $1 }
  /* Int arithmetic */				 
  | exp PLUS exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.ADD, $3) }
