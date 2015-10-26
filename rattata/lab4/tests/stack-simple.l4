@@ -1,0 +1,45 @@
+struct stack_struct {
+   //We add on elements starting from 0. curr_idx represents the
+   //maxmimum index that has an element.
+   int curr_idx; 
+   int[] elems;
+   int size;
+   };
+
+typedef struct stack_struct* stack;
+
+stack empty_stack(int size) {
+   stack result = alloc(struct stack_struct);
+   result->curr_idx = -1;
+   result->elems = alloc_array(int, size);
+   result->size = size;
+   return result;
+   }
+
+int pop (stack s) {
+   int result = s->elems[s->curr_idx];
+   s->curr_idx--;
+   return result;
+   }
+
+void push (stack s, int x) {
+   if (s->curr_idx == s->size - 1) {
+      //stack is full, need to reallocate
+      stack new = empty_stack(s->size * 2);
+      while (s->curr_idx >= 0) {
+          push(new, pop(s));
+	  }
+      }
+   s->curr_idx++;
+   s->elems[s->curr_idx] = x;
+   }
+
+int main () {
+   stack s = empty_stack(2);
+   push(s, 4);
+   push(s, 6);
+   pop(s);
+   return pop(s);
+}
+
+   
