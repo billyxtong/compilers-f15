@@ -30,9 +30,9 @@ let rec expand_log_binop e1 op e2 =
      | _ -> failwith "this should only be called with logical binops"
 
 let rec expToLVal = function
-    A.PreElabConstExpr -> assert(false)
+    A.PreElabConstExpr _ -> assert(false)
   | A.PreElabNullExpr -> assert(false)
-  | A.PreElabIdentExpr id -> PreElabVarLVal IDENT
+  | A.PreElabIdentExpr id -> A.PreElabVarLVal id
   | A.PreElabBinop _ -> assert(false)
   | A.PreElabNot _ -> assert(false)
   | A.PreElabTernary _ -> assert(false)
@@ -167,7 +167,8 @@ simp :
  | simpNoDecl               { $1 }  
    
 simpNoDecl :
-   exp asnop exp %prec ASNOP  { A.SimpAssign (expToLVal $1, $2, $3) }
+   exp asnop exp %prec ASNOP  { let () = print_string("hi\n") in
+			 A.SimpAssign (expToLVal $1, $2, $3) }
  | exp                           { A.SimpStmtExpr $1 }
  | exp postop		 { expand_postop (expToLVal $1) $2 }
   ;
@@ -240,7 +241,8 @@ exp :
  | exp LBRACK exp RBRACK       { A.PreElabArrayAccessExpr ($1, $3) }
  | STAR exp                    { A.PreElabDerefExpr $2 }       
 
- /* Misc */       
+ /* Misc */
+ | IDENT                       { A.PreElabIdentExpr $1 }
  | IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
  | intconst                      { $1 }
  | boolconst                     { $1 } 
