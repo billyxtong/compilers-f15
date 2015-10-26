@@ -29,6 +29,10 @@ let rec expand_log_binop e1 op e2 =
      | A.LT -> A.PreElabBinop (e1, A.LT, e2)
      | _ -> failwith "this should only be called with logical binops"
 
+(* The following two functions are because we sometimes parse
+   lvals and c0types as exps in order to deal with conflicts.
+   Then afterwards, we convert the exps back to lvals/c0types,
+   throwing errors if we are unable to. *)		     
 let rec expToLVal = function
     A.PreElabConstExpr _ -> assert(false)
   | A.PreElabNullExpr -> assert(false)
@@ -44,6 +48,10 @@ let rec expToLVal = function
   | A.PreElabDerefExpr ptr -> A.PreElabDerefLVal (expToLVal ptr)
   | A.PreElabArrayAccessExpr (arrayExpr, indexExpr) ->
        A.PreElabArrayAccessLVal (expToLVal arrayExpr, indexExpr)
+
+let expToC0Type = function
+    A.PreElabIdentExpr id -> D.TypedefType id
+  | _ -> assert(false)					   
 		     
 %}
 
@@ -177,14 +185,18 @@ postop :
    PLUSPLUS                      { A.PLUSPLUS }
  | MINUSMINUS 	                 { A.MINUSMINUS }
     
-c0type :
+c0typeNotIdent :
    INT                           { D.INT }
  | BOOL 		         { D.BOOL }
  | VOID                          { D.VOID }
- | IDENT                         { D.TypedefType $1 }
  | c0type STAR                   { D.Pointer $1 }
- | c0type LBRACK RBRACK          { D.Array $1 }
- | STRUCT IDENT                  { D.Struct $2 }	  
+ | STRUCT IDENT                  { D.Struct $2 }
+
+c0type :
+   IDENT                         { D.TypedefType $1 }
+ | exp LBRACK RBRACK          { D.Array (expToC0Type $1) }       
+ | c0typeNotIdent LBRACK RBRACK          { D.Array $1 }
+ | c0typeNotIdent                { $1 }		  
      
 simpoptNoDecl :
    /* empty */                   { A.EmptySimp }
