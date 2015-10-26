@@ -1,4 +1,5 @@
-//test return 4
+//test return 3725
+//This one forces it to reallocate memory when the stack grows too large.
 
 struct stack_struct {
    //We add on elements starting from 0. curr_idx represents the
@@ -41,10 +42,15 @@ void push (stack s, int x) {
 
 int main () {
    stack s = empty_stack();
-   push(s,4);
-   push(s,6);
-   pop(s);
-   return pop(s);
+   int sum = 0;
+   int num_elems = 100;
+   for (int i = 0; i < num_elems; i++) {
+       push(s, i);
+       }
+   for (int i = 0; i < num_elems/2; i++) {
+       sum += pop(s);
+       }
+   return sum;
 }
 
    

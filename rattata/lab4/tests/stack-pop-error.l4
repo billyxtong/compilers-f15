@@ -1,4 +1,5 @@
-//test return 4
+//test memerror
+//too many pops!
 
 struct stack_struct {
    //We add on elements starting from 0. curr_idx represents the
@@ -43,6 +44,7 @@ int main () {
    stack s = empty_stack();
    push(s,4);
    push(s,6);
+   pop(s);
    pop(s);
    return pop(s);
 }

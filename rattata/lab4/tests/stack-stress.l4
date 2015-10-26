@@ -1,4 +1,5 @@
-//test return 4
+//test return -1443966272
+//Look, my stack is amortized constant! Also stress.
 
 struct stack_struct {
    //We add on elements starting from 0. curr_idx represents the
@@ -41,10 +42,15 @@ void push (stack s, int x) {
 
 int main () {
    stack s = empty_stack();
-   push(s,4);
-   push(s,6);
-   pop(s);
-   return pop(s);
+   int sum = 0;
+   int num_elems = 40000000;
+   for (int i = 0; i < num_elems; i++) {
+       push(s, i);
+       }
+   for (int i = 0; i < num_elems/100; i++) {
+       sum += pop(s);
+       }
+   return sum;
 }
 
    
