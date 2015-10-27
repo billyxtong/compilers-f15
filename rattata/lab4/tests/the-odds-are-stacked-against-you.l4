@@ -1,5 +1,5 @@
-//test return -1443966272
-//Look, my stack is amortized constant! Also stress.
+//test return -27548640
+//My stack is amortized constant, but how fast are your executables?
 
 struct stack_struct {
    //We add on elements starting from 0. curr_idx represents the
@@ -43,7 +43,7 @@ void push (stack s, int x) {
 int main () {
    stack s = empty_stack();
    int sum = 0;
-   int num_elems = 40000000;
+   int num_elems = 60000000;
    for (int i = 0; i < num_elems; i++) {
        push(s, i);
        }
