@@ -1,0 +1,13 @@
+//test typecheck
+//arrays of pointers
+
+int main(){
+  int* [] A = alloc_array(int*, 3);
+  int first = 0;
+  int second = 1;
+  int third = 2;
+  *A[0] = first;
+  *A[1] = second;
+  *A[2] = third;
+  return (*A[0] + *A[1]) / *A[2]; //return 0
+}

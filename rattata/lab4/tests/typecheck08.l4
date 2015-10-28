@@ -1,0 +1,10 @@
+//test typecheck
+//nested pointer dereference
+
+typedef int bloo;
+
+int main(){
+  bloo* y = alloc(int);
+  bloo* z = y;
+  return *z; //does this typecheck?
+}

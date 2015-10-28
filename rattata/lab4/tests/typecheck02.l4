@@ -1,0 +1,17 @@
+//test typecheck
+//basic arrays
+
+int main(){
+  int[] A = alloc_array(int, 5);
+  int[] B = alloc_array(int, 5); //B[i] = 0, 0 <= i <= 4
+  int* p = alloc(int);
+  *p = 3;
+  int x = 1;
+  int y = 2;
+  A[B[4]] = 0;                //A[0] = 0
+  A[(p == NULL) ? 6 : 1] = 1; //A[1] = 1
+  A[-B[x] + *p - 1] = 2;      //A[2] = 2
+  A[*p] = 3;                  //A[3] = 3
+  A[x+y] = 4;                 //A[4] = 4
+  return 0;
+}

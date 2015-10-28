@@ -1,0 +1,11 @@
+//test typecheck
+//basic allocation with a typedef and postop
+
+typedef int y;
+
+int main(){
+  int x = 4;
+  y* p = alloc(y);
+  *p = x;
+  return (*p)+1;
+}

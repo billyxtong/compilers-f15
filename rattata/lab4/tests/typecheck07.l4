@@ -1,0 +1,21 @@
+//test typecheck
+//arrays of structs
+
+struct s {
+  bool b1;
+  bool b2;
+};
+
+typedef struct s str;
+
+int main(){
+  int x = 2;
+  int* ptr = alloc(int);
+  *ptr = x;
+  str*[] A = alloc_array(str*, (*ptr << 1));
+  for (int i = 0; i < 4; i++) {
+    A[i]->b1 = true;
+    A[i]->b2 = false;
+  }
+  return ((*A[2]).b1 && A[3]->b2) ? 4 : 3; //returns 3
+}

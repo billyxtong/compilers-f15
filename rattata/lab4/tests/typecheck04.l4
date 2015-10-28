@@ -1,0 +1,20 @@
+//test typecheck
+//functions with side effects
+
+int sideEffects(int[] A, int* B) {
+  A[0] += 1;
+  *B -= 2;
+  return 0;
+}
+
+int main(){
+  int[] A = alloc_array(int, 3);
+  int b = 5;
+  int* B = alloc(int);
+  *B = b;
+  A[sideEffects(A,B)] *= 2; //A[0] = 2, *B = 3 
+  A[sideEffects(A,B) + 1] = //A[0] = 3, *B = 1
+    A[sideEffects(A,B)] * 5; //A[0] = 4, *B = -1
+  //A[1] = 20
+  return A[-2 * *B]; //should return 20...
+}

@@ -1,0 +1,20 @@
+//test div-by-zero
+
+typedef int poop;
+
+poop f(poop*[] A){
+  (*A[2]) = 0;
+  return 4;
+}
+
+poop main(){
+  poop* [] A = alloc_array(int*, 5);
+  poop* i = alloc(poop);
+  *i = 0;
+  while((*i) < 5) {
+    (*A[*i]) = *i;
+    (*i) = (*i)+1;
+  }
+  A[f(A)];
+  return (*A[4]) % (*A[2]);
+}

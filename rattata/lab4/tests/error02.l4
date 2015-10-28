@@ -1,0 +1,9 @@
+//test error
+//allocating with the wrong types
+
+int main(){
+  bool* A0 = alloc_array(bool, 5);
+  int[][] A1 = alloc_array(int, 6);
+  int*** A2 = alloc(int*);
+  return 0;
+}

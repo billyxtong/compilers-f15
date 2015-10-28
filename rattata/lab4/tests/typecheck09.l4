@@ -1,0 +1,25 @@
+//test typecheck
+//standing expressions and uninitialized fields
+
+typedef struct s str;
+
+struct s {
+  int f0;
+  bool f1;
+  str* f2;
+};
+
+
+
+int main(){
+  int[] A = alloc_array(int, 5);
+  bool* p = alloc(bool);
+  str* s0 = alloc(str);
+  str* s1 = alloc(str);
+  s0->f0;
+  (*s1).f1;
+  s0->f2 = s1;
+  A[s1->f0];
+  s1->f0 = A[s0->f0];
+  return A[4];
+}

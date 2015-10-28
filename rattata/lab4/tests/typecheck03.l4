@@ -1,0 +1,25 @@
+//test typecheck
+//structs and nested pointer dereferences
+
+struct s0 {
+  int f0;
+  int* f1;
+};
+
+typedef struct s0 str0;
+
+struct s1 {
+  str0* f;
+};
+
+typedef struct s1 str1;
+
+int main(){
+  str0* ptr0 = alloc(str0);
+  int x = 4;
+  ptr0->f0 = 4;
+  *(ptr0->f1) = x;
+  str1* ptr1 = alloc(str1);
+  (*ptr1).f = ptr0;
+  return *((*(ptr1->f)).f1);
+}
