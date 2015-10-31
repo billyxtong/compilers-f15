@@ -66,6 +66,8 @@ type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const
 (* Two Address Code *)
 type tmpBoolInstr = TmpTest of tmpArg * tmp
+                   (* No ands between pointers, so test is always
+                      32-bit *)
                   | TmpCmp of size * tmpArg * tmp
 type tmp2AddrBinop = intBinop * tmpArg * tmp
 type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
@@ -76,7 +78,7 @@ type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
                     (* tmp option because voids have no dest *)
-                   | Tmp2AddrFunCall of ident * tmpArg list * tmp option
+                   | Tmp2AddrFunCall of size * ident * tmpArg list * tmp option
 type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmp list *
                                         tmp2AddrInstr list
 type tmp2AddrProg = tmp2AddrFunDef list
@@ -94,7 +96,7 @@ type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg *  tmp
                   (* function name, arg list, dest. Dest is an
                   option because void function don't need to move
                   the result anywhere *)
-                   | Tmp3AddrFunCall of ident * tmpArg list * tmp option
+                   | Tmp3AddrFunCall of size * ident * tmpArg list * tmp option
                (* alloc, alloc_array become call malloc *)
 type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmp list *
                                         tmp3AddrInstr list

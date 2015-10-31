@@ -3,6 +3,10 @@ open String
 open Ast
 let identToString(i : ident) = i
 
+let sizeToString = function
+      BIT32 -> "(32-bit)"
+    | BIT64 -> "(64-bit)"
+
 let rec c0typeToString (c : c0type) =
   match c with
         INT -> "int"
@@ -187,7 +191,8 @@ let tmp2AddrBinopToString((binop, arg, temp) : tmp2AddrBinop) =
      
 let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) = 
   match tmp2instr with
-        Tmp2AddrMov(s, arg, temp) -> concat "" [tmpToString(temp); " <-- "; 
+        Tmp2AddrMov(s, arg, temp) -> concat "" [tmpToString(temp); " <--";
+                                                sizeToString s; " ";
                                       tmpArgToString(arg)]
       | Tmp2AddrPtrBinop(op,arg,temp) -> 
           (match op with
@@ -199,14 +204,15 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
                             tmpToString(temp)])
       | Tmp2AddrBinop(tmpbinop) -> tmp2AddrBinopToString(tmpbinop)
       | Tmp2AddrReturn(s, tmparg) -> 
-            concat "" ["return "; tmpArgToString(tmparg)]
+            concat "" ["return"; sizeToString s; " "; tmpArgToString(tmparg)]
       | Tmp2AddrJump(jumpinstr) -> jumpInstrToString(jumpinstr)
       | Tmp2AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
       | Tmp2AddrLabel(l) -> labelToString(l)
-      | Tmp2AddrFunCall(i,args,tmpOpt) ->
+      | Tmp2AddrFunCall(s, i,args,tmpOpt) ->
           let thing = identToString(i) ^ "(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
           (match tmpOpt with
-                 Some t -> tmpToString(t) ^ " <--" ^ thing
+                 Some t -> tmpToString(t) ^ " <--" ^ sizeToString s
+                             ^ " " ^ thing
                | None -> thing)
 
 let tmp2AddrFunDefToString (Tmp2AddrFunDef (i,temps,instrList)) =
@@ -225,7 +231,7 @@ let tmp3AddrBinopToString((binop, arg1, arg2, temp) : tmp3AddrBinop) =
 let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) = 
   match tmp3instr with
         Tmp3AddrMov(s, arg, temp) -> 
-            concat "" [tmpToString(temp); " <-- "; 
+            concat "" [tmpToString(temp); " <--"; sizeToString s; " "; 
             tmpArgToString(arg)]
       | Tmp3AddrPtrBinop(op,arg,temp) -> 
           (match op with
@@ -241,10 +247,11 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
       | Tmp3AddrJump(jumpinstr) -> jumpInstrToString(jumpinstr)
       | Tmp3AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
       | Tmp3AddrLabel(l) -> labelToString(l)
-      | Tmp3AddrFunCall(i,args,tmpOpt) ->
+      | Tmp3AddrFunCall(s, i,args,tmpOpt) ->
           let thing = identToString(i) ^ "(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
           (match tmpOpt with
-                 Some t -> tmpToString(t) ^ " <--" ^ thing
+                 Some t -> tmpToString(t) ^ " <--" ^ sizeToString s
+                           ^ " " ^ thing
                | None -> thing)
 
 let tmp3AddrFunDefToString (Tmp3AddrFunDef (i,temps,instrList)) =
@@ -303,15 +310,19 @@ and tmpExprToString(tExpr : tmpExpr) =
 and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =
   match tInstr with
         TmpInfAddrTest(bExpr1, bExpr2) -> concat "" ["test "; tmpBoolExprToString(bExpr1); ", "; tmpBoolExprToString(bExpr2)]
-      | TmpInfAddrCmp(s, iExpr1, iExpr2) -> concat "" ["cmp "; tmpExprToString(iExpr1); ", "; tmpExprToString(iExpr2)]
+      | TmpInfAddrCmp(s, iExpr1, iExpr2) ->
+            concat "" ["cmp"; sizeToString s; " "; tmpExprToString(iExpr1);
+                       ", "; tmpExprToString(iExpr2)]
 
 let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
   match t with
-        TmpInfAddrMov(s, tExpr,t) -> concat "" [tmpToString(t); " <-- "; tmpExprToString(tExpr)]
+        TmpInfAddrMov(s, tExpr,t) -> concat "" [tmpToString(t); " <--";
+                                sizeToString s; " "; tmpExprToString(tExpr)]
       | TmpInfAddrJump(jInstr) -> jumpInstrToString(jInstr)
       | TmpInfAddrBoolInstr(bInstr) -> tmpInfAddrBoolInstrToString(bInstr)
       | TmpInfAddrLabel(l) -> labelToString(l)
-      | TmpInfAddrReturn(s, tExpr) -> concat "" ["return "; tmpExprToString(tExpr)]
+      | TmpInfAddrReturn(s, tExpr) -> concat "" ["return"; sizeToString s;
+                                                 " "; tmpExprToString(tExpr)]
       | TmpInfAddrVoidFunCall(i,args) ->
           identToString(i) ^ "(" ^ (concat "," (List.map tmpExprToString args)) ^ ")"
 
