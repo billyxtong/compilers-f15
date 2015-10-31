@@ -167,7 +167,6 @@ and handleArrayAccess elemType ptrExp indexExpr =
            handleMemForExpr (TmpPtrExpr ptrExp) in
        let (TmpIntExpr index_final, index_instrs) =
            handleMemForExpr (TmpIntExpr indexExpr) in
-       let elemSize = getSizeForType elemType in
        (* The number of elems is stored at the address ptr_final - 8 *)
        let numElemsPtr = TmpInfAddrPtrBinop(PTR_SUB, ptr_final,
                                             TmpIntArg (TmpConst 8)) in
@@ -190,7 +189,7 @@ and handleArrayAccess elemType ptrExp indexExpr =
                               TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
        let accessOffsetExpr = TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (getSizeForType elemType)),
-                                              numElemsExpr) in
+                                      index_final) in
        let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD, ptr_final,
                                               accessOffsetExpr) in
        let doTheAccess = makeAccessInstr elemType resultTmp accessPtrExpr in
@@ -205,6 +204,7 @@ and handleArrayAccess elemType ptrExp indexExpr =
 let handleMemForInstr = function
       TmpInfAddrJump j -> TmpInfAddrJump j::[]
     | TmpInfAddrLabel lbl -> TmpInfAddrLabel lbl::[]
+    | _ -> assert(false)                                                  
       
 
 let handleMemForFunDef (fName, tmpParams, instrs) =
