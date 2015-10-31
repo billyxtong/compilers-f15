@@ -194,14 +194,12 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
         Tmp2AddrMov(s, arg, temp) -> concat "" [tmpToString(temp); " <--";
                                                 sizeToString s; " ";
                                       tmpArgToString(arg)]
-      | Tmp2AddrPtrBinop(op,arg,temp) -> 
+      | Tmp2AddrPtrBinop(op, c, temp) -> 
           (match op with
-                 PTR_ADD -> concat "" ["addq "; 
-                            tmpArgToString(arg); ", ";
-                            tmpToString(temp)]
-               | PTR_SUB -> concat "" ["subq "; 
-                            tmpArgToString(arg); ", ";
-                            tmpToString(temp)])
+                 PTR_ADD -> concat "" [tmpToString temp; " <-- ";
+                                 tmpToString temp; "addq "; constToString c]
+               | PTR_SUB -> concat "" [tmpToString temp; " <-- ";
+                                 tmpToString temp; "subq "; constToString c])
       | Tmp2AddrBinop(tmpbinop) -> tmp2AddrBinopToString(tmpbinop)
       | Tmp2AddrReturn(s, tmparg) -> 
             concat "" ["return"; sizeToString s; " "; tmpArgToString(tmparg)]
@@ -233,14 +231,12 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
         Tmp3AddrMov(s, arg, temp) -> 
             concat "" [tmpToString(temp); " <--"; sizeToString s; " "; 
             tmpArgToString(arg)]
-      | Tmp3AddrPtrBinop(op,arg,temp) -> 
+      | Tmp3AddrPtrBinop(op, ptr_arg, c, temp) -> 
           (match op with
-                 PTR_ADD -> concat "" ["addq "; 
-                            tmpArgToString(arg); ", ";
-                            tmpToString(temp)]
-               | PTR_SUB -> concat "" ["subq "; 
-                            tmpArgToString(arg); ", ";
-                            tmpToString(temp)])
+                 PTR_ADD -> concat "" [tmpToString(temp); "<-- ";
+                            tmpArgToString(ptr_arg); "addq "; constToString c] 
+               | PTR_SUB -> concat "" [tmpToString(temp); "<-- ";
+                            tmpArgToString(ptr_arg); "subq "; constToString c])
       | Tmp3AddrBinop(tmpbinop) -> tmp3AddrBinopToString(tmpbinop)
       | Tmp3AddrReturn(s, tmparg) -> 
             concat "" ["return "; tmpArgToString(tmparg)]

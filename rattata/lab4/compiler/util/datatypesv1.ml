@@ -71,8 +71,9 @@ type tmpBoolInstr = TmpTest of tmpArg * tmp
                   | TmpCmp of size * tmpArg * tmp
 type tmp2AddrBinop = intBinop * tmpArg * tmp
 type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
-                   | Tmp2AddrPtrBinop of ptrBinop * tmpArg * tmp
+                   | Tmp2AddrPtrBinop of ptrBinop * const * tmp
                    | Tmp2AddrBinop of tmp2AddrBinop
+                 (* PtrBinops can only be ptr + const, ptr - const *)
                    | Tmp2AddrReturn of size * tmpArg
                    | Tmp2AddrJump of jumpInstr
                    | Tmp2AddrBoolInstr of tmpBoolInstr
@@ -87,7 +88,8 @@ type tmp2AddrProg = tmp2AddrFunDef list
 type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp
 type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg *  tmp
                 (* ptr derefences are subsumed by mov *)
-                   | Tmp3AddrPtrBinop of ptrBinop * tmpArg * tmp
+                   | Tmp3AddrPtrBinop of ptrBinop * tmpArg * const * tmp
+                 (* PtrBinops can only be ptr + const, ptr - const *)
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn of size * tmpArg
                    | Tmp3AddrJump of jumpInstr
