@@ -68,6 +68,7 @@ and munch_exp d e depth =
          let t = if depth > 0 then Tmp (Temp.create()) else d in
          (munch_ptr_binop t (op, e1, e2) (depth + 1),
           TmpLoc t)
+   | _ -> assert(false)
 
 
 and munch_ptr_binop d (ptr_binop, e1, e2) depth =
@@ -118,7 +119,9 @@ let munch_instr = function
   | TmpInfAddrVoidFunCall (fName, args) -> 
        let (instrs, dests) = munch_fun_args args in
        (* The None means no destination for fun call *)
-       instrs @ Tmp3AddrFunCall(fName, dests, None)::[]
+       (* VoidFunCalls don't have sizes so we'll just say 32-bit
+          because w/e *)
+       instrs @ Tmp3AddrFunCall(BIT32, fName, dests, None)::[]
            
 let rec finalPass = function
     [] -> []
