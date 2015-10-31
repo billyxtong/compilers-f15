@@ -46,8 +46,6 @@ and munch_exp d e depth =
          let t = if depth > 0 then Tmp (Temp.create()) else d in
          (munch_int_binop t (int_binop, int_e1, int_e2) (depth + 1),
           TmpLoc t)
-         (* Note: no nested bool exps because we unwrap them all in
-            toInfAddr! *)
    | TmpIntExpr (TmpIntArg e) -> ([], e)
        (* Int and Bool function calls are identical from now on, I think *)
    | TmpIntExpr (TmpIntSharedExpr (TmpInfAddrFunCall (fName, args))) ->
@@ -55,6 +53,8 @@ and munch_exp d e depth =
        let (instrs, dests) = munch_fun_args args in
        (instrs @ Tmp3AddrFunCall (BIT32, fName, dests, Some t)::[], TmpLoc t)
    | TmpBoolExpr (TmpBoolArg e) -> ([], e)
+         (* Note: no nested bool exps because we unwrap them all in
+            toInfAddr! *)
    | TmpBoolExpr (TmpBoolSharedExpr (TmpInfAddrFunCall (fName, args))) ->
        let t = Tmp (Temp.create()) in
        let (instrs, dests) = munch_fun_args args in
@@ -64,13 +64,16 @@ and munch_exp d e depth =
        let (instrs, dests) = munch_fun_args args in
        (instrs @ Tmp3AddrFunCall (BIT64, fName, dests, Some t)::[], TmpLoc t)
    | TmpPtrExpr (TmpPtrArg e) -> ([], e)
-   (* | TmpPtrExpr (TmpInfAddrPtrBinop (op, e1, e2)) ->        *)
+   | TmpPtrExpr (TmpInfAddrPtrBinop (op, e1, e2)) ->
+         let t = if depth > 0 then Tmp (Temp.create()) else d in
+         (munch_ptr_binop t (op, e1, e2) (depth + 1),
+          TmpLoc t)
 
 
 and munch_ptr_binop d (ptr_binop, e1, e2) depth =
    let (instrs1, dest1) = munch_exp d (TmpPtrExpr e1) depth in
    let (instrs2, dest2) = munch_exp d (TmpPtrExpr e1) depth in
-   instrs1 @ instrs2 @ [Tmp3AddrPtrBinop (ptr_binop, 
+   instrs1 @ instrs2 @ [Tmp3AddrPtrBinop (ptr_binop, dest1, dest2, d)] 
 
 
 (* Note: all bool binops are removed in toInfAddr because we
