@@ -4,11 +4,11 @@
  * Authors: Ben Plaut, William Tong
  *)
  
-open Core.Std
-
 module A = Ast
 module D = Datatypesv1
-
+module H = Hashtbl
+open Core.Std
+       
 let expand_postop lval op =
     match op with
        A.PLUSPLUS -> A.SimpAssign(lval, A.PLUSEQ,
@@ -64,6 +64,8 @@ let expToC0Type = function
 %token <Int32.t> DECCONST
 %token <Int32.t> HEXCONST
 %token <string> IDENT
+%token <string> VAR_IDENT
+%token <string> TYPEDEF_IDENT
 %token RETURN
 %token INT
 %token TYPEDEF
@@ -123,29 +125,34 @@ gdecl :
   | sdef                       { $1 }			       
 
 fdecl :
-    c0type IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3) }
+    c0type VAR_IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3) }
 
 fdefn :
-    c0type IDENT paramlist block { A.FunDef ($1, $2, $3, $4) }
+    c0type VAR_IDENT paramlist block { A.FunDef ($1, $2, $3, $4) }
 
 typedef :
-    TYPEDEF c0type IDENT SEMI         { A.Typedef ($2, $3) }
+    TYPEDEF c0type VAR_IDENT SEMI    { let () = H.add
+		                       ParseUtil.parsingTypedefMap $3 () in
+				       A.Typedef ($2, $3) }
 
 sdecl :
-    STRUCT IDENT SEMI         { A.PreElabStructDecl $2 }
+    STRUCT VAR_IDENT SEMI         { A.PreElabStructDecl $2 }
 
 sdef :
-    STRUCT IDENT LBRACE fieldlist RBRACE SEMI { A.PreElabStructDef ($2, $4) }
+    STRUCT VAR_IDENT LBRACE fieldlist RBRACE SEMI { A.PreElabStructDef ($2, $4) }
 
 field :
-    c0type IDENT         { ($1, $2) }
+/* Apparently you can actually have typedef'd ids still be the names of
+     struct fields */
+    c0type VAR_IDENT         { ($1, $2) }
+  | c0type TYPEDEF_IDENT         { ($1, $2) }
 
 fieldlist :
     /* empty */          { [] }
   | field fieldlist      { $1::$2 }
 	    
 param :
-    c0type IDENT            { ($1, $2) }
+    c0type VAR_IDENT            { ($1, $2) }
 
 paramlistfollow :
     /* empty */             { [] }
@@ -190,10 +197,10 @@ c0typeNotIdent :
  | BOOL 		         { D.BOOL }
  | VOID                          { D.VOID }
  | c0type STAR                   { D.Pointer $1 }
- | STRUCT IDENT                  { D.Struct $2 }
+ | STRUCT VAR_IDENT                  { D.Struct $2 }
 
 c0type :
-   IDENT                         { D.TypedefType $1 }
+   TYPEDEF_IDENT                         { D.TypedefType $1 }
  | exp LBRACK RBRACK          { D.Array (expToC0Type $1) }       
  | c0typeNotIdent LBRACK RBRACK          { D.Array $1 }
  | c0typeNotIdent                { $1 }		  
@@ -222,12 +229,8 @@ control :
  | ASSERT LPAREN exp RPAREN SEMI      { A.PreElabAssert $3 }	  
 	  
 decl :
-   c0type IDENT                     { A.NewVar ($2, $1)}
- | c0type IDENT ASSIGN exp         { A.Init ($2, $1, $4) }
-	  /*
- | c0type MAIN                     { A.NewVar ("main", $1) }
- | c0type MAIN ASSIGN exp          { A.Init ("main", $1, $4) }
-	  */
+   c0type VAR_IDENT                     { A.NewVar ($2, $1)}
+ | c0type VAR_IDENT ASSIGN exp         { A.Init ($2, $1, $4) }
  ;
 
 arglistfollow :
@@ -247,15 +250,19 @@ exp :
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
  | ALLOC_ARRAY LPAREN c0type COMMA exp RPAREN
 	                       { A.PreElabArrayAlloc ($3, $5) }
- | exp DOT IDENT               { A.PreElabFieldAccessExpr ($1, $3) }
- | exp ARROW IDENT             { A.PreElabFieldAccessExpr
+/* For some reason, struct field names can also be typedef'd ids */
+ | exp DOT VAR_IDENT               { A.PreElabFieldAccessExpr ($1, $3) }
+ | exp ARROW VAR_IDENT             { A.PreElabFieldAccessExpr
+				   (A.PreElabDerefExpr $1, $3) }
+ | exp DOT TYPEDEF_IDENT               { A.PreElabFieldAccessExpr ($1, $3) }
+ | exp ARROW TYPEDEF_IDENT             { A.PreElabFieldAccessExpr
 				   (A.PreElabDerefExpr $1, $3) }
  | exp LBRACK exp RBRACK       { A.PreElabArrayAccessExpr ($1, $3) }
  | STAR exp                    { A.PreElabDerefExpr $2 }       
 
  /* Misc */
- | IDENT                       { A.PreElabIdentExpr $1 }
- | IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
+ | VAR_IDENT                       { A.PreElabIdentExpr $1 }
+ | VAR_IDENT arglist                 { A.PreElabFunCall ($1, $2) }	 
  | intconst                      { $1 }
  | boolconst                     { $1 } 
  /* Int arithmetic */				 

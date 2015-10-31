@@ -8,7 +8,10 @@ open String
 
 let generalBinopToString(op : generalBinop) = 
   match op with
-        IntBinop(i) -> intBinopToString(i)
+     (* I want mul to be printed differently so that I know that
+        I'm handling the x*y parsing correctly *)
+        IntBinop(MUL) -> " mul "
+      | IntBinop(i) -> intBinopToString(i)
       | DOUBLE_EQ -> " == "
       | GT -> " > "
       | LT -> " < "
