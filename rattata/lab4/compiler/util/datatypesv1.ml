@@ -2,7 +2,8 @@
    error :( *)
 type c0type = INT | BOOL | VOID | TypedefType of ident | Pointer of c0type
             | Array of c0type
-            | Struct of ident 
+            | Struct of ident
+            | Poop (* for null pointer polymorphism *) 
 and ident = string
 (* everything in c0 is an int! *)              
 type const = int

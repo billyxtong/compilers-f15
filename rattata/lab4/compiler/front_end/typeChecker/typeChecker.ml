@@ -12,13 +12,13 @@ open String
 module H = Hashtbl
 open PrintDatatypes
 open PrintASTs
+open TcExprs
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 
-let blockCounter : int ref = ref 0
-
 let functionMap = ref Core.Std.String.Map.empty
 let typedefMap = ref Core.Std.String.Map.empty
+let structMap = ref Core.Std.String.Map.empty
 
 let isValidVarDecl (identifier : ident) = 
   if sub identifier 0 1 = "\\" 
@@ -57,8 +57,8 @@ let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
           if ((pType = INT && paramType = INT) || (pType = BOOL && paramType = BOOL))
           then matchParamListTypes ps remainingParams else false
 
-let matchFuncTypes funcType1 funcType2  =
-  if (lowestTypedefType funcType1 ) = (lowestTypedefType funcType2 )
+let matchFuncTypes (funcType1 : c0type) (funcType2 : c0type) =
+  if (lowestTypedefType funcType1) = (lowestTypedefType funcType2)
   then true else false
 
 let rec uniqueParamNames (params : param list) nameTable =
@@ -69,91 +69,6 @@ let rec uniqueParamNames (params : param list) nameTable =
                  (None, None) -> uniqueParamNames ps (M.add nameTable datName ())
                | _ -> false)
 
-
-let rec tc_expression varEnv (expression : untypedPostElabExpr) =
-  match expression with
-    UntypedPostElabConstExpr (constant, typee) -> 
-      (match typee with
-             INT -> IntExpr(IntConst(constant))
-           | BOOL -> BoolExpr(BoolConst(constant)))
-  | UntypedPostElabIdentExpr id -> 
-      (match M.find varEnv id with (* is it declared? *)
-                   Some(typee, isInitialized) -> 
-                     (if isInitialized (* declared and initialized, all good *)
-                      then (match typee with
-                                  INT -> IntExpr(IntIdent(id))
-                                | BOOL -> BoolExpr(BoolIdent(id))
-                                | _ -> (ErrorMsg.error ("bad type " ^ id ^ "\n");
-                                        raise ErrorMsg.Error))
-                      else (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
-                            raise ErrorMsg.Error))
-                 | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
-                            raise ErrorMsg.Error))
-  | UntypedPostElabBinop (e1, op, e2) -> 
-      let tcExpr1 = tc_expression varEnv e1 in
-      let tcExpr2 = tc_expression varEnv e2 in
-      (match op with
-             GT -> (match (tcExpr1, tcExpr2) with
-                          (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(GreaterThan(exp1, exp2))
-                        | _ -> (ErrorMsg.error ("greater than expression didn't typecheck \n");
-                               raise ErrorMsg.Error))
-           | LT -> (match (tcExpr1, tcExpr2) with
-                          (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(LessThan(exp1, exp2))
-                        | _ -> (ErrorMsg.error ("less than expression didn't typecheck \n");
-                               raise ErrorMsg.Error))
-           | DOUBLE_EQ -> 
-               (match (tcExpr1, tcExpr2) with
-                      (IntExpr(exp1), IntExpr(exp2)) -> BoolExpr(IntEquals(exp1, exp2))
-                    | (BoolExpr(exp1), BoolExpr(exp2)) -> BoolExpr(BoolEquals(exp1, exp2))
-                    | _ -> (ErrorMsg.error ("double equals expressions didn't typecheck \n");
-                           raise ErrorMsg.Error))
-           | LOG_AND -> (match (tcExpr1, tcExpr2) with
-                               (BoolExpr(exp1), BoolExpr(exp2)) -> BoolExpr(LogAnd(exp1, exp2))
-                             | _ -> (ErrorMsg.error ("logical and expressions didn't typecheck \n");
-                                    raise ErrorMsg.Error))
-           | IntBinop(intOp) -> (match (tcExpr1, tcExpr2) with
-                          (IntExpr(exp1), IntExpr(exp2)) -> IntExpr(ASTBinop(exp1, intOp, exp2))
-                        | _ -> (ErrorMsg.error ("int binop expressions didn't typecheck \n");
-                               raise ErrorMsg.Error)))
-  | UntypedPostElabNot e' -> 
-      let tcExpr = tc_expression varEnv e' in
-      (match tcExpr with
-             BoolExpr(exp1) -> BoolExpr(LogNot(exp1))
-           | _ -> ErrorMsg.error ("not expression didn't typecheck \n");
-                  raise ErrorMsg.Error)
-  | UntypedPostElabTernary(e1, e2, e3) ->
-      let tcExpr1 = tc_expression varEnv e1 in
-      let tcExpr2 = tc_expression varEnv e2 in
-      let tcExpr3 = tc_expression varEnv e3 in
-      (match (tcExpr1, tcExpr2, tcExpr3) with
-             (BoolExpr(exp1), IntExpr(exp2), IntExpr(exp3)) -> IntExpr(IntTernary(exp1, exp2, exp3))
-           | (BoolExpr(exp1), BoolExpr(exp2), BoolExpr(exp3)) -> BoolExpr(BoolTernary(exp1, exp2, exp3))
-           | _ -> (ErrorMsg.error ("ternary expression didn't typecheck \n");
-                  raise ErrorMsg.Error))
-  | UntypedPostElabFunCall(i, argList) -> 
-      (match (M.find varEnv i, M.find !functionMap i) with
-             (Some _, _) -> (ErrorMsg.error ("cannot call this function while var with same name is in scope \n");
-                             raise ErrorMsg.Error)
-           | (None, Some(funcType, funcParams, isDefined, isExternal)) -> 
-               let () = (if not isDefined 
-                         then H.replace declaredAndUsedButUndefinedFunctionTable i ()
-                         else ()) in
-               let typedArgs = List.map (tc_expression varEnv) argList in
-               let newFuncName = if isExternal then i else "_c0_" ^ i in
-               (* internal functions must be called with prefix _c0_ *)
-               if (argsMatch typedArgs funcParams) then 
-               (match funcType with
-                      INT -> IntExpr(IntFunCall(newFuncName, typedArgs))
-                    | BOOL -> BoolExpr(BoolFunCall(newFuncName, typedArgs))
-                    | VOID -> VoidExpr(VoidFunCall(newFuncName, typedArgs))
-                    | TypedefType(_) -> 
-                        (ErrorMsg.error ("shouldn't get here; 
-                                          functions should have lowest typedef type \n");
-                         raise ErrorMsg.Error))
-               else (ErrorMsg.error ("parameters don't typecheck \n");
-                     raise ErrorMsg.Error)
-           | _ -> (ErrorMsg.error ("function doesn't exist \n");
-                   raise ErrorMsg.Error))
 
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
 let rec tc_header (header : untypedPostElabAST) = 

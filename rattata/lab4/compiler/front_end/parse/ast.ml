@@ -20,8 +20,23 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
                     | FieldAccess of ident * ptrExpr * ident
-                       (* first ident: type name of struct 
-                        * second ident: actual struct pointer *)
+                       (* first ident: type name of struct
+                        * ptrExpr: the pointer expression 
+                        * second ident: actual struct field
+                        *
+                        * example: p->x where p is a struct s*. 
+                        * first ident: s
+                        * ptrExpr: PtrSharedExpr(Ident(p))
+                        * second ident: x
+                        *
+                        * example: p->q->x, where p is a struct s0*, 
+                        *                         s0 has a field s1* q,
+                        *                         and s1 has a field x.
+                        *
+                        * first ident: s1
+                        * ptrExpr: PtrSharedExpr(FieldAccess(s0, PtrSharedExpr(Ident(p)), q))
+                        * second ident: x
+                        * *)
                     | ArrayAccess of ptrExpr * intExpr
    (* intExpr is the index, not the mem offset. We can get the mem offset
       because we know the type of the array based on what
