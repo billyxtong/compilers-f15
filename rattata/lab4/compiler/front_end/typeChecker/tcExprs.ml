@@ -143,18 +143,20 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
       match (typedExp, typee) with
             (PtrExpr(PtrSharedExpr(Deref(p))), Struct(structName)) -> 
               (match M.find structMap structName with
-                     Some fieldMap -> 
+                     Some fieldMap -> (* in structMap, struct names point to a table of their fields
+                                         in fieldMap, field names point to their type *)
                        (match M.find fieldMap fieldName with
-                              Some _ -> (* need to do this *)
+                              Some fieldType ->
+                                (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType)
                             | None -> (ErrorMsg.error ("struct " ^ structName ^ 
                                                     " has no field with name " 
                                                     ^ fieldName ^ "\n");
                                        raise ErrorMsg.Error))
                    | None -> (ErrorMsg.error ("no struct with name " ^ structName ^ "\n");
                               raise ErrorMsg.Error))
-          | _ -> (ErrorMsg.error ("not of the form *structPtr.fieldName\n");
+          | _ -> (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
                   raise ErrorMsg.Error)
-  | UntypedPostElabAlloc(t) -> (PtrExpr(Alloc(t)), Pointer(t))
+  | UntypedPostElabAlloc(t : c0type) -> (PtrExpr(Alloc(t)), Pointer(t))
   | UntypedPostElabDerefExpr(e)  ->
       let (typedExp, typee) = tc_expression varEnv e in
       (match (typedExp, typee) with
@@ -164,24 +166,24 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
   | UntypedPostElabArrayAlloc(c,e)  ->
-      let (typedExp, _) = tc_expression varEnv e in
-      (match typedExp with
+      let (typedExpr, _) = tc_expression varEnv e in
+      (match typedExpr with
              IntExpr(i) -> (PtrExpr(AllocArray(c,i)), Array(c))
            | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
                   raise ErrorMsg.Error))
   | UntypedPostElabArrayAccessExpr(e1,e2)  -> 
       let (typedExp1, type1) = tc_expression varEnv e1 in
       (match type1 with
-            Array(c) -> 
-              let (typedExp2, type2) = tc_expression varEnv e2 in
-              (match (typedExp1, typedExp2) with
-                     (PtrExpr(p), IntExpr(i)) -> 
-                       (match p with
-                              Null -> (ErrorMsg.error ("can't have a null array\n");
-                                       raise ErrorMsg.Error)
-                            | Alloc(_) -> (ErrorMsg.error ("can't access ptrs like arrays\n");
-                                   raise ErrorMsg.Error)
-                            | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), c)))
-          | _ -> (ErrorMsg.error ("not an array\n");
+             Array(c) -> 
+               let (typedExp2, type2) = tc_expression varEnv e2 in
+               (match (typedExp1, typedExp2) with
+                      (PtrExpr(p), IntExpr(i)) -> 
+                         (match p with
+                                Null -> (ErrorMsg.error ("can't have a null array\n");
+                                         raise ErrorMsg.Error)
+                              | Alloc(_) -> (ErrorMsg.error ("can't access ptrs like arrays\n");
+                                             raise ErrorMsg.Error)
+                              | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), c)))
+          | _ -> (ErrorMsg.error ("first expr not an array\n");
                   raise ErrorMsg.Error))
 
