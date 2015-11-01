@@ -121,10 +121,13 @@ and handleMemForExpr = function
        (* Remember! We allocate an extra 8 bytes and store the length
           in the address p - 8, where p is the address we return here. *)
       (* Not sure if we need to deal with initializing memory here? *)
-       let sizeForMalloc = getSizeForType elemType + 8 in 
-       (TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
-             TmpIntExpr (TmpIntArg (TmpConst sizeForMalloc))::[]))),
-              [])
+       let spaceForLength = 8 in
+       let sizeForMalloc = getSizeForType elemType + spaceForLength in 
+       let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
+             [TmpIntExpr (TmpIntArg (TmpConst sizeForMalloc))])) in
+       let finalExpr = TmpPtrExpr (PTR_ADD, funCallExpr,
+                                   TmpIntArg (TmpConst spaceForLength)) in
+       (finalExpr, [])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
     | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
@@ -204,7 +207,6 @@ and handleArrayAccess elemType ptrExp indexExpr =
 let handleMemForInstr = function
       TmpInfAddrJump j -> TmpInfAddrJump j::[]
     | TmpInfAddrLabel lbl -> TmpInfAddrLabel lbl::[]
-    | _ -> assert(false)                                                  
       
 
 let handleMemForFunDef (fName, tmpParams, instrs) =
