@@ -16,6 +16,8 @@ let rec c0typeToString (c : c0type) =
       | Pointer(c) -> c0typeToString(c) ^ "*"
       | Array(c) -> c0typeToString(c) ^ "[]"
       | Struct(i) -> identToString(i)
+      | Poop -> "nulltype"
+        
 let constToString (c : const) = string_of_int(c)
 
 let regToString (r : reg) = 
@@ -310,9 +312,19 @@ and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =
             concat "" ["cmp"; sizeToString s; " "; tmpExprToString(iExpr1);
                        ", "; tmpExprToString(iExpr2)]
 
+let tmpLValToString (tLVal: tmpLVal) =
+  match tLVal with
+       TmpFieldAccessLVal (sName, p, fieldName) ->
+            tmpSharedTypeExprToString (TmpInfAddrFieldAccess(sName, p, fieldName))
+     | TmpArrayAccessLVal (a, idx) ->
+            tmpSharedTypeExprToString (TmpInfAddrArrayAccess(a, idx))
+     | TmpDerefLVal (p) ->
+            tmpSharedTypeExprToString (TmpInfAddrDeref p)
+     | TmpVarLVal t -> tmpToString t
+
 let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
   match t with
-        TmpInfAddrMov(s, tExpr,t) -> concat "" [tmpToString(t); " <--";
+        TmpInfAddrMov(s, tExpr,lval) -> concat "" [tmpLValToString lval; " <--";
                                 sizeToString s; " "; tmpExprToString(tExpr)]
       | TmpInfAddrJump(jInstr) -> jumpInstrToString(jInstr)
       | TmpInfAddrBoolInstr(bInstr) -> tmpInfAddrBoolInstrToString(bInstr)
