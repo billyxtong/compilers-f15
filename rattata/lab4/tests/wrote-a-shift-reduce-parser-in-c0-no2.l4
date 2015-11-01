@@ -1,0 +1,147 @@
+//test div-by-zero
+//Shift-reduce parser for arithmetic, including parentheses!
+//Because I have no life.
+
+//Uses the same stack implementation as my other test cases.
+
+struct stack_struct {
+   //We add on elements starting from 0. curr_idx represents the
+   //maxmimum index that has an element.
+   int curr_idx; 
+   int[] elems;
+   int size;
+   };
+
+typedef struct stack_struct* stack;
+
+bool is_empty(stack s) {
+   return s->curr_idx == -1;
+   }
+
+stack empty_stack() {
+   int size = 2;
+   stack result = alloc(struct stack_struct);
+   result->curr_idx = -1;
+   result->elems = alloc_array(int, size);
+   result->size = size;
+   return result;
+   }
+
+int pop (stack s) {
+   int result = s->elems[s->curr_idx];
+   s->curr_idx--;
+   return result;
+   }
+
+void push (stack s, int x) {
+   if (s->curr_idx == s->size - 1) {
+      //stack is full, need to reallocate
+      int[] new_elems = alloc_array(int, s->size * 2);
+      for (int i = 0; i <= s->curr_idx; i++) {
+          new_elems[i] = s->elems[i];
+	  }
+      s->elems = new_elems;
+      s->size *= 2;
+      }
+   s->curr_idx++;
+   s->elems[s->curr_idx] = x;
+   }
+
+void shift(stack reduce_stack, int x) {
+   push(reduce_stack, x);
+   }
+
+// -1 is +   
+void reduce(stack reduce_stack) {
+   int e2 = pop(reduce_stack);
+   int op = pop(reduce_stack);
+   int e1 = pop(reduce_stack);
+   if (op == -1) {
+      push(reduce_stack, e1 + e2);
+      }
+   else if (op == -2) {
+      push(reduce_stack, e1 * e2);
+      }
+   else if (op == -3) {
+      push(reduce_stack, e1 / e2);
+      }
+   else if (op == -4) {
+      push(reduce_stack, e1 - e2);
+      }
+   else if (op == -5) {
+      push(reduce_stack, e1 % e2);
+      }
+}
+
+void init_program(stack program) {
+   //program must be enclosed by parens because that's the way I
+   //wrote it
+   //((13 * 5) / (3 - (15 % 4)))
+   push(program, -11); //RPAREN
+   push(program, -11); //RPAREN
+   push(program, -11); //RPAREN
+   push(program, 4);
+   push(program, -5); //%
+   push(program, 15);
+   push(program, -10); //LPAREN
+   push(program, -4); //-   
+   push(program, 3);
+   push(program, -10); //LPAREN
+   push(program, -3); //div (hehe was tempted to just put ///)
+   push(program, -11); //RPAREN
+   push(program, 5);
+   push(program, -2); //*
+   push(program, 13); 
+   push(program, -10); //LPAREN
+   push(program, -10); //LPAREN
+   }
+   
+//We represent arithmetic operations by negative numbers:
+// -1 is +, -2 is *, -3 is /, -4 is -, -5 is %.
+//In the absence of parens, everything has the same precedence,
+//and it evaluates right-to-left. I would change this, except
+//I need to start writing the actual compiler/get on with my life.
+//Also, -10 is LPAREN, -11 is RPAREN
+int main () {
+   stack program = empty_stack();
+   init_program(program);
+   stack reduce_stack = empty_stack();
+   while (!is_empty(program)) {
+       int next_elem = pop(program);
+       if (next_elem >= 0) {
+          //an integer: shift
+	  shift(reduce_stack, next_elem);
+	  }
+       else if (next_elem == -10) {
+          //LPAREN
+	  shift(reduce_stack, next_elem);
+	  }
+       else if (next_elem == -11) {
+         //RPAREN
+	 //see if there is anything to reduce (or if it's just something
+	 //like (4)
+	 int top = pop(reduce_stack);
+	 int below_top = pop(reduce_stack);
+	 if (below_top == -10) {
+	    //something like (4): just remove the parens
+	    push(reduce_stack, top);
+	    //in this case we're done! The RPAREN just goes away
+	    }
+	 else {
+	    //reduce, and then put the RPAREN back on the top of the
+	    //program. Make sure to put the stuff back on first
+	    push(reduce_stack, below_top);
+	    push(reduce_stack, top);
+	    reduce(reduce_stack);
+	    push(program, next_elem);
+	    }
+	 }
+       else if (-10 < next_elem && next_elem < 0) {
+           //an operation: shift
+	   shift(reduce_stack, next_elem);
+	   }
+      }
+   return pop(reduce_stack);
+}	   
+
+   
