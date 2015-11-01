@@ -8,10 +8,8 @@
  * will raise ErrorMsg.Error in case of lexing or parsing error
  *)
 
-open Core.Std
-
 let parse_file filename = 
-    In_channel.with_file filename ~f:(
+    Core.Std.In_channel.with_file filename ~f:(
       fun chan ->
         let lexbuf = Lexing.from_channel chan in
         let _ = ErrorMsg.reset ()

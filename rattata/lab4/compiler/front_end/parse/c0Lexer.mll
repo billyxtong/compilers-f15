@@ -7,11 +7,11 @@
  * in order to make the grammar forward compatible with C0.
  *)
 
-open Core.Std
 
 module A = Ast
 module P = C0Parser
-
+module H = Hashtbl
+  
 let start = Lexing.lexeme_start
 let l_end = Lexing.lexeme_end
 let text = Lexing.lexeme
@@ -152,7 +152,11 @@ rule initial =
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }
 
-  | id as name  { P.IDENT name }
+  | id as name  { try
+                      (let () = H.find ParseUtil.parsingTypedefMap name in
+                      P.TYPEDEF_IDENT name)
+                  with Not_found ->
+                      P.VAR_IDENT name }
 
   | "/*"        { enterComment lexbuf; comment lexbuf }
   | "*/"        { ErrorMsg.error 
