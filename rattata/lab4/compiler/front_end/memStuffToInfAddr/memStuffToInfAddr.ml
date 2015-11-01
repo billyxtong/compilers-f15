@@ -133,8 +133,8 @@ and handleMemForExpr = function
        let sizeForMalloc = getSizeForType elemType + spaceForLength in 
        let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
              [TmpIntExpr (TmpIntArg (TmpConst sizeForMalloc))])) in
-       let finalExpr = TmpPtrExpr (PTR_ADD, funCallExpr,
-                                   TmpIntArg (TmpConst spaceForLength)) in
+       let finalExpr = TmpPtrExpr (TmpInfAddrPtrBinop (PTR_ADD, funCallExpr,
+                                   TmpIntArg (TmpConst spaceForLength))) in
        (finalExpr, [])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
@@ -220,20 +220,20 @@ let handleMemForInstr = function
         instrsForSrc @ TmpInfAddrMov(opSize, srcFinal, dest)::[]
     | TmpInfAddrReturn (retSize, arg) ->
         let (argFinal, instrsForArg) = handleMemForExpr arg in
-        instrsForArg @ TmpInfAddrReturn (retSize, argFinal)
+        instrsForArg @ TmpInfAddrReturn (retSize, argFinal)::[]
     | TmpInfAddrVoidFunCall (fName, args) ->
         let () = assert(allArgsAreTmps args) in
-        TmpInfAddrVoidFunCall (fName, args)
+        TmpInfAddrVoidFunCall (fName, args)::[]
     | TmpInfAddrBoolInstr (TmpInfAddrTest (e1, e2)) ->
-        let (BoolExpr e1_final, instrs1) = handleMemForExpr (BoolExpr e1) in
-        let (BoolExpr e2_final, instrs2) = handleMemForExpr (BoolExpr e2) in
+        let (TmpBoolExpr e1_final, instrs1) = handleMemForExpr (TmpBoolExpr e1) in
+        let (TmpBoolExpr e2_final, instrs2) = handleMemForExpr (TmpBoolExpr e2) in
         instrs1 @ instrs2 @
-        TmpInfAddrBoolInstr (TmpInfAddrTest (e1_final, e2_final))
+        TmpInfAddrBoolInstr (TmpInfAddrTest (e1_final, e2_final))::[]
     | TmpInfAddrBoolInstr (TmpInfAddrCmp (opSize, e1, e2)) ->
         let (e1_final, instrs1) = handleMemForExpr e1 in
         let (e2_final, instrs2) = handleMemForExpr e2 in
         instrs1 @ instrs2 @
-        TmpInfAddrBoolInstr (TmpInfAddrCmp (opSize, e1_final, e2_final))
+        TmpInfAddrBoolInstr (TmpInfAddrCmp (opSize, e1_final, e2_final))::[]
 
 let handleMemForFunDef (fName, tmpParams, instrs) =
     TmpInfAddrFunDef(fName, tmpParams,
