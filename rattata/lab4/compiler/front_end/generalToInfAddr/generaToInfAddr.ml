@@ -319,6 +319,33 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
            trans_cond retTmp retLabel newMap (A.BoolSharedExpr (A.Ident result_id),
                                               stmtsForIf, stmtsForElse)
 
+(* returns (newMap, infAddrLVal, instrs *)
+(* pretty sure newMap is only different from the input map in the var
+   case, because otherwise, the id should already have been initalized *)
+and trans_lval retTmp retLabel idToTmpMap = function
+     A.TypedPostElabVarLVal id -> let t = get_or_make_tmp id idToTmpMap in
+                                  let newMap = M.add idToTmpMap id t in
+                                  (newMap, TmpVarLVal (Tmp t), [])
+   | A.TypedPostElabFieldLVal (structName, structPtrLVal, fieldName) ->
+        let (newMap, structTmpLVal, instrs) =
+           trans_lval retTmp retLabel idToTmpMap structPtrLVal in
+        (newMap, TmpFieldAccessLVal(structName, structTmpLVal, fieldName), instrs)
+   | A.TypedPostElabArrayAccessLVal (arrayLVal, idxExpr) ->
+       (* Note: arrayLVal is evaluating first! This matters for things like
+          a[1/0][f()] where f is function that asserts false *)
+        let (newMap, arrayTmpLVal, instrsForArray) =
+           trans_lval retTmp retLabel idToTmpMap arrayLVal in
+        let (instrsForIdx, TmpIntExpr idxFinal) =
+           trans_exp retTmp retLabel idToTmpMap idxExpr in
+        (newMap, TmpArrayAccessLVal (arrayTmpLVal, idxFinal),
+         instrsForArray @ instrsForIdx)
+   | A.TypedPostElabDerefLVal (ptrLVal) ->
+        let (newMap, ptrTmpLVal, instrs) =
+          trans_lval retTmp retLabel idToTmpMap ptrLVal in
+        (newMap, TmpDerefLVal ptrTmpLVal, instrs)
+        
+       
+
 and trans_stmts retTmp retLabel idToTmpMap = function
      A.TypedPostElabDecl (id, idType)::stmts ->
       (* Just create a single temp per variable for now,
@@ -338,7 +365,7 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         let (newMap, tmpLval) = (match lval with
             A.TypedPostElabVarLVal id -> let t = get_or_make_tmp id idToTmpMap in
                                (M.add idToTmpMap id t, TmpVarLVal (Tmp t))
-         | A.TypedPostElabFieldLVal 
+          | A.TypedPostElabFieldLVal 
 
           )
         instrs_for_e @
