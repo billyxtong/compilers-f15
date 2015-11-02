@@ -30,6 +30,20 @@ let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
             | Some t -> t)
 
+(* Note: there's a function in memStuffToInfAddr that is identical...
+   I'm sorry, style gods *)
+let addTypeToShared e = function
+    INT -> TmpIntExpr (TmpIntSharedExpr e)
+  | BOOL -> TmpBoolExpr (TmpBoolSharedExpr e)
+  | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr e)
+  | _ -> assert(false)                   
+
+let addTypeToTmp t = function
+    INT -> TmpIntExpr (TmpIntArg (TmpLoc (Tmp t)))
+  | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc (Tmp t)))
+  | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc (Tmp t)))
+  | _ -> assert(false)                   
+
 let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     let max_shift = A.IntConst 31 in
     let new_id = GenUnusedID.create () in
@@ -96,13 +110,6 @@ and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
    but ternary *)
 and trans_int_exp retTmp retLabel idToTmpMap = function
        A.IntConst c -> ([], TmpIntArg (TmpConst c))
-     | A.IntSharedExpr (A.Ident id) -> 
-          (match M.find idToTmpMap id with
-             None -> 
-             (let () = print_string("Uninitialized: " ^ id ^ "\n") in
-             ([], (TmpIntArg (TmpLoc (Tmp (Temp.create()))))))
-           | Some t -> 
-             ([], TmpIntArg (TmpLoc (Tmp t))))
      | A.ASTBinop (e1, LSHIFT, e2) ->
          handle_shift retTmp retLabel idToTmpMap (e1, LSHIFT, e2)
      | A.ASTBinop (e1, RSHIFT, e2) ->
@@ -126,28 +133,57 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
          (instrs_for_exp1 @ instrs_for_exp2,
           TmpInfAddrBinopExpr (op, tmp_exp1, tmp_exp2))
          
-     | A.IntSharedExpr (A.Ternary (c, e1, e2)) ->
-         (* See bool Ternary in trans_cond *) 
-         let ternary_result_tmp = Temp.create() in
-         let ternary_result_id = GenUnusedID.create() in
-         let newMap = M.add idToTmpMap ternary_result_id ternary_result_tmp in
-         let astForIf = [A.TypedPostElabAssignStmt (ternary_result_id,
-                                       A.EQ, e1)] in
-         let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
-                                       A.EQ, e2)] in
-         (trans_cond retTmp retLabel newMap (c, astForIf, astForElse),
-          TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
      | A.IntSharedExpr e ->
-         let (instrs, eInfAddr) = trans_shared_expr retTmp retLabel idToTmpMap e in
-         (instrs, TmpIntSharedExpr eInfAddr)
+         let (instrs, TmpIntExpr eInfAddr) = trans_shared_expr retTmp retLabel INT
+                                  idToTmpMap e in
+         (instrs, eInfAddr)
 
-and trans_shared_expr retTmp retLabel idToTmpMap = function
+and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
     A.FunCall (fName, argList) ->
          let (instrs, argExps) = trans_fun_args retTmp retLabel fName
              idToTmpMap argList in
-         (instrs, TmpInfAddrFunCall(fName, argExps))
-  | A.ArrayAccess (arrayExpr, idxExpr) -> assert(false)
-
+         (instrs, addTypeToShared (TmpInfAddrFunCall(fName, argExps)) exprType)
+  | A.ArrayAccess (arrayExpr, idxExpr) ->
+        (* evaluate the array first! *)
+        let (arrayInstrs, TmpPtrExpr arrayFinalExpr) = 
+            trans_exp retTmp retLabel idToTmpMap (A.PtrExpr arrayExpr) in
+        let (idxInstrs, TmpIntExpr idxFinalExpr) = 
+            trans_exp retTmp retLabel idToTmpMap (A.IntExpr idxExpr) in
+        (arrayInstrs @ idxInstrs, addTypeToShared
+           (TmpInfAddrArrayAccess (arrayFinalExpr, idxFinalExpr)) exprType)
+  | A.FieldAccess (structName, structPtr, fieldName) ->
+        let (ptrInstrs, TmpPtrExpr structPtrExpr) =
+            trans_exp retTmp retLabel idToTmpMap (A.PtrExpr structPtr) in
+        (ptrInstrs, addTypeToShared
+         (TmpInfAddrFieldAccess (structName, structPtrExpr, fieldName)) exprType)
+  | A.Deref ptr ->
+        let (ptrInstrs, TmpPtrExpr ptrFinal) =
+            trans_exp retTmp retLabel idToTmpMap (A.PtrExpr ptr) in
+        (ptrInstrs, addTypeToShared (TmpInfAddrDeref ptrFinal) exprType)
+  | A.Ident id ->
+        (match M.find idToTmpMap id with
+             None -> 
+             (let () = print_string("Uninitialized: " ^ id ^ "\n") in
+              assert(false))
+           | Some t -> 
+             ([], addTypeToTmp t exprType))
+  | A.Ternary (c, e1, e2) ->
+      (* We create a new variable and a new ast that puts e1
+         into this variable is c is true, otherwise e2. Then
+         we can just recurse on a new conditional, with that var as
+         the condition *)
+      let ternary_result_tmp = Temp.create() in
+      let ternary_result_id = GenUnusedID.create() in
+      let newMap = M.add idToTmpMap ternary_result_id ternary_result_tmp in
+      let astForIf = [A.TypedPostElabAssignStmt (ternary_result_id,
+                                               A.EQ, e1)] in
+      let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
+                                                 A.EQ, e2)] in
+      let ternary_instrs = trans_cond retTmp retLabel newMap
+                           (c, astForIf, astForElse) in
+      let result_exp = addTypeToTmp ternary_result_tmp exprType in
+      (ternary_instrs, result_exp)
+      
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
    if (e) t = true; else t = false;
@@ -221,28 +257,9 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
      match condition with
          A.LogNot negCondition ->
         (* In this case, just switch the statements for if and else,
-           AND ALSO THE JUMPTOTOPSTATUS *)
+           AND ALSO THE JUMPTOTOPSTATUS <--- I think I got rid of that *)
               trans_cond retTmp retLabel idToTmpMap (negCondition, stmtsForElse,
                                    stmtsForIf)
-       | A.BoolSharedExpr (A.Ternary (c, bool_exp1, bool_exp2)) ->
-          (* BoolTernary means the expressions are bools
-             (obviously the condition is a bool too *)
-         (* We create a new variable and a new ast that puts bool_exp1
-            into this variable is c is true, otherwise bool_exp2. Then
-            we can just recurse on a new conditional, with that var as
-            the condition *)
-            let ternary_result_tmp = Temp.create() in
-            let ternary_result_id = GenUnusedID.create() in
-            let newMap = M.add idToTmpMap ternary_result_id ternary_result_tmp in
-            let astForIf = [A.TypedPostElabAssignStmt (ternary_result_id,
-                                              A.EQ, bool_exp1)] in
-            let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
-                                              A.EQ, bool_exp2)] in
-            let ternary_instrs = trans_cond retTmp retLabel newMap (c, astForIf, astForElse) in
-            ternary_instrs @
-            trans_cond retTmp retLabel newMap
-              (A.BoolSharedExpr (A.Ident ternary_result_id), stmtsForIf,
-               stmtsForElse)
        | A.LogAnd (bool_exp1, bool_exp2) -> 
           (* For &&, we break it up into nested if statements, where each
              of them gets the "else" from the original. *)
@@ -306,28 +323,14 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
             instrs_for_exp1 @ instrs_for_exp2 @
             (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JE JNE )
-       | A.BoolSharedExpr (A.Ident id) ->  
-          (match M.find idToTmpMap id with
-             None -> 
-             let () = print_string("Undeclared: " ^ id ^ "\n") in
-             assert(false)
-           | Some t -> let priorInstr = TmpInfAddrBoolInstr
-                 (TmpInfAddrTest (TmpBoolArg (TmpLoc (Tmp t)),
-                                  TmpBoolArg (TmpConst 1))) in
-                   make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
-                      stmtsForElse JNE JE )
-       | A.BoolSharedExpr (A.FunCall(fName, argList)) ->
-         
-           let (instrs, argExps) = trans_fun_args retTmp retLabel fName
-                                   idToTmpMap argList in
-           let result_id = GenUnusedID.create() in
-           let result_tmp = Temp.create() in
-           let newMap = M.add idToTmpMap result_id result_tmp in
-           instrs @ TmpInfAddrMov(getSizeForType BOOL, TmpBoolExpr
-                     (TmpBoolSharedExpr (TmpInfAddrFunCall (fName, argExps))),
-                                    TmpVarLVal (Tmp result_tmp))::[] @
-           trans_cond retTmp retLabel newMap (A.BoolSharedExpr (A.Ident result_id),
-                                              stmtsForIf, stmtsForElse)
+       | A.BoolSharedExpr e ->
+          let (instrs, TmpBoolExpr eInfAddr) =
+            trans_shared_expr retTmp retLabel BOOL idToTmpMap e in
+          let priorInstr = TmpInfAddrBoolInstr
+                 (TmpInfAddrTest (eInfAddr, TmpBoolArg (TmpConst 1))) in
+          instrs @ make_cond_instrs retTmp retLabel idToTmpMap
+            priorInstr stmtsForIf stmtsForElse JNE JE
+       | A.PtrEquals _ -> failwith "Ben, do this!"
 
 (* returns (newMap, infAddrLVal, instrs *)
 (* pretty sure newMap is only different from the input map in the var
