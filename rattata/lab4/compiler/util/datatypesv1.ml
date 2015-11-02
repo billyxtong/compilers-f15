@@ -63,7 +63,7 @@ type assemProgWonky = wonkyFunDef list
    to register allocation, at least not in L1 (unless I'm missing
    something) *)
 type tmp = Tmp of int
-type tmpArg = TmpLoc of tmp | TmpConst of const
+type tmpArg = TmpLoc of tmp | TmpConst of const | TmpDeref of tmp
 (* Two Address Code *)
 type tmpBoolInstr = TmpTest of tmpArg * tmp
                    (* No ands between pointers, so test is always

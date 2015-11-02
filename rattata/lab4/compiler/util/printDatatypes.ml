@@ -174,6 +174,7 @@ let tmpArgToString(tArg : tmpArg) =
   match tArg with
         TmpLoc(t) -> tmpToString(t)
       | TmpConst(c) -> constToString(c)
+      | TmpDeref(t) -> "*" ^ tmpToString(t)
 
 let tmpBoolInstrToString(tmpbool : tmpBoolInstr) =
   match tmpbool with
