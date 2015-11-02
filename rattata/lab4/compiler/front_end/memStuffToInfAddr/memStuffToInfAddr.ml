@@ -163,12 +163,14 @@ and handleMemForExpr = function
 and handleStructAccess exprType structTypeName structPtr fieldName =
     try
         let (fieldOffsets, _) = H.find structDefsMap structTypeName in
+        let (TmpPtrExpr structPtrFinal, structPtrInstrs) =
+             handleMemForExpr (TmpPtrExpr structPtr) in
         let accessOffset = H.find fieldOffsets fieldName in
         let resultTmp = Tmp (Temp.create()) in
-        let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtr,
+        let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtrFinal,
                              TmpIntArg (TmpConst accessOffset)) in
         let accessInstr = makeAccessInstr exprType resultTmp fieldPtrExpr in
-        (tmpToTypedExpr resultTmp exprType, accessInstr::[])
+        (tmpToTypedExpr resultTmp exprType, structPtrInstrs @ accessInstr::[])
     with Not_found -> let () = print_string("struct " ^ structTypeName
                            ^ "not defined before alloc\n") in assert(false)
 

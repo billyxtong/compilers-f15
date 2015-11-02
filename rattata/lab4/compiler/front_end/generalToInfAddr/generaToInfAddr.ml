@@ -81,7 +81,8 @@ and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
       let getSizeForArg = fun i -> getSizeForType (H.find funParamsMap fName).(i) in
       let instrs = List.concat (List.mapi instr_and_e_list
         (fun i -> fun (instrs, e) -> instrs @
-                         [TmpInfAddrMov(getSizeForArg i, e, newTmps.(i))])) in
+                         [TmpInfAddrMov(getSizeForArg i, e,
+                                        TmpVarLVal newTmps.(i))])) in
       let newTmpExprs = List.map (Array.to_list newTmps)
             (fun t -> TmpIntExpr (TmpIntArg (TmpLoc t))) in
       (instrs, newTmpExprs)
