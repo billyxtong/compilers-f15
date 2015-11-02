@@ -27,31 +27,37 @@ let rec tc_lval varEnv (lval : untypedPostElabLVal) =
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
                             raise ErrorMsg.Error)) 
       (* need to do below LVals*)
-      | UntypedPostElabFieldLVal(untypedLVal,id) ->  
-          let (typedLVal, lvalType) =  in
+      | UntypedPostElabFieldLVal(untypedLVal,id) ->
           (match tc_lval varEnv untypedLVal with
-                 (TypedPostElabDerefLVal(), Struct(structName) ->
+                 (TypedPostElabDerefLVal(typedLVal), Struct(structName)) ->
                    (match M.find structMap structName with
                           Some fieldMap -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
                             (match M.find fieldMap fieldName with
                                    Some fieldType ->
-                                     (TypedPostElabFieldLVal(typedLVal, id), fieldType)
+                                     (TypedPostElabFieldLVal(structName, typedLVal, id), fieldType)
                                  | None -> (ErrorMsg.error ("struct " ^ structName ^ 
                                                             " has no field with name " 
                                                             ^ fieldName ^ "\n");
                                             raise ErrorMsg.Error))
                         | None -> (ErrorMsg.error ("no struct with name " ^ structName ^ "\n");
                                    raise ErrorMsg.Error))
-               | _ -> (ErrorMsg.error ("not a struct\n");
+               | _ -> (ErrorMsg.error ("LVal isn't of form *structName.fieldName \n");
                        raise ErrorMsg.Error))
-      | UntypedPostElabDerefLVal(untypedLVal) -> 
-          let (typedLVal, lvalType) = tc_lval varEnv untypedLVal in
-          (match lvalType with
-                 Pointer(c) -> (TypedPostElabDerefLVal(typedLVal), c)
+      | UntypedPostElabDerefLVal(untypedLVal) ->
+          (match tc_lval varEnv untypedLVal with
+                 (typedLVal, Pointer(c)) -> 
+                   if c = Poop 
+                   then (ErrorMsg.error ("dereferencing a non-pointer\n");
+                         raise ErrorMsg.Error)
+                   else (TypedPostElabDerefLVal(typedLVal), c)
                | _ -> (ErrorMsg.error ("dereferencing a non-pointer\n");
                        raise ErrorMsg.Error))
       | UntypedPostElabArrayAccessLVal(untypedLVal,exp) -> 
+          (match (tc_lval varEnv untypedLVal, tc_expression varEnv exp) with
+                 ((typedLVal, Array(c)), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c)  
+               | _ -> (ErrorMsg.error ("array access lval didn't typecheck\n");
+                       raise ErrorMsg.Error))
 
 let rec tc_expression varEnv (expression : untypedPostElabExpr) =
   match expression with
@@ -104,8 +110,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
       let (tcExpr,t) = tc_expression varEnv e' in
       (match tcExpr with
              BoolExpr(exp1) -> (BoolExpr(LogNot(exp1)), BOOL)
-           | _ -> ErrorMsg.error ("not expression didn't typecheck \n");
-                  raise ErrorMsg.Error)
+           | _ -> (ErrorMsg.error ("not expression didn't typecheck \n");
+                  raise ErrorMsg.Error))
   | UntypedPostElabTernary(e1 : untypedPostElabExpr, e2 : untypedPostElabExpr, e3 : untypedPostElabExpr) ->
       let (tcExpr1,type1) = tc_expression varEnv e1 in
       let (tcExpr2,type2) = tc_expression varEnv e2 in
