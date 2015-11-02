@@ -44,6 +44,29 @@ let addTypeToTmp t = function
   | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc (Tmp t)))
   | _ -> assert(false)                   
 
+
+(* little helper for getRHSForAsnop *)
+let toIntBinopFromRHS lval rhs binop =
+    match rhs with
+       TmpIntExpr rhs' -> TmpIntExpr (TmpInfAddrBinopExpr (binop,
+                              TmpIntSharedExpr (TmpLValExpr lval), rhs'))
+     | _ -> assert(false)
+
+(* this will return (x+1) for x+=1, just 1 for x = 1. With
+   all the proper constructors and types and such *)
+let getRHSForAsnop lval rhsExpr = function
+    A.EQ -> rhsExpr
+  | A.PLUSEQ -> toIntBinopFromRHS lval rhsExpr ADD
+  | A.SUBEQ -> toIntBinopFromRHS lval rhsExpr SUB
+  | A.MULEQ -> toIntBinopFromRHS lval rhsExpr MUL
+  | A.DIVEQ -> toIntBinopFromRHS lval rhsExpr FAKEDIV
+  | A.MODEQ -> toIntBinopFromRHS lval rhsExpr FAKEMOD
+  | A.AND_EQ -> toIntBinopFromRHS lval rhsExpr BIT_AND
+  | A.OR_EQ -> toIntBinopFromRHS lval rhsExpr BIT_OR
+  | A.XOR_EQ -> toIntBinopFromRHS lval rhsExpr BIT_XOR
+  | A.LSHIFT_EQ -> toIntBinopFromRHS lval rhsExpr LSHIFT
+  | A.RSHIFT_EQ -> toIntBinopFromRHS lval rhsExpr RSHIFT
+
 let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     let max_shift = A.IntConst 31 in
     let new_id = GenUnusedID.create () in
@@ -87,7 +110,10 @@ and trans_exp retTmp retLabel idToTmpMap = function
     | A.BoolExpr e -> let (instrs, t) = trans_bool_exp retTmp retLabel
                           idToTmpMap e None in
                       (instrs, TmpBoolExpr (TmpBoolArg (TmpLoc t)))
-
+    | A.PtrExpr e -> let (instrs, e') = trans_ptr_exp retTmp retLabel idToTmpMap e
+                     in (instrs, TmpPtrExpr e')
+    | A.VoidExpr _ -> assert(false)
+      
 (* Returns a list of tmpExprs, resulting from calling trans_exp on each of the args *)
 and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
   (* Here's the deal: we have to make sure to evaluate the args from left to right.
@@ -104,6 +130,18 @@ and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
       let newTmpExprs = List.map (Array.to_list newTmps)
             (fun t -> TmpIntExpr (TmpIntArg (TmpLoc t))) in
       (instrs, newTmpExprs)
+
+and trans_ptr_exp retTmp retLabel idToTmpMap = function
+       A.Null -> ([], TmpPtrArg (TmpConst 0))
+     | A.Alloc typee -> ([], TmpAlloc typee)
+     | A.AllocArray (typee, numElems) ->
+         let (instrs, numElemsFinal) =
+           trans_int_exp retTmp retLabel idToTmpMap numElems in
+         (instrs, TmpAllocArray (typee, numElemsFinal))
+     | A.PtrSharedExpr e ->          
+         let (instrs, TmpPtrExpr eInfAddr) = trans_shared_expr retTmp retLabel
+        (* It doesn't matter what the type is a ptr to; just that it's a ptr *)
+              (Pointer Poop) idToTmpMap e in (instrs, eInfAddr)
 
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
@@ -307,8 +345,17 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
             (TmpInfAddrCmp(getSizeForType INT, TmpIntExpr tmp_exp2,
                            TmpIntExpr tmp_exp1)) in
             instrs_for_exp1 @ instrs_for_exp2 @
-              (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf stmtsForElse
-                 JE JNE )
+             make_cond_instrs retTmp retLabel idToTmpMap priorInstr
+                 stmtsForIf stmtsForElse JE JNE
+       | A.PtrEquals (p1, p2) ->
+            let (instrs1, tmpP1) = trans_ptr_exp retTmp retLabel idToTmpMap p1 in
+            let (instrs2, tmpP2) = trans_ptr_exp retTmp retLabel idToTmpMap p2 in
+            let priorInstr = TmpInfAddrBoolInstr
+            (* Again, doesn't matter what type it's a ptr to *)
+            (TmpInfAddrCmp(getSizeForType (Pointer Poop), TmpPtrExpr tmpP1,
+                           TmpPtrExpr tmpP2)) in
+            instrs1 @ instrs2 @ make_cond_instrs retTmp retLabel idToTmpMap
+              priorInstr stmtsForIf stmtsForElse JE JNE
        | A.BoolEquals (bool_exp1, bool_exp2) ->
             (* See description of trans_bool_exp *)
             let (instrs_for_exp1, tmp_exp1) =
@@ -322,7 +369,7 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
             (* The order of instrs_for_exp1/2 shouldn't matter *)
             instrs_for_exp1 @ instrs_for_exp2 @
             (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
-                 stmtsForElse JE JNE )
+                 stmtsForElse JE JNE )            
        | A.BoolSharedExpr e ->
           let (instrs, TmpBoolExpr eInfAddr) =
             trans_shared_expr retTmp retLabel BOOL idToTmpMap e in
@@ -330,7 +377,6 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
                  (TmpInfAddrTest (eInfAddr, TmpBoolArg (TmpConst 1))) in
           instrs @ make_cond_instrs retTmp retLabel idToTmpMap
             priorInstr stmtsForIf stmtsForElse JNE JE
-       | A.PtrEquals _ -> failwith "Ben, do this!"
 
 (* returns (newMap, infAddrLVal, instrs *)
 (* pretty sure newMap is only different from the input map in the var
@@ -369,10 +415,11 @@ and trans_stmts retTmp retLabel idToTmpMap = function
      let (newMap, tmplval, instrsForLVal) =
          trans_lval retTmp retLabel idToTmpMap lval in
      let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
-r          (* trans_exp gives us the instructions it generated, and also where it
+          (* trans_exp gives us the instructions it generated, and also where it
              ended up putting the value. We then update the binding in idToTmpMap *)
+     let rhs = getRHSForAsnop tmplval eInfAddr asnop in
         instrsForLVal @ instrs_for_e @
-        TmpInfAddrMov (getSizeForExpr eInfAddr, eInfAddr, tmplval)
+        TmpInfAddrMov (getSizeForExpr eInfAddr, rhs, tmplval)
         ::trans_stmts retTmp retLabel newMap stmts
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
        trans_cond retTmp retLabel idToTmpMap (e, ifStmts, elseStmts) @
@@ -392,7 +439,7 @@ r          (* trans_exp gives us the instructions it generated, and also where i
         let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
         (* Move our value to the ret tmp, then jump to the return *)
         instrs_for_e @
-        TmpInfAddrMov(getSizeForExpr eInfAddr, eInfAddr, retTmp)::
+        TmpInfAddrMov(getSizeForExpr eInfAddr, eInfAddr, TmpVarLVal retTmp)::
         TmpInfAddrJump(JMP_UNCOND, retLabel) :: []
    | A.TypedPostElabAssert e :: stmts ->
      (* If e is true we proceed on, else we call the abort function, with
