@@ -68,7 +68,9 @@ and intExpr = IntConst of const
               | LogAnd of boolExpr * boolExpr
 (* new in L4: lvalues are no longer just var names *)        
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
-              TypedPostElabFieldLVal of typedPostElabLVal * ident |
+            (* Same deal as FieldAccess expr (for what the two
+               idents are) *)
+              TypedPostElabFieldLVal of ident * typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
               TypedPostElabArrayAccessLVal of typedPostElabLVal * typedPostElabExpr 
 and typedPostElabExpr = IntExpr of intExpr

@@ -261,8 +261,9 @@ and boolExprToString(bExpr : boolExpr) =
 and typedPostElabLValToString(lval : typedPostElabLVal) =
   match lval with
         TypedPostElabVarLVal(i) -> identToString(i)
-      | TypedPostElabFieldLVal(p,i) -> typedPostElabLValToString(p) ^ "->"  
-                                            ^ identToString(i)
+      | TypedPostElabFieldLVal(i1, p,i2) -> typedPostElabLValToString(p) ^ "->"  
+                                            ^ identToString(i2) ^ "("
+                                            ^ identToString(i1) ^ ")"
       | TypedPostElabDerefLVal(p) -> "*" ^ typedPostElabLValToString(p)
       | TypedPostElabArrayAccessLVal(p,e) -> typedPostElabLValToString(p)
                                ^ "[" ^ typedPostElabExprToString(e) ^ "]"
