@@ -4,7 +4,9 @@ open PrintDatatypes
 module A = Array
 open Graph  
 
-let spillReg = Reg R15
+(* We need two now, for things like movl (%rbx), (-8(%rbp)) *)
+let firstSpillReg = Reg R15
+let secondSpillReg = Reg R14
 
 let bytesForArg = 8
 
@@ -16,7 +18,7 @@ let assemLocForColor regArray offsetIncr colorNum =
     (* If there are 8 registers but this color is 10 (indexed from 0),
        that means we need there are at least 11 colors, which means we need
        at least 3 * (size of one tmp) bytes of stack memory. Since the
-       first stack spot is 4(rsp), we add one *)
+       first stack spot is offsetIncr(rsp), we add one *)
     else MemAddr(RBP, - ((colorNum - (A.length regArray) + 1) * offsetIncr))
 
 (* colorList consists of tuples (t, colorForTmp) where t is the temp number
@@ -186,7 +188,7 @@ let getUsedRegs maxColor allocableRegList =
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   funcToParamSizeMap : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
-  let allocableRegList = [EBX; R10; R11; R12; R13; R14] in
+  let allocableRegList = [EBX; R10; R11; R12; R13] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
   let tempList = getTempList instrs in
@@ -198,7 +200,7 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
   let allocdRegs = getUsedRegs maxColor allocableRegList in
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
-  let offsetIncr = 4 in
+  let offsetIncr = 8 in
   (* we need a list of tmps to go through; just use vertexOrdering *)
   let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
       offsetIncr regArray (H.create 100) in
