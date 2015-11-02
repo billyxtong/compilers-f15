@@ -16,10 +16,19 @@ let markedLive liveSet line = try let () = H.find liveSet line in true
 
 let getDefVars prog line =
     match Array.get prog line with
-         Tmp2AddrMov(s, src, Tmp dest) -> dest::[]
-       | Tmp2AddrBinop(op, src, Tmp dest) -> dest::[]
-       | Tmp2AddrFunCall(fName, args, Some (Tmp dest)) -> dest::[]
-       | _ -> []
+         Tmp2AddrMov(opSize, src, TmpVar dest) -> dest::[]
+       | Tmp2AddrBinop(op, src, TmpVar dest) -> dest::[]
+       | Tmp2AddrPtrBinop(op, src, TmpVar dest) -> dest::[]
+       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpVar dest)) -> dest::[]
+       | Tmp2AddrMov(opSize, src, TmpDeref dest) -> dest::[]
+       | Tmp2AddrBinop(op, src, TmpDeref dest) -> dest::[]
+       | Tmp2AddrPtrBinop(op, src, TmpDeref dest) -> dest::[]
+       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpDeref dest)) -> dest::[]
+       | Tmp2AddrReturn _ -> []
+       | Tmp2AddrJump _ -> []
+       | Tmp2AddrLabel _ -> []
+       | Tmp2AddrBoolInstr _ -> []
+       | Tmp2AddrFunCall(opSize, fName, args, None) -> []
   
 
 let isDef t prog line =
@@ -28,18 +37,29 @@ let isDef t prog line =
         | [] -> false
         | _ -> assert(false)
 
+let isUsedInTmpArg t = function
+    TmpLoc (TmpVar t') -> t = t'
+  | TmpLoc (TmpDeref t') -> t = t'
+  | _ -> false
+
+let isUsedInTmpLoc t = function
+    (TmpVar t') -> t = t'
+  | (TmpDeref t') -> t = t'
+  | _ -> false
+    
+
 let isUsed t prog line =
     match Array.get prog line with
-         Tmp2AddrMov(s, src, dest) -> (src = TmpLoc (Tmp t))
-       | Tmp2AddrBinop(op, src, dest) -> ((src = (TmpLoc (Tmp t)))
-                                           || (dest = Tmp t))
-       | Tmp2AddrReturn (s, arg) -> (arg = TmpLoc (Tmp t))
+         Tmp2AddrMov(s, src, dest) -> isUsedInTmpArg t src
+       | Tmp2AddrBinop(op, src, dest) ->
+            (isUsedInTmpArg t src) || (isUsedInTmpLoc t dest)
+       | Tmp2AddrReturn (s, arg) -> isUsedInTmpArg t arg
        | Tmp2AddrBoolInstr (TmpCmp (s, arg, loc)) ->
-              ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
+            (isUsedInTmpArg t arg) || (isUsedInTmpLoc t loc)
        | Tmp2AddrBoolInstr (TmpTest (arg, loc)) ->
-              ((arg = (TmpLoc (Tmp t))) || (loc = Tmp t))
-       | Tmp2AddrFunCall(fName, args, dest) ->
-            List.exists (fun t' -> TmpLoc (Tmp t) = t') args
+            (isUsedInTmpArg t arg) || (isUsedInTmpLoc t loc)
+       | Tmp2AddrFunCall(retSize, fName, args, dest) ->
+            List.exists (fun arg -> isUsedInTmpArg t arg) args
        | _ -> false
 
 let rec findLiveLinesForTmpRec t prog predsPerLine liveLinesSet currLine =
@@ -109,8 +129,9 @@ let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
+  let tempsWithConstructor = List.map (fun t -> Tmp t) temps in
   let () = L.iter (fun t -> handleTemp t prog predsPerLine
-                      interferenceGraph liveTmpsPerLine) temps in
+                      interferenceGraph liveTmpsPerLine) tempsWithConstructor in
   let lineNums = Array.mapi (fun i -> fun _ -> i) prog in
   let () = A.iter (fun lineNum -> drawEdgesForLine prog lineNum
       (liveTmpsPerLine.(lineNum)) interferenceGraph) lineNums in

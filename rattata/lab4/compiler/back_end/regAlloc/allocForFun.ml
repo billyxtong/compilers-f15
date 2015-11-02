@@ -42,6 +42,14 @@ let translateTmpArg tbl = function
   | TmpLoc (TmpDeref t) -> try AssemLoc (H.find tbl t)
                            with Not_found -> failwith "I don't think this can happen"
 
+let translateTmpLoc tbl = function
+    TmpVar t -> H.find tbl t
+  | TmpDeref t -> (match H.find tbl t with
+                       Reg r -> RegDeref r
+                     | MemAddr mem -> MemAddrDeref mem
+                     | _ -> assert(false))                                        
+                  (* we get rid of MemAddrDeref later *)
+
 let getArgDest paramRegArray i =
     (* First 6 args go into paramRegArray. 7th arg goes 8 above RSP,
        8th arg goes 16 above RSP, etc *)
@@ -83,20 +91,23 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
     let popRegsInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) in
     let resultInstr = (match dest with
                           None -> []
-                        | Some t -> MOV(opSize, AssemLoc (Reg EAX), H.find tbl t)::[]) in
+                        | Some t -> MOV(opSize, AssemLoc (Reg EAX),
+                                       translateTmpLoc tbl t)::[]) in
     (* Now make sure we align RSP to 16 bytes. Note that we know that RSP
        is 8-byte-but-not-16-bye aligned at the moment. *)
     pushRegsInstrs @
     PTR_BINOP(PTR_SUB, Const rspShiftAmount, Reg RSP):: moveInstrs @ [CALL fName]
     @ [PTR_BINOP(PTR_ADD, Const rspShiftAmount, Reg RSP)] @ popRegsInstrs @ resultInstr 
 
-let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr)
-    funcToParamSizeMap : assemInstr list =
+let translate tbl allocdRegs finalOffset paramRegArray
+    funcToParamSizeMap (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
         Tmp2AddrMov(opSize, arg, dest) -> MOV(opSize, translateTmpArg tbl arg,
-                                              H.find tbl dest)::[]
+                                              translateTmpLoc tbl dest)::[]
       | Tmp2AddrBinop(binop, arg, dest) ->
-              INT_BINOP(binop, translateTmpArg tbl arg, H.find tbl dest)::[]
+              INT_BINOP(binop, translateTmpArg tbl arg, translateTmpLoc tbl dest)::[]
+      | Tmp2AddrPtrBinop(binop, arg, dest) ->
+              PTR_BINOP(binop, translateTmpArg tbl arg, translateTmpLoc tbl dest)::[]
       | Tmp2AddrReturn(opSize, arg) ->
         (* Need to pop in opposite order as pushed *)
         let popInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) @ [POP RBP] in
@@ -106,9 +117,9 @@ let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr)
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
       | Tmp2AddrBoolInstr TmpTest(arg, t) ->
-              BOOL_INSTR (TEST (translateTmpArg tbl arg, H.find tbl t))::[]
+              BOOL_INSTR (TEST (translateTmpArg tbl arg, translateTmpLoc tbl t))::[]
       | Tmp2AddrBoolInstr TmpCmp(opSize, arg, t) ->
-              BOOL_INSTR (CMP (opSize, translateTmpArg tbl arg, H.find tbl t))::[]
+              BOOL_INSTR (CMP (opSize, translateTmpArg tbl arg, translateTmpLoc tbl t))::[]
       | Tmp2AddrFunCall(opSize, fName, args, dest) ->
         translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
           opSize fName args dest
@@ -128,11 +139,18 @@ let rec getTempSet instrList tempSet =
            (* Only count things that we write to: this matters so that we don't
               re-allocate for the params (which we never write to, since we move them
               all to new temps immediately *)
-                   Tmp2AddrMov(opSize, src, Tmp dest) -> (let () = H.replace tempSet dest () in
+                   Tmp2AddrMov(opSize, src, TmpVar dest) ->
+                       (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
+                 | Tmp2AddrBinop(op, src, TmpVar dest) ->
+                       (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
+                 | Tmp2AddrFunCall(retSize, fName, args, Some (TmpVar dest)) ->
+                                              (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
-                 | Tmp2AddrBinop(op, src, Tmp dest) -> (let () = H.replace tempSet dest () in
-                                                             getTempSet instrs tempSet)
-                 | Tmp2AddrFunCall(fName, args, Some (Tmp dest)) ->
+                 | Tmp2AddrMov(opSize, src, TmpDeref dest) ->
+                       (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
+                 | Tmp2AddrBinop(op, src, TmpDeref dest) ->
+                       (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
+                 | Tmp2AddrFunCall(retSize, fName, args, Some (TmpDeref dest)) ->
                                               (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
                  | _ -> getTempSet instrs tempSet)
