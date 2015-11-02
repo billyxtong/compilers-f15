@@ -235,15 +235,20 @@ let rec lvalToExpr typee = function
    should both return tmps, so we can just use those too! Yay *)
 let rec handleMemForLVal = function
     TmpVarLVal t -> (TmpVarLVal t, [])
-  | TmpDerefLVal ptr -> let (ptrFinal, instrs) = handleMemForLVal ptr in
-                        (TmpDerefLVal(ptrFinal), instrs)                        
+  (* | TmpDerefLVal ptr -> let (ptrFinal, instrs) = handleMemForLVal ptr in *)
+  (*                       (TmpDerefLVal(ptrFinal), instrs) *)
+  (* | TmpFieldAccessLVal (structName, structptr, fieldName) -> *)
+       
 
 let handleMemForInstr = function
       TmpInfAddrJump j -> TmpInfAddrJump j::[]
     | TmpInfAddrLabel lbl -> TmpInfAddrLabel lbl::[]
     | TmpInfAddrMov (opSize, src, dest) ->
+      (* Note: dest is evaluated first! *)
+        let (destFinal, instrsForDest) = handleMemForLVal dest in
         let (srcFinal, instrsForSrc) = handleMemForExpr src in
-        instrsForSrc @ TmpInfAddrMov(opSize, srcFinal, dest)::[]
+        instrsForDest @ instrsForSrc
+        @ TmpInfAddrMov(opSize, srcFinal, destFinal)::[]
     | TmpInfAddrReturn (retSize, arg) ->
         let (argFinal, instrsForArg) = handleMemForExpr arg in
         instrsForArg @ TmpInfAddrReturn (retSize, argFinal)::[]
