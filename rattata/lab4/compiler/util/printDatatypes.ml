@@ -217,7 +217,8 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
                | None -> thing)
 
 let tmp2AddrFunDefToString (Tmp2AddrFunDef (i,temps,instrList)) =
-  identToString(i) ^ "(" ^ (concat ", " (List.map tmpToString temps)) ^ ") {\n" ^
+  identToString(i) ^ "(" ^ (concat ", "
+                   (List.map (fun (t, s) -> tmpToString t) temps)) ^ ") {\n" ^
   (concat "\n" (List.map tmp2AddrInstrToString instrList)) ^ "}\n"
 
 let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
@@ -254,7 +255,8 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
                | None -> thing)
 
 let tmp3AddrFunDefToString (Tmp3AddrFunDef (i,temps,instrList)) =
-  identToString(i) ^ "(" ^ (concat ", " (List.map tmpToString temps)) ^ ") {\n" ^
+  identToString(i) ^ "(" ^ (concat ", "
+             (List.map (fun (t, s) -> tmpToString t) temps)) ^ ") {\n" ^
   (concat "\n" (List.map tmp3AddrInstrToString instrList)) ^ "}\n"
 
 
@@ -340,7 +342,8 @@ let tmpFieldToString(c,i) = c0typeToString(c) ^ " " ^ identToString(i) ^ ";\n"
 let tmpInfAddrGlobalDeclToString (decl : tmpInfAddrGlobalDecl) =
   match decl with
         TmpInfAddrFunDef (i,temps,instrList) ->
-  identToString(i) ^ "(" ^ (concat ", " (List.map tmpToString temps)) ^ ") {\n" ^
+  identToString(i) ^ "(" ^ (concat ", "
+              (List.map (fun (t,s) -> tmpToString t) temps)) ^ ") {\n" ^
   (concat "\n" (List.map tmpInfAddrInstrToString instrList)) ^ "}\n"
       | TmpStructDef(i, ts) -> "struct " ^ identToString(i) ^ "{\n" ^ 
       (concat "" (List.map tmpFieldToString ts)) ^ "};"

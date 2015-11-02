@@ -64,6 +64,7 @@ type assemProgWonky = wonkyFunDef list
    something) *)
 type tmp = Tmp of int
 type tmpArg = TmpLoc of tmp | TmpConst of const | TmpDeref of tmp
+type tmpParam = tmp * size                
 (* Two Address Code *)
 type tmpBoolInstr = TmpTest of tmpArg * tmp
                    (* No ands between pointers, so test is always
@@ -80,7 +81,7 @@ type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
                    | Tmp2AddrLabel of label
                     (* tmp option because voids have no dest *)
                    | Tmp2AddrFunCall of size * ident * tmpArg list * tmp option
-type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmp list *
+type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmpParam list *
                                         tmp2AddrInstr list
 type tmp2AddrProg = tmp2AddrFunDef list
 
@@ -100,7 +101,7 @@ type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg *  tmp
                   the result anywhere *)
                    | Tmp3AddrFunCall of size * ident * tmpArg list * tmp option
                (* alloc, alloc_array become call malloc *)
-type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmp list *
+type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmpParam list *
                                         tmp3AddrInstr list
 type tmp3AddrProg = tmp3AddrFunDef list
 
@@ -162,7 +163,7 @@ type tmpInfAddrInstr = TmpInfAddrMov of size * tmpExpr * tmpLVal
 type tmpField = c0type * ident
                 
 type tmpInfAddrGlobalDecl =
-    TmpInfAddrFunDef of ident * tmp list * tmpInfAddrInstr list
+    TmpInfAddrFunDef of ident * tmpParam list * tmpInfAddrInstr list
     (* function name, param names, instruction list *)
   | TmpStructDef of ident * tmpField list
     (* still need struct defs until the second pass of converting
