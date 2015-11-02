@@ -304,6 +304,7 @@ and tmpExprToString(tExpr : tmpExpr) =
         TmpBoolExpr(bExpr) -> tmpBoolExprToString(bExpr)
       | TmpIntExpr(iExpr) -> tmpIntExprToString(iExpr)
       | TmpPtrExpr(pExpr) -> tmpPtrExprToString(pExpr)
+      | TmpLValExpr (lval) -> tmpLValToString(lval)                               
 
 and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =
   match tInstr with
@@ -312,15 +313,14 @@ and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =
             concat "" ["cmp"; sizeToString s; " "; tmpExprToString(iExpr1);
                        ", "; tmpExprToString(iExpr2)]
 
-let tmpLValToString (tLVal: tmpLVal) =
+and tmpLValToString (tLVal: tmpLVal) =
   match tLVal with
-       TmpFieldAccessLVal (sName, p, fieldName) ->
-            tmpSharedTypeExprToString (TmpInfAddrFieldAccess(sName, p, fieldName))
-     | TmpArrayAccessLVal (a, idx) ->
-            tmpSharedTypeExprToString (TmpInfAddrArrayAccess(a, idx))
-     | TmpDerefLVal (p) ->
-            tmpSharedTypeExprToString (TmpInfAddrDeref p)
-     | TmpVarLVal t -> tmpToString t
+       TmpFieldAccessLVal (sName, p, fieldName) -> tmpLValToString(p) ^ "->" ^
+                          identToString(fieldName) ^ "(" ^ identToString(fieldName) ^ ")"
+     | TmpArrayAccessLVal (a, idx) -> tmpLValToString(a) ^ "[" ^ tmpIntExprToString(idx)
+                                        ^ "]"
+     | TmpDerefLVal (p) -> "*" ^ tmpLValToString(p)
+     | TmpVarLVal t -> tmpToString(t)
 
 let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
   match t with

@@ -139,11 +139,17 @@ and tmpBoolExpr = TmpBoolArg of tmpArg
 and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
              | TmpPtrExpr of tmpPtrExpr
+             | TmpLValExpr of tmpLVal (* This is necessary because
+               when we have something like x += 1, we're going to
+               first evaluate the lval x, but then we need to do
+               (x + 1), but x is an lval, not an expr. So we need
+               this constructor. It's ok because lvals and exprs
+               basically get treated identically in memStuffToInfAddr *)
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
 (* Note: by this point, we've already reversed the operations for
    cmp. That is, cmp (a,b) followed by jg will jump if b > a *)
                         | TmpInfAddrCmp of size * tmpExpr * tmpExpr
-type tmpLVal = TmpFieldAccessLVal of ident * tmpLVal * ident
+and tmpLVal = TmpFieldAccessLVal of ident * tmpLVal * ident
              | TmpArrayAccessLVal of tmpLVal * tmpIntExpr
              | TmpVarLVal of tmp
              | TmpDerefLVal of tmpLVal
