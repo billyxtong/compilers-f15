@@ -33,12 +33,14 @@ let rec makeTmpToAssemLocMap tmpToColorMap tmpList offsetIncr regArray resultMap
 
 let translateTmpArg tbl = function
     TmpConst c -> Const c
-  | TmpLoc t -> (try AssemLoc (H.find tbl t)
+  | TmpLoc (TmpVar t) -> (try AssemLoc (H.find tbl t)
                  (* The "with" means there's a tmp that is used, but we
                     never assigned an AssemLoc to it because we never
                     wrote to it. This can happen if the variable was never initialized,
                     but it was ok because the line was unreachable *)
                  with Not_found -> AssemLoc (MemAddr(RSP, -666)))
+  | TmpLoc (TmpDeref t) -> try AssemLoc (H.find tbl t)
+                           with Not_found -> failwith "I don't think this can happen"
 
 let getArgDest paramRegArray i =
     (* First 6 args go into paramRegArray. 7th arg goes 8 above RSP,
@@ -49,7 +51,8 @@ let getArgDest paramRegArray i =
     MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray))
       (* this puts the 7th arg at 0(rsp) BEFORE the call. Which should be 8(rsp) after *)
 
-let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
+let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
+      opSize fName args dest =
     (* 1. Figure out how many args we'll need to put on the stack.
        2. Figure out how much we'll need to decrease RSP by, both to make
        room for the stack args, and to make sure it's 16-byte aligned.
@@ -71,7 +74,8 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
                           else spaceForArgs + 8) in
             (* Adding 8 makes it 16-byte-aligned if it isn't *)
     let moveInstrs = List.mapi (fun i -> fun arg ->
-        MOV(translateTmpArg tbl arg, getArgDest paramRegArray i)) args in
+        MOV((H.find funcToParamSizeMap fName).(i),
+          translateTmpArg tbl arg, getArgDest paramRegArray i)) args in
     (* See if we need to move EAX to a certain result tmp (we wouldn't have to
        for void function calls *)
     (* See which registers we need to save (only the ones we're using *)
@@ -79,32 +83,35 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest =
     let popRegsInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) in
     let resultInstr = (match dest with
                           None -> []
-                        | Some t -> MOV(AssemLoc (Reg EAX), H.find tbl t)::[]) in
+                        | Some t -> MOV(opSize, AssemLoc (Reg EAX), H.find tbl t)::[]) in
     (* Now make sure we align RSP to 16 bytes. Note that we know that RSP
        is 8-byte-but-not-16-bye aligned at the moment. *)
     pushRegsInstrs @
-    SUBQ(Const rspShiftAmount, Reg RSP):: moveInstrs @ [CALL fName]
-    @ [ADDQ(Const rspShiftAmount, Reg RSP)] @ popRegsInstrs @ resultInstr 
+    PTR_BINOP(PTR_SUB, Const rspShiftAmount, Reg RSP):: moveInstrs @ [CALL fName]
+    @ [PTR_BINOP(PTR_ADD, Const rspShiftAmount, Reg RSP)] @ popRegsInstrs @ resultInstr 
 
-let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr) : assemInstr list =
+let translate tbl allocdRegs finalOffset paramRegArray (instr : tmp2AddrInstr)
+    funcToParamSizeMap : assemInstr list =
    match instr with
-        Tmp2AddrMov(arg, dest) -> MOV(translateTmpArg tbl arg, H.find tbl dest)::[]
+        Tmp2AddrMov(opSize, arg, dest) -> MOV(opSize, translateTmpArg tbl arg,
+                                              H.find tbl dest)::[]
       | Tmp2AddrBinop(binop, arg, dest) ->
               INT_BINOP(binop, translateTmpArg tbl arg, H.find tbl dest)::[]
-      | Tmp2AddrReturn(arg) ->
+      | Tmp2AddrReturn(opSize, arg) ->
         (* Need to pop in opposite order as pushed *)
         let popInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) @ [POP RBP] in
-                               MOV(translateTmpArg tbl arg, Reg EAX)::
-                               ADDQ(Const finalOffset, Reg RSP)::[]
+                               MOV(opSize, translateTmpArg tbl arg, Reg EAX)::
+                               PTR_BINOP(PTR_ADD, Const finalOffset, Reg RSP)::[]
                                @ (popInstrs)@ RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
       | Tmp2AddrBoolInstr TmpTest(arg, t) ->
               BOOL_INSTR (TEST (translateTmpArg tbl arg, H.find tbl t))::[]
-      | Tmp2AddrBoolInstr TmpCmp(arg, t) ->
-              BOOL_INSTR (CMP (translateTmpArg tbl arg, H.find tbl t))::[]
-      | Tmp2AddrFunCall(fName, args, dest) ->
-        translateFunCall tbl allocdRegs finalOffset paramRegArray fName args dest
+      | Tmp2AddrBoolInstr TmpCmp(opSize, arg, t) ->
+              BOOL_INSTR (CMP (opSize, translateTmpArg tbl arg, H.find tbl t))::[]
+      | Tmp2AddrFunCall(opSize, fName, args, dest) ->
+        translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
+          opSize fName args dest
                                                  
 
 (* We want to find the amount of memory allocated for this function's local vars:
@@ -121,7 +128,7 @@ let rec getTempSet instrList tempSet =
            (* Only count things that we write to: this matters so that we don't
               re-allocate for the params (which we never write to, since we move them
               all to new temps immediately *)
-                   Tmp2AddrMov(src, Tmp dest) -> (let () = H.replace tempSet dest () in
+                   Tmp2AddrMov(opSize, src, Tmp dest) -> (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
                  | Tmp2AddrBinop(op, src, Tmp dest) -> (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
@@ -144,9 +151,10 @@ let mappingForParam argOffsetAboveRbp paramRegArray i =
     MemAddr(RBP, argOffsetAboveRbp + offsetFromArgStart)
 
 let addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params =
+    let paramTmps = List.map (fun (t, paramSize) -> t) params in
     List.iteri (fun i -> fun p ->
         H.add tmpToAssemLocMap p (mappingForParam argOffsetAboveRbp
-                                    paramRegArray i)) params
+                                    paramRegArray i)) paramTmps
 
 let combineForMaxColor t color currMax = max color currMax
 
@@ -157,7 +165,8 @@ let getUsedRegs maxColor allocableRegList =
     (* have to convert it back to list without indices *)
     List.map (fun (i,p) -> p) filtered
 
-let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assemFunDef =
+let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
+  funcToParamSizeMap : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
   let allocableRegList = [EBX; R10; R11; R12; R13; R14] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
@@ -183,8 +192,10 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef) : assem
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)
   let finalInstrs = pushInstrs @
-  MOVQ(AssemLoc (Reg RSP), Reg RBP) :: SUBQ(Const finalOffset, Reg RSP):: [] @
-  (List.concat (List.map (translate tmpToAssemLocMap allocdRegs finalOffset paramRegArray) instrs)) in
+  MOV(BIT64, AssemLoc (Reg RSP), Reg RBP)
+  :: PTR_BINOP (PTR_SUB, Const finalOffset, Reg RSP):: [] @
+  (List.concat (List.map (translate tmpToAssemLocMap allocdRegs finalOffset
+                            paramRegArray funcToParamSizeMap) instrs)) in
   AssemFunDef(fName, finalInstrs)
 
 (* MAKE SURE NUMBER OF PUSH/POPS MATCH UP/SUM TO AN EVEN NUMBER
