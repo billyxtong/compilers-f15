@@ -269,6 +269,7 @@ let rec tmpSharedTypeExprToString(t : tmpSharedTypeExpr) =
       | TmpInfAddrArrayAccess(p,i) -> tmpPtrExprToString(p) ^ "[" ^ 
                                       tmpIntExprToString(i) ^ "]"
       | TmpInfAddrDeref(p) -> "*" ^ tmpPtrExprToString(p)
+      | TmpLValExpr (lval) -> tmpLValToString(lval)                               
 
 and tmpPtrExprToString(p : tmpPtrExpr) =
   match p with
@@ -304,7 +305,6 @@ and tmpExprToString(tExpr : tmpExpr) =
         TmpBoolExpr(bExpr) -> tmpBoolExprToString(bExpr)
       | TmpIntExpr(iExpr) -> tmpIntExprToString(iExpr)
       | TmpPtrExpr(pExpr) -> tmpPtrExprToString(pExpr)
-      | TmpLValExpr (lval) -> tmpLValToString(lval)                               
 
 and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =
   match tInstr with
