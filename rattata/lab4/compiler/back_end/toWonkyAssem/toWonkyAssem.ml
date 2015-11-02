@@ -5,21 +5,21 @@ open Datatypesv1
 let instrToWonky = function
   (* The modulo is left in EDX, the quotient is in EAX *)
     INT_BINOP(FAKEDIV, divisor, dest) ->
-        AssemInstr(MOV(AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
-        ::AssemInstr(MOV(AssemLoc (Reg EAX), dest))::[]
+        AssemInstr(MOV(BIT32, AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
+        ::AssemInstr(MOV(BIT32, AssemLoc (Reg EAX), dest))::[]
   | INT_BINOP(FAKEMOD, divisor, dest) ->
-        AssemInstr(MOV(AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
-        ::AssemInstr(MOV(AssemLoc (Reg EDX), dest))::[]
+        AssemInstr(MOV(BIT32, AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
+        ::AssemInstr(MOV(BIT32, AssemLoc (Reg EDX), dest))::[]
   | INT_BINOP(MUL, src, MemAddr memDest) ->
-        AssemInstr(MOV (AssemLoc (MemAddr memDest), AllocForFun.spillReg))
+        AssemInstr(MOV (BIT32, AssemLoc (MemAddr memDest), AllocForFun.spillReg))
         ::AssemInstr(INT_BINOP(MUL, src, AllocForFun.spillReg))
-        ::AssemInstr(MOV(AssemLoc AllocForFun.spillReg, MemAddr memDest))::[]
+        ::AssemInstr(MOV(BIT32, AssemLoc AllocForFun.spillReg, MemAddr memDest))::[]
   | INT_BINOP(LSHIFT, src, dest) ->
-        AssemInstr(MOV(src, Reg ECX))
+        AssemInstr(MOV(BIT32, src, Reg ECX))
         ::AssemInstr(INT_BINOP (LSHIFT, AssemLoc(Reg ECX), dest))
         ::[]
   | INT_BINOP(RSHIFT, src, dest) ->
-        AssemInstr(MOV(src, Reg ECX))
+        AssemInstr(MOV(BIT32, src, Reg ECX))
         ::AssemInstr(INT_BINOP (RSHIFT, AssemLoc(Reg ECX), dest))
         ::[]
   | instr -> [AssemInstr instr]
