@@ -21,6 +21,10 @@ let getSizeForType = function
   | Pointer _ -> BIT64
   | _ -> let () = print_string("I'm not sure if this case is valid or not,\
                                 assert false for now") in assert(false)
+let getSizeForExpr = function
+    TmpIntExpr _ -> BIT32
+  | TmpBoolExpr _ -> BIT32
+  | TmpPtrExpr _ -> BIT64
 
 let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
@@ -343,8 +347,6 @@ and trans_lval retTmp retLabel idToTmpMap = function
         let (newMap, ptrTmpLVal, instrs) =
           trans_lval retTmp retLabel idToTmpMap ptrLVal in
         (newMap, TmpDerefLVal ptrTmpLVal, instrs)
-        
-       
 
 and trans_stmts retTmp retLabel idToTmpMap = function
      A.TypedPostElabDecl (id, idType)::stmts ->
@@ -353,23 +355,15 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         let t = Temp.create() in
         let newMap = M.add idToTmpMap id t in
         trans_stmts retTmp retLabel newMap stmts
-   (* | A.TypedPostElabAssignStmt (lval, asnop, e)::stmts -> *)
-   (*      let (instrs_for_move, e_result) = *)
-   (*      let t = Temp.create() in *)
-   (*      let newMap = M.add idToTmpMap id t in *)
-   (*      instrs_for_move @ trans_stmts retTmp retLabel newMap stmts *)
    | A.TypedPostElabAssignStmt (lval, asnop, e)::stmts ->
-        let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
-          (* trans_exp gives us the instructions it generated, and also where it
-             ended up putting the value. We then update the binding in idToTmpMap  *)
-        let (newMap, tmpLval) = (match lval with
-            A.TypedPostElabVarLVal id -> let t = get_or_make_tmp id idToTmpMap in
-                               (M.add idToTmpMap id t, TmpVarLVal (Tmp t))
-          | A.TypedPostElabFieldLVal 
-
-          )
-        instrs_for_e @
-        TmpInfAddrMov (TmpIntExpr eInfAddr, TmpVarLVal (Tmp t))
+     (* Note: lval gets evaluated first! *)
+     let (newMap, tmplval, instrsForLVal) =
+         trans_lval retTmp retLabel idToTmpMap lval in
+     let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
+r          (* trans_exp gives us the instructions it generated, and also where it
+             ended up putting the value. We then update the binding in idToTmpMap *)
+        instrsForLVal @ instrs_for_e @
+        TmpInfAddrMov (getSizeForExpr eInfAddr, eInfAddr, tmplval)
         ::trans_stmts retTmp retLabel newMap stmts
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
        trans_cond retTmp retLabel idToTmpMap (e, ifStmts, elseStmts) @
