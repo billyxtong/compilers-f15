@@ -20,7 +20,7 @@ let rec c0typeToString (c : c0type) =
         
 let constToString (c : const) = string_of_int(c)
 
-let regToString (r : reg) = 
+let regToString32 (r : reg) = 
   match r with
         EAX -> "%eax"
       | EBX -> "%ebx" (* callee-saved *)
@@ -58,17 +58,24 @@ let regToString64 (r : reg) =
       | R14 -> "%r14" (* callee-saved *)
       | R15 -> "%r15" (* callee-saved *)
 
+let regToString (r : reg) regSize =
+    match regSize with
+        BIT32 -> regToString32 r
+      | BIT64 -> regToString64 r
+
 let memAddrToString ((register, offset) : memAddr) = 
-    concat "" [string_of_int(offset); "("; regToString(register); ")"]
+    concat "" [string_of_int(offset); "("; regToString64(register); ")"]
 
-let assemLocToString(loc : assemLoc) =
+let assemLocToString(loc : assemLoc) locSize =
   match loc with
-        Reg(r) -> regToString(r)
+        Reg(r) -> regToString r locSize
       | MemAddr(register, offset) -> memAddrToString(register, offset)
+      | RegDeref(r) -> "(" ^ regToString64(r) ^ ")"
+      | MemAddrDeref(register, offset) -> memAddrToString(register, offset)
 
-let assemArgToString (arg : assemArg) = 
+let assemArgToString (arg : assemArg) argSize = 
   match arg with
-        AssemLoc(loc) -> assemLocToString(loc)
+        AssemLoc(loc) -> assemLocToString loc argSize
       | Const(c) -> concat "" ["$"; constToString(c)]
 
 let intBinopToString (op: intBinop) =
@@ -86,22 +93,22 @@ let intBinopToString (op: intBinop) =
 
 let boolInstrToString (instr : boolInstr) =
   match instr with
-        TEST(arg1, arg2) -> concat "" ["testl "; assemArgToString(arg1); ", "; 
-                                                assemLocToString(arg2)]
+        TEST(arg1, arg2) -> concat "" ["testl "; assemArgToString arg1 BIT32;
+                                       ", "; assemLocToString arg2 BIT32]
       | CMP(s, arg1, arg2) -> 
           (match s with
-                 BIT32 -> concat "" ["cmpl "; assemArgToString(arg1); ", "; 
-                                               assemLocToString(arg2)]
-               | BIT64 -> concat "" ["cmpq "; assemArgToString(arg1); ", "; 
-                                               assemLocToString(arg2)])
+                 BIT32 -> concat "" ["cmpl "; assemArgToString(arg1) s; ", "; 
+                                               assemLocToString(arg2) s]
+               | BIT64 -> concat "" ["cmpq "; assemArgToString(arg1) s; ", "; 
+                                               assemLocToString(arg2) s])
 
 let assemIntInstrToString((intOp, src, dest) : assemIntInstr) =
     let srcString = (match (intOp, src) with
                        (LSHIFT, AssemLoc (Reg ECX)) -> "%cl"
                      | (RSHIFT, AssemLoc (Reg ECX)) -> "%cl"
-                     | _ -> assemArgToString(src)) in
+                     | _ -> assemArgToString(src) BIT32) in
     concat "" [intBinopToString intOp; srcString; ", "; 
-               assemLocToString(dest)]
+               assemLocToString(dest) BIT32]
 
 let jumpToString (j : jump) =
   match j with
@@ -122,19 +129,19 @@ let assemInstrToString(instr : assemInstr) =
         MOV(s, src, dest) ->
           (match s with
                  BIT32 -> concat "" ["movl "; 
-                          assemArgToString(src); ", ";
-                          assemLocToString(dest)]
+                          assemArgToString(src) s; ", ";
+                          assemLocToString(dest) s]
                | BIT64 -> concat "" ["movq "; 
-                          assemArgToString(src); ", ";
-                          assemLocToString(dest)])
+                          assemArgToString(src) s; ", ";
+                          assemLocToString(dest) s])
       | PTR_BINOP(op,src,dest) -> 
           (match op with
                  PTR_ADD -> concat "" ["addq "; 
-                            assemArgToString(src); ", ";
-                            assemLocToString(dest)]
+                            assemArgToString(src) BIT64; ", ";
+                            assemLocToString(dest) BIT64]
                | PTR_SUB -> concat "" ["subq "; 
-                            assemArgToString(src); ", ";
-                            assemLocToString(dest)])
+                            assemArgToString(src) BIT64; ", ";
+                            assemLocToString(dest) BIT64])
       | INT_BINOP(intinstr) -> assemIntInstrToString(intinstr)
       | PUSH(r) -> concat "" ["push "; regToString64(r)]
       | POP(r) -> concat "" ["pop "; regToString64(r)]
@@ -158,7 +165,7 @@ let assemInstrWonkyToString(wonkyInstr : assemInstrWonky) =
       | CDQ -> "cdq"
       | IDIV(divisor) ->
            concat "" ["idivl "; 
-           assemArgToString(divisor)]
+           assemArgToString(divisor) BIT32]
 
 let assemFunDefWonkyToString(WonkyFunDef(funcName, instrList)) =
   ".globl " ^ identToString(funcName) ^ "\n" ^
@@ -170,39 +177,43 @@ let assemProgWonkyToString(prog: assemProgWonky) =
 
 let tmpToString(Tmp(t) : tmp) = concat "" ["t"; string_of_int t]
 
+let tmpLocToString (tLoc : tmpLoc) =
+    match tLoc with
+       TmpVar t -> tmpToString t
+     | TmpDeref(t) -> "*" ^ tmpToString(t)                
+
 let tmpArgToString(tArg : tmpArg) = 
   match tArg with
-        TmpLoc(t) -> tmpToString(t)
+        TmpLoc(t) -> tmpLocToString(t)
       | TmpConst(c) -> constToString(c)
-      | TmpDeref(t) -> "*" ^ tmpToString(t)
 
 let tmpBoolInstrToString(tmpbool : tmpBoolInstr) =
   match tmpbool with
         TmpTest(arg, t) -> concat "" ["test "; tmpArgToString(arg); ", "; 
-                                               tmpToString(t)]
+                                               tmpLocToString(t)]
       | TmpCmp(s, arg, t) ->
          (match s with
                 BIT32 -> concat "" ["cmpl "; tmpArgToString(arg); ", "; 
-                                              tmpToString(t)]
+                                              tmpLocToString(t)]
               | BIT64 -> concat "" ["cmpq "; tmpArgToString(arg); ", "; 
-                                              tmpToString(t)])
+                                              tmpLocToString(t)])
 
 let tmp2AddrBinopToString((binop, arg, temp) : tmp2AddrBinop) =
-    concat "" [tmpToString(temp); " <-- "; 
-    tmpToString(temp); intBinopToString(binop);
+    concat "" [tmpLocToString(temp); " <-- "; 
+    tmpLocToString(temp); intBinopToString(binop);
     tmpArgToString(arg)]
      
 let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) = 
   match tmp2instr with
-        Tmp2AddrMov(s, arg, temp) -> concat "" [tmpToString(temp); " <--";
+        Tmp2AddrMov(s, arg, temp) -> concat "" [tmpLocToString(temp); " <--";
                                                 sizeToString s; " ";
                                       tmpArgToString(arg)]
       | Tmp2AddrPtrBinop(op, arg, temp) -> 
           (match op with
-                 PTR_ADD -> concat "" [tmpToString temp; " <-- ";
-                                 tmpToString temp; "addq "; tmpArgToString arg]
-               | PTR_SUB -> concat "" [tmpToString temp; " <-- ";
-                                 tmpToString temp; "subq "; tmpArgToString arg])
+                 PTR_ADD -> concat "" [tmpLocToString temp; " <-- ";
+                                 tmpLocToString temp; "addq "; tmpArgToString arg]
+               | PTR_SUB -> concat "" [tmpLocToString temp; " <-- ";
+                                 tmpLocToString temp; "subq "; tmpArgToString arg])
       | Tmp2AddrBinop(tmpbinop) -> tmp2AddrBinopToString(tmpbinop)
       | Tmp2AddrReturn(s, tmparg) -> 
             concat "" ["return"; sizeToString s; " "; tmpArgToString(tmparg)]
@@ -212,7 +223,7 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
       | Tmp2AddrFunCall(s, i,args,tmpOpt) ->
           let thing = identToString(i) ^ "(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
           (match tmpOpt with
-                 Some t -> tmpToString(t) ^ " <--" ^ sizeToString s
+                 Some t -> tmpLocToString(t) ^ " <--" ^ sizeToString s
                              ^ " " ^ thing
                | None -> thing)
 
@@ -226,20 +237,20 @@ let tmp2AddrProgToString(tmp2addrprog : tmp2AddrProg) =
   concat "\n" (List.map tmp2AddrFunDefToString tmp2addrprog) ^ "\n"
 
 let tmp3AddrBinopToString((binop, arg1, arg2, temp) : tmp3AddrBinop) =
-    concat "" [tmpToString(temp); " <-- "; 
+    concat "" [tmpLocToString(temp); " <-- "; 
     tmpArgToString(arg1); intBinopToString(binop); 
     tmpArgToString(arg2)]
 
 let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) = 
   match tmp3instr with
         Tmp3AddrMov(s, arg, temp) -> 
-            concat "" [tmpToString(temp); " <--"; sizeToString s; " "; 
+            concat "" [tmpLocToString(temp); " <--"; sizeToString s; " "; 
             tmpArgToString(arg)]
       | Tmp3AddrPtrBinop(op, arg1, arg2, temp) -> 
           (match op with
-                 PTR_ADD -> concat "" [tmpToString(temp); "<-- ";
+                 PTR_ADD -> concat "" [tmpLocToString(temp); "<-- ";
                          tmpArgToString(arg1); "addq "; tmpArgToString(arg2)] 
-               | PTR_SUB -> concat "" [tmpToString(temp); "<-- ";
+               | PTR_SUB -> concat "" [tmpLocToString(temp); "<-- ";
                          tmpArgToString(arg1); "subq "; tmpArgToString(arg2)])
       | Tmp3AddrBinop(tmpbinop) -> tmp3AddrBinopToString(tmpbinop)
       | Tmp3AddrReturn(s, tmparg) -> 
@@ -250,7 +261,7 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
       | Tmp3AddrFunCall(s, i,args,tmpOpt) ->
           let thing = identToString(i) ^ "(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
           (match tmpOpt with
-                 Some t -> tmpToString(t) ^ " <--" ^ sizeToString s
+                 Some t -> tmpLocToString(t) ^ " <--" ^ sizeToString s
                            ^ " " ^ thing
                | None -> thing)
 

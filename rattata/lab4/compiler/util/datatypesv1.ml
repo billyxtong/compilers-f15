@@ -18,7 +18,7 @@ type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 |
 
 (* actually I think I'm just going to use old memAddr type for now
    (which is only direct offsets *)
-type memAddr = reg * int                                   
+type memAddr = reg * int 
 
 (* These are for actual assembly instructions. Tmps are not allowed. *)
 type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
@@ -26,7 +26,8 @@ type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
               | RSHIFT | LSHIFT
 type ptrBinop = PTR_ADD | PTR_SUB
 type size = BIT32 | BIT64                
-type assemLoc = Reg of reg | MemAddr of memAddr
+type assemLoc = Reg of reg | MemAddr of memAddr | RegDeref of reg
+              | MemAddrDeref of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const
 type boolInstr = TEST of assemArg * assemLoc
                | CMP of size * assemArg * assemLoc
@@ -63,16 +64,17 @@ type assemProgWonky = wonkyFunDef list
    to register allocation, at least not in L1 (unless I'm missing
    something) *)
 type tmp = Tmp of int
-type tmpArg = TmpLoc of tmp | TmpConst of const | TmpDeref of tmp
+type tmpLoc = TmpVar of tmp | TmpDeref of tmp
+type tmpArg = TmpLoc of tmpLoc | TmpConst of const
 type tmpParam = tmp * size                
 (* Two Address Code *)
-type tmpBoolInstr = TmpTest of tmpArg * tmp
+type tmpBoolInstr = TmpTest of tmpArg * tmpLoc
                    (* No ands between pointers, so test is always
                       32-bit *)
-                  | TmpCmp of size * tmpArg * tmp
-type tmp2AddrBinop = intBinop * tmpArg * tmp
-type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
-                   | Tmp2AddrPtrBinop of ptrBinop * tmpArg * tmp
+                  | TmpCmp of size * tmpArg * tmpLoc
+type tmp2AddrBinop = intBinop * tmpArg * tmpLoc
+type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmpLoc
+                   | Tmp2AddrPtrBinop of ptrBinop * tmpArg * tmpLoc
                    | Tmp2AddrBinop of tmp2AddrBinop
                  (* PtrBinops can only be ptr + const, ptr - const *)
                    | Tmp2AddrReturn of size * tmpArg
@@ -80,16 +82,16 @@ type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmp
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
                     (* tmp option because voids have no dest *)
-                   | Tmp2AddrFunCall of size * ident * tmpArg list * tmp option
+                   | Tmp2AddrFunCall of size * ident * tmpArg list * tmpLoc option
 type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmpParam list *
                                         tmp2AddrInstr list
 type tmp2AddrProg = tmp2AddrFunDef list
 
 (* Three Address Code *)
-type tmp3AddrBinop = intBinop * tmpArg * tmpArg *  tmp
-type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg *  tmp
+type tmp3AddrBinop = intBinop * tmpArg * tmpArg * tmpLoc
+type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg * tmpLoc
                 (* ptr derefences are subsumed by mov *)
-                   | Tmp3AddrPtrBinop of ptrBinop * tmpArg * tmpArg * tmp
+                   | Tmp3AddrPtrBinop of ptrBinop * tmpArg * tmpArg * tmpLoc
                  (* PtrBinops can only be ptr + const, ptr - const *)
                    | Tmp3AddrBinop of tmp3AddrBinop
                    | Tmp3AddrReturn of size * tmpArg
@@ -99,7 +101,7 @@ type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg *  tmp
                   (* function name, arg list, dest. Dest is an
                   option because void function don't need to move
                   the result anywhere *)
-                   | Tmp3AddrFunCall of size * ident * tmpArg list * tmp option
+                   | Tmp3AddrFunCall of size * ident * tmpArg list * tmpLoc option
                (* alloc, alloc_array become call malloc *)
 type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmpParam list *
                                         tmp3AddrInstr list
