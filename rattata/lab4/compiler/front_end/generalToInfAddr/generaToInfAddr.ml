@@ -137,10 +137,16 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
                                        A.EQ, e2)] in
          (trans_cond retTmp retLabel newMap (c, astForIf, astForElse),
           TmpIntArg (TmpLoc (Tmp ternary_result_tmp)))
-     | A.IntSharedExpr (A.FunCall (fName, argList)) ->
+     | A.IntSharedExpr e ->
+         let (instrs, eInfAddr) = trans_shared_expr retTmp retLabel idToTmpMap e in
+         (instrs, TmpIntSharedExpr eInfAddr)
+
+and trans_shared_expr retTmp retLabel idToTmpMap = function
+    A.FunCall (fName, argList) ->
          let (instrs, argExps) = trans_fun_args retTmp retLabel fName
              idToTmpMap argList in
-         (instrs, TmpIntSharedExpr (TmpInfAddrFunCall(fName, argExps)))
+         (instrs, TmpInfAddrFunCall(fName, argExps))
+  | A.ArrayAccess (arrayExpr, idxExpr) -> assert(false)
 
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
@@ -383,7 +389,7 @@ r          (* trans_exp gives us the instructions it generated, and also where i
         let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
         (* Move our value to the ret tmp, then jump to the return *)
         instrs_for_e @
-        TmpInfAddrMov(eInfAddr, retTmp)::
+        TmpInfAddrMov(getSizeForExpr eInfAddr, eInfAddr, retTmp)::
         TmpInfAddrJump(JMP_UNCOND, retLabel) :: []
    | A.TypedPostElabAssert e :: stmts ->
      (* If e is true we proceed on, else we call the abort function, with
@@ -392,7 +398,8 @@ r          (* trans_exp gives us the instructions it generated, and also where i
                                      [A.VoidFunCall("abort", [])])::[] in
         trans_stmts retTmp retLabel idToTmpMap callAbortAst
    | A.VoidFunCall (fName, argList)::stmts ->
-        let (instrs, argExps) = trans_fun_args retTmp retLabel idToTmpMap argList in
+        let (instrs, argExps) = trans_fun_args retTmp retLabel fName
+                                idToTmpMap argList in
         instrs @ TmpInfAddrVoidFunCall(fName, argExps)::[]
         @ trans_stmts retTmp retLabel idToTmpMap stmts
    | A.TypedPostElabVoidReturn::stmts -> TmpInfAddrJump(JMP_UNCOND, retLabel)::[]
