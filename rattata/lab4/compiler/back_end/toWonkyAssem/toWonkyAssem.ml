@@ -11,9 +11,10 @@ let instrToWonky = function
         AssemInstr(MOV(BIT32, AssemLoc dest, Reg EAX))::CDQ::IDIV divisor
         ::AssemInstr(MOV(BIT32, AssemLoc (Reg EDX), dest))::[]
   | INT_BINOP(MUL, src, MemAddr memDest) ->
-        AssemInstr(MOV (BIT32, AssemLoc (MemAddr memDest), AllocForFun.spillReg))
-        ::AssemInstr(INT_BINOP(MUL, src, AllocForFun.spillReg))
-        ::AssemInstr(MOV(BIT32, AssemLoc AllocForFun.spillReg, MemAddr memDest))::[]
+        AssemInstr(MOV (BIT32, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg))
+        ::AssemInstr(INT_BINOP(MUL, src, AllocForFun.firstSpillReg))
+        ::AssemInstr(MOV(BIT32, AssemLoc AllocForFun.firstSpillReg,
+                         MemAddr memDest))::[]
   | INT_BINOP(LSHIFT, src, dest) ->
         AssemInstr(MOV(BIT32, src, Reg ECX))
         ::AssemInstr(INT_BINOP (LSHIFT, AssemLoc(Reg ECX), dest))
