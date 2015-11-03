@@ -39,9 +39,9 @@ let addTypeToShared e = function
   | _ -> assert(false)                   
 
 let addTypeToTmp t = function
-    INT -> TmpIntExpr (TmpIntArg (TmpLoc (Tmp t)))
-  | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc (Tmp t)))
-  | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc (Tmp t)))
+    INT -> TmpIntExpr (TmpIntArg (TmpLoc (TmpVar (Tmp t))))
+  | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc (TmpVar (Tmp t))))
+  | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar (Tmp t))))
   | _ -> assert(false)                   
 
 
@@ -70,9 +70,10 @@ let getRHSForAsnop lval rhsExpr = function
 let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     let max_shift = A.IntConst 31 in
     let new_id = GenUnusedID.create () in
+    let new_lval = A.TypedPostElabVarLVal new_id in
     let result_tmp = Temp.create() in
     let newMap = M.add idToTmpMap new_id result_tmp in
-        (* whatever gets put in new_id should end up in result_tmp *)
+        (* whatever gets put in new_lval should end up in result_tmp *)
       (* Now: we need one for the div-by-zero instr we're about to add *)
         (* NOTE: e2 not e1!! *)
     let baseCaseShiftOp = (match op with
@@ -82,11 +83,13 @@ let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     (* Here's the trick: we actually have to evaluate the left hand size
        (the thing being shifted) first, because of side effects. *)
     let lhs_id = GenUnusedID.create () in
-    let evaluateLHS = A.TypedPostElabAssignStmt(lhs_id, A.EQ, A.IntExpr e1) in
+    let lhs_lval = A.TypedPostElabVarLVal lhs_id in
+    let evaluateLHS = A.TypedPostElabAssignStmt(lhs_lval, A.EQ, A.IntExpr e1) in
     (* We also need to make sure to only evluate the RHS once, because
        of side effects. *)
     let rhs_id = GenUnusedID.create () in
-    let evaluateRHS = A.TypedPostElabAssignStmt(rhs_id, A.EQ, A.IntExpr e2) in
+    let rhs_lval = A.TypedPostElabVarLVal rhs_id in
+    let evaluateRHS = A.TypedPostElabAssignStmt(rhs_lval, A.EQ, A.IntExpr e2) in
     let isNonNegative = A.GreaterThan(A.IntSharedExpr (A.Ident rhs_id),
                                       A.IntConst (-1)) in
     let isSmallEnough = A.LogNot (A.GreaterThan(A.IntSharedExpr (A.Ident rhs_id),
@@ -94,15 +97,15 @@ let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     let condition = A.LogAnd (isNonNegative, isSmallEnough) in
           (* If shift is too big, or is negative, div by zero.
              Else, do the shift *)
-    let doTheShift = A.TypedPostElabAssignStmt(new_id, A.EQ, A.IntExpr
+    let doTheShift = A.TypedPostElabAssignStmt(new_lval, A.EQ, A.IntExpr
                  (A.BaseCaseShift(A.IntSharedExpr (A.Ident lhs_id), baseCaseShiftOp,
                                   A.IntSharedExpr (A.Ident rhs_id))))::[] in
-    let divByZero = A.TypedPostElabAssignStmt(new_id, A.EQ, A.IntExpr
+    let divByZero = A.TypedPostElabAssignStmt(new_lval, A.EQ, A.IntExpr
                  (A.ASTBinop(A.IntConst 666, FAKEDIV, A.IntConst 0)))::[] in
     let shiftCond = A.TypedPostElabIf(condition, doTheShift, divByZero) in
        (trans_stmts retTmp retLabel newMap
              (evaluateLHS::evaluateRHS::shiftCond::[]),
-       TmpIntArg (TmpLoc (Tmp result_tmp)))
+       TmpIntArg (TmpLoc (TmpVar (Tmp result_tmp))))
 
 and trans_exp retTmp retLabel idToTmpMap = function
       A.IntExpr e -> let (instrs, e') = trans_int_exp retTmp retLabel idToTmpMap e
@@ -128,7 +131,7 @@ and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
                          [TmpInfAddrMov(getSizeForArg i, e,
                                         TmpVarLVal newTmps.(i))])) in
       let newTmpExprs = List.map (Array.to_list newTmps)
-            (fun t -> TmpIntExpr (TmpIntArg (TmpLoc t))) in
+            (fun t -> TmpIntExpr (TmpIntArg (TmpLoc (TmpVar t)))) in
       (instrs, newTmpExprs)
 
 and trans_ptr_exp retTmp retLabel idToTmpMap = function
@@ -211,11 +214,12 @@ and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
          we can just recurse on a new conditional, with that var as
          the condition *)
       let ternary_result_tmp = Temp.create() in
-      let ternary_result_id = GenUnusedID.create() in
+      let ternary_result_id = GenUnusedID.create () in
+      let ternary_result_lval = A.TypedPostElabVarLVal ternary_result_id in
       let newMap = M.add idToTmpMap ternary_result_id ternary_result_tmp in
-      let astForIf = [A.TypedPostElabAssignStmt (ternary_result_id,
+      let astForIf = [A.TypedPostElabAssignStmt (ternary_result_lval,
                                                A.EQ, e1)] in
-      let astForElse = [A.TypedPostElabAssignStmt (ternary_result_id,
+      let astForElse = [A.TypedPostElabAssignStmt (ternary_result_lval,
                                                  A.EQ, e2)] in
       let ternary_instrs = trans_cond retTmp retLabel newMap
                            (c, astForIf, astForElse) in
@@ -234,7 +238,7 @@ and trans_bool_exp retTmp retLabel idToTmpMap e dest =
         A.BoolConst c ->
             (TmpInfAddrMov(getSizeForType BOOL, TmpBoolExpr
                              (TmpBoolArg (TmpConst c)), (TmpVarLVal (Tmp t)))
-            ::[], Tmp t)
+            ::[], TmpVar (Tmp t))
       | _ ->
     (* Ok this is kind of hacky but here it is: the functions that
        take "if (e) t = true; else t = false;" to infAddr all take
@@ -242,16 +246,17 @@ and trans_bool_exp retTmp retLabel idToTmpMap e dest =
        create an ident that is guaranteed to not already be an ident
        (GenUnusedID basically puts "\\" at the front of id's, which
        cannot be part of the input), and map it to t. *)
-    let identForT = GenUnusedID.create() in
+    let identForT = GenUnusedID.create () in
+    let lvalForT = A.TypedPostElabVarLVal identForT in
     let newMap = M.add idToTmpMap identForT t in
     let ifStmts = [A.TypedPostElabAssignStmt
-                     (identForT, A.EQ, A.BoolExpr (A.BoolConst 1))] in
+                     (lvalForT, A.EQ, A.BoolExpr (A.BoolConst 1))] in
     let elseStmts = [A.TypedPostElabAssignStmt
-                       (identForT, A.EQ, A.BoolExpr (A.BoolConst 0))] in
+                       (lvalForT, A.EQ, A.BoolExpr (A.BoolConst 0))] in
     (* Translating this if statement puts expression e in temp t.
        We also need to return the resulting location. *)
     (trans_stmts retTmp retLabel newMap [A.TypedPostElabIf (e, ifStmts, elseStmts)],
-     Tmp t)
+     TmpVar (Tmp t))
 
 (* For a while loop, typically we jump back to the top if the
    if condition is true. This would be jumpToTopStatus =
@@ -394,8 +399,8 @@ and trans_lval retTmp retLabel idToTmpMap = function
           a[1/0][f()] where f is function that asserts false *)
         let (newMap, arrayTmpLVal, instrsForArray) =
            trans_lval retTmp retLabel idToTmpMap arrayLVal in
-        let (instrsForIdx, TmpIntExpr idxFinal) =
-           trans_exp retTmp retLabel idToTmpMap idxExpr in
+        let (instrsForIdx, idxFinal) =
+           trans_int_exp retTmp retLabel idToTmpMap idxExpr in
         (newMap, TmpArrayAccessLVal (arrayTmpLVal, idxFinal),
          instrsForArray @ instrsForIdx)
    | A.TypedPostElabDerefLVal (ptrLVal) ->
@@ -480,15 +485,15 @@ let trans_global_decl decl =
             TmpStructDef (structName, fields)
       | A.TypedPostElabFunDef (typee, fName, params, stmts) ->
             let idToTmpMap = initIdToTmpMap params in
-            let param_tmp_list = List.map params (fun (_, id) ->
+            let param_tmp_list = List.map params (fun (typee, id) ->
                    match M.find idToTmpMap id with
-                       Some t -> Tmp t
+                       Some t -> (Tmp t, getSizeForType typee)
                      | None -> assert(false)) in
             let infAddrStmts = trans_stmts retTmp retLabel idToTmpMap stmts in
             let finalStmts = infAddrStmts @ TmpInfAddrLabel retLabel ::
             let retSize = getSizeForType typee in 
             TmpInfAddrReturn (retSize, TmpIntExpr (TmpIntArg
-                                                     (TmpLoc (retTmp))))::[] in
+                                   (TmpLoc (TmpVar retTmp))))::[] in
             TmpInfAddrFunDef (fName, param_tmp_list, finalStmts)
 
 let toInfAddr (funDefList: A.typedPostElabAST) =
