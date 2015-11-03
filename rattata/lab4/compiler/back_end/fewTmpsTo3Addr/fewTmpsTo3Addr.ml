@@ -107,7 +107,8 @@ and munch_fun_args = function
     
 (* munch_stm stm generates code to execute stm *)
 let munch_instr = function
-    TmpInfAddrMov (opSize, e, t) ->
+    TmpInfAddrMov (opSize, e, lval) ->
+       let TmpVarLVal t = lval in (* we should only have TmpVarLVals now *)
        let (instrs, intermediate_dest) = munch_exp t e 0 in
        instrs @ [Tmp3AddrMov (opSize, intermediate_dest, t)]
   | TmpInfAddrJump j -> Tmp3AddrJump j::[]

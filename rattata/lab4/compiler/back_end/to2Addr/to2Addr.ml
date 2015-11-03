@@ -1,14 +1,22 @@
 open Datatypesv1
 module H = Hashtbl    
 
-let binopTo2Addr dest = function
+let intBinopTo2Addr dest = function
     (op, arg1, arg2) ->
        let t = Tmp(Temp.create()) in
        (* The order of where arg1 and arg2 go here is kind of
-          weird: remember it's Tmp2AddrBinop(op, dest, src) *)
-       let op_instr = Tmp2AddrBinop(op, arg2, t) in
-       Tmp2AddrMov(arg1, t)::op_instr::
-       [Tmp2AddrMov(TmpLoc t, dest)]
+          weird: remember Tmp2AddrBinop(op, src, dest is
+          dest <- dest (op) src) *)
+       let op_instr = Tmp2AddrBinop(op, arg2, TmpVar t) in
+       Tmp2AddrMov(BIT32, arg1, TmpVar t)::op_instr::
+       [Tmp2AddrMov(BIT32, TmpLoc (TmpVar t), dest)]
+
+let ptrBinopTo2Addr dest = function
+    (op, arg1, arg2) ->
+       let t = Tmp(Temp.create()) in
+       let op_instr = Tmp2AddrPtrBinop(op, arg2, TmpVar t) in
+       Tmp2AddrMov(BIT64, arg1, TmpVar t)::op_instr::
+       [Tmp2AddrMov(BIT64, TmpLoc (TmpVar t), dest)]
 
 let trans_arg paramToTmpMap arg =
     try TmpLoc (H.find paramToTmpMap arg)
@@ -21,21 +29,23 @@ let trans_loc paramToTmpMap loc =
         Not_found -> loc
 
 let instrTo2Addr paramToTmpMap = function
-    Tmp3AddrMov (src, dest) -> [Tmp2AddrMov (trans_arg paramToTmpMap src,
-                                             trans_loc paramToTmpMap dest)]
-  | Tmp3AddrReturn arg -> [Tmp2AddrReturn (trans_arg paramToTmpMap arg)]
-  | Tmp3AddrBinop (op, arg1, arg2, dest) ->
-     binopTo2Addr (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
-                        trans_arg paramToTmpMap arg2)
+    Tmp3AddrMov (opSize, src, dest) ->
+        [Tmp2AddrMov (opSize, trans_arg paramToTmpMap src,
+                      trans_loc paramToTmpMap dest)]
+  | Tmp3AddrReturn (opSize, arg) ->
+    [Tmp2AddrReturn (opSize, trans_arg paramToTmpMap arg)]
+  | Tmp3AddrBinop (op, arg1, arg2, dest) -> intBinopTo2Addr
+         (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
+                                         trans_arg paramToTmpMap arg2)
   | Tmp3AddrJump j -> Tmp2AddrJump j::[]
   | Tmp3AddrLabel jumpLabel -> Tmp2AddrLabel jumpLabel::[]
   | Tmp3AddrBoolInstr (TmpTest (arg, loc)) ->
         Tmp2AddrBoolInstr (TmpTest (trans_arg paramToTmpMap arg,
                                     trans_loc paramToTmpMap loc))::[]
-  | Tmp3AddrBoolInstr (TmpCmp (arg, loc)) ->
-        Tmp2AddrBoolInstr (TmpCmp (trans_arg paramToTmpMap arg,
+  | Tmp3AddrBoolInstr (TmpCmp (opSize, arg, loc)) ->
+        Tmp2AddrBoolInstr (TmpCmp (opSize, trans_arg paramToTmpMap arg,
                                     trans_loc paramToTmpMap loc))::[]
-  | Tmp3AddrFunCall (fName, args, dest) ->
+  | Tmp3AddrFunCall (retSize, fName, args, dest) ->
       (* At the beginning of the function, move all of the args into new tmps.
          Keep live ranges of pre-colored tmps short! We're doing it here because
          we only have to match against one constructor here *)
@@ -43,7 +53,10 @@ let instrTo2Addr paramToTmpMap = function
       let newDest = (match dest with
                          Some dest' -> Some (trans_loc paramToTmpMap dest')
                        | None -> None) in
-      Tmp2AddrFunCall (fName, newArgs, newDest)::[]
+      Tmp2AddrFunCall (retSize, fName, newArgs, newDest)::[]
+  | Tmp3AddrPtrBinop (op, arg1, arg2, dest) -> ptrBinopTo2Addr
+       (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
+                                       trans_arg paramToTmpMap arg2)
 
 let rec funTo2Addr paramToTmpMap = function
    [] -> []
@@ -58,10 +71,11 @@ let rec funTo2Addr paramToTmpMap = function
 let rec setUpParams params map =
     match params with
        [] -> []
-     | param::rest ->
+     | (param_t, param_size)::rest ->
          let t = Tmp (Temp.create()) in
-         let () = H.add map (TmpLoc param) t in
-         Tmp2AddrMov(TmpLoc param, t)::setUpParams rest map
+         let () = H.add map (TmpLoc (TmpVar param_t)) (TmpVar t) in
+         Tmp2AddrMov(param_size, TmpLoc (TmpVar param_t), TmpVar t)
+         ::setUpParams rest map
 
 let rec to2Addr = function
    [] -> []
