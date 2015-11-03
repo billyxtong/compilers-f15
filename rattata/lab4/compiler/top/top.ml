@@ -50,7 +50,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
     say_if dump_upeAST (fun () ->
       PrintASTs.untypedPostElabOverallASTToString(untypedPostElabOverallAst));
-(*
+
     (* Typecheck *)
     say_if verbose (fun () -> "Typechecking...");
     let typedPostElabAst = TypeChecker.typecheck untypedPostElabOverallAst in ();
@@ -58,7 +58,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
       PrintASTs.typedPostElabASTToString(typedPostElabAst));
     if typecheck_only then exit 0;
 
-
+(*
     (* convert Post-Elab AST to Infinte Addr, except for memory stuff *)
     say_if verbose (fun () -> "converting to infAddr, except memory stuff");
     let infAddr = GeneralToInfAddr.toInfAddr typedPostElabAst in ();

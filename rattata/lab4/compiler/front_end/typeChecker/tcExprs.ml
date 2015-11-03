@@ -1,4 +1,59 @@
-open Typechecker
+module H = Hashtbl
+
+let declaredAndUsedButUndefinedFunctionTable = H.create 5
+
+let functionMap = ref Core.Std.String.Map.empty
+let typedefMap = ref Core.Std.String.Map.empty
+let structMap = ref Core.Std.String.Map.empty
+
+let isValidVarDecl (identifier : ident) = 
+  if sub identifier 0 1 = "\\" 
+  then true 
+  else false
+
+let lowestTypedefType (typedefType : c0type) =
+  match typedefType with
+        TypedefType(identifier) -> 
+          (match M.find !typedefMap identifier with
+                 Some(anotherType) -> anotherType
+               | None -> (ErrorMsg.error ("undefined typedef \n");
+                         raise ErrorMsg.Error))
+      | _ -> typedefType
+
+let rec argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) =
+  match (arguments, paramTypes) with
+        ([], []) -> true
+      | ([], p :: ps) -> false
+      | (arg :: args, []) -> false
+      | (arg :: args, p :: ps) ->
+          (match (arg, lowestTypedefType p) with
+                 (IntExpr(_), INT) -> argsMatch args ps
+               | (BoolExpr(_), BOOL) -> argsMatch args ps
+               | _ -> false)
+
+
+let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
+  match (paramTypes, params) with
+        ([], []) -> true
+      | ([], p :: ps) -> false
+      | (p :: ps, []) -> false
+      | (p :: ps, (typee, _) :: remainingParams) ->
+          let pType = lowestTypedefType p in
+          let paramType = lowestTypedefType typee in
+          if ((pType = INT && paramType = INT) || (pType = BOOL && paramType = BOOL))
+          then matchParamListTypes ps remainingParams else false
+
+let matchFuncTypes (funcType1 : c0type) (funcType2 : c0type) =
+  if (lowestTypedefType funcType1) = (lowestTypedefType funcType2)
+  then true else false
+
+let rec uniqueParamNames (params : param list) nameTable =
+  match params with
+        [] -> true
+      | (datType, datName) :: ps -> 
+          (match (M.find nameTable datName, M.find !typedefMap datName) with
+                 (None, None) -> uniqueParamNames ps (M.add nameTable datName ())
+               | _ -> false)
 
 let rec matchTypes (t1 : c0type) (t2 : c0type) =
   match (t1, t2) with
@@ -8,30 +63,32 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
       | (Array(c1), Array(c2)) -> matchTypes c1 c2
       | (Struct(i1), Struct(i2)) -> (i1 = i2)
       | (Poop, Poop) -> true
+      | (Pointer(c), Poop) -> true
       | _ -> false
 
-let rec tc_lval varEnv (lval : untypedPostElabLVal) =
+let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
   match lval with
         UntypedPostElabVarLVal(id) -> 
           (match M.find varEnv id with (* is it declared? *)
                    Some(typee, isInitialized) -> 
-                     (if isInitialized (* declared and initialized, all good *)
+                     (if isInitialized && !isNested (* declared and initialized, all good *)
                       then 
                         (match typee with
                                Struct _ -> (ErrorMsg.error ("bad type for " ^ id ^ "; can't put struct in local var\n");
                                             raise ErrorMsg.Error)
-                             | _ -> (TypedPostElabVarLVal(id), typee))
-                      else 
+                             | _ -> 
+                                 let () = M.replace varEnv id (typee, true) in
+                                 (TypedPostElabVarLVal(id), typee))
+                      else
                         (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                          raise ErrorMsg.Error))
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
-                            raise ErrorMsg.Error)) 
-      (* need to do below LVals*)
+                            raise ErrorMsg.Error))
       | UntypedPostElabFieldLVal(untypedLVal,id) ->
-          (match tc_lval varEnv untypedLVal with
+          (match tc_lval_helper varEnv isNested untypedLVal with
                  (TypedPostElabDerefLVal(typedLVal), Struct(structName)) ->
-                   (match M.find structMap structName with
-                          Some fieldMap -> (* in structMap, struct names point to a table of their fields
+                   (match M.find !structMap structName with
+                          (Some fieldMap, true) -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
                             (match M.find fieldMap fieldName with
                                    Some fieldType ->
@@ -40,24 +97,29 @@ let rec tc_lval varEnv (lval : untypedPostElabLVal) =
                                                             " has no field with name " 
                                                             ^ fieldName ^ "\n");
                                             raise ErrorMsg.Error))
-                        | None -> (ErrorMsg.error ("no struct with name " ^ structName ^ "\n");
+                        | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                                    raise ErrorMsg.Error))
                | _ -> (ErrorMsg.error ("LVal isn't of form *structName.fieldName \n");
                        raise ErrorMsg.Error))
       | UntypedPostElabDerefLVal(untypedLVal) ->
-          (match tc_lval varEnv untypedLVal with
+          (match tc_lval_helper varEnv isNested untypedLVal with
                  (typedLVal, Pointer(c)) -> 
                    if c = Poop 
-                   then (ErrorMsg.error ("dereferencing a non-pointer\n");
+                   then (ErrorMsg.error ("dereferencing a null pointer\n");
                          raise ErrorMsg.Error)
                    else (TypedPostElabDerefLVal(typedLVal), c)
                | _ -> (ErrorMsg.error ("dereferencing a non-pointer\n");
                        raise ErrorMsg.Error))
       | UntypedPostElabArrayAccessLVal(untypedLVal,exp) -> 
-          (match (tc_lval varEnv untypedLVal, tc_expression varEnv exp) with
+          (match (tc_lval_helper varEnv isNested untypedLVal, tc_expression varEnv exp) with
                  ((typedLVal, Array(c)), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c)  
                | _ -> (ErrorMsg.error ("array access lval didn't typecheck\n");
                        raise ErrorMsg.Error))
+
+let tc_lval varEnv lval = 
+  match lval with
+        UntypedPostElabVarLVal(id) -> tc_lval_helper varEnv false lval
+      | _ -> tc_lval_helper varEnv true lval
 
 let rec tc_expression varEnv (expression : untypedPostElabExpr) =
   match expression with
@@ -158,10 +220,10 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                    raise ErrorMsg.Error))
   | UntypedPostElabFieldAccessExpr(e : untypedPostElabExpr, fieldName : ident) ->
       let (typedExp,typee) = tc_expression varEnv e in
-      match (typedExp, typee) with
+      (match (typedExp, typee) with
             (PtrExpr(PtrSharedExpr(Deref(p))), Struct(structName)) -> 
-              (match M.find structMap structName with
-                     Some fieldMap -> (* in structMap, struct names point to a table of their fields
+              (match M.find !structMap structName with
+                     (Some fieldMap, true) -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
                        (match M.find fieldMap fieldName with
                               Some fieldType ->
@@ -170,11 +232,19 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                                                     " has no field with name " 
                                                     ^ fieldName ^ "\n");
                                        raise ErrorMsg.Error))
-                   | None -> (ErrorMsg.error ("no struct with name " ^ structName ^ "\n");
+                   | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                               raise ErrorMsg.Error))
           | _ -> (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
-                  raise ErrorMsg.Error)
-  | UntypedPostElabAlloc(t : c0type) -> (PtrExpr(Alloc(t)), Pointer(t))
+                  raise ErrorMsg.Error))
+  | UntypedPostElabAlloc(t : c0type) -> 
+      let baseType = lowestTypedefType t in
+      (match baseType with
+             Struct(structName) -> 
+               (match M.find !structMap structName with
+                      (Some _, true) -> (PtrExpr(Alloc(t)), Pointer(t))
+                    | _ -> (ErrorMsg.error ("undefined struct\n");
+                            raise ErrorMsg.Error))
+           | _ -> (PtrExpr(Alloc(t)), Pointer(baseType))
   | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
       let (typedExp, typee) = tc_expression varEnv e in
       (match (typedExp, typee) with
@@ -185,8 +255,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                    raise ErrorMsg.Error))
   | UntypedPostElabArrayAlloc(c : c0type, e : untypedPostElabExpr) ->
       let (typedExpr, _) = tc_expression varEnv e in
+      let baseType = lowestTypedefType c in
       (match typedExpr with
-             IntExpr(i) -> (PtrExpr(AllocArray(c,i)), Array(c))
+             IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType c))
            | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
                   raise ErrorMsg.Error))
   | UntypedPostElabArrayAccessExpr(e1 : untypedPostElabExpr, e2 : untypedPostElabExpr)  -> 

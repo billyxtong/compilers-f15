@@ -3,7 +3,10 @@ open Ast
 let rec elaboratePreElabLVal(lval : preElabLVal) =
   match lval with
         PreElabVarLVal(i) -> UntypedPostElabVarLVal(i)
-      | PreElabFieldLVal(p,i) -> UntypedPostElabFieldLVal(elaboratePreElabLVal(p), i)
+      | PreElabFieldLVal(p,i) -> 
+          (match p with
+                 PreElabDerefLVal(_) -> UntypedPostElabFieldLVal(elaboratePreElabLVal(p), i)
+               | _ -> UntypedPostElabFieldLVal(UntypedPostElabDerefLVal(elaboratePreElabLVal(p)), i))
       | PreElabDerefLVal(p) -> UntypedPostElabDerefLVal(elaboratePreElabLVal(p))
       | PreElabArrayAccessLVal(p,e) -> UntypedPostElabArrayAccessLVal(elaboratePreElabLVal(p),elaboratePreElabExpr(e))
 
@@ -18,7 +21,10 @@ and elaboratePreElabExpr(expression : preElabExpr) =
       | PreElabTernary(e1, e2, e3) -> UntypedPostElabTernary(elaboratePreElabExpr e1,
                                           elaboratePreElabExpr e2, elaboratePreElabExpr e3)
       | PreElabFunCall(i, exprs) -> UntypedPostElabFunCall(i, List.map elaboratePreElabExpr exprs)
-      | PreElabFieldAccessExpr(e,i) -> UntypedPostElabFieldAccessExpr(elaboratePreElabExpr(e), i)
+      | PreElabFieldAccessExpr(e,i) -> 
+          (match e with
+                 PreElabDerefExpr(_) -> UntypedPostElabFieldAccessExpr(elaboratePreElabExpr(e), i)
+               | _ -> UntypedPostElabFieldAccessExpr(UntypedPostElabDerefExpr(elaboratePreElabExpr(e)), i))
       | PreElabAlloc(c) -> UntypedPostElabAlloc(c)
       | PreElabDerefExpr(e) -> UntypedPostElabDerefExpr(elaboratePreElabExpr(e))
       | PreElabArrayAlloc(c,e) -> UntypedPostElabArrayAlloc(c, elaboratePreElabExpr(e))
