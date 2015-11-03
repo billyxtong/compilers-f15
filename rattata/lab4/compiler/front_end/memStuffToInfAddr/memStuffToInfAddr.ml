@@ -44,6 +44,11 @@ let updateStructDefsMap structTypeName fields =
       let structTotalSize = makeStructInnerMap fields initialOffset innerMap in
       H.add structDefsMap structTypeName (innerMap, structTotalSize)
 
+let getTypeFromExpr = function
+     TmpIntExpr _ -> INT
+   | TmpBoolExpr _ -> BOOL
+   | TmpPtrExpr _ -> Pointer Poop (* Again, doesn't matter what type of ptr *)
+
 let getSizeForType = function
      INT -> smallFieldSize
    | BOOL -> smallFieldSize
@@ -97,9 +102,19 @@ let rec handleSharedExpr exprType = function
        let (TmpPtrExpr e_result, instrs) = handleMemForExpr (TmpPtrExpr ptrExp) in
        (sharedExprToTypedExpr exprType (TmpInfAddrDeref e_result), instrs)
    | TmpInfAddrFieldAccess(structTypeName, structPtr, fieldName) ->
-       handleStructAccess exprType structTypeName structPtr fieldName
+       let (fieldPtr, instrs) = getStructAccessPtr structTypeName
+                                structPtr fieldName in
+        let resultTmp = Tmp (Temp.create()) in
+        let accessInstr = makeAccessInstr exprType (TmpVarLVal resultTmp) fieldPtr in
+        (tmpToTypedExpr (TmpVar resultTmp) exprType, instrs @ accessInstr::[])
    | TmpInfAddrArrayAccess (ptrExp, indexExpr) ->
-       handleArrayAccess exprType ptrExp indexExpr
+       let (accessPtrExpr, instrs) = getArrayAccessPtr exprType ptrExp indexExpr in
+       let resultTmp = Tmp (Temp.create()) in
+       let doTheAccess = makeAccessInstr exprType (TmpVarLVal resultTmp)
+                         accessPtrExpr in
+       let resultTmpExpr = tmpToTypedExpr (TmpVar resultTmp) exprType in
+       (resultTmpExpr, instrs @ doTheAccess :: [])
+   | TmpLValExpr lval -> failwith "Ben, do this case"       
 
 (* returns (e, instrs) pair *)
 and handleMemForExpr = function
@@ -116,8 +131,9 @@ and handleMemForExpr = function
         let (final_e1, final_instrs1) =
              (match instrs2 with
                  [] -> (e1_result, instrs1)
-               | _ -> (let t = Tmp (Temp.create()) in (TmpIntArg (TmpLoc t),
-                       instrs1 @ TmpInfAddrMov(BIT32, TmpIntExpr e1_result, t)::[])))
+               | _ -> (let t = Tmp (Temp.create()) in (TmpIntArg (TmpLoc (TmpVar t)),
+                       instrs1 @ TmpInfAddrMov(BIT32, TmpIntExpr e1_result,
+                                               (TmpVarLVal t))::[])))
             in
         (TmpIntExpr (TmpInfAddrBinopExpr(op, final_e1, e2_result)),
          final_instrs1 @ instrs2)
@@ -154,28 +170,27 @@ and handleMemForExpr = function
         let (final_ptr_expr, final_instrs1) = 
              (match instrs2 with
                  [] -> (ptr_result, instrs1)
-               | _ -> (let t = Tmp (Temp.create()) in (TmpPtrArg (TmpLoc t),
+               | _ -> (let t = Tmp (Temp.create()) in (TmpPtrArg (TmpLoc (TmpVar t)),
                        instrs1 @
-                       TmpInfAddrMov(BIT64, TmpPtrExpr ptr_result, t)::[])))
+                       TmpInfAddrMov(BIT64, TmpPtrExpr ptr_result,
+                                     (TmpVarLVal t))::[])))
             in
         (TmpPtrExpr (TmpInfAddrPtrBinop(op, final_ptr_expr, int_result)),
          final_instrs1 @ instrs2)
 
-and handleStructAccess exprType structTypeName structPtr fieldName =
+and getStructAccessPtr structTypeName structPtr fieldName =
     try
         let (fieldOffsets, _) = H.find structDefsMap structTypeName in
         let (TmpPtrExpr structPtrFinal, structPtrInstrs) =
              handleMemForExpr (TmpPtrExpr structPtr) in
         let accessOffset = H.find fieldOffsets fieldName in
-        let resultTmp = Tmp (Temp.create()) in
         let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtrFinal,
                              TmpIntArg (TmpConst accessOffset)) in
-        let accessInstr = makeAccessInstr exprType resultTmp fieldPtrExpr in
-        (tmpToTypedExpr resultTmp exprType, structPtrInstrs @ accessInstr::[])
+        (fieldPtrExpr,structPtrInstrs)
     with Not_found -> let () = print_string("struct " ^ structTypeName
                            ^ "not defined before alloc\n") in assert(false)
 
-and handleArrayAccess elemType ptrExp indexExpr =
+and getArrayAccessPtr elemType ptrExp indexExpr =
        let (TmpPtrExpr ptr_final, ptr_instrs) =
            handleMemForExpr (TmpPtrExpr ptrExp) in
        let (TmpIntExpr index_final, index_instrs) =
@@ -184,7 +199,6 @@ and handleArrayAccess elemType ptrExp indexExpr =
        let numElemsPtr = TmpInfAddrPtrBinop(PTR_SUB, ptr_final,
                                             TmpIntArg (TmpConst 8)) in
        let numElemsExpr = TmpIntSharedExpr (TmpInfAddrDeref numElemsPtr) in
-       let resultTmp = Tmp (Temp.create()) in
        let errorLabel = GenLabel.create() in
        let doTheAccessLabel = GenLabel.create() in
        (* Note that the operand order for cmp has already been reversed!
@@ -205,17 +219,15 @@ and handleArrayAccess elemType ptrExp indexExpr =
                                       index_final) in
        let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD, ptr_final,
                                               accessOffsetExpr) in
-       let doTheAccess = makeAccessInstr elemType resultTmp accessPtrExpr in
       (* Ok now actually put all of the instructions together *)
       (* The array pointer is evaluated first, I checked *)
       let allInstrs = ptr_instrs @ index_instrs @ indexLowerCheck
              @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
-             ::TmpInfAddrLabel(doTheAccessLabel)::doTheAccess::[] in
-      let resultTmpExpr = tmpToTypedExpr resultTmp elemType in
-      (resultTmpExpr, allInstrs)
+             ::TmpInfAddrLabel(doTheAccessLabel)::[] in
+      (accessPtrExpr, allInstrs)
 
 let rec lvalToExpr typee = function
-    TmpVarLVal t -> tmpToTypedExpr t typee
+    TmpVarLVal t -> tmpToTypedExpr (TmpVar t) typee
   | TmpDerefLVal lval -> 
            (* Again, type of pointer doesn't matter *)
         let TmpPtrExpr ptrLValExpr = lvalToExpr (Pointer Poop) lval in
@@ -228,24 +240,57 @@ let rec lvalToExpr typee = function
         let TmpPtrExpr arrayExpr = lvalToExpr (Pointer Poop) arrayLVal in
         sharedExprToTypedExpr typee (TmpInfAddrArrayAccess(arrayExpr, idxExpr))
 
+(* throws an error if unable to convert to a lval. At this point should
+   only have tmps and derefs, I believe *)
+let rec exprToLVal = function
+    TmpBoolExpr (TmpBoolArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
+  | TmpBoolExpr (TmpBoolArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
+  | TmpBoolExpr (TmpBoolSharedExpr (TmpInfAddrDeref p)) ->
+           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
+  | TmpIntExpr (TmpIntArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
+  | TmpIntExpr (TmpIntArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
+  | TmpIntExpr (TmpIntSharedExpr (TmpInfAddrDeref p)) ->
+           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
+  | TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
+  | TmpPtrExpr (TmpPtrArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
+  | TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrDeref p)) ->
+           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
+  | _ -> assert(false)                           
+
 (* After this, the only lvals should be tmps *)
 (* Ok I realized I don't have to redo everything I did for the exprs,
    that makes me feel better *)
 (* So derefs and vars are fine. The functions for FieldAccess and ArrayAccess
    should both return tmps, so we can just use those too! Yay *)
-let rec handleMemForLVal = function
+let rec handleMemForLVal typee = function
     TmpVarLVal t -> (TmpVarLVal t, [])
-  (* | TmpDerefLVal ptr -> let (ptrFinal, instrs) = handleMemForLVal ptr in *)
-  (*                       (TmpDerefLVal(ptrFinal), instrs) *)
-  (* | TmpFieldAccessLVal (structName, structptr, fieldName) -> *)
-       
+  | TmpDerefLVal ptr ->
+    let (ptrFinal, instrs) = handleMemForLVal (Pointer Poop) ptr in
+    (* We know that the inner element is a pointer, what type doesn't matter *)
+                        (TmpDerefLVal(ptrFinal), instrs)
+  | TmpFieldAccessLVal (structName, structptr, fieldName) ->
+      (* We know that structptr is a pointer of some kind; doesn't matter what *)
+      let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structptr in
+      let (fieldAccessPtr, instrs) = getStructAccessPtr structName
+          structPtrExpr fieldName in
+      let fieldAccessPtrLVal = exprToLVal (TmpPtrExpr fieldAccessPtr)
+      in (fieldAccessPtrLVal, instrs)
+  | TmpArrayAccessLVal (arrayLVal, idxExpr) ->
+      let TmpPtrExpr arrayExpr = lvalToExpr (Pointer Poop) arrayLVal in
+      let (arrayAccessPtr, instrs) = getArrayAccessPtr typee arrayExpr idxExpr in
+      let arrayAccessPtrLVal = exprToLVal (TmpPtrExpr arrayAccessPtr) in
+      (arrayAccessPtrLVal, instrs)
 
 let handleMemForInstr = function
       TmpInfAddrJump j -> TmpInfAddrJump j::[]
     | TmpInfAddrLabel lbl -> TmpInfAddrLabel lbl::[]
     | TmpInfAddrMov (opSize, src, dest) ->
       (* Note: dest is evaluated first! *)
-        let (destFinal, instrsForDest) = handleMemForLVal dest in
+        let typee = getTypeFromExpr src in
+        (* We need to know the type to do array accesses and such, but
+           LVal doesn't have the typed constructors (IntExpr, etc), so
+           we have to get it from the rhs beforehand *)
+        let (destFinal, instrsForDest) = handleMemForLVal typee dest in
         let (srcFinal, instrsForSrc) = handleMemForExpr src in
         instrsForDest @ instrsForSrc
         @ TmpInfAddrMov(opSize, srcFinal, destFinal)::[]
