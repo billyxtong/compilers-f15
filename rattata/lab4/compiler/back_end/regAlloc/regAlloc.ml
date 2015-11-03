@@ -1,11 +1,13 @@
 open Datatypesv1
 module H = Hashtbl
 
-let makeFuncToParamSizeMap map = function
-    [] -> ()
+let rec makeFuncToParamSizeMap map = function
+    [] -> map
   | Tmp2AddrFunDef(fName, params, dest)::rest ->
     let paramSizes = List.map (fun (t, paramSize) -> paramSize) params in
-    H.add map fName (Array.of_list paramSizes)
+    let () = H.add map fName (Array.of_list paramSizes) in
+    makeFuncToParamSizeMap map rest
+    
 
 let rec regAllocRec (funDefs: tmp2AddrProg) funcToParamSizeMap : assemProg =
     match funDefs with
