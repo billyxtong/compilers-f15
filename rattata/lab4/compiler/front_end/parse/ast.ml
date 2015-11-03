@@ -72,7 +72,7 @@ and typedPostElabLVal = TypedPostElabVarLVal of ident |
                idents are) *)
               TypedPostElabFieldLVal of ident * typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
-              TypedPostElabArrayAccessLVal of typedPostElabLVal * typedPostElabExpr 
+              TypedPostElabArrayAccessLVal of typedPostElabLVal * intExpr 
 and typedPostElabExpr = IntExpr of intExpr
                        | BoolExpr of boolExpr
                        | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)

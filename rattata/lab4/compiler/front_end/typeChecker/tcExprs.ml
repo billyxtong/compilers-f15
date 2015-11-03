@@ -5,10 +5,10 @@ module M = Core.Std.Map
 open String
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
-
+type mytype = (c0type Core.Std.String.Map.t) * bool
 let functionMap = ref Core.Std.String.Map.empty
 let typedefMap = ref Core.Std.String.Map.empty
-let structMap = ref Core.Std.String.Map.empty
+let (structMap : (mytype Core.Std.String.Map.t)) = ref (mytype Core.Std.String.Map.empty)
 
 let isValidVarDecl (identifier : ident) =
   if sub identifier 0 1 = "\\" then true else false
@@ -188,7 +188,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       (match baseType with
              Struct(structName) ->
                (match M.find !structMap structName with
-                      Some ( _, true) -> (PtrExpr(Alloc(t)), Pointer(t))
+                      Some (_, true) -> (PtrExpr(Alloc(t)), Pointer(t))
                     | _ -> (ErrorMsg.error ("undefined struct\n");
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(t)), Pointer(baseType)))

@@ -266,7 +266,7 @@ and typedPostElabLValToString(lval : typedPostElabLVal) =
                                             ^ identToString(i1) ^ ")"
       | TypedPostElabDerefLVal(p) -> "*" ^ typedPostElabLValToString(p)
       | TypedPostElabArrayAccessLVal(p,e) -> typedPostElabLValToString(p)
-                               ^ "[" ^ typedPostElabExprToString(e) ^ "]"
+                               ^ "[" ^ intExprToString(e) ^ "]"
 
 and typedPostElabExprToString(e : typedPostElabExpr) =
   match e with

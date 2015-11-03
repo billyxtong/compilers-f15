@@ -12,7 +12,6 @@ open PrintDatatypes
 open PrintASTs
 open TcExprs
 
-
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
 let rec tc_header (header : untypedPostElabAST) = 
   match header with
@@ -199,10 +198,19 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 raise ErrorMsg.Error))
                | UntypedPostElabStructDef(structName, fields) ->
                    (match M.find !structMap structName with
-                          (Some fieldMap, false) -> (* declared but undefined struct *)
+                          Some (fieldMap, false) -> (* declared but undefined struct *)
                             let () = List.iter(fun (fieldType, fieldName) -> M.add fieldMap fieldName fieldType) fields in
                             let () = structMap := M.replace !structMap structName (Some fieldMap, true) in
-                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST)))
+                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST))
+                        | Some (_, true) -> (* already defined struct *) 
+                            (ErrorMsg.error ("redefining struct " ^ structName ^ "\n");
+                             raise ErrorMsg.Error)
+                        | None -> 
+                            let () = structMap := M.add !structMap structName (Core.Std.String.Map.empty, true) in
+                            let (fieldMap, _) = M.find !structMap structName in
+                            let () = List.iter(fun (fieldType, fieldName) -> M.add fieldMap fieldName fieldType) fields in
+                            let () = structMap := M.replace !structMap structName (Some fieldMap, true) in
+                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST))
 
 (* varMap is the map of variables within the function body *) 
 (* funcRetType is the return type of the function *)         
