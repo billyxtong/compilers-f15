@@ -138,8 +138,11 @@ and handleMemForExpr = function
         (TmpIntExpr (TmpInfAddrBinopExpr(op, final_e1, e2_result)),
          final_instrs1 @ instrs2)
     | TmpPtrExpr (TmpAlloc typee) -> 
-           (* alloc becomes a function call to malloc *) 
-             (TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
+           (* alloc becomes a function call to calloc. We're going to just
+              calloc 1 element of the appropriate size. Using calloc
+              because it zero-initalizes memory. *)
+             (TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrFunCall ("calloc",
+              TmpIntExpr (TmpIntArg (TmpConst 1))::
               TmpIntExpr (TmpIntArg (TmpConst (getSizeForType typee)))::[]))),
               [])
     | TmpPtrExpr (TmpAllocArray (elemType, numElems)) ->
