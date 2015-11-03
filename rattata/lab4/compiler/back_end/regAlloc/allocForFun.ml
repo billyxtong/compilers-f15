@@ -141,18 +141,18 @@ let rec getTempSet instrList tempSet =
            (* Only count things that we write to: this matters so that we don't
               re-allocate for the params (which we never write to, since we move them
               all to new temps immediately *)
-                   Tmp2AddrMov(opSize, src, TmpVar dest) ->
+                   Tmp2AddrMov(opSize, src, TmpVar (Tmp dest)) ->
                        (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
-                 | Tmp2AddrBinop(op, src, TmpVar dest) ->
+                 | Tmp2AddrBinop(op, src, TmpVar (Tmp dest)) ->
                        (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
-                 | Tmp2AddrFunCall(retSize, fName, args, Some (TmpVar dest)) ->
+                 | Tmp2AddrFunCall(retSize, fName, args, Some (TmpVar (Tmp dest))) ->
                                               (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
-                 | Tmp2AddrMov(opSize, src, TmpDeref dest) ->
+                 | Tmp2AddrMov(opSize, src, TmpDeref (Tmp dest)) ->
                        (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
-                 | Tmp2AddrBinop(op, src, TmpDeref dest) ->
+                 | Tmp2AddrBinop(op, src, TmpDeref (Tmp dest)) ->
                        (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
-                 | Tmp2AddrFunCall(retSize, fName, args, Some (TmpDeref dest)) ->
+                 | Tmp2AddrFunCall(retSize, fName, args, Some (TmpDeref (Tmp dest))) ->
                                               (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
                  | _ -> getTempSet instrs tempSet)
