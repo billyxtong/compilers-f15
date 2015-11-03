@@ -484,6 +484,7 @@ let trans_global_decl decl =
         A.TypedPostElabStructDef (structName, fields) ->
             TmpStructDef (structName, fields)
       | A.TypedPostElabFunDef (typee, fName, params, stmts) ->
+            let () = updateFunParamsMap fName params in
             let idToTmpMap = initIdToTmpMap params in
             let param_tmp_list = List.map params (fun (typee, id) ->
                    match M.find idToTmpMap id with
