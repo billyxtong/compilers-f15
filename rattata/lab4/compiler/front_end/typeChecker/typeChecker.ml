@@ -253,7 +253,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                       let newVarMap = M.add varMap id (actualDeclType, true) in  
                       tc_statements newVarMap 
                       stms funcRetType ret newTypedAST
-                    else (ErrorMsg.error ("assignment expression didn't typecheck" ^ id ^"\n");
+                    else (ErrorMsg.error ("assignment expression didn't typecheck " ^ id ^"\n");
                           raise ErrorMsg.Error)
                | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
                        raise ErrorMsg.Error))))
