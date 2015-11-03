@@ -20,4 +20,7 @@ let rec regAllocRec (funDefs: tmp2AddrProg) funcToParamSizeMap : assemProg =
 let regAlloc (funDefs: tmp2AddrProg) : assemProg =
     let funcToParamSizeMap = makeFuncToParamSizeMap
         (H.create (List.length funDefs)) funDefs in
+    (* Need to also built-functions calloc and abort *)
+    let () = H.add funcToParamSizeMap "calloc" (Array.of_list (BIT32::BIT32::[])) in
+    let () = H.add funcToParamSizeMap "abort" (Array.of_list (BIT32::[])) in
     regAllocRec funDefs funcToParamSizeMap
