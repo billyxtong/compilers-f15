@@ -68,7 +68,7 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
       | (Pointer(c), Poop) -> true
       | _ -> false
 
-let rec tc_expression varEnv (expression : untypedPostElabExpr) =
+let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
     UntypedPostElabConstExpr (constant, typee) ->
       (match typee with
@@ -87,7 +87,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                     | Array(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), typee)
                     | _ -> (ErrorMsg.error ("can't reference a struct without ptr\n");
                             raise ErrorMsg.Error))
-           | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
+           | None -> (ErrorMsg.error ("undeclared variable " ^ i ^ "\n");
                             raise ErrorMsg.Error))
   | UntypedPostElabBinop (e1, op, e2) ->
       let (tcExpr1, type1) = tc_expression varEnv e1 in
@@ -165,12 +165,12 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function doesn't exist \n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabFieldAccessExpr(e : untypedPostElabExpr, fieldName : ident) ->
+  | UntypedPostElabFieldAccessExpr(e, fieldName) ->
       let (typedExp,typee) = tc_expression varEnv e in
       (match (typedExp, typee) with
             (PtrExpr(PtrSharedExpr(Deref(p))), Struct(structName)) ->
               (match M.find !structMap structName with
-                     (Some fieldMap, true) -> (* in structMap, struct names point to a table of their fields
+                     Some(fieldMap, true) -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
                        (match M.find fieldMap fieldName with
                               Some fieldType ->
@@ -188,7 +188,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
       (match baseType with
              Struct(structName) ->
                (match M.find !structMap structName with
-                      (Some _, true) -> (PtrExpr(Alloc(t)), Pointer(t))
+                      Some ( _, true) -> (PtrExpr(Alloc(t)), Pointer(t))
                     | _ -> (ErrorMsg.error ("undefined struct\n");
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(t)), Pointer(baseType)))
@@ -200,17 +200,17 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
            | (PtrExpr(p), Pointer(c)) -> (PtrExpr(PtrSharedExpr(Deref(p))), c)
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabArrayAlloc(c : c0type, e : untypedPostElabExpr) ->
+  | UntypedPostElabArrayAlloc(typee, e) ->
       let (typedExpr, _) = tc_expression varEnv e in
-      let baseType = lowestTypedefType c in
+      let baseType = lowestTypedefType typee in
       (match typedExpr with
-             IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType c))
+             IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType))
            | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
                   raise ErrorMsg.Error))
-  | UntypedPostElabArrayAccessExpr(e1 : untypedPostElabExpr, e2 : untypedPostElabExpr)  ->
+  | UntypedPostElabArrayAccessExpr(e1, e2)  ->
       let (typedExp1, type1) = tc_expression varEnv e1 in
       (match type1 with
-             Array(c) ->
+             Array(arrayType) ->
                let (typedExp2, type2) = tc_expression varEnv e2 in
                (match (typedExp1, typedExp2) with
                       (PtrExpr(p), IntExpr(i)) ->
@@ -219,7 +219,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                                          raise ErrorMsg.Error)
                               | Alloc(_) -> (ErrorMsg.error ("can't access ptrs like arrays\n");
                                              raise ErrorMsg.Error)
-                              | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), c)))
+                              | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), arrayType)))
           | _ -> (ErrorMsg.error ("first expr not an array\n");
                   raise ErrorMsg.Error))
 
