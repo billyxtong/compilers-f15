@@ -79,7 +79,11 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
   | UntypedPostElabNullExpr -> (PtrExpr(Null), Poop)
   | UntypedPostElabIdentExpr(i : ident) ->
       (match M.find varEnv i with
-             Some (typee, isInit) ->
+             Some (typee, isInit) -> 
+               if not isInit
+               then (ErrorMsg.error ("ident " ^ i ^ " uninitialized\n");
+                   raise ErrorMsg.Error)
+               else
                (match typee with
                       INT -> (IntExpr(IntSharedExpr(Ident(i))), typee)
                     | BOOL -> (BoolExpr(BoolSharedExpr(Ident(i))), typee)
@@ -228,16 +232,16 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
         UntypedPostElabVarLVal(id) ->
           (match M.find varEnv id with (* is it declared? *)
                    Some(typee, isInitialized) ->
-                     (if isInitialized && not isNested (* declared and initialized, all good *)
+                     (if not isNested (* declared and initialized, all good *)
                       then
                         (match typee with
                                Struct _ -> (ErrorMsg.error ("bad type for " ^ id ^ "; can't put struct in local var\n");
                                             raise ErrorMsg.Error)
                              | _ ->
-                                 (* let () = M.add varEnv id (typee, true) in *)
+                                  let newVarMap = M.add varEnv id (typee, true) in
                                  (* Pretty sure we don't have to re-add it because it's already in the
                                     map based on the match and if statements *)
-                                 (TypedPostElabVarLVal(id), typee))
+                                 (TypedPostElabVarLVal(id), typee, newVarMap))
                       else
                         (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                          raise ErrorMsg.Error))
@@ -245,13 +249,13 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                             raise ErrorMsg.Error))
       | UntypedPostElabFieldLVal(untypedLVal,fieldName) ->
           (match tc_lval_helper varEnv isNested untypedLVal with
-                 (TypedPostElabDerefLVal(typedLVal), Struct(structName)) ->
+                 (TypedPostElabDerefLVal(typedLVal), Struct(structName), _) ->
                    (match M.find !structMap structName with
                           Some (fieldMap, true) -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
                             (match M.find !fieldMap fieldName with
                                    Some fieldType ->
-                                     (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType)
+                                     (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType, varEnv)
                                  | None -> (ErrorMsg.error ("struct " ^ structName ^
                                                             " has no field with name "
                                                             ^ fieldName ^ "\n");
@@ -262,16 +266,16 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                        raise ErrorMsg.Error))
       | UntypedPostElabDerefLVal(untypedLVal) ->
           (match tc_lval_helper varEnv isNested untypedLVal with
-                 (typedLVal, Pointer(c)) ->
+                 (typedLVal, Pointer(c), _) ->
                    if c = Poop
                    then (ErrorMsg.error ("dereferencing a null pointer\n");
                          raise ErrorMsg.Error)
-                   else (TypedPostElabDerefLVal(typedLVal), c)
+                   else (TypedPostElabDerefLVal(typedLVal), c, varEnv)
                | _ -> (ErrorMsg.error ("dereferencing a non-pointer\n");
                        raise ErrorMsg.Error))
       | UntypedPostElabArrayAccessLVal(untypedLVal,exp) ->
           (match (tc_lval_helper varEnv isNested untypedLVal, tc_expression varEnv exp) with
-                 ((typedLVal, Array(c)), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c)
+                 ((typedLVal, Array(c), _), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c, varEnv)
                | _ -> (ErrorMsg.error ("array access lval didn't typecheck\n");
                        raise ErrorMsg.Error))
 

@@ -273,16 +273,16 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                    raise ErrorMsg.Error))
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
        (let (tcExpr, exprType) = tc_expression varMap e in
-        let (typedLVal, lvalType) = tc_lval varMap lval in
+        let (typedLVal, lvalType, newVarMap) = tc_lval varMap lval in
         if matchTypes exprType lvalType 
         then
           (match op with
-                 EQ -> tc_statements varMap stms 
+                 EQ -> tc_statements newVarMap stms 
                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                        (* we don't have to add lvals to our varMap *)
                | _ -> 
                    if lvalType = INT
-                   then tc_statements varMap stms 
+                   then tc_statements newVarMap stms 
                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                    else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
                                raise ErrorMsg.Error))
