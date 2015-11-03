@@ -19,8 +19,14 @@ let getSizeForType = function
     INT -> BIT32
   | BOOL -> BIT32
   | Pointer _ -> BIT64
-  | _ -> let () = print_string("I'm not sure if this case is valid or not,\
-                                assert false for now") in assert(false)
+  | VOID -> BIT32 (* unfortunately, this case can validly happen if a
+                     function has void "return type". But rest assured
+                     that the size will never be used in that case! *)
+  | Array _ -> BIT64
+  | Struct _ -> BIT64
+  | Poop -> assert(false)
+  | TypedefType _ -> assert(false) (* should be stripped away in typecheck *)
+    
 let getSizeForExpr = function
     TmpIntExpr _ -> BIT32
   | TmpBoolExpr _ -> BIT32
