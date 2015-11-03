@@ -138,14 +138,16 @@ typedef :
 sdecl :
     STRUCT VAR_IDENT SEMI         { A.PreElabStructDecl $2 }
 
+/* Struct names can also be typedef'd ids */	   
 sdef :
     STRUCT VAR_IDENT LBRACE fieldlist RBRACE SEMI { A.PreElabStructDef ($2, $4) }
+  | STRUCT TYPEDEF_IDENT LBRACE fieldlist RBRACE SEMI { A.PreElabStructDef ($2, $4) }
 
 field :
 /* Apparently you can actually have typedef'd ids still be the names of
      struct fields */
-    c0type VAR_IDENT         { ($1, $2) }
-  | c0type TYPEDEF_IDENT         { ($1, $2) }
+    c0type VAR_IDENT SEMI         { ($1, $2) }
+  | c0type TYPEDEF_IDENT SEMI        { ($1, $2) }
 
 fieldlist :
     /* empty */          { [] }
@@ -198,10 +200,12 @@ c0typeNotIdent :
  | c0type STAR                   { D.Pointer $1 }
  | STRUCT VAR_IDENT                  { D.Struct $2 }
 
+/* I forget exactly what the deal was with expToC0Type and
+   c0typeNotIdent, but it seems to work so let's just go with it */	    
 c0type :
    TYPEDEF_IDENT                         { D.TypedefType $1 }
  | exp LBRACK RBRACK          { D.Array (expToC0Type $1) }       
- | c0typeNotIdent LBRACK RBRACK          { D.Array $1 }
+ | c0type LBRACK RBRACK          { D.Array $1 }
  | c0typeNotIdent                { $1 }		  
      
 simpoptNoDecl :
