@@ -182,8 +182,7 @@ simp :
  | simpNoDecl               { $1 }  
    
 simpNoDecl :
-   exp asnop exp %prec ASNOP  { let () = print_string("hi\n") in
-			 A.SimpAssign (expToLVal $1, $2, $3) }
+   exp asnop exp %prec ASNOP  { A.SimpAssign (expToLVal $1, $2, $3) }
  | exp                           { A.SimpStmtExpr $1 }
  | exp postop		 { expand_postop (expToLVal $1) $2 }
   ;
