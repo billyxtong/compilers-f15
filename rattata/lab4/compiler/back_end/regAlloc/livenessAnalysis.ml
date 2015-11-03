@@ -16,14 +16,15 @@ let markedLive liveSet line = try let () = H.find liveSet line in true
 
 let getDefVars prog line =
     match Array.get prog line with
-         Tmp2AddrMov(opSize, src, TmpVar dest) -> dest::[]
-       | Tmp2AddrBinop(op, src, TmpVar dest) -> dest::[]
-       | Tmp2AddrPtrBinop(op, src, TmpVar dest) -> dest::[]
-       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpVar dest)) -> dest::[]
-       | Tmp2AddrMov(opSize, src, TmpDeref dest) -> dest::[]
-       | Tmp2AddrBinop(op, src, TmpDeref dest) -> dest::[]
-       | Tmp2AddrPtrBinop(op, src, TmpDeref dest) -> dest::[]
-       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpDeref dest)) -> dest::[]
+         Tmp2AddrMov(opSize, src, TmpVar (Tmp dest)) -> dest::[]
+       | Tmp2AddrBinop(op, src, TmpVar (Tmp dest)) -> dest::[]
+       | Tmp2AddrPtrBinop(op, src, TmpVar (Tmp dest)) -> dest::[]
+       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpVar (Tmp dest))) -> dest::[]
+       | Tmp2AddrMov(opSize, src, TmpDeref (Tmp dest)) -> dest::[]
+       | Tmp2AddrBinop(op, src, TmpDeref (Tmp dest)) -> dest::[]
+       | Tmp2AddrPtrBinop(op, src, TmpDeref (Tmp dest)) -> dest::[]
+       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpDeref (Tmp dest))) ->
+         dest::[]
        | Tmp2AddrReturn _ -> []
        | Tmp2AddrJump _ -> []
        | Tmp2AddrLabel _ -> []
@@ -38,14 +39,13 @@ let isDef t prog line =
         | _ -> assert(false)
 
 let isUsedInTmpArg t = function
-    TmpLoc (TmpVar t') -> t = t'
-  | TmpLoc (TmpDeref t') -> t = t'
+    TmpLoc (TmpVar (Tmp t')) -> t = t'
+  | TmpLoc (TmpDeref (Tmp t')) -> t = t'
   | _ -> false
 
 let isUsedInTmpLoc t = function
-    (TmpVar t') -> t = t'
-  | (TmpDeref t') -> t = t'
-  | _ -> false
+    TmpVar (Tmp t') -> t = t'
+  | TmpDeref (Tmp t') -> t = t'
     
 
 let isUsed t prog line =
@@ -129,9 +129,8 @@ let handleTemp t prog predsPerLine interferenceGraph liveTmpsPerLine =
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine =
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
-  let tempsWithConstructor = List.map (fun t -> Tmp t) temps in
   let () = L.iter (fun t -> handleTemp t prog predsPerLine
-                      interferenceGraph liveTmpsPerLine) tempsWithConstructor in
+                      interferenceGraph liveTmpsPerLine) temps in
   let lineNums = Array.mapi (fun i -> fun _ -> i) prog in
   let () = A.iter (fun lineNum -> drawEdgesForLine prog lineNum
       (liveTmpsPerLine.(lineNum)) interferenceGraph) lineNums in
