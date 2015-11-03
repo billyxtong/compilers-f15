@@ -77,6 +77,37 @@ let sharedExprToTypedExpr exprType sharedExpr =
        | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr sharedExpr)
        | _ -> assert(false)
 
+let rec lvalToExpr typee = function
+    TmpVarLVal t -> tmpToTypedExpr (TmpVar t) typee
+  | TmpDerefLVal lval -> 
+           (* Again, type of pointer doesn't matter *)
+        let TmpPtrExpr ptrLValExpr = lvalToExpr (Pointer Poop) lval in
+        sharedExprToTypedExpr typee (TmpInfAddrDeref ptrLValExpr)
+  | TmpFieldAccessLVal (structName, structPtr, fieldName) ->
+        let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structPtr in
+        sharedExprToTypedExpr typee (TmpInfAddrFieldAccess(structName,
+                                             structPtrExpr, fieldName))
+  | TmpArrayAccessLVal (arrayLVal, idxExpr) ->
+        let TmpPtrExpr arrayExpr = lvalToExpr (Pointer Poop) arrayLVal in
+        sharedExprToTypedExpr typee (TmpInfAddrArrayAccess(arrayExpr, idxExpr))
+
+(* throws an error if unable to convert to a lval. At this point should
+   only have tmps and derefs, I believe *)
+let rec exprToLVal = function
+    TmpBoolExpr (TmpBoolArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
+  | TmpBoolExpr (TmpBoolArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
+  | TmpBoolExpr (TmpBoolSharedExpr (TmpInfAddrDeref p)) ->
+           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
+  | TmpIntExpr (TmpIntArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
+  | TmpIntExpr (TmpIntArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
+  | TmpIntExpr (TmpIntSharedExpr (TmpInfAddrDeref p)) ->
+           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
+  | TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
+  | TmpPtrExpr (TmpPtrArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
+  | TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrDeref p)) ->
+           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
+  | _ -> assert(false)                           
+
 let makeAccessInstr elemType resultTmp accessPtrExpr = match elemType with
                     BOOL -> TmpInfAddrMov(BIT32, TmpBoolExpr (TmpBoolSharedExpr
                                (TmpInfAddrDeref accessPtrExpr)), resultTmp)
@@ -114,7 +145,10 @@ let rec handleSharedExpr exprType = function
                          accessPtrExpr in
        let resultTmpExpr = tmpToTypedExpr (TmpVar resultTmp) exprType in
        (resultTmpExpr, instrs @ doTheAccess :: [])
-   | TmpLValExpr lval -> failwith "Ben, do this case"       
+   | TmpLValExpr lval ->
+       let (handledLVal, instrs) = handleMemForLVal exprType lval in
+       let lvalAsExpr = lvalToExpr exprType handledLVal in
+       (lvalAsExpr, instrs)
 
 (* returns (e, instrs) pair *)
 and handleMemForExpr = function
@@ -229,43 +263,12 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
              ::TmpInfAddrLabel(doTheAccessLabel)::[] in
       (accessPtrExpr, allInstrs)
 
-let rec lvalToExpr typee = function
-    TmpVarLVal t -> tmpToTypedExpr (TmpVar t) typee
-  | TmpDerefLVal lval -> 
-           (* Again, type of pointer doesn't matter *)
-        let TmpPtrExpr ptrLValExpr = lvalToExpr (Pointer Poop) lval in
-        sharedExprToTypedExpr typee (TmpInfAddrDeref ptrLValExpr)
-  | TmpFieldAccessLVal (structName, structPtr, fieldName) ->
-        let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structPtr in
-        sharedExprToTypedExpr typee (TmpInfAddrFieldAccess(structName,
-                                             structPtrExpr, fieldName))
-  | TmpArrayAccessLVal (arrayLVal, idxExpr) ->
-        let TmpPtrExpr arrayExpr = lvalToExpr (Pointer Poop) arrayLVal in
-        sharedExprToTypedExpr typee (TmpInfAddrArrayAccess(arrayExpr, idxExpr))
-
-(* throws an error if unable to convert to a lval. At this point should
-   only have tmps and derefs, I believe *)
-let rec exprToLVal = function
-    TmpBoolExpr (TmpBoolArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
-  | TmpBoolExpr (TmpBoolArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
-  | TmpBoolExpr (TmpBoolSharedExpr (TmpInfAddrDeref p)) ->
-           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
-  | TmpIntExpr (TmpIntArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
-  | TmpIntExpr (TmpIntArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
-  | TmpIntExpr (TmpIntSharedExpr (TmpInfAddrDeref p)) ->
-           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
-  | TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar t))) -> TmpVarLVal t
-  | TmpPtrExpr (TmpPtrArg (TmpLoc (TmpDeref t))) -> TmpDerefLVal (TmpVarLVal t)
-  | TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrDeref p)) ->
-           TmpDerefLVal (exprToLVal (TmpPtrExpr p))
-  | _ -> assert(false)                           
-
 (* After this, the only lvals should be tmps *)
 (* Ok I realized I don't have to redo everything I did for the exprs,
    that makes me feel better *)
 (* So derefs and vars are fine. The functions for FieldAccess and ArrayAccess
    should both return tmps, so we can just use those too! Yay *)
-let rec handleMemForLVal typee = function
+and handleMemForLVal typee = function
     TmpVarLVal t -> (TmpVarLVal t, [])
   | TmpDerefLVal ptr ->
     let (ptrFinal, instrs) = handleMemForLVal (Pointer Poop) ptr in
