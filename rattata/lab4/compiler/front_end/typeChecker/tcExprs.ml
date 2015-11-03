@@ -5,7 +5,7 @@ module M = Core.Std.Map
 open String
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
-type mytype = (c0type Core.Std.String.Map.t) * bool
+type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
 let functionMap = ref Core.Std.String.Map.empty
 let typedefMap = ref Core.Std.String.Map.empty
 let (structMap : (mytype Core.Std.String.Map.t) ref) = ref (Core.Std.String.Map.empty)
@@ -172,7 +172,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
               (match M.find !structMap structName with
                      Some(fieldMap, true) -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
-                       (match M.find fieldMap fieldName with
+                       (match M.find !fieldMap fieldName with
                               Some fieldType ->
                                 (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType)
                             | None -> (ErrorMsg.error ("struct " ^ structName ^
@@ -249,7 +249,7 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                    (match M.find !structMap structName with
                           Some (fieldMap, true) -> (* in structMap, struct names point to a table of their fields
                                          in fieldMap, field names point to their type *)
-                            (match M.find fieldMap fieldName with
+                            (match M.find !fieldMap fieldName with
                                    Some fieldType ->
                                      (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType)
                                  | None -> (ErrorMsg.error ("struct " ^ structName ^

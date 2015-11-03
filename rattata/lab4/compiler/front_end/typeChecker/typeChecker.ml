@@ -5,6 +5,7 @@
  *)
 
 open Ast
+module A = Ast
 open Datatypesv1
 module M = Core.Std.Map
 open String
@@ -61,7 +62,7 @@ let rec tc_header (header : untypedPostElabAST) =
                | UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
                           None -> 
-                            let () = structMap := M.add !structMap structName (Core.Std.String.Map.empty, false) in
+                            let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
                             tc_header fdecls
                         | _ -> (ErrorMsg.error ("struct name \n");
                                 raise ErrorMsg.Error))
@@ -192,25 +193,27 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                | UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
                           None -> 
-                            let () = structMap := M.add !structMap structName (Core.Std.String.Map.empty, false) in
+                            let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
                             tc_prog gdecls typedAST
                         | _ -> (ErrorMsg.error ("redeclaring struct " ^ structName ^ "\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabStructDef(structName, fields) ->
                    (match M.find !structMap structName with
                           Some (fieldMap, false) -> (* declared but undefined struct *)
-                            let () = List.iter(fun (fieldType, fieldName) -> M.add fieldMap fieldName fieldType) fields in
-                            let () = structMap := M.replace !structMap structName (Some fieldMap, true) in
-                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST))
+                            let () = List.iter(fun (fieldType, fieldName) -> 
+                              fieldMap := M.add !fieldMap fieldName fieldType) fields in
+                            let () = structMap := M.add !structMap structName (fieldMap, true) in
+                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST)
                         | Some (_, true) -> (* already defined struct *) 
                             (ErrorMsg.error ("redefining struct " ^ structName ^ "\n");
                              raise ErrorMsg.Error)
                         | None -> 
-                            let () = structMap := M.add !structMap structName (Core.Std.String.Map.empty, true) in
-                            let (fieldMap, _) = M.find !structMap structName in
-                            let () = List.iter(fun (fieldType, fieldName) -> M.add fieldMap fieldName fieldType) fields in
-                            let () = structMap := M.replace !structMap structName (Some fieldMap, true) in
-                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST))
+                            let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, true) in
+                            let Some (fieldMap, _) = M.find !structMap structName in
+                            let () = List.iter(fun (fieldType, fieldName) -> 
+                              fieldMap := M.add !fieldMap fieldName fieldType) fields in
+                            let () = structMap := M.add !structMap structName (fieldMap, true) in
+                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST)))
 
 (* varMap is the map of variables within the function body *) 
 (* funcRetType is the return type of the function *)         
@@ -243,7 +246,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
             | _ -> 
               (match (M.find !typedefMap id, M.find varMap id) with
                  (None, None) -> 
-                    let newTypedAST = (TypedPostElabAssignStmt(id, tcExpr)
+                    let newTypedAST = (TypedPostElabAssignStmt(TypedPostElabVarLVal(id), EQ, tcExpr)
                                     :: TypedPostElabDecl(id, actualDeclType)
                                     :: typedBlock) in
                     if matchTypes exprType actualDeclType then 
@@ -258,7 +261,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
       (match (M.find !typedefMap id, M.find varMap id) with
              (None, None) -> 
                (let actualType = lowestTypedefType typee in
-                (match actualDeclType with
+                (match actualType with
                       VOID -> (ErrorMsg.error ("vars can't be void\n");
                                raise ErrorMsg.Error)
                     | Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
@@ -282,7 +285,9 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                    then tc_statements varMap stms 
                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                    else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
-                               raise ErrorMsg.Error)))
+                               raise ErrorMsg.Error))
+        else (ErrorMsg.error ("expr types don't match\n");
+                               raise ErrorMsg.Error))
   | A.UntypedPostElabIf(e, block1, block2)::stms -> 
       let (tcExpr, _) = tc_expression varMap e in
       (match tcExpr with
@@ -342,7 +347,8 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
              VoidExpr(stmt) -> tc_statements varMap 
                                stms funcRetType ret (stmt :: typedBlock)
            | _ -> tc_statements varMap 
-                  stms funcRetType ret (TypedPostElabAssignStmt(GenUnusedID.create(), tcExpr) :: typedBlock))
+                  stms funcRetType ret 
+                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock))
        
 and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   
