@@ -1,4 +1,5 @@
 module H = Hashtbl
+open String
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 
@@ -7,11 +8,9 @@ let typedefMap = ref Core.Std.String.Map.empty
 let structMap = ref Core.Std.String.Map.empty
 
 let isValidVarDecl (identifier : ident) = 
-  if sub identifier 0 1 = "\\" 
-  then true 
-  else false
+  if sub identifier 0 1 = "\\" then true else false
 
-let lowestTypedefType (typedefType : c0type) =
+let lowestTypedefType (typedefType) =
   match typedefType with
         TypedefType(identifier) -> 
           (match M.find !typedefMap identifier with
@@ -174,7 +173,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
              BoolExpr(exp1) -> (BoolExpr(LogNot(exp1)), BOOL)
            | _ -> (ErrorMsg.error ("not expression didn't typecheck \n");
                   raise ErrorMsg.Error))
-  | UntypedPostElabTernary(e1 : untypedPostElabExpr, e2 : untypedPostElabExpr, e3 : untypedPostElabExpr) ->
+  | UntypedPostElabTernary(e1, e2, e3) ->
       let (tcExpr1,type1) = tc_expression varEnv e1 in
       let (tcExpr2,type2) = tc_expression varEnv e2 in
       let (tcExpr3,type3) = tc_expression varEnv e3 in
@@ -194,7 +193,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) =
                             raise ErrorMsg.Error))
            | _ -> (ErrorMsg.error ("ternary expression didn't typecheck \n");
                    raise ErrorMsg.Error))  
-  | UntypedPostElabFunCall(i : ident, argList) -> 
+  | UntypedPostElabFunCall(i, argList) -> 
       (match (M.find varEnv i, M.find !functionMap i) with
              (Some _, _) -> (ErrorMsg.error ("cannot call this function while var with same name is in scope \n");
                              raise ErrorMsg.Error)

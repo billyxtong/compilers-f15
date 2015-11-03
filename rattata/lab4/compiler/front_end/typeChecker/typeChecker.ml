@@ -227,11 +227,13 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
       (* only necessary for statements of the form "int f = f();" *)
        (let (tcExpr, exprType) = tc_expression varMap e in
         let actualDeclType = lowestTypedefType typee in
-        if (actualDeclType = Struct(_) || actualDeclType = VOID)
-        then (ErrorMsg.error ("vars can't be void or structs\n");
-              raise ErrorMsg.Error)
-        else
-          (match (M.find !typedefMap id, M.find varMap id) with
+        (match actualDeclType with
+              VOID -> (ErrorMsg.error ("vars can't be void\n");
+                       raise ErrorMsg.Error)
+            | Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
+                            raise ErrorMsg.Error)
+            | _ -> 
+              (match (M.find !typedefMap id, M.find varMap id) with
                  (None, None) -> 
                     let newTypedAST = (TypedPostElabAssignStmt(id, tcExpr)
                                     :: TypedPostElabDecl(id, actualDeclType)
@@ -241,20 +243,21 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                       tc_statements newVarMap 
                       stms funcRetType ret newTypedAST
                     else (ErrorMsg.error ("assignment expression didn't typecheck" ^ id ^"\n");
-                          raise ErrorMsg.Error))
+                          raise ErrorMsg.Error)
                | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
-                       raise ErrorMsg.Error))
+                       raise ErrorMsg.Error))))
   | A.UntypedPostElabDecl(id, typee)::stms ->
       (match (M.find !typedefMap id, M.find varMap id) with
              (None, None) -> 
                (let actualType = lowestTypedefType typee in
-                if (actualType = VOID || actualDeclType = Struct(_))  then 
-                  (ErrorMsg.error ("vars can't be void or structs\n");
-                   raise ErrorMsg.Error)
-                else
-                 let newVarMap = M.add varMap id (actualType, false) in 
+                (match actualDeclType with
+                      VOID -> (ErrorMsg.error ("vars can't be void\n");
+                               raise ErrorMsg.Error)
+                    | Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
+                                    raise ErrorMsg.Error)
+                    | _ -> let newVarMap = M.add varMap id (actualType, false) in 
                  tc_statements newVarMap 
-                 stms funcRetType ret ((TypedPostElabDecl(id, actualType)) :: typedBlock))
+                 stms funcRetType ret ((TypedPostElabDecl(id, actualType)) :: typedBlock)))
            | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
                    raise ErrorMsg.Error))
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
