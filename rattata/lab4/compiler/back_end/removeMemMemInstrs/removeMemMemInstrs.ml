@@ -14,11 +14,11 @@ let handleMemMemInstr (instr: assemInstr) : assemInstr list =
              MOV(opSize, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[])
       | BOOL_INSTR (TEST (AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
             (* TEST always takes bools, which are 32-bit *)
-             MOV(BIT32, AssemLoc (MemAddr memDest), AllocForFun.spillReg)::
+             MOV(BIT32, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg)::
              BOOL_INSTR (TEST(AssemLoc (MemAddr memSrc), AllocForFun.firstSpillReg))::
              MOV(BIT32, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[]
       | BOOL_INSTR (CMP (opSize, AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
-             MOV(opSize, AssemLoc (MemAddr memDest), AllocForFun.spillReg)::
+             MOV(opSize, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg)::
              BOOL_INSTR (CMP (opSize, AssemLoc (MemAddr memSrc),
                               AllocForFun.firstSpillReg))::
              MOV(opSize, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[]
