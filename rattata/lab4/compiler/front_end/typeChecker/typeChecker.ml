@@ -155,7 +155,8 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 let newFuncName = "_c0_" ^ funcName in
                                 (* We're supposed to call internal functions with the prefix _c0_. I'm doing it
                                    here because we know exactly which are internal/external at this point *)
-                                  tc_prog gdecls (TypedPostElabFunDef(funcType, newFuncName, 
+                                let newFuncType = lowestTypedefType funcType in
+                                  tc_prog gdecls (TypedPostElabFunDef(newFuncType, newFuncName, 
                                   newFuncParams, List.rev typeCheckedBlock)::typedAST))
                          | (None, None) -> 
                              (if funcName = "main" && 
