@@ -41,7 +41,10 @@ let translateTmpArg tbl = function
                     wrote to it. This can happen if the variable was never initialized,
                     but it was ok because the line was unreachable *)
                  with Not_found -> AssemLoc (MemAddr(RSP, -666)))
-  | TmpLoc (TmpDeref t) -> try AssemLoc (H.find tbl t)
+  | TmpLoc (TmpDeref t) -> try AssemLoc (match (H.find tbl t) with
+                                     MemAddr m -> MemAddrDeref m
+                                   | Reg r -> RegDeref r
+                                   | _ -> assert(false))
                            with Not_found -> failwith "I don't think this can happen"
 
 let translateTmpLoc tbl = function
