@@ -198,6 +198,11 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                         | _ -> (ErrorMsg.error ("redeclaring struct " ^ structName ^ "\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabStructDef(structName, fields) ->
+                   let nameTable = Core.Std.String.Map.empty in
+                   if (not (uniqueFieldNames fields nameTable) || (isFieldOrParamAStruct fields)) then 
+                      (ErrorMsg.error ("bad field names, or field is a struct \n");
+                                raise ErrorMsg.Error)
+                   else
                    (match M.find !structMap structName with
                           Some (fieldMap, false) -> (* declared but undefined struct *)
                             let () = List.iter(fun (fieldType, fieldName) -> 

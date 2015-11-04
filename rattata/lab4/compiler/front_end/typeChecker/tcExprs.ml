@@ -72,6 +72,22 @@ let rec uniqueParamNames (params : param list) nameTable =
                  (None, None) -> uniqueParamNames ps (M.add nameTable datName ())
                | _ -> false)
 
+let rec uniqueFieldNames (fields : field list) nameTable = 
+  match fields with
+        [] -> true
+      | (datType, datName) :: fs ->
+          (match (M.find nameTable datName, M.find !typedefMap datName) with
+                 (None, None) -> uniqueFieldNames fs (M.add nameTable datName ())
+               | _ -> false)
+
+let rec isFieldOrParamAStruct l =
+  match l with
+        [] -> false
+      | (typee, _) :: xs -> 
+          (match typee with
+                 Struct(_) -> true
+               | _ -> isFieldOrParamAStruct xs)
+
 let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
     UntypedPostElabConstExpr (constant, typee) ->
