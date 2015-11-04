@@ -21,7 +21,10 @@ let generalBinopToString(op : generalBinop) =
 let rec preElabLValToString(lval : preElabLVal) =
   match lval with
         PreElabVarLVal(i) -> identToString(i)
-      | PreElabFieldLVal(p,i) -> preElabLValToString(p) ^ "->" ^ identToString(i)
+      | PreElabFieldLVal(p,i) -> 
+          (match p with
+                 PreElabDerefLVal(inner) -> "(*" ^ preElabLValToString(inner) ^ ")." ^ identToString(i)
+               | _ -> preElabLValToString(p) ^ "->" ^ identToString(i))
       | PreElabDerefLVal(p) -> "*" ^ preElabLValToString(p)
       | PreElabArrayAccessLVal(p,e) -> preElabLValToString(p) ^ "[" ^ preElabExprToString(e) ^ "]"
 
@@ -130,7 +133,7 @@ let preElabASTToString (mainDecls, headerDecls) =
 let rec untypedPostElabLValToString(lval : untypedPostElabLVal) =
   match lval with
         UntypedPostElabVarLVal(i) -> identToString(i)
-      | UntypedPostElabFieldLVal(p,i) -> untypedPostElabLValToString(p) ^ "->"  
+      | UntypedPostElabFieldLVal(p,i) -> "(" ^ untypedPostElabLValToString(p) ^ ")."  
                                             ^ identToString(i)
       | UntypedPostElabDerefLVal(p) -> "*" ^ untypedPostElabLValToString(p)
       | UntypedPostElabArrayAccessLVal(p,e) -> untypedPostElabLValToString(p)
@@ -224,7 +227,7 @@ let rec sharedTypeExprToString(s : sharedTypeExpr) =
       | FunCall(func,args) -> identToString(func) ^ "(" ^ (concat ", " 
                       (List.map typedPostElabExprToString args)) ^ ")"
       | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "->" ^ identToString(i2) ^
-                                  "(" ^ identToString(i2) ^ ")"
+                                  " (type = " ^ identToString(i2) ^ ")"
       | ArrayAccess(p,i) -> ptrExprToString(p) ^ "[" ^ intExprToString(i) ^ "]"
       | Deref(p) -> "*" ^ ptrExprToString(p)
       | Ident(i) -> identToString(i)

@@ -3,6 +3,7 @@ open Ast
 module H = Hashtbl
 module M = Core.Std.Map
 open String
+open PrintASTs
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
@@ -13,13 +14,15 @@ let (structMap : (mytype Core.Std.String.Map.t) ref) = ref (Core.Std.String.Map.
 let isValidVarDecl (identifier : ident) =
   if sub identifier 0 1 = "\\" then true else false
 
-let lowestTypedefType (typedefType) =
+let rec lowestTypedefType (typedefType) =
   match typedefType with
         TypedefType(identifier) ->
           (match M.find !typedefMap identifier with
                  Some(anotherType) -> anotherType
                | None -> (ErrorMsg.error ("undefined typedef \n");
                          raise ErrorMsg.Error))
+      | Pointer(c) -> Pointer(lowestTypedefType c)
+      | Array(c) -> Array(lowestTypedefType c)
       | _ -> typedefType
 
 let rec argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) =
@@ -109,6 +112,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                (match (tcExpr1, tcExpr2) with
                       (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntEquals(exp1, exp2)), BOOL)
                     | (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(BoolEquals(exp1, exp2)), BOOL)
+                    | (PtrExpr(exp1), PtrExpr(exp2)) -> (BoolExpr(PtrEquals(exp1, exp2)), BOOL)
                     | _ -> (ErrorMsg.error ("double equals expressions didn't typecheck \n");
                            raise ErrorMsg.Error))
            | LOG_AND -> (match (tcExpr1, tcExpr2) with
@@ -178,21 +182,26 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                                          in fieldMap, field names point to their type *)
                        (match M.find !fieldMap fieldName with
                               Some fieldType ->
-                                (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType)
+                                (match fieldType with
+                                       INT -> (IntExpr(IntSharedExpr(FieldAccess(structName, p, fieldName))), INT)
+                                     | BOOL -> (BoolExpr(BoolSharedExpr(FieldAccess(structName, p, fieldName))), BOOL)
+                                     | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType))
                             | None -> (ErrorMsg.error ("struct " ^ structName ^
                                                     " has no field with name "
                                                     ^ fieldName ^ "\n");
                                        raise ErrorMsg.Error))
                    | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                               raise ErrorMsg.Error))
-          | _ -> (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
+          | _ -> 
+              let () = print_string (typedPostElabExprToString(typedExp) ^ "\n") in 
+              (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
                   raise ErrorMsg.Error))
   | UntypedPostElabAlloc(t : c0type) ->
       let baseType = lowestTypedefType t in
       (match baseType with
              Struct(structName) ->
                (match M.find !structMap structName with
-                      Some (_, true) -> (PtrExpr(Alloc(t)), Pointer(t))
+                      Some (_, true) -> (PtrExpr(Alloc(t)), Pointer(baseType))
                     | _ -> (ErrorMsg.error ("undefined struct\n");
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(t)), Pointer(baseType)))
@@ -201,7 +210,11 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       (match (typedExp, typee) with
              (_, Poop) -> (ErrorMsg.error ("trying to dereference null pointer\n");
                            raise ErrorMsg.Error)
-           | (PtrExpr(p), Pointer(c)) -> (PtrExpr(PtrSharedExpr(Deref(p))), c)
+           | (PtrExpr(p), Pointer(c)) -> 
+               (match c with
+                      INT -> (IntExpr(IntSharedExpr(Deref(p))), c)
+                    | BOOL -> (BoolExpr(BoolSharedExpr(Deref(p))), c) 
+                    | _ -> (PtrExpr(PtrSharedExpr(Deref(p))), c))
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
   | UntypedPostElabArrayAlloc(typee, e) ->
@@ -211,7 +224,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
              IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType))
            | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
                   raise ErrorMsg.Error))
-  | UntypedPostElabArrayAccessExpr(e1, e2)  ->
+  | UntypedPostElabArrayAccessExpr(e1, e2) ->
       let (typedExp1, type1) = tc_expression varEnv e1 in
       (match type1 with
              Array(arrayType) ->
@@ -223,9 +236,13 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                                          raise ErrorMsg.Error)
                               | Alloc(_) -> (ErrorMsg.error ("can't access ptrs like arrays\n");
                                              raise ErrorMsg.Error)
-                              | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), arrayType)))
-          | _ -> (ErrorMsg.error ("first expr not an array\n");
-                  raise ErrorMsg.Error))
+                              | _ -> 
+                                  (match arrayType with
+                                         INT -> (IntExpr(IntSharedExpr(ArrayAccess(p, i))), arrayType)
+                                       | BOOL -> (BoolExpr(BoolSharedExpr(ArrayAccess(p, i))), arrayType)
+                                       | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), arrayType)))
+                    | _ -> (ErrorMsg.error ("first expr not an array\n");
+                            raise ErrorMsg.Error)))
 
 let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
   match lval with
@@ -243,8 +260,11 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                                     map based on the match and if statements *)
                                  (TypedPostElabVarLVal(id), typee, newVarMap))
                       else
-                        (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
-                         raise ErrorMsg.Error))
+                        if not isInitialized
+                        then (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
+                              raise ErrorMsg.Error)
+                        else
+                          (TypedPostElabVarLVal(id), typee, varEnv))
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
                             raise ErrorMsg.Error))
       | UntypedPostElabFieldLVal(untypedLVal,fieldName) ->

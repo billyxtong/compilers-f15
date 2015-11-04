@@ -180,7 +180,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                   funcParams, List.rev typeCheckedFuncBody)::typedAST))))
                | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
                     if typeDefType = VOID then
-                    (ErrorMsg.error ("apparently you can't typedef voids which is stupid but whatever \n");
+                    (ErrorMsg.error ("can't typedef voids\n");
                      raise ErrorMsg.Error)
                     else
                    (match (M.find !typedefMap typeDefName, M.find !functionMap typeDefName) with
@@ -235,7 +235,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
               | None -> assert(false) (* everything in varMap should be in blockVarMap *)))) in
       tc_statements newVarMap stmts funcRetType newRet (blockBlock @ typedBlock)
   | A.UntypedPostElabInitDecl(id, typee, e)::stms ->
-      (* only necessary for statements of the form "int f = f();" *)
+      (* necessary for statements of the form "int f = f();" *)
        (let (tcExpr, exprType) = tc_expression varMap e in
         let actualDeclType = lowestTypedefType typee in
         (match actualDeclType with
@@ -249,11 +249,12 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                     let newTypedAST = (TypedPostElabAssignStmt(TypedPostElabVarLVal(id), EQ, tcExpr)
                                     :: TypedPostElabDecl(id, actualDeclType)
                                     :: typedBlock) in
-                    if matchTypes exprType actualDeclType then 
-                      let newVarMap = M.add varMap id (actualDeclType, true) in  
+                    if matchTypes exprType actualDeclType then
+                      let newVarMap = M.add varMap id (actualDeclType, true) in 
                       tc_statements newVarMap 
                       stms funcRetType ret newTypedAST
-                    else (ErrorMsg.error ("assignment expression didn't typecheck " ^ id ^"\n");
+                    else (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(actualDeclType) ^"\nRHS type: "
+                                    ^ c0typeToString(exprType));
                           raise ErrorMsg.Error)
                | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
                        raise ErrorMsg.Error))))
@@ -274,7 +275,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
        (let (tcExpr, exprType) = tc_expression varMap e in
         let (typedLVal, lvalType, newVarMap) = tc_lval varMap lval in
-        if matchTypes exprType lvalType 
+        if matchTypes exprType (lowestTypedefType lvalType )
         then
           (match op with
                  EQ -> tc_statements newVarMap stms 
@@ -286,7 +287,10 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                    else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
                                raise ErrorMsg.Error))
-        else (ErrorMsg.error ("expr types don't match\n");
+        else 
+        let () = print_string (untypedPostElabLValToString(lval) ^ assignOpToString(op) 
+                           ^ untypedPostElabExprToString(e) ^ "\n") in
+        (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(lvalType) ^ "\nRHS type: " ^ c0typeToString(exprType) ^ "\n");
                                raise ErrorMsg.Error))
   | A.UntypedPostElabIf(e, block1, block2)::stms -> 
       let (tcExpr, _) = tc_expression varMap e in

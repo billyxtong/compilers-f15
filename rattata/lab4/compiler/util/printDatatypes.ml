@@ -15,7 +15,7 @@ let rec c0typeToString (c : c0type) =
       | TypedefType(identifier) -> identToString(identifier) ^ " "
       | Pointer(c) -> c0typeToString(c) ^ "*"
       | Array(c) -> c0typeToString(c) ^ "[]"
-      | Struct(i) -> identToString(i)
+      | Struct(i) -> "struct " ^ identToString(i)
       | Poop -> "nulltype"
         
 let constToString (c : const) = string_of_int(c)
