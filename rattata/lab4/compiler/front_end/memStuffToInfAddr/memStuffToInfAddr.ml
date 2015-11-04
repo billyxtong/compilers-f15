@@ -236,7 +236,11 @@ and getStructAccessPtr structTypeName structPtr fieldName =
         let accessOffset = H.find fieldOffsets fieldName in
         let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtrFinal,
                              TmpIntArg (TmpConst accessOffset)) in
-        (fieldPtrExpr,structPtrInstrs)
+       let fieldPtrFinal = Tmp (Temp.create()) in
+       let storeFieldPtr = TmpInfAddrMov(BIT64, TmpPtrExpr fieldPtrExpr,
+                                          TmpVarLVal fieldPtrFinal) in
+        (TmpPtrArg (TmpLoc (TmpVar fieldPtrFinal)),
+         structPtrInstrs @ storeFieldPtr :: [])
     with Not_found -> let () = print_string("struct " ^ structTypeName
                            ^ "not defined before alloc\n") in assert(false)
 
@@ -296,7 +300,7 @@ and handleMemForLVal typee = function
       let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structptr in
       let (fieldAccessPtr, instrs) = getStructAccessPtr structName
           structPtrExpr fieldName in
-      let fieldAccessPtrLVal = exprToLVal (TmpPtrExpr fieldAccessPtr)
+      let fieldAccessPtrLVal = TmpDerefLVal (exprToLVal (TmpPtrExpr fieldAccessPtr))
       in (fieldAccessPtrLVal, instrs)
   | TmpArrayAccessLVal (arrayLVal, idxExpr) ->
       let TmpPtrExpr arrayExpr = lvalToExpr (Pointer Poop) arrayLVal in
