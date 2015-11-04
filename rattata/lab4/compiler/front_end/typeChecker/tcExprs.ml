@@ -228,7 +228,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                       Some (_, true) -> (PtrExpr(Alloc(baseType)), Pointer(baseType))
                     | _ -> (ErrorMsg.error ("undefined struct\n");
                             raise ErrorMsg.Error))
-           | _ -> (PtrExpr(Alloc(t)), Pointer(baseType)))
+           | _ -> (PtrExpr(Alloc(baseType)), Pointer(baseType)))
   | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
       let (typedExp, typee) = tc_expression varEnv e in
       let actualType = lowestTypedefType typee in
