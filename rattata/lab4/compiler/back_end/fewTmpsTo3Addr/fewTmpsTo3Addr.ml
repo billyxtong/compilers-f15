@@ -134,13 +134,20 @@ and munch_fun_args = function
                  let (curr_instrs, curr_dest) = munch_exp t arg 0 in
                  let (rest_instrs, rest_dests) = munch_fun_args args in
                  (curr_instrs @ rest_instrs, curr_dest::rest_dests)
-    
+
+let lvalToTmpLoc = function
+    TmpVarLVal t -> TmpVar t
+  | TmpDerefLVal (TmpVarLVal t) -> TmpDeref t
+  | _ -> assert(false)               
+
 (* munch_stm stm generates code to execute stm *)
 let munch_instr = function
     TmpInfAddrMov (opSize, e, lval) ->
-       let TmpVarLVal t = lval in (* we should only have TmpVarLVals now *)
-       let (instrs, intermediate_dest) = munch_exp t e 0 in
-       instrs @ [Tmp3AddrMov (opSize, intermediate_dest, TmpVar t)]
+       let munch_dest = (match lval with
+                            TmpVarLVal t -> t
+                          | _ -> Tmp (Temp.create())) in
+       let (instrs, intermediate_dest) = munch_exp munch_dest e 0 in
+       instrs @ [Tmp3AddrMov (opSize, intermediate_dest, lvalToTmpLoc lval)]
   | TmpInfAddrJump j -> Tmp3AddrJump j::[]
   | TmpInfAddrBoolInstr instr -> munch_bool_instr instr
   | TmpInfAddrReturn (argSize, e) ->
