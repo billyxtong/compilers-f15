@@ -49,6 +49,13 @@ let getTypeFromExpr = function
    | TmpBoolExpr _ -> BOOL
    | TmpPtrExpr _ -> Pointer Poop (* Again, doesn't matter what type of ptr *)
 
+let get32vs64ForType = function
+    INT -> BIT32
+  | BOOL -> BIT32
+  | Pointer _ -> BIT64
+  | Array _ -> BIT64
+  | _ -> assert(false)
+
 let getSizeForType = function
      INT -> smallFieldSize
    | BOOL -> smallFieldSize
@@ -128,7 +135,11 @@ let rec allArgsAreTmps = function
 let rec handleSharedExpr exprType = function
      TmpInfAddrFunCall (fName, args) ->
         let () = assert(allArgsAreTmps args) in
-        (sharedExprToTypedExpr exprType (TmpInfAddrFunCall(fName, args)), [])
+        (* move this into a new tmp first to make sure we only evaluate it once. *)
+        let t = Tmp (Temp.create()) in
+        (tmpToTypedExpr (TmpVar t) exprType, TmpInfAddrMov (get32vs64ForType exprType,
+               sharedExprToTypedExpr exprType (TmpInfAddrFunCall(fName, args)),
+               TmpVarLVal t)::[])
    | TmpInfAddrDeref (ptrExp) ->
        let (TmpPtrExpr e_result, instrs) = handleMemForExpr (TmpPtrExpr ptrExp) in
        let nullCheckInstrs = handleNullPointerCheck e_result in
@@ -309,7 +320,7 @@ and handleMemForLVal typee = function
     let TmpPtrExpr ptrFinalAsExpr = lvalToExpr (Pointer Poop) ptrFinal in
     let nullCheckInstrs = handleNullPointerCheck ptrFinalAsExpr in
     (* We know that the inner element is a pointer, what type doesn't matter *)
-                        (TmpDerefLVal(ptrFinal), nullCheckInstrs @ instrs)
+                        (TmpDerefLVal(ptrFinal), instrs @ nullCheckInstrs)
   | TmpFieldAccessLVal (structName, structptr, fieldName) ->
       (* We know that structptr is a pointer of some kind; doesn't matter what *)
       let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structptr in
