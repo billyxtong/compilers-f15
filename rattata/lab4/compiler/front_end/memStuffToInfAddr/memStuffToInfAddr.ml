@@ -192,9 +192,17 @@ and handleMemForExpr = function
              numElemsToAlloc::
              TmpIntExpr (TmpIntArg (TmpConst (getSizeForType elemType)))
                                                       ::[])) in
-       let finalExpr = TmpPtrExpr (TmpInfAddrPtrBinop (PTR_ADD, funCallExpr,
+       let funCallResult = Tmp (Temp.create()) in
+       let storeFunCall = TmpInfAddrMov(BIT64, TmpPtrExpr funCallExpr,
+                                        TmpVarLVal funCallResult) in
+       let finalExpr = TmpPtrExpr (TmpInfAddrPtrBinop (PTR_ADD,
+                                   TmpPtrArg (TmpLoc (TmpVar funCallResult)),
                                    TmpIntArg (TmpConst spaceForLength))) in
-       (finalExpr, [])
+       (* Actually store the length! *)
+       let lengthLoc = TmpVarLVal funCallResult in
+       let storeLengthInstr = TmpInfAddrMov(BIT32, TmpIntExpr numElems,
+                                            TmpDerefLVal lengthLoc) in
+       (finalExpr, storeFunCall::storeLengthInstr::[])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
     | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
