@@ -201,8 +201,8 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 raise ErrorMsg.Error))
                | UntypedPostElabStructDef(structName, fields) ->
                    let nameTable = Core.Std.String.Map.empty in
-                   if (not (uniqueFieldNames fields nameTable) || (isStructRecursive fields structName)) then 
-                      (ErrorMsg.error ("bad field names, or field is a struct \n");
+                   if (not (uniqueFieldNames fields nameTable) || not (areStructFieldsDefined fields)) then 
+                      (ErrorMsg.error ("bad field names, or field is a struct that hasn't been defined \n");
                                 raise ErrorMsg.Error)
                    else
                    (match M.find !structMap structName with

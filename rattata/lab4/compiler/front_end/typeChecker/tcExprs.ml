@@ -80,13 +80,16 @@ let rec uniqueFieldNames (fields : field list) nameTable =
                  None -> uniqueFieldNames fs (M.add nameTable datName ())
                | _ -> false)
 
-let rec isStructRecursive fields structName =
+let rec areStructFieldsDefined fields =
   match fields with
-        [] -> false
+        [] -> true
       | (typee, _) :: fs -> 
-          (match typee with
-                 Struct(name) -> if name = structName then true else isStructRecursive fs structName
-               | _ -> isStructRecursive fs structName)
+          (match lowestTypedefType typee with
+                 Struct(name) -> 
+                   (match M.find !structMap name with
+                          Some (_, true) -> areStructFieldsDefined fs
+                        | _ -> false)
+               | _ -> areStructFieldsDefined fs)
 
 let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
