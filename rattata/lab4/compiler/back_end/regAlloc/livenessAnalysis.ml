@@ -56,6 +56,8 @@ let isUsed t prog line =
             (isUsedInTmpArg t src || dest = TmpDeref (Tmp t))
        | Tmp2AddrBinop(op, src, dest) ->
             (isUsedInTmpArg t src) || (isUsedInTmpLoc t dest)
+       | Tmp2AddrPtrBinop(op, src, dest) ->
+            (isUsedInTmpArg t src) || (isUsedInTmpLoc t dest)
        | Tmp2AddrReturn (s, arg) -> isUsedInTmpArg t arg
        | Tmp2AddrBoolInstr (TmpCmp (s, arg, loc)) ->
             (isUsedInTmpArg t arg) || (isUsedInTmpLoc t loc)
