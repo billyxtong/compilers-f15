@@ -21,10 +21,10 @@ and elaboratePreElabExpr(expression : preElabExpr) =
       | PreElabTernary(e1, e2, e3) -> UntypedPostElabTernary(elaboratePreElabExpr e1,
                                           elaboratePreElabExpr e2, elaboratePreElabExpr e3)
       | PreElabFunCall(i, exprs) -> UntypedPostElabFunCall(i, List.map elaboratePreElabExpr exprs)
-      | PreElabFieldAccessExpr(e,i) -> 
+      | PreElabFieldAccessExpr(e,i) -> (* 
           (match e with
-                 PreElabDerefExpr(_) -> UntypedPostElabFieldAccessExpr(elaboratePreElabExpr(e), i)
-               | _ -> UntypedPostElabFieldAccessExpr(UntypedPostElabDerefExpr(elaboratePreElabExpr(e)), i))
+                 PreElabDerefExpr(_) ->*) UntypedPostElabFieldAccessExpr(elaboratePreElabExpr(e), i) (*
+               | _ -> UntypedPostElabFieldAccessExpr(UntypedPostElabDerefExpr(elaboratePreElabExpr(e)), i)*)
       | PreElabAlloc(c) -> UntypedPostElabAlloc(c)
       | PreElabDerefExpr(e) -> UntypedPostElabDerefExpr(elaboratePreElabExpr(e))
       | PreElabArrayAlloc(c,e) -> UntypedPostElabArrayAlloc(c, elaboratePreElabExpr(e))
