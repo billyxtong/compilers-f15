@@ -44,7 +44,7 @@ and preElabExprToString(preelabexpr : preElabExpr) =
       | PreElabFieldAccessExpr(e,i) -> 
           (match e with
                  PreElabDerefExpr(inner) -> "*(" ^ preElabExprToString(inner) ^ ")." ^ identToString(i)
-               | _ -> preElabExprToString(e) ^ "->" ^ identToString(i))
+               | _ -> preElabExprToString(e) ^ "." ^ identToString(i))
       | PreElabAlloc(t) -> "alloc(" ^ c0typeToString(t) ^ ")"
       | PreElabDerefExpr(e) -> "*(" ^ preElabExprToString(e) ^ ")"
       | PreElabArrayAlloc(t,e) -> "alloc_array(" ^ c0typeToString(t) ^ ", " ^ preElabExprToString(e) ^ ")"
