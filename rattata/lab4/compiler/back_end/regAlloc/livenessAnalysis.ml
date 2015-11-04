@@ -50,7 +50,10 @@ let isUsedInTmpLoc t = function
 
 let isUsed t prog line =
     match Array.get prog line with
-         Tmp2AddrMov(s, src, dest) -> isUsedInTmpArg t src
+         Tmp2AddrMov(s, src, dest) ->
+            (* Mov is special: it's used if the dest is a deref of it,
+               but not it is the dest! *)
+            isUsedInTmpArg t src || dest = TmpDeref (Tmp t)
        | Tmp2AddrBinop(op, src, dest) ->
             (isUsedInTmpArg t src) || (isUsedInTmpLoc t dest)
        | Tmp2AddrReturn (s, arg) -> isUsedInTmpArg t arg
