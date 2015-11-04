@@ -100,9 +100,10 @@ and munch_exp d e depth : tmp3AddrInstr list * tmpArg =
                                   assert(false)
 
 
+(* in a ptr binop, the second arg is always an int. *)
 and munch_ptr_binop d (ptr_binop, e1, e2) depth =
    let (instrs1, dest1) = munch_exp d (TmpPtrExpr e1) depth in
-   let (instrs2, dest2) = munch_exp d (TmpPtrExpr e1) depth in
+   let (instrs2, dest2) = munch_exp d (TmpIntExpr e2) depth in
    instrs1 @ instrs2 @ [Tmp3AddrPtrBinop (ptr_binop, dest1, dest2, TmpVar d)] 
 
 
