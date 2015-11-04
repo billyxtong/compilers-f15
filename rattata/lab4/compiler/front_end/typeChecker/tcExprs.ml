@@ -76,8 +76,8 @@ let rec uniqueFieldNames (fields : field list) nameTable =
   match fields with
         [] -> true
       | (datType, datName) :: fs ->
-          (match (M.find nameTable datName, M.find !typedefMap datName) with
-                 (None, None) -> uniqueFieldNames fs (M.add nameTable datName ())
+          (match M.find nameTable datName with
+                 None -> uniqueFieldNames fs (M.add nameTable datName ())
                | _ -> false)
 
 let rec isFieldOrParamAStruct l =

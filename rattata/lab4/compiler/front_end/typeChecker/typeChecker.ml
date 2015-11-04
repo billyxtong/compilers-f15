@@ -32,6 +32,7 @@ let rec tc_header (header : untypedPostElabAST) =
                         | _ -> (ErrorMsg.error ("typedef name already used\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
+                   let () = print_string ("declaring function " ^ funcName) in
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
@@ -64,7 +65,7 @@ let rec tc_header (header : untypedPostElabAST) =
                           None -> 
                             let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
                             tc_header fdecls
-                        | _ -> (ErrorMsg.error ("struct name \n");
+                        | _ -> (ErrorMsg.error ("struct name already used\n");
                                 raise ErrorMsg.Error))
                | _ -> (ErrorMsg.error ("func/struct def'n in header file \n");
                        raise ErrorMsg.Error))
@@ -329,7 +330,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
          get to be treated as initialized...although those declared
          after don't *)
       let newVarMap = M.map varMap (fun (typee, _) -> (typee, true)) in
-      if matchTypes exprType funcRetType 
+      if matchTypes (lowestTypedefType exprType) funcRetType 
       then tc_statements newVarMap 
           stms funcRetType true ((TypedPostElabReturn(tcExpr)) :: typedBlock) 
       else (ErrorMsg.error ("return expr not same as func ret type\n");
