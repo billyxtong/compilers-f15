@@ -24,7 +24,7 @@ let rec preElabLValToString(lval : preElabLVal) =
       | PreElabFieldLVal(p,i) -> 
           (match p with
                  PreElabDerefLVal(inner) -> "*(" ^ preElabLValToString(inner) ^ ")." ^ identToString(i)
-               | _ -> preElabLValToString(p) ^ "->" ^ identToString(i))
+               | _ -> preElabLValToString(p) ^ "." ^ identToString(i))
       | PreElabDerefLVal(p) -> "*(" ^ preElabLValToString(p) ^ ")"
       | PreElabArrayAccessLVal(p,e) -> preElabLValToString(p) ^ "[" ^ preElabExprToString(e) ^ "]"
 

@@ -20,6 +20,7 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
                     | FieldAccess of ident * ptrExpr * ident
+                (* FieldAccess here is an arrow! *)
                        (* first ident: type name of struct
                         * ptrExpr: the pointer expression 
                         * second ident: actual struct field
@@ -108,6 +109,7 @@ type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND
                       I'm just using them for parsing *)
                   | LT | LEQ | GEQ | LOG_OR | NEQ
 type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
+             (* Field access here is a dot! *)
               UntypedPostElabFieldLVal of untypedPostElabLVal * ident |
               UntypedPostElabDerefLVal of untypedPostElabLVal |
               UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr 
@@ -181,7 +183,7 @@ and preElabExpr = PreElabConstExpr of const * c0type
                  (* new in L4: everything below. Replaced a lot of "exp" with idents. Is that correct? *)
                  (* Not all of them should be idents. You can do something like f().x if
                     f returns a struct. -Ben. *)
-                 | PreElabFieldAccessExpr of preElabExpr * ident (* accesses field with name ident *)
+                 | PreElabFieldAccessExpr of preElabExpr * ident (* field access here is a dot *)
                  | PreElabAlloc of c0type 
                  | PreElabDerefExpr of preElabExpr
                  | PreElabArrayAlloc of c0type * preElabExpr 
