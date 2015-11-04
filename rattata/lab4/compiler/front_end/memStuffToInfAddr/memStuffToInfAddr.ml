@@ -182,11 +182,16 @@ and handleMemForExpr = function
     | TmpPtrExpr (TmpAllocArray (elemType, numElems)) ->
        (* Remember! We allocate an extra 8 bytes and store the length
           in the address p - 8, where p is the address we return here. *)
-      (* Not sure if we need to deal with initializing memory here? *)
        let spaceForLength = 8 in
-       let sizeForMalloc = getSizeForType elemType + spaceForLength in 
-       let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("malloc",
-             [TmpIntExpr (TmpIntArg (TmpConst sizeForMalloc))])) in
+       let extraElemsForLength = (* how many extra elems do we need
+                      to alloc to get 8 bytes for the length? *)
+         (if getSizeForType elemType = spaceForLength then 1 else 2) in
+       let numElemsToAlloc = TmpIntExpr (TmpInfAddrBinopExpr(ADD, numElems,
+                              TmpIntArg (TmpConst extraElemsForLength))) in
+       let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("calloc",
+             numElemsToAlloc::
+             TmpIntExpr (TmpIntArg (TmpConst (getSizeForType elemType)))
+                                                      ::[])) in
        let finalExpr = TmpPtrExpr (TmpInfAddrPtrBinop (PTR_ADD, funCallExpr,
                                    TmpIntArg (TmpConst spaceForLength))) in
        (finalExpr, [])
