@@ -200,7 +200,9 @@ and handleMemForExpr = function
        let extraElemsForLength = (* how many extra elems do we need
                       to alloc to get 8 bytes for the length? *)
          (if getSizeForType elemType = spaceForLength then 1 else 2) in
-       let numElemsToAlloc = TmpIntExpr (TmpInfAddrBinopExpr(ADD, numElems,
+       let (TmpIntExpr numElemsExpr, instrsForNumElems) =
+          handleMemForExpr (TmpIntExpr numElems) in
+       let numElemsToAlloc = TmpIntExpr (TmpInfAddrBinopExpr(ADD, numElemsExpr,
                               TmpIntArg (TmpConst extraElemsForLength))) in
        let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("calloc",
              numElemsToAlloc::
@@ -214,9 +216,9 @@ and handleMemForExpr = function
                                    TmpIntArg (TmpConst spaceForLength))) in
        (* Actually store the length! *)
        let lengthLoc = TmpVarLVal funCallResult in
-       let storeLengthInstr = TmpInfAddrMov(BIT32, TmpIntExpr numElems,
+       let storeLengthInstr = TmpInfAddrMov(BIT32, TmpIntExpr numElemsExpr,
                                             TmpDerefLVal lengthLoc) in
-       (finalExpr, storeFunCall::storeLengthInstr::[])
+       (finalExpr, instrsForNumElems@ storeFunCall::storeLengthInstr::[])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
     | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
