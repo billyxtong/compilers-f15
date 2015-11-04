@@ -250,11 +250,13 @@ and getStructAccessPtr structTypeName structPtr fieldName =
         let accessOffset = H.find fieldOffsets fieldName in
         let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtrFinal,
                              TmpIntArg (TmpConst accessOffset)) in
-       let fieldPtrFinal = Tmp (Temp.create()) in
-       let storeFieldPtr = TmpInfAddrMov(BIT64, TmpPtrExpr fieldPtrExpr,
+        let fieldPtrFinal = Tmp (Temp.create()) in
+        let storeFieldPtr = TmpInfAddrMov(BIT64, TmpPtrExpr fieldPtrExpr,
                                           TmpVarLVal fieldPtrFinal) in
+        let nullCheckInstrs =
+            handleNullPointerCheck (TmpPtrArg (TmpLoc (TmpVar fieldPtrFinal))) in
         (TmpPtrArg (TmpLoc (TmpVar fieldPtrFinal)),
-         structPtrInstrs @ storeFieldPtr :: [])
+         structPtrInstrs @ storeFieldPtr :: [] @ nullCheckInstrs)
     with Not_found -> let () = print_string("struct " ^ structTypeName
                            ^ "not defined before alloc\n") in assert(false)
 
