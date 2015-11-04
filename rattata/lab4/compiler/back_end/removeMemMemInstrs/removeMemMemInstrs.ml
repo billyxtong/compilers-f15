@@ -6,24 +6,35 @@ open Datatypesv1
 let Reg secondSpillRegNoConstr = AllocForFun.secondSpillReg
 let Reg firstSpillRegNoConstr = AllocForFun.firstSpillReg
 
+let areValidSrcDest src dest =
+    match (src, dest) with
+         (AssemLoc (MemAddr _), MemAddr _) -> false
+       | (AssemLoc (MemAddr _), RegDeref _) -> false
+       | (AssemLoc (RegDeref _), RegDeref _) -> false
+       | (AssemLoc (RegDeref _), MemAddr _) -> false
+       | _ -> true
+
 let handleMemMemInstr (instr: assemInstr) : assemInstr list =
     match instr with
-        MOV(opSize, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
-        (if memSrc = memDest then [] else
-             MOV(opSize, AssemLoc (MemAddr memSrc), AllocForFun.firstSpillReg)::
-             MOV(opSize, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[])
-      | BOOL_INSTR (TEST (AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
+        MOV(opSize, src, dest) ->
+             if areValidSrcDest src dest then MOV(opSize, src, dest)::[] else
+             MOV(opSize, src, AllocForFun.firstSpillReg)::
+             MOV(opSize, AssemLoc AllocForFun.firstSpillReg, dest)::[]
+      | BOOL_INSTR (TEST (src, dest)) ->
+             if areValidSrcDest src dest then BOOL_INSTR (TEST (src, dest))::[] else
             (* TEST always takes bools, which are 32-bit *)
-             MOV(BIT32, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg)::
-             BOOL_INSTR (TEST(AssemLoc (MemAddr memSrc), AllocForFun.firstSpillReg))::
-             MOV(BIT32, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[]
-      | BOOL_INSTR (CMP (opSize, AssemLoc(MemAddr memSrc), MemAddr memDest)) ->
-             MOV(opSize, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg)::
-             BOOL_INSTR (CMP (opSize, AssemLoc (MemAddr memSrc),
+             MOV(BIT32, AssemLoc (dest), AllocForFun.firstSpillReg)::
+             BOOL_INSTR (TEST(src, AllocForFun.firstSpillReg))::
+             MOV(BIT32, AssemLoc AllocForFun.firstSpillReg, dest)::[]
+      | BOOL_INSTR (CMP (opSize, src, dest)) -> if areValidSrcDest src dest
+             then BOOL_INSTR (CMP (opSize, src, dest))::[] else
+             MOV(opSize, AssemLoc (dest), AllocForFun.firstSpillReg)::
+             BOOL_INSTR (CMP (opSize, src,
                               AllocForFun.firstSpillReg))::
-             MOV(opSize, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[]
-      | INT_BINOP(op, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
-             MOV(BIT32, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg)::
+             MOV(opSize, AssemLoc AllocForFun.firstSpillReg, dest)::[]
+      | INT_BINOP(op, src, dest) ->
+             if areValidSrcDest src dest then INT_BINOP(op, src, dest)::[] else
+             MOV(BIT32, AssemLoc (dest), AllocForFun.firstSpillReg)::
              (* We always put the register as the destination here,
                 because suppose the op was MUL and we put the
                 register as the first operand. Then when we went to
@@ -31,15 +42,16 @@ let handleMemMemInstr (instr: assemInstr) : assemInstr list =
                 because imul can't have MemAddr as 2nd operand.
                 But we can't switch them because we already
                 used firstSpillReg. So that's why. *)
-             INT_BINOP(op, AssemLoc (MemAddr memSrc), AllocForFun.firstSpillReg)::
-             MOV(BIT32, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[]
-      | PTR_BINOP(op, AssemLoc(MemAddr memSrc), MemAddr memDest) ->
-             MOV(BIT64, AssemLoc (MemAddr memDest), AllocForFun.firstSpillReg)::
+             INT_BINOP(op, src, AllocForFun.firstSpillReg)::
+             MOV(BIT32, AssemLoc AllocForFun.firstSpillReg, dest)::[]
+      | PTR_BINOP(op, src, dest) ->
+             if areValidSrcDest src dest then PTR_BINOP(op, src, dest)::[] else
+             MOV(BIT64, AssemLoc (dest), AllocForFun.firstSpillReg)::
              (* Not sure if the thing about putting the register as the
                 destination matters for ptrs, because there's no ptr mul,
                 but as well *)
-             PTR_BINOP(op, AssemLoc (MemAddr memSrc), AllocForFun.firstSpillReg)::
-             MOV(BIT64, AssemLoc AllocForFun.firstSpillReg, MemAddr memDest)::[]
+             PTR_BINOP(op, src, AllocForFun.firstSpillReg)::
+             MOV(BIT64, AssemLoc AllocForFun.firstSpillReg, dest)::[]
       | otherInstr -> [otherInstr]
 
 (* Everywhere where just the src is a MemAddrDeref, do:
