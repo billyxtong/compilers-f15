@@ -80,13 +80,13 @@ let rec uniqueFieldNames (fields : field list) nameTable =
                  None -> uniqueFieldNames fs (M.add nameTable datName ())
                | _ -> false)
 
-let rec isFieldOrParamAStruct l =
-  match l with
+let rec isStructRecursive fields structName =
+  match fields with
         [] -> false
-      | (typee, _) :: xs -> 
+      | (typee, _) :: fs -> 
           (match typee with
-                 Struct(_) -> true
-               | _ -> isFieldOrParamAStruct xs)
+                 Struct(name) -> if name = structName then true else isStructRecursive fs structName
+               | _ -> isStructRecursive fs structName)
 
 let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with

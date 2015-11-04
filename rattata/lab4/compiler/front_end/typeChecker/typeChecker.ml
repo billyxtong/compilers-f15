@@ -144,6 +144,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 let () = functionMap := M.add !functionMap funcName 
                                   (fType, paramTypes, true, false) in
                                 let funcVarMap = init_func_env funcParams in
+                                let newFuncParams = List.map(fun (t,i) -> (lowestTypedefType t, i)) funcParams in
                                 (* Make sure the function returns! *)
                                 let (ret, _, typeCheckedBlock) = 
                                   tc_statements funcVarMap 
@@ -155,7 +156,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 (* We're supposed to call internal functions with the prefix _c0_. I'm doing it
                                    here because we know exactly which are internal/external at this point *)
                                   tc_prog gdecls (TypedPostElabFunDef(funcType, newFuncName, 
-                                  funcParams, List.rev typeCheckedBlock)::typedAST))
+                                  newFuncParams, List.rev typeCheckedBlock)::typedAST))
                          | (None, None) -> 
                              (if funcName = "main" && 
                                  ((List.length funcParams > 0) || lowestTypedefType funcType != INT)
@@ -168,6 +169,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                   true, false) in
                                  let funcVarMap = init_func_env funcParams in
                                  (* Make sure the function returns! *)
+                                 let newFuncParams = List.map(fun (t,i) -> (lowestTypedefType t, i)) funcParams in
                                  let (ret, _, typeCheckedFuncBody) = 
                                    tc_statements funcVarMap 
                                    funcBody (lowestTypedefType funcType) false [] in
@@ -176,8 +178,8 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                    raise ErrorMsg.Error)
                                  else
                                   let newFuncName = "_c0_" ^ funcName in
-                                  tc_prog gdecls (TypedPostElabFunDef(funcType, newFuncName, 
-                                  funcParams, List.rev typeCheckedFuncBody)::typedAST))))
+                                  tc_prog gdecls (TypedPostElabFunDef(lowestTypedefType funcType, newFuncName, 
+                                  newFuncParams, List.rev typeCheckedFuncBody)::typedAST))))
                | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
                     if typeDefType = VOID then
                     (ErrorMsg.error ("can't typedef voids\n");
@@ -199,26 +201,30 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 raise ErrorMsg.Error))
                | UntypedPostElabStructDef(structName, fields) ->
                    let nameTable = Core.Std.String.Map.empty in
-                   if (not (uniqueFieldNames fields nameTable) || (isFieldOrParamAStruct fields)) then 
+                   if (not (uniqueFieldNames fields nameTable) || (isStructRecursive fields structName)) then 
                       (ErrorMsg.error ("bad field names, or field is a struct \n");
                                 raise ErrorMsg.Error)
                    else
                    (match M.find !structMap structName with
                           Some (fieldMap, false) -> (* declared but undefined struct *)
+                            let newFields = List.map(fun (fieldType, fieldName) -> 
+                                                    (lowestTypedefType fieldType, fieldName)) fields in
                             let () = List.iter(fun (fieldType, fieldName) -> 
-                              fieldMap := M.add !fieldMap fieldName fieldType) fields in
+                              fieldMap := M.add !fieldMap fieldName fieldType) newFields in
                             let () = structMap := M.add !structMap structName (fieldMap, true) in
-                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST)
+                            tc_prog gdecls (TypedPostElabStructDef(structName, newFields)::typedAST)
                         | Some (_, true) -> (* already defined struct *) 
                             (ErrorMsg.error ("redefining struct " ^ structName ^ "\n");
                              raise ErrorMsg.Error)
                         | None -> 
                             let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, true) in
                             let Some (fieldMap, _) = M.find !structMap structName in
+                            let newFields = List.map(fun (fieldType, fieldName) -> 
+                                                    (lowestTypedefType fieldType, fieldName)) fields in
                             let () = List.iter(fun (fieldType, fieldName) -> 
-                              fieldMap := M.add !fieldMap fieldName fieldType) fields in
+                              fieldMap := M.add !fieldMap fieldName fieldType) newFields in
                             let () = structMap := M.add !structMap structName (fieldMap, true) in
-                            tc_prog gdecls (TypedPostElabStructDef(structName, fields)::typedAST)))
+                            tc_prog gdecls (TypedPostElabStructDef(structName, newFields)::typedAST)))
 
 (* varMap is the map of variables within the function body *) 
 (* funcRetType is the return type of the function *)         
