@@ -419,8 +419,16 @@ and trans_lval retTmp retLabel idToTmpMap = function
    | A.TypedPostElabArrayAccessLVal (arrayLVal, idxExpr) ->
        (* Note: arrayLVal is evaluating first! This matters for things like
           a[1/0][f()] where f is function that asserts false *)
+     (* Not only do we have to put the arrays instrs first, we have to actually
+        store the array somewhere so that it gets evaluated. Because what about
+        a[-1][1/0] *)
         let (newMap, arrayTmpLVal, instrsForArray) =
            trans_lval retTmp retLabel idToTmpMap arrayLVal in
+        let storedArray = Tmp (Temp.create()) in
+        let storedArrayAsLVal = TmpVarLVal storedArray in
+        let storeArrayInstr = TmpInfAddrMov(getSizeForType INT,
+                             TmpIntExpr (TmpIntSharedExpr (TmpLValExpr arrayTmpLVal)),
+                                         TmpVarLVal storedArray) in
         let (instrsForIdx, idxFinal) =
            trans_int_exp retTmp retLabel idToTmpMap idxExpr in
         (* need to store the index to make sure it is evaluated first *)
@@ -428,8 +436,8 @@ and trans_lval retTmp retLabel idToTmpMap = function
         let storedIdxAsExpr = TmpIntArg (TmpLoc (TmpVar storedIdx)) in
         let storeIdxInstr = TmpInfAddrMov(getSizeForType INT,
                              TmpIntExpr idxFinal, TmpVarLVal storedIdx) in
-        (newMap, TmpArrayAccessLVal (arrayTmpLVal, storedIdxAsExpr),
-         instrsForArray @ instrsForIdx @ storeIdxInstr :: [])
+        (newMap, TmpArrayAccessLVal (storedArrayAsLVal, storedIdxAsExpr),
+         instrsForArray @ [storeArrayInstr] @ instrsForIdx @ storeIdxInstr :: [])
    | A.TypedPostElabDerefLVal (ptrLVal) ->
         let (newMap, ptrTmpLVal, instrs) =
           trans_lval retTmp retLabel idToTmpMap ptrLVal in
