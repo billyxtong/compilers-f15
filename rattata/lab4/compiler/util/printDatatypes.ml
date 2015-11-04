@@ -71,7 +71,7 @@ let assemLocToString(loc : assemLoc) locSize =
         Reg(r) -> regToString r locSize
       | MemAddr(register, offset) -> memAddrToString(register, offset)
       | RegDeref(r) -> "(" ^ regToString64(r) ^ ")"
-      | MemAddrDeref(register, offset) -> memAddrToString(register, offset)
+      | MemAddrDeref(register, offset) -> "(" ^ memAddrToString(register, offset) ^ ")"
 
 let assemArgToString (arg : assemArg) argSize = 
   match arg with
