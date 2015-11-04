@@ -137,6 +137,7 @@ typedef :
 
 sdecl :
     STRUCT VAR_IDENT SEMI         { A.PreElabStructDecl $2 }
+  | STRUCT TYPEDEF_IDENT SEMI         { A.PreElabStructDecl $2 }
 
 /* Struct names can also be typedef'd ids */	   
 sdef :
