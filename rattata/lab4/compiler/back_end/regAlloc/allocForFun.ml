@@ -87,7 +87,8 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
                           else spaceForArgs + 8) in
             (* Adding 8 makes it 16-byte-aligned if it isn't *)
     let moveInstrs = List.mapi (fun i -> fun arg ->
-        MOV((H.find funcToParamSizeMap fName).(i),
+        MOV((try (H.find funcToParamSizeMap fName).(i)
+             with Not_found -> BIT64),
           translateTmpArg tbl arg, getArgDest paramRegArray i)) args in
     (* See if we need to move EAX to a certain result tmp (we wouldn't have to
        for void function calls *)

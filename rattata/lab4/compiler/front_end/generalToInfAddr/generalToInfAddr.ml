@@ -131,7 +131,12 @@ and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
                                     (fun _ -> Tmp (Temp.create()))) in
       let instr_and_e_list = List.map exp_list (trans_exp retTmp retLabel
                                                   idToTmpMap) in
-      let getSizeForArg = fun i -> getSizeForType (H.find funParamsMap fName).(i) in
+      let getSizeForArg = fun i -> getSizeForType
+          (try (H.find funParamsMap fName).(i)
+      (* VERY QUESTIONABLE: since we throw out function declarations, we
+         don't have access to the param sizes of functions from header files.
+         just going to assume they're 64-bit? *)
+           with Not_found -> (Pointer Poop)) in
       let instrs = List.concat (List.mapi instr_and_e_list
         (fun i -> fun (instrs, e) -> instrs @
                          [TmpInfAddrMov(getSizeForArg i, e,
