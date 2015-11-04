@@ -66,7 +66,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     (* convert memory stuff to Inf Addr *)
     say_if verbose (fun () -> "converting memory stuff to Inf Addr");
     let infAddrWithMem = MemStuffToInfAddr.handleMemStuff infAddr in ();
-    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
+    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddrWithMem);
     
     (* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *)
