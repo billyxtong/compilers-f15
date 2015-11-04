@@ -32,7 +32,6 @@ let rec tc_header (header : untypedPostElabAST) =
                         | _ -> (ErrorMsg.error ("typedef name already used\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
-                   let () = print_string ("declaring function " ^ funcName) in
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
