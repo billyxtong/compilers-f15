@@ -112,7 +112,7 @@ and munch_ptr_binop d (ptr_binop, e1, e2) depth =
 and munch_int_binop d (int_binop, e1, e2) depth =
     let (instrs1, dest1) = munch_exp d (TmpIntExpr e1) depth in
     let (instrs2, dest2) =
-       match (int_binop, e2) with
+       (match (int_binop, e2) with
          (* can't idivl by constants :( *)
           (FAKEDIV, TmpIntArg (TmpConst  c)) -> 
               let t = Tmp (Temp.create()) in
@@ -120,10 +120,18 @@ and munch_int_binop d (int_binop, e1, e2) depth =
         |(FAKEMOD, TmpIntArg (TmpConst c)) -> 
               let t = Tmp (Temp.create()) in
               (Tmp3AddrMov (BIT32, TmpConst c, TmpVar t)::[], TmpLoc (TmpVar t))
-        | _ -> munch_exp d (TmpIntExpr e2) depth in
-    instrs1 @ instrs2
-    @ (if false (* TmpLoc d = dest1 *) then []
-       else [Tmp3AddrBinop (int_binop, dest1, dest2, TmpVar d)])
+        | _ -> munch_exp d (TmpIntExpr e2) depth) in
+    match (dest1, dest2) with
+          (TmpLoc (TmpDeref t1), TmpLoc (TmpDeref t2)) ->
+               (* Need to make sure we evaluate t1 first *)
+               (let t1' = Tmp (Temp.create()) in
+               instrs1 @ Tmp3AddrMov(getSizeForType (Pointer Poop),
+                          TmpLoc (TmpDeref t1), TmpVar t1')::[]
+               @ instrs2 @ [Tmp3AddrBinop (int_binop, TmpLoc (TmpVar t1'), dest2,
+                                          TmpVar d)])
+       | _ -> (instrs1 @ instrs2
+               @ (if false (* TmpLoc d = dest1 *) then []
+                  else [Tmp3AddrBinop (int_binop, dest1, dest2, TmpVar d)]))
 
 (* takes a tmpExpr list and returns (instrs, tmpArgs) where instrs is a
    list of all required instructions, and tmpArgs is a list of the
