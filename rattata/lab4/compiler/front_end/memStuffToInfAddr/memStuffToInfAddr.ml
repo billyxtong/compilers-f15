@@ -347,7 +347,9 @@ and handleMemForLVal typee = function
       let (arrayAccessPtr, arrayInstrs) =
            getArrayAccessPtr typee arrayExpr idxExprFinal in
       let arrayAccessPtrLVal = TmpDerefLVal (exprToLVal (TmpPtrExpr arrayAccessPtr)) in
-      (arrayAccessPtrLVal, idxInstrs, arrayInstrs)
+      (* Apparently the whole array (including idx) gets evaluated before RHS?
+         I thought there was a case where that wasn't true *)
+      (arrayAccessPtrLVal, idxInstrs @ arrayInstrs, [])
 
 let handleMemForInstr = function
       TmpInfAddrJump j -> TmpInfAddrJump j::[]
