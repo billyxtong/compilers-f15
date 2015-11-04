@@ -4,6 +4,7 @@ module H = Hashtbl
 module M = Core.Std.Map
 open String
 open PrintASTs
+open PrintDatatypes
 
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
@@ -87,11 +88,12 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                then (ErrorMsg.error ("ident " ^ i ^ " uninitialized\n");
                    raise ErrorMsg.Error)
                else
-               (match typee with
-                      INT -> (IntExpr(IntSharedExpr(Ident(i))), typee)
-                    | BOOL -> (BoolExpr(BoolSharedExpr(Ident(i))), typee)
-                    | Pointer(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), typee)
-                    | Array(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), typee)
+                 let actualType = lowestTypedefType typee in
+               (match actualType with
+                      INT -> (IntExpr(IntSharedExpr(Ident(i))), actualType)
+                    | BOOL -> (BoolExpr(BoolSharedExpr(Ident(i))), actualType)
+                    | Pointer(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
+                    | Array(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | _ -> (ErrorMsg.error ("can't reference a struct without ptr\n");
                             raise ErrorMsg.Error))
            | None -> (ErrorMsg.error ("undeclared variable " ^ i ^ "\n");
@@ -175,7 +177,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    raise ErrorMsg.Error))
   | UntypedPostElabFieldAccessExpr(e, fieldName) ->
       let (typedExp,typee) = tc_expression varEnv e in
-      (match (typedExp, typee) with
+      let actualType = lowestTypedefType typee in
+      (match (typedExp, actualType) with
             (PtrExpr(PtrSharedExpr(Deref(p))), Struct(structName)) ->
               (match M.find !structMap structName with
                      Some(fieldMap, true) -> (* in structMap, struct names point to a table of their fields
@@ -185,7 +188,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                                 (match fieldType with
                                        INT -> (IntExpr(IntSharedExpr(FieldAccess(structName, p, fieldName))), INT)
                                      | BOOL -> (BoolExpr(BoolSharedExpr(FieldAccess(structName, p, fieldName))), BOOL)
-                                     | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType))
+                                     | _ -> 
+                                         let () = print_string "blah\n" in
+                                         (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType))
                             | None -> (ErrorMsg.error ("struct " ^ structName ^
                                                     " has no field with name "
                                                     ^ fieldName ^ "\n");
@@ -193,7 +198,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                               raise ErrorMsg.Error))
           | _ -> 
-              let () = print_string (untypedPostElabExprToString(e) ^ "\n") in 
+              let () = print_string ("expr: " ^ typedPostElabExprToString(typedExp) ^ 
+                                   ", type: " ^ c0typeToString(actualType) ^"\n") in 
               (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
                   raise ErrorMsg.Error))
   | UntypedPostElabAlloc(t : c0type) ->
@@ -201,13 +207,14 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       (match baseType with
              Struct(structName) ->
                (match M.find !structMap structName with
-                      Some (_, true) -> (PtrExpr(Alloc(t)), Pointer(baseType))
+                      Some (_, true) -> (PtrExpr(Alloc(baseType)), Pointer(baseType))
                     | _ -> (ErrorMsg.error ("undefined struct\n");
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(t)), Pointer(baseType)))
   | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
       let (typedExp, typee) = tc_expression varEnv e in
-      (match (typedExp, typee) with
+      let actualType = lowestTypedefType typee in
+      (match (typedExp, actualType) with
              (_, Poop) -> (ErrorMsg.error ("trying to dereference null pointer\n");
                            raise ErrorMsg.Error)
            | (PtrExpr(p), Pointer(c)) -> 
