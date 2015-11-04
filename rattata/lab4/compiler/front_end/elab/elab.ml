@@ -3,10 +3,10 @@ open Ast
 let rec elaboratePreElabLVal(lval : preElabLVal) =
   match lval with
         PreElabVarLVal(i) -> UntypedPostElabVarLVal(i)
-      | PreElabFieldLVal(p,i) -> 
+      | PreElabFieldLVal(p,i) -> (* 
           (match p with
-                 PreElabDerefLVal(_) -> UntypedPostElabFieldLVal(elaboratePreElabLVal(p), i)
-               | _ -> UntypedPostElabFieldLVal(UntypedPostElabDerefLVal(elaboratePreElabLVal(p)), i))
+                 PreElabDerefLVal(_) ->*) UntypedPostElabFieldLVal(elaboratePreElabLVal(p), i) (*
+               | _ -> UntypedPostElabFieldLVal(UntypedPostElabDerefLVal(elaboratePreElabLVal(p)), i)*)
       | PreElabDerefLVal(p) -> UntypedPostElabDerefLVal(elaboratePreElabLVal(p))
       | PreElabArrayAccessLVal(p,e) -> UntypedPostElabArrayAccessLVal(elaboratePreElabLVal(p),elaboratePreElabExpr(e))
 

@@ -26,17 +26,28 @@ let rec lowestTypedefType (typedefType) =
       | Array(c) -> Array(lowestTypedefType c)
       | _ -> typedefType
 
-let rec argsMatch (arguments : typedPostElabExpr list) (paramTypes : c0type list) =
-  match (arguments, paramTypes) with
+let rec matchTypes (t1 : c0type) (t2 : c0type) =
+  match (t1, t2) with
+        (INT, INT) -> true
+      | (BOOL, BOOL) -> true
+      | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
+      | (Array(c1), Array(c2)) -> matchTypes c1 c2
+      | (Struct(i1), Struct(i2)) -> (i1 = i2)
+      | (Poop, Poop) -> true
+      | (Pointer(c), Poop) -> true
+      | (Poop, Pointer(c)) -> true
+      | _ -> false
+
+
+let rec argsMatch (argTypes : c0type list) (paramTypes : c0type list) =
+  match (argTypes, paramTypes) with
         ([], []) -> true
       | ([], p :: ps) -> false
       | (arg :: args, []) -> false
       | (arg :: args, p :: ps) ->
-          (match (arg, lowestTypedefType p) with
-                 (IntExpr(_), INT) -> argsMatch args ps
-               | (BoolExpr(_), BOOL) -> argsMatch args ps
-               | _ -> false)
-
+          if matchTypes arg p
+          then argsMatch args ps
+          else false
 
 let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
   match (paramTypes, params) with
@@ -60,17 +71,6 @@ let rec uniqueParamNames (params : param list) nameTable =
           (match (M.find nameTable datName, M.find !typedefMap datName) with
                  (None, None) -> uniqueParamNames ps (M.add nameTable datName ())
                | _ -> false)
-
-let rec matchTypes (t1 : c0type) (t2 : c0type) =
-  match (t1, t2) with
-        (INT, INT) -> true
-      | (BOOL, BOOL) -> true
-      | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
-      | (Array(c1), Array(c2)) -> matchTypes c1 c2
-      | (Struct(i1), Struct(i2)) -> (i1 = i2)
-      | (Poop, Poop) -> true
-      | (Pointer(c), Poop) -> true
-      | _ -> false
 
 let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
@@ -159,10 +159,11 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                let () = (if not isDefined
                          then H.replace declaredAndUsedButUndefinedFunctionTable i ()
                          else ()) in
+               let argTypes = List.map (fun arg -> let (_, argType) = tc_expression varEnv arg in argType) argList in
                let typedArgs = List.map (fun arg -> let (typedArg, _) = tc_expression varEnv arg in typedArg) argList in
                let newFuncName = if isExternal then i else "_c0_" ^ i in
                (* internal functions must be called with prefix _c0_ *)
-               if (argsMatch typedArgs funcParams) then
+               if (argsMatch argTypes funcParams) then
                (match funcType with
                       INT -> (IntExpr(IntSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | BOOL -> (BoolExpr(BoolSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
@@ -188,9 +189,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                                 (match fieldType with
                                        INT -> (IntExpr(IntSharedExpr(FieldAccess(structName, p, fieldName))), INT)
                                      | BOOL -> (BoolExpr(BoolSharedExpr(FieldAccess(structName, p, fieldName))), BOOL)
-                                     | _ -> 
-                                         let () = print_string "blah\n" in
-                                         (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType))
+                                     | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType))
                             | None -> (ErrorMsg.error ("struct " ^ structName ^
                                                     " has no field with name "
                                                     ^ fieldName ^ "\n");
