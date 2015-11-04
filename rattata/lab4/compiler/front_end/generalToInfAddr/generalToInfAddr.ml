@@ -199,10 +199,15 @@ and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
         (* evaluate the array first! *)
         let (arrayInstrs, TmpPtrExpr arrayFinalExpr) = 
             trans_exp retTmp retLabel idToTmpMap (A.PtrExpr arrayExpr) in
+        (* always store the index to make sure it's only evaluated once! *)
         let (idxInstrs, TmpIntExpr idxFinalExpr) = 
             trans_exp retTmp retLabel idToTmpMap (A.IntExpr idxExpr) in
-        (arrayInstrs @ idxInstrs, addTypeToShared
-           (TmpInfAddrArrayAccess (arrayFinalExpr, idxFinalExpr)) exprType)
+        let storedIdx = Tmp (Temp.create()) in
+        let storedIdxAsExpr = TmpIntArg (TmpLoc (TmpVar storedIdx)) in
+        let storeIdxInstr = TmpInfAddrMov(getSizeForType INT,
+                             TmpIntExpr idxFinalExpr, TmpVarLVal storedIdx) in
+        (arrayInstrs @ idxInstrs @ storeIdxInstr :: [], addTypeToShared
+           (TmpInfAddrArrayAccess (arrayFinalExpr, storedIdxAsExpr)) exprType)
   | A.FieldAccess (structName, structPtr, fieldName) ->
         let (ptrInstrs, TmpPtrExpr structPtrExpr) =
             trans_exp retTmp retLabel idToTmpMap (A.PtrExpr structPtr) in
@@ -412,8 +417,13 @@ and trans_lval retTmp retLabel idToTmpMap = function
            trans_lval retTmp retLabel idToTmpMap arrayLVal in
         let (instrsForIdx, idxFinal) =
            trans_int_exp retTmp retLabel idToTmpMap idxExpr in
-        (newMap, TmpArrayAccessLVal (arrayTmpLVal, idxFinal),
-         instrsForArray @ instrsForIdx)
+        (* need to store the index to make sure it is evaluated first *)
+        let storedIdx = Tmp (Temp.create()) in
+        let storedIdxAsExpr = TmpIntArg (TmpLoc (TmpVar storedIdx)) in
+        let storeIdxInstr = TmpInfAddrMov(getSizeForType INT,
+                             TmpIntExpr idxFinal, TmpVarLVal storedIdx) in
+        (newMap, TmpArrayAccessLVal (arrayTmpLVal, storedIdxAsExpr),
+         instrsForArray @ instrsForIdx @ storeIdxInstr :: [])
    | A.TypedPostElabDerefLVal (ptrLVal) ->
         let (newMap, ptrTmpLVal, instrs) =
           trans_lval retTmp retLabel idToTmpMap ptrLVal in
