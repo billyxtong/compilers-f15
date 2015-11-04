@@ -193,7 +193,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                               raise ErrorMsg.Error))
           | _ -> 
-              let () = print_string (typedPostElabExprToString(typedExp) ^ "\n") in 
+              let () = print_string (untypedPostElabExprToString(e) ^ "\n") in 
               (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
                   raise ErrorMsg.Error))
   | UntypedPostElabAlloc(t : c0type) ->

@@ -9,13 +9,13 @@ let sizeToString = function
 
 let rec c0typeToString (c : c0type) =
   match c with
-        INT -> "int"
-      | BOOL -> "bool"
-      | VOID -> "void"
+        INT -> "int "
+      | BOOL -> "bool "
+      | VOID -> "void "
       | TypedefType(identifier) -> identToString(identifier) ^ " "
       | Pointer(c) -> c0typeToString(c) ^ "*"
       | Array(c) -> c0typeToString(c) ^ "[]"
-      | Struct(i) -> "struct " ^ identToString(i)
+      | Struct(i) -> "struct " ^ identToString(i) ^ " "
       | Poop -> "nulltype"
         
 let constToString (c : const) = string_of_int(c)
