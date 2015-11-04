@@ -11,6 +11,12 @@ open Datatypesv1
    we get to this point, they should all be gone. Derefs
    should be gone too; they turn into movs. *)
 
+let getSizeForType = function
+    INT -> BIT32
+  | BOOL -> BIT32
+  | Pointer _ -> BIT64
+  | _ -> assert(false)
+
 let rec munch_bool_instr = function
     TmpInfAddrTest (bool_exp, TmpBoolArg TmpLoc t) ->
         let t' = Tmp (Temp.create()) in
@@ -71,7 +77,27 @@ and munch_exp d e depth : tmp3AddrInstr list * tmpArg =
          let t = if depth > 0 then Tmp (Temp.create()) else d in
          (munch_ptr_binop t (op, e1, e2) (depth + 1),
           TmpLoc (TmpVar t))
-   | _ -> assert(false)
+   | TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrDeref p)) ->
+         let (instrs, pDest) = munch_exp d (TmpPtrExpr p) depth in
+         let t = Tmp (Temp.create()) in
+         (* type of pointer doesn't matter *)
+         (instrs @ Tmp3AddrMov(getSizeForType (Pointer Poop), pDest, TmpVar t)::[],
+          TmpLoc (TmpDeref t))
+   | TmpIntExpr (TmpIntSharedExpr (TmpInfAddrDeref p)) ->
+         let (instrs, pDest) = munch_exp d (TmpPtrExpr p) depth in
+         let t = Tmp (Temp.create()) in
+         (* type of pointer doesn't matter *)
+         (instrs @ Tmp3AddrMov(getSizeForType (Pointer Poop), pDest, TmpVar t)::[],
+          TmpLoc (TmpDeref t))
+   | TmpBoolExpr (TmpBoolSharedExpr (TmpInfAddrDeref p)) ->
+         let (instrs, pDest) = munch_exp d (TmpPtrExpr p) depth in
+         let t = Tmp (Temp.create()) in
+         (* type of pointer doesn't matter *)
+         (instrs @ Tmp3AddrMov(getSizeForType (Pointer Poop), pDest, TmpVar t)::[],
+          TmpLoc (TmpDeref t))
+   | e -> let () = print_string("failing: " ^ PrintDatatypes.tmpExprToString e
+                                  ^ "\n") in
+                                  assert(false)
 
 
 and munch_ptr_binop d (ptr_binop, e1, e2) depth =
