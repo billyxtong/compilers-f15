@@ -20,11 +20,11 @@ let getDefVars prog line =
        | Tmp2AddrBinop(op, src, TmpVar (Tmp dest)) -> dest::[]
        | Tmp2AddrPtrBinop(op, src, TmpVar (Tmp dest)) -> dest::[]
        | Tmp2AddrFunCall(opSize, fName, args, Some (TmpVar (Tmp dest))) -> dest::[]
-       | Tmp2AddrMov(opSize, src, TmpDeref (Tmp dest)) -> dest::[]
-       | Tmp2AddrBinop(op, src, TmpDeref (Tmp dest)) -> dest::[]
-       | Tmp2AddrPtrBinop(op, src, TmpDeref (Tmp dest)) -> dest::[]
-       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpDeref (Tmp dest))) ->
-         dest::[]
+       (* it's not defined if the dest is its deref! *)
+       | Tmp2AddrMov(opSize, src, TmpDeref (Tmp dest)) -> []
+       | Tmp2AddrBinop(op, src, TmpDeref (Tmp dest)) -> []
+       | Tmp2AddrPtrBinop(op, src, TmpDeref (Tmp dest)) -> []
+       | Tmp2AddrFunCall(opSize, fName, args, Some (TmpDeref (Tmp dest))) -> []
        | Tmp2AddrReturn _ -> []
        | Tmp2AddrJump _ -> []
        | Tmp2AddrLabel _ -> []
@@ -53,7 +53,7 @@ let isUsed t prog line =
          Tmp2AddrMov(s, src, dest) ->
             (* Mov is special: it's used if the dest is a deref of it,
                but not it is the dest! *)
-            isUsedInTmpArg t src || dest = TmpDeref (Tmp t)
+            (isUsedInTmpArg t src || dest = TmpDeref (Tmp t))
        | Tmp2AddrBinop(op, src, dest) ->
             (isUsedInTmpArg t src) || (isUsedInTmpLoc t dest)
        | Tmp2AddrReturn (s, arg) -> isUsedInTmpArg t arg
@@ -62,7 +62,9 @@ let isUsed t prog line =
        | Tmp2AddrBoolInstr (TmpTest (arg, loc)) ->
             (isUsedInTmpArg t arg) || (isUsedInTmpLoc t loc)
        | Tmp2AddrFunCall(retSize, fName, args, dest) ->
-            List.exists (fun arg -> isUsedInTmpArg t arg) args
+            List.exists (fun arg -> isUsedInTmpArg t arg) args ||
+            (* same deal as mov *)
+            dest = Some (TmpDeref (Tmp t))
        | _ -> false
 
 let rec findLiveLinesForTmpRec t prog predsPerLine liveLinesSet currLine =
@@ -86,7 +88,7 @@ let findLiveLinesForTmp t prog predsPerLine =
     let result = H.create 500 in
     let _ = List.map (findLiveLinesForTmpRec t prog predsPerLine result) usedLines in
     H.fold addLineToList result []
-
+        
 let rec findPredecessors (predecessorsArray : (int list) array)
       (progArray : tmp2AddrInstr array) (lineNum : int) =
   (* Note the -1 here to avoid index-out-of-range! *)

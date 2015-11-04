@@ -135,9 +135,13 @@ and munch_fun_args = function
                  let (rest_instrs, rest_dests) = munch_fun_args args in
                  (curr_instrs @ rest_instrs, curr_dest::rest_dests)
 
-let lvalToTmpLoc = function
-    TmpVarLVal t -> TmpVar t
-  | TmpDerefLVal (TmpVarLVal t) -> TmpDeref t
+let rec munch_lval = function
+    TmpVarLVal t -> ([], TmpVar t)
+  | TmpDerefLVal (TmpVarLVal t) -> ([], TmpDeref t)
+  | TmpDerefLVal lval -> let t = Tmp (Temp.create()) in
+                         let (instrs, lvalFinal) = munch_lval lval in
+                         (instrs @ Tmp3AddrMov(getSizeForType (Pointer Poop),
+                                               TmpLoc lvalFinal, TmpVar t)::[], TmpDeref t)
   | _ -> assert(false)               
 
 (* munch_stm stm generates code to execute stm *)
@@ -146,8 +150,10 @@ let munch_instr = function
        let munch_dest = (match lval with
                             TmpVarLVal t -> t
                           | _ -> Tmp (Temp.create())) in
-       let (instrs, intermediate_dest) = munch_exp munch_dest e 0 in
-       instrs @ [Tmp3AddrMov (opSize, intermediate_dest, lvalToTmpLoc lval)]
+       let (instrsForE, eDest) = munch_exp munch_dest e 0 in
+       let (instrsForLVal, lvalDest) = munch_lval lval in
+       (* apparently e is evaluated first? *)
+       instrsForE @ instrsForLVal @ [Tmp3AddrMov (opSize, eDest, lvalDest)]
   | TmpInfAddrJump j -> Tmp3AddrJump j::[]
   | TmpInfAddrBoolInstr instr -> munch_bool_instr instr
   | TmpInfAddrReturn (argSize, e) ->
