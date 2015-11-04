@@ -57,7 +57,7 @@ let rec tc_header (header : untypedPostElabAST) =
                         | (None, None) -> 
                             (let () = functionMap := M.add !functionMap funcName 
                              (lowestTypedefType funcType, 
-                             (List.map (fun (c, i) -> c) funcParams), true, true) in
+                             (List.map (fun (c, i) -> lowestTypedefType c) funcParams), true, true) in
                              tc_header fdecls))
                | UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
@@ -227,8 +227,6 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
   match untypedBlock with
     [] -> (ret, varMap, typedBlock)
   | A.UntypedPostElabBlock(blockStmts)::stmts ->
-      (* let () = (blockCounter := !blockCounter + 1) in
-      let () = print_string ("block number " ^ string_of_int(!blockCounter) ^ "\n") in *)
       let (blockRet, blockVarMap, blockBlock) = tc_statements varMap blockStmts funcRetType ret [] in
       let newRet = (ret || blockRet) in
       (* We have returned if we return otherwise, or if the block returns *)
@@ -292,9 +290,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                    else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
                                raise ErrorMsg.Error))
-        else 
-        let () = print_string (untypedPostElabLValToString(lval) ^ assignOpToString(op) 
-                           ^ untypedPostElabExprToString(e) ^ "\n") in
+        else
         (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(lvalType) ^ "\nRHS type: " ^ c0typeToString(exprType) ^ "\n");
                                raise ErrorMsg.Error))
   | A.UntypedPostElabIf(e, block1, block2)::stms -> 

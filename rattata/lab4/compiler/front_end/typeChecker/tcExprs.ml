@@ -175,7 +175,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                let () = (if not isDefined
                          then H.replace declaredAndUsedButUndefinedFunctionTable i ()
                          else ()) in
-               let argTypes = List.map (fun arg -> let (_, argType) = tc_expression varEnv arg in argType) argList in
+               let argTypes = List.map (fun arg -> let (_, argType) = tc_expression varEnv arg 
+                                                   in lowestTypedefType argType) argList in
                let typedArgs = List.map (fun arg -> let (typedArg, _) = tc_expression varEnv arg in typedArg) argList in
                let newFuncName = if isExternal then i else "_c0_" ^ i in
                (* internal functions must be called with prefix _c0_ *)
@@ -188,7 +189,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | Array(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | _ -> (ErrorMsg.error ("functions can't return structs \n");
                          raise ErrorMsg.Error))
-               else (ErrorMsg.error ("parameters don't typecheck \n");
+               else
+                 (ErrorMsg.error ("parameters don't typecheck \n");
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function doesn't exist \n");
                    raise ErrorMsg.Error))
@@ -213,8 +215,6 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                               raise ErrorMsg.Error))
           | _ -> 
-              let () = print_string ("expr: " ^ typedPostElabExprToString(typedExp) ^ 
-                                   ", type: " ^ c0typeToString(actualType) ^"\n") in 
               (ErrorMsg.error ("not of the form (*structPtr.fieldName) \n");
                   raise ErrorMsg.Error))
   | UntypedPostElabAlloc(t : c0type) ->
