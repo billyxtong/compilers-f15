@@ -277,7 +277,7 @@ let tmp3AddrProgToString(tmp3addrprog : tmp3AddrProg) =
 let rec tmpSharedTypeExprToString(t : tmpSharedTypeExpr) =
   match t with
         TmpInfAddrFunCall(func,args) -> identToString(func) ^ "(" ^ 
-        (concat "" (List.map tmpExprToString args)) ^ ")"
+        (concat "," (List.map tmpExprToString args)) ^ ")"
       | TmpInfAddrFieldAccess(i1,p,i2) -> tmpPtrExprToString(p) ^ "->" ^ 
                     identToString(i2) ^ "(" ^ identToString(i1) ^ ")"
       | TmpInfAddrArrayAccess(p,i) -> tmpPtrExprToString(p) ^ "[" ^ 
