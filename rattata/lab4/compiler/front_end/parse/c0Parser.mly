@@ -200,6 +200,8 @@ c0typeNotIdent :
  | VOID                          { D.VOID }
  | c0type STAR                   { D.Pointer $1 }
  | STRUCT VAR_IDENT                  { D.Struct $2 }
+   /* It's ok if the struct name type has been typedefed */
+ | STRUCT TYPEDEF_IDENT              { D.Struct $2 }
 
 /* I forget exactly what the deal was with expToC0Type and
    c0typeNotIdent, but it seems to work so let's just go with it */	    
