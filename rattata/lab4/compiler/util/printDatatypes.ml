@@ -282,7 +282,7 @@ let rec tmpSharedTypeExprToString(t : tmpSharedTypeExpr) =
                     identToString(i2) ^ "(" ^ identToString(i1) ^ ")"
       | TmpInfAddrArrayAccess(p,i) -> tmpPtrExprToString(p) ^ "[" ^ 
                                       tmpIntExprToString(i) ^ "]"
-      | TmpInfAddrDeref(p) -> "*" ^ tmpPtrExprToString(p)
+      | TmpInfAddrDeref(p) -> "*(" ^ tmpPtrExprToString(p) ^")"
       | TmpLValExpr (lval) -> tmpLValToString(lval)                               
 
 and tmpPtrExprToString(p : tmpPtrExpr) =
