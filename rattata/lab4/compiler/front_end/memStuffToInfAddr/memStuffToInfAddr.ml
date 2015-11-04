@@ -269,12 +269,16 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
                                       index_final) in
        let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD, ptr_final,
                                               accessOffsetExpr) in
+       let accessPtrFinal = Tmp (Temp.create()) in
+       let storeAccessPtr = TmpInfAddrMov(BIT64, TmpPtrExpr accessPtrExpr,
+                                          TmpVarLVal accessPtrFinal) in
+       (* Does where I put the storeAccessPtr in this order matter? *)
       (* Ok now actually put all of the instructions together *)
       (* The array pointer is evaluated first, I checked *)
       let allInstrs = ptr_instrs @ index_instrs @ indexLowerCheck
              @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
-             ::TmpInfAddrLabel(doTheAccessLabel)::[] in
-      (accessPtrExpr, allInstrs)
+             ::TmpInfAddrLabel(doTheAccessLabel)::storeAccessPtr::[] in
+      (TmpPtrArg (TmpLoc (TmpVar accessPtrFinal)), allInstrs)
 
 (* After this, the only lvals should be tmps *)
 (* Ok I realized I don't have to redo everything I did for the exprs,
@@ -297,7 +301,7 @@ and handleMemForLVal typee = function
   | TmpArrayAccessLVal (arrayLVal, idxExpr) ->
       let TmpPtrExpr arrayExpr = lvalToExpr (Pointer Poop) arrayLVal in
       let (arrayAccessPtr, instrs) = getArrayAccessPtr typee arrayExpr idxExpr in
-      let arrayAccessPtrLVal = exprToLVal (TmpPtrExpr arrayAccessPtr) in
+      let arrayAccessPtrLVal = TmpDerefLVal (exprToLVal (TmpPtrExpr arrayAccessPtr)) in
       (arrayAccessPtrLVal, instrs)
 
 let handleMemForInstr = function
