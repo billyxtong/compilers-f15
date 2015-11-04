@@ -131,7 +131,10 @@ let rec handleSharedExpr exprType = function
         (sharedExprToTypedExpr exprType (TmpInfAddrFunCall(fName, args)), [])
    | TmpInfAddrDeref (ptrExp) ->
        let (TmpPtrExpr e_result, instrs) = handleMemForExpr (TmpPtrExpr ptrExp) in
-       (sharedExprToTypedExpr exprType (TmpInfAddrDeref e_result), instrs)
+       let nullCheckInstrs = handleNullPointerCheck e_result in
+       
+       (sharedExprToTypedExpr exprType (TmpInfAddrDeref e_result),
+        instrs @ nullCheckInstrs)
    | TmpInfAddrFieldAccess(structTypeName, structPtr, fieldName) ->
        let (fieldPtr, instrs) = getStructAccessPtr structTypeName
                                 structPtr fieldName in
@@ -244,6 +247,16 @@ and getStructAccessPtr structTypeName structPtr fieldName =
     with Not_found -> let () = print_string("struct " ^ structTypeName
                            ^ "not defined before alloc\n") in assert(false)
 
+and handleNullPointerCheck ptr =
+     let doAccessLabel = GenLabel.create () in
+     let throwError = TmpInfAddrVoidFunCall("raise",
+                                TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
+     let nullCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp(BIT64,
+           TmpPtrExpr ptr, TmpPtrExpr (TmpPtrArg (TmpConst 0))))::
+           TmpInfAddrJump(JNE, doAccessLabel)::throwError::
+           TmpInfAddrLabel(doAccessLabel)::[]
+     in nullCheck                               
+
 and getArrayAccessPtr elemType ptrExp indexExpr =
        let (TmpPtrExpr ptr_final, ptr_instrs) =
            handleMemForExpr (TmpPtrExpr ptrExp) in
@@ -293,8 +306,10 @@ and handleMemForLVal typee = function
     TmpVarLVal t -> (TmpVarLVal t, [])
   | TmpDerefLVal ptr ->
     let (ptrFinal, instrs) = handleMemForLVal (Pointer Poop) ptr in
+    let TmpPtrExpr ptrFinalAsExpr = lvalToExpr (Pointer Poop) ptrFinal in
+    let nullCheckInstrs = handleNullPointerCheck ptrFinalAsExpr in
     (* We know that the inner element is a pointer, what type doesn't matter *)
-                        (TmpDerefLVal(ptrFinal), instrs)
+                        (TmpDerefLVal(ptrFinal), nullCheckInstrs @ instrs)
   | TmpFieldAccessLVal (structName, structptr, fieldName) ->
       (* We know that structptr is a pointer of some kind; doesn't matter what *)
       let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structptr in
