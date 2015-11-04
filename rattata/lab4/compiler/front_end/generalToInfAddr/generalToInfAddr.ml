@@ -196,18 +196,24 @@ and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
              idToTmpMap argList in
          (instrs, addTypeToShared (TmpInfAddrFunCall(fName, argExps)) exprType)
   | A.ArrayAccess (arrayExpr, idxExpr) ->
-        (* evaluate the array first! *)
+        (* evaluate the array first! Store the pointer to make sure it's
+        evaluated first. *)
         let (arrayInstrs, TmpPtrExpr arrayFinalExpr) = 
             trans_exp retTmp retLabel idToTmpMap (A.PtrExpr arrayExpr) in
         (* always store the index to make sure it's only evaluated once! *)
+        let storedArrayPtr = Tmp (Temp.create()) in
+        let storedArrayPtrAsExpr = TmpPtrArg (TmpLoc (TmpVar storedArrayPtr)) in
+        let storeArrayPtrInstr = TmpInfAddrMov(getSizeForType (Pointer Poop),
+                             TmpPtrExpr arrayFinalExpr, TmpVarLVal storedArrayPtr) in
         let (idxInstrs, TmpIntExpr idxFinalExpr) = 
             trans_exp retTmp retLabel idToTmpMap (A.IntExpr idxExpr) in
         let storedIdx = Tmp (Temp.create()) in
         let storedIdxAsExpr = TmpIntArg (TmpLoc (TmpVar storedIdx)) in
         let storeIdxInstr = TmpInfAddrMov(getSizeForType INT,
                              TmpIntExpr idxFinalExpr, TmpVarLVal storedIdx) in
-        (arrayInstrs @ idxInstrs @ storeIdxInstr :: [], addTypeToShared
-           (TmpInfAddrArrayAccess (arrayFinalExpr, storedIdxAsExpr)) exprType)
+        (arrayInstrs @ storeArrayPtrInstr :: [] @ idxInstrs @ storeIdxInstr :: [],
+         addTypeToShared
+           (TmpInfAddrArrayAccess (storedArrayPtrAsExpr, storedIdxAsExpr)) exprType)
   | A.FieldAccess (structName, structPtr, fieldName) ->
         let (ptrInstrs, TmpPtrExpr structPtrExpr) =
             trans_exp retTmp retLabel idToTmpMap (A.PtrExpr structPtr) in
