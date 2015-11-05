@@ -32,7 +32,6 @@ let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) =
                         | _ -> (ErrorMsg.error ("typedef name already used\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
-                   let () = print_string ("declaring function " ^ funcName ^ "\n") in
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
@@ -180,13 +179,6 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                               if not ((matchFuncTypes fType funcType) && 
                                       (matchParamListTypes paramTypes funcParams))
                               then
-                                let () = print_string (string_of_bool (matchParamListTypes paramTypes funcParams)) in 
-                                let () = print_string ("\nfunc type in declaration: " ^ c0typeToString(fType)) in
-                                let () = print_string ("\nfunc type in definition: " ^ c0typeToString(funcType)) in
-                                let () = print_string ("\nparam types in dec: " ^ (concat " " 
-                                                          (List.map c0typeToString paramTypes))) in
-                                let () = print_string ("\nparam types in def: " ^ (concat " " 
-                                                          (List.map (fun (a,b) -> c0typeToString a) funcParams))) in
                                 (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
@@ -340,7 +332,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                    raise ErrorMsg.Error))
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
        (let (tcExpr, exprType) = tc_expression varMap e in
-        let (typedLVal, lvalType, newVarMap) = tc_lval varMap lval in
+        let (typedLVal, lvalType) = tc_lval varMap lval in
         if matchTypes exprType (lowestTypedefType lvalType ) && notAStruct exprType
         then
           (match op with
@@ -348,11 +340,11 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                    (match typedLVal with
                       (* we don't have to add lvals to our varMap unless they are vars *)
                       TypedPostElabVarLVal(id) -> 
-                        let newerVarMap = M.add newVarMap id (lvalType, true) in
-                        tc_statements newerVarMap stms 
+                        let newVarMap = M.add varMap id (lvalType, true) in
+                        tc_statements newVarMap stms 
                         funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                     | _ -> 
-                       tc_statements newVarMap stms 
+                       tc_statements varMap stms 
                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock))
                | _ -> 
                   (match typedLVal with
@@ -360,7 +352,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                         (match M.find varMap id with
                                Some(typee, isInit) -> 
                                  if isInit && typee = INT
-                                 then tc_statements newVarMap stms 
+                                 then tc_statements varMap stms 
                                       funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                                  else (ErrorMsg.error ("wrong type or lval uninitialized\n");
                                        raise ErrorMsg.Error)
@@ -368,7 +360,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                                      raise ErrorMsg.Error))
                     | _ -> 
                         if lvalType = INT
-                        then tc_statements newVarMap stms 
+                        then tc_statements varMap stms 
                           funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                         else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
                               raise ErrorMsg.Error)))

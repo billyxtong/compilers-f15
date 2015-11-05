@@ -332,20 +332,17 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                                Struct _ -> (ErrorMsg.error ("bad type for " ^ id ^ "; can't put struct in local var\n");
                                             raise ErrorMsg.Error)
                              | _ ->
-                                  let newVarMap = M.add varEnv id (typee, isInitialized) in
-                                 (* Pretty sure we don't have to re-add it because it's already in the
-                                    map based on the match and if statements *)
-                                 (TypedPostElabVarLVal(id), typee, newVarMap))
+                                 (TypedPostElabVarLVal(id), typee))
                       else
                         if not isInitialized
                         then (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                               raise ErrorMsg.Error)
                         else
-                          (TypedPostElabVarLVal(id), typee, varEnv))
+                          (TypedPostElabVarLVal(id), typee))
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
                             raise ErrorMsg.Error))
       | UntypedPostElabFieldLVal(untypedLVal,fieldName) -> (* need to fix this *)
-          let (typedLVal, lvalType, newVarMap) = tc_lval_helper varEnv isNested untypedLVal in
+          let (typedLVal, lvalType) = tc_lval_helper varEnv isNested untypedLVal in
           (match lvalType with
               Struct(structName) -> 
                 (match M.find !structMap structName with
@@ -356,7 +353,7 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                                TypedPostElabVarLVal(id) -> 
                                  (ErrorMsg.error ("can't store structs in local vars\n");
                                   raise ErrorMsg.Error)
-                             | _ -> (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType, newVarMap))
+                             | _ -> (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType))
                         | None -> (ErrorMsg.error ("struct " ^ structName ^
                                                             " has no field with name "
                                                             ^ fieldName ^ "\n");
@@ -367,16 +364,16 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                      raise ErrorMsg.Error))
       | UntypedPostElabDerefLVal(untypedLVal) ->
           (match tc_lval_helper varEnv isNested untypedLVal with
-                 (typedLVal, Pointer(c), _) ->
+                 (typedLVal, Pointer(c)) ->
                    if c = Poop
                    then (ErrorMsg.error ("dereferencing a null pointer\n");
                          raise ErrorMsg.Error)
-                   else (TypedPostElabDerefLVal(typedLVal), c, varEnv)
+                   else (TypedPostElabDerefLVal(typedLVal), c)
                | _ -> (ErrorMsg.error ("dereferencing a non-pointer\n");
                        raise ErrorMsg.Error))
       | UntypedPostElabArrayAccessLVal(untypedLVal,exp) ->
           (match (tc_lval_helper varEnv isNested untypedLVal, tc_expression varEnv exp) with
-                 ((typedLVal, Array(c), _), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c, varEnv)
+                 ((typedLVal, Array(c)), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c)
                | _ -> (ErrorMsg.error ("array access lval didn't typecheck\n");
                        raise ErrorMsg.Error))
 
