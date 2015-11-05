@@ -23,7 +23,10 @@ let rec makeStructInnerMap fields offset map =
                              | BOOL -> smallFieldSize
                              | Pointer _ -> ptrFieldSize
                              | Array _ -> ptrFieldSize
-                             | _ -> assert(false)) in
+                             | Struct structName -> (
+                                 let (fields, structSize) =
+                                   H.find structDefsMap structName in structSize)
+                             | _ -> assert(false)) in                               
            let currFieldOffset =
         (* If it's an int or a bool, it's always fine, since
            all addresses with be mod 4. If it's a pointer, buffer it
@@ -260,8 +263,17 @@ and handleMemForExpr = function
 and getStructAccessPtr structTypeName structPtr fieldName =
     try
         let (fieldOffsets, _) = H.find structDefsMap structTypeName in
-        let (TmpPtrExpr structPtrFinal, structPtrInstrs) =
-             handleMemForExpr (TmpPtrExpr structPtr) in
+        let (structPtrFinal, structPtrInstrs) =
+            (match structPtr with
+                TmpPtrSharedExpr (TmpInfAddrDeref p) ->
+                   let (TmpPtrExpr pFinal, pInstrs) = handleMemForExpr (TmpPtrExpr p) in
+                   (pFinal, pInstrs)
+              | TmpPtrSharedExpr (TmpInfAddrArrayAccess (arrayExpr, idxExpr)) ->
+                 getArrayAccessPtr (Struct structTypeName) arrayExpr idxExpr
+              | TmpPtrSharedExpr (TmpInfAddrFieldAccess (innerStructTypeName,
+                                              innerStructPtr, innerFieldName)) ->
+                getStructAccessPtr innerStructTypeName innerStructPtr innerFieldName
+              | _ -> assert(false)) in
         let accessOffset = H.find fieldOffsets fieldName in
         let fieldPtrExpr = TmpInfAddrPtrBinop (PTR_ADD, structPtrFinal,
                              TmpIntArg (TmpConst accessOffset)) in
