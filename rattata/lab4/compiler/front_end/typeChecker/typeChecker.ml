@@ -32,16 +32,17 @@ let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) =
                         | _ -> (ErrorMsg.error ("typedef name already used\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
+                   let () = print_string ("declaring function " ^ funcName ^ "\n") in
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
                                 raise ErrorMsg.Error)
                    else
-                   if List.exists (fun (typee, id) -> typee = VOID) funcParams then
+                   if List.exists (fun (typee, id) -> (isNestedVoidPtr typee)) funcParams then
                       (ErrorMsg.error ("can't have void as param type\n");
                                 raise ErrorMsg.Error)
                    else
-                   if areAnyFuncParamsStructs (funcParams : param list)
+                   if (areAnyFuncParamsStructs funcParams)
                    then
                       (ErrorMsg.error ("can't have structs as param type \n");
                                 raise ErrorMsg.Error)
@@ -343,15 +344,34 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
         if matchTypes exprType (lowestTypedefType lvalType ) && notAStruct exprType
         then
           (match op with
-                 EQ -> tc_statements newVarMap stms 
-                       funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                       (* we don't have to add lvals to our varMap *)
-               | _ -> 
-                   if lvalType = INT
-                   then tc_statements newVarMap stms 
+                 EQ -> 
+                   (match typedLVal with
+                      (* we don't have to add lvals to our varMap unless they are vars *)
+                      TypedPostElabVarLVal(id) -> 
+                        let newerVarMap = M.add newVarMap id (lvalType, true) in
+                        tc_statements newerVarMap stms 
                         funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                   else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
-                               raise ErrorMsg.Error))
+                    | _ -> 
+                       tc_statements newVarMap stms 
+                       funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock))
+               | _ -> 
+                  (match typedLVal with
+                      TypedPostElabVarLVal(id) -> 
+                        (match M.find varMap id with
+                               Some(typee, isInit) -> 
+                                 if isInit && typee = INT
+                                 then tc_statements newVarMap stms 
+                                      funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+                                 else (ErrorMsg.error ("wrong type or lval uninitialized\n");
+                                       raise ErrorMsg.Error)
+                             | _ -> (ErrorMsg.error ("lval undeclared\n");
+                                     raise ErrorMsg.Error))
+                    | _ -> 
+                        if lvalType = INT
+                        then tc_statements newVarMap stms 
+                          funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+                        else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
+                              raise ErrorMsg.Error)))
         else
         (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(lvalType) ^ "\nRHS type: " ^ c0typeToString(exprType) ^ "\n");
                                raise ErrorMsg.Error))

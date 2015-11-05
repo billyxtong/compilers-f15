@@ -230,7 +230,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                else
                  (ErrorMsg.error ("parameters don't typecheck \n");
                      raise ErrorMsg.Error)
-           | _ -> (ErrorMsg.error ("function doesn't exist \n");
+           | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
                    raise ErrorMsg.Error))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       (* sorry in advance for the nested match statements *)
@@ -332,7 +332,7 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                                Struct _ -> (ErrorMsg.error ("bad type for " ^ id ^ "; can't put struct in local var\n");
                                             raise ErrorMsg.Error)
                              | _ ->
-                                  let newVarMap = M.add varEnv id (typee, true) in
+                                  let newVarMap = M.add varEnv id (typee, isInitialized) in
                                  (* Pretty sure we don't have to re-add it because it's already in the
                                     map based on the match and if statements *)
                                  (TypedPostElabVarLVal(id), typee, newVarMap))
