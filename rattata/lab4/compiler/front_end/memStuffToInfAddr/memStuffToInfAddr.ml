@@ -205,6 +205,15 @@ and handleMemForExpr = function
          (if getSizeForType elemType = spaceForLength then 1 else 2) in
        let (TmpIntExpr numElemsExpr, instrsForNumElems) =
           handleMemForExpr (TmpIntExpr numElems) in
+      (* check that numElems is nonnegative. *)
+       let doAllocLabel = GenLabel.create () in
+       let throwError = TmpInfAddrVoidFunCall("raise",
+                                TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
+       let checkNumElemsNonnegative = TmpInfAddrBoolInstr
+           (TmpInfAddrCmp(BIT32, TmpIntExpr(TmpIntArg(TmpConst 0)),
+                          TmpIntExpr numElemsExpr))
+           ::TmpInfAddrJump(JGE, doAllocLabel)::throwError
+           ::TmpInfAddrLabel doAllocLabel::[] in
        let numElemsToAlloc = TmpIntExpr (TmpInfAddrBinopExpr(ADD, numElemsExpr,
                               TmpIntArg (TmpConst extraElemsForLength))) in
        let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("calloc",
@@ -221,7 +230,8 @@ and handleMemForExpr = function
        let lengthLoc = TmpVarLVal funCallResult in
        let storeLengthInstr = TmpInfAddrMov(BIT32, TmpIntExpr numElemsExpr,
                                             TmpDerefLVal lengthLoc) in
-       (finalExpr, instrsForNumElems@ storeFunCall::storeLengthInstr::[])
+       (finalExpr, instrsForNumElems @ checkNumElemsNonnegative
+                   @ storeFunCall::storeLengthInstr::[])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
     | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
