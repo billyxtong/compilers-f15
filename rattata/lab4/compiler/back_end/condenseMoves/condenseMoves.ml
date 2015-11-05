@@ -15,9 +15,9 @@ let rec condenseMovesDoubles = function
         match (instr1, instr2) with
              (AssemInstr (MOV (opSize1, src1, dest1)),
               AssemInstr (MOV (opSize2, src2, dest2))) ->
-     if ((AssemLoc dest1) = src2) && ((AssemLoc dest2) = src1)
-     then (let () = assert(opSize1 = opSize2) in instr1 :: condenseMovesDoubles instrs)
-                   else instr1 :: condenseMovesDoubles(instr2::instrs)
+     (if ((AssemLoc dest1) = src2) && ((AssemLoc dest2) = src1) && (opSize1 = opSize2)
+     then instr1 :: condenseMovesDoubles instrs
+                   else instr1 :: condenseMovesDoubles(instr2::instrs))
            | _ -> instr1 :: condenseMovesDoubles(instr2::instrs)
 
 let condenseMovesForFun instrs = condenseMovesDoubles(removeNullMoves instrs)
