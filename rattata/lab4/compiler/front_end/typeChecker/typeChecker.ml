@@ -285,7 +285,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
        (let (tcExpr, exprType) = tc_expression varMap e in
         let (typedLVal, lvalType, newVarMap) = tc_lval varMap lval in
-        if matchTypes exprType (lowestTypedefType lvalType )
+        if matchTypes exprType (lowestTypedefType lvalType ) && notAStruct exprType
         then
           (match op with
                  EQ -> tc_statements newVarMap stms 
@@ -294,7 +294,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                | _ -> 
                    if lvalType = INT
                    then tc_statements newVarMap stms 
-                       funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
                    else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
                                raise ErrorMsg.Error))
         else
@@ -354,13 +354,17 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
            | _ -> (ErrorMsg.error ("assert must have bool expr\n");
                   raise ErrorMsg.Error))
   | A.UntypedPostElabExprStmt(e)::stms ->
-      let (tcExpr, _) = tc_expression varMap e in
+      let (tcExpr, exprType) = tc_expression varMap e in
+      (match exprType with
+            Struct(_) -> (ErrorMsg.error ("type can't be a struct\n");
+                          raise ErrorMsg.Error) 
+          | _ ->
       (match tcExpr with
              VoidExpr(stmt) -> tc_statements varMap 
                                stms funcRetType ret (stmt :: typedBlock)
            | _ -> tc_statements varMap 
                   stms funcRetType ret 
-                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock))
+                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock)))
        
 and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   

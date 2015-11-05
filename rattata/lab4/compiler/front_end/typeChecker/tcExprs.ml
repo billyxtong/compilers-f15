@@ -38,6 +38,10 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
       | (Poop, Pointer(c)) -> true
       | _ -> false
 
+let notAStruct (t : c0type) =
+  match lowestTypedefType t with
+        Struct(_) -> false
+      | _ -> true
 
 let rec argsMatch (argTypes : c0type list) (paramTypes : c0type list) =
   match (argTypes, paramTypes) with
@@ -138,7 +142,11 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                (match (tcExpr1, tcExpr2) with
                       (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntEquals(exp1, exp2)), BOOL)
                     | (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(BoolEquals(exp1, exp2)), BOOL)
-                    | (PtrExpr(exp1), PtrExpr(exp2)) -> (BoolExpr(PtrEquals(exp1, exp2)), BOOL)
+                    | (PtrExpr(exp1), PtrExpr(exp2)) -> 
+                        if matchTypes type1 type2 && notAStruct type1 && notAStruct type2 then
+                        (BoolExpr(PtrEquals(exp1, exp2)), BOOL)
+                        else (ErrorMsg.error ("different typed ptrExprs\n");
+                           raise ErrorMsg.Error)
                     | _ -> (ErrorMsg.error ("double equals expressions didn't typecheck \n");
                            raise ErrorMsg.Error))
            | LOG_AND -> (match (tcExpr1, tcExpr2) with
@@ -202,79 +210,35 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function doesn't exist \n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) ->
+  | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
+      (* sorry in advance for the nested match statements *)
+      (* we're missing the case where we have 
+       * (alloc(struct s)) -> x
+       * but that gets elaborated to
+       * *(alloc(struct s)).x 
+       * which is illegal; check cc0 *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
-             (PtrExpr(Null), _) -> (ErrorMsg.error ("deferencing null\n");
-                                    raise ErrorMsg.Error)
-           | (PtrExpr(PtrSharedExpr(Deref(p))), Struct(structName)) -> (* changes *structPtr.field to structPtr -> field *)
-              (match M.find !structMap structName with
-                     Some(fieldMap, true) -> (* in structMap, struct names point to a table of their fields
-                                         in fieldMap, field names point to their type *)
-                       (match M.find !fieldMap fieldName with
-                              Some fieldType ->
-                                (match fieldType with
-                                       INT -> (IntExpr(IntSharedExpr(FieldAccess(structName, p, fieldName))), INT)
-                                     | BOOL -> (BoolExpr(BoolSharedExpr(FieldAccess(structName, p, fieldName))), BOOL)
-                                     | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, p, fieldName))), fieldType))
-                            | None -> (ErrorMsg.error ("struct " ^ structName ^
-                                                    " has no field with name "
-                                                    ^ fieldName ^ "\n");
-                                       raise ErrorMsg.Error))
-                   | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
-                              raise ErrorMsg.Error))
-           | (PtrExpr(PtrSharedExpr(Ident(i))), _) -> 
-               (ErrorMsg.error ("struct ident\n"); raise ErrorMsg.Error)
-           | (PtrExpr(pExpr), Struct(structName)) ->
-               (match pExpr with
-                      Alloc(c) -> 
-                        if matchTypes (lowestTypedefType c) actualType 
-                        then
-                          (match M.find !structMap structName with
-                                 Some(fieldMap, true) -> 
-                                   (match M.find !fieldMap fieldName with
-                                          Some fieldType ->
-                                            (match fieldType with
-                                                   INT -> 
-                                                     (IntExpr(IntSharedExpr(FieldAccess(structName, pExpr, fieldName))), 
-                                                              INT)
-                                                 | BOOL -> 
-                                                     (BoolExpr(BoolSharedExpr(FieldAccess(structName, pExpr, fieldName))),
-                                                               BOOL)
-                                                 | _ -> 
-                                                     (PtrExpr(PtrSharedExpr(FieldAccess(structName, pExpr, fieldName))), 
-                                                              fieldType))
-                                        | None -> (ErrorMsg.error ("struct " ^ structName ^
-                                                    " has no field with name "
-                                                    ^ fieldName ^ "\n");
-                                                   raise ErrorMsg.Error))
-                               | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
-                                       raise ErrorMsg.Error))
-                        else (ErrorMsg.error ("allocating wrong struct\n"); raise ErrorMsg.Error)
-                    | PtrSharedExpr(inner) ->
-                        (match M.find !structMap structName with
-                                 Some(fieldMap, true) -> 
-                                   (match M.find !fieldMap fieldName with
-                                          Some fieldType ->
-                                            (match fieldType with
-                                                   INT -> 
-                                                     (IntExpr(IntSharedExpr(FieldAccess(structName, pExpr, fieldName))), 
-                                                              INT)
-                                                 | BOOL -> 
-                                                     (BoolExpr(BoolSharedExpr(FieldAccess(structName, pExpr, fieldName))),
-                                                               BOOL)
-                                                 | _ -> 
-                                                     (PtrExpr(PtrSharedExpr(FieldAccess(structName, pExpr, fieldName))), 
-                                                              fieldType))
-                                        | None -> (ErrorMsg.error ("struct " ^ structName ^
-                                                    " has no field with name "
-                                                    ^ fieldName ^ "\n");
-                                                   raise ErrorMsg.Error))
-                               | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
-                                       raise ErrorMsg.Error))
-                    | _ -> (ErrorMsg.error ("ill formed field access\n");
-                            raise ErrorMsg.Error)))
+         (PtrExpr(PtrSharedExpr(inner)), Struct(structName)) ->
+            (match inner with
+               Ident(_) -> (ErrorMsg.error ("bad expr on LHS\n"); raise ErrorMsg.Error)
+             | _ -> 
+                (match M.find !structMap structName with
+                  Some(fieldMap, true) -> 
+                    (match M.find !fieldMap fieldName with
+                       Some fieldType -> 
+                         (match fieldType with
+                           INT -> (IntExpr(IntSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), INT)
+                         | BOOL -> (BoolExpr(BoolSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), BOOL)
+                         | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), fieldType))
+                     | None -> 
+                         (ErrorMsg.error ("struct " ^ structName ^
+                              " has no field with name "
+                              ^ fieldName ^ "\n"); raise ErrorMsg.Error))
+                | None -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
+                           raise ErrorMsg.Error)))
+        | _ -> (ErrorMsg.error ("bad expr on LHS, or LHS not a struct\n"); raise ErrorMsg.Error))
   | UntypedPostElabAlloc(t : c0type) ->
       let baseType = lowestTypedefType t in
       (match baseType with
@@ -298,12 +262,23 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
   | UntypedPostElabArrayAlloc(typee, e) ->
-      let (typedExpr, _) = tc_expression varEnv e in
       let baseType = lowestTypedefType typee in
-      (match typedExpr with
-             IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType))
-           | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
-                  raise ErrorMsg.Error))
+      (match lowestTypedefType typee with
+             Struct(structName) -> 
+              (match M.find !structMap structName with
+                     Some(_, true) -> 
+                       let (typedExpr, _) = tc_expression varEnv e in
+                       (match typedExpr with
+                              IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType))
+                            | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
+                                    raise ErrorMsg.Error))
+                   | _ -> (ErrorMsg.error ("undeclared/undefined struct\n");
+                                    raise ErrorMsg.Error))
+           | _ -> let (typedExpr, _) = tc_expression varEnv e in
+                       (match typedExpr with
+                              IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType))
+                            | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
+                                    raise ErrorMsg.Error)))
   | UntypedPostElabArrayAccessExpr(e1, e2) ->
       let (typedExp1, type1) = tc_expression varEnv e1 in
       (match type1 with
@@ -347,23 +322,27 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                           (TypedPostElabVarLVal(id), typee, varEnv))
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
                             raise ErrorMsg.Error))
-      | UntypedPostElabFieldLVal(untypedLVal,fieldName) ->
-          (match tc_lval_helper varEnv isNested untypedLVal with
-                 (TypedPostElabDerefLVal(typedLVal), Struct(structName), _) ->
-                   (match M.find !structMap structName with
-                          Some (fieldMap, true) -> (* in structMap, struct names point to a table of their fields
-                                         in fieldMap, field names point to their type *)
-                            (match M.find !fieldMap fieldName with
-                                   Some fieldType ->
-                                     (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType, varEnv)
-                                 | None -> (ErrorMsg.error ("struct " ^ structName ^
+      | UntypedPostElabFieldLVal(untypedLVal,fieldName) -> (* need to fix this *)
+          let (typedLVal, lvalType, newVarMap) = tc_lval_helper varEnv isNested untypedLVal in
+          (match lvalType with
+              Struct(structName) -> 
+                (match M.find !structMap structName with
+                    Some (fieldMap, true) ->
+                      (match M.find !fieldMap fieldName with
+                          Some fieldType ->            
+                            (match typedLVal with
+                               TypedPostElabVarLVal(id) -> 
+                                 (ErrorMsg.error ("can't store structs in local vars\n");
+                                  raise ErrorMsg.Error)
+                             | _ -> (TypedPostElabFieldLVal(structName, typedLVal, fieldName), fieldType, newVarMap))
+                        | None -> (ErrorMsg.error ("struct " ^ structName ^
                                                             " has no field with name "
                                                             ^ fieldName ^ "\n");
                                             raise ErrorMsg.Error))
-                        | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
-                                   raise ErrorMsg.Error))
-               | _ -> (ErrorMsg.error ("LVal isn't of form *structName.fieldName \n");
-                       raise ErrorMsg.Error))
+                  | _ -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
+                          raise ErrorMsg.Error))
+            | _ -> (ErrorMsg.error ("LHS lval isn't a struct\n");
+                     raise ErrorMsg.Error))
       | UntypedPostElabDerefLVal(untypedLVal) ->
           (match tc_lval_helper varEnv isNested untypedLVal with
                  (typedLVal, Pointer(c), _) ->

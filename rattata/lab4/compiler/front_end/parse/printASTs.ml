@@ -229,7 +229,7 @@ let rec sharedTypeExprToString(s : sharedTypeExpr) =
                                        typedPostElabExprToString(e2)]
       | FunCall(func,args) -> identToString(func) ^ "(" ^ (concat ", " 
                       (List.map typedPostElabExprToString args)) ^ ")"
-      | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "->" ^ identToString(i2) (*^
+      | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "." ^ identToString(i2) (*^
                                   " (type = " ^ identToString(i2) ^ ")"*)
       | ArrayAccess(p,i) -> ptrExprToString(p) ^ "[" ^ intExprToString(i) ^ "]"
       | Deref(p) -> "*(" ^ ptrExprToString(p) ^ ")"
@@ -267,7 +267,7 @@ and boolExprToString(bExpr : boolExpr) =
 and typedPostElabLValToString(lval : typedPostElabLVal) =
   match lval with
         TypedPostElabVarLVal(i) -> identToString(i)
-      | TypedPostElabFieldLVal(i1, p,i2) -> typedPostElabLValToString(p) ^ "->"  
+      | TypedPostElabFieldLVal(i1, p,i2) -> typedPostElabLValToString(p) ^ "."  
                                             ^ identToString(i2) ^ "("
                                             ^ identToString(i1) ^ ")"
       | TypedPostElabDerefLVal(p) -> "*" ^ typedPostElabLValToString(p)
