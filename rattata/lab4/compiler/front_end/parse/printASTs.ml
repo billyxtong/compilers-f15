@@ -66,8 +66,8 @@ let assignOpToString(op : assignOp) =
      |  AND_EQ -> " &= "
      |  OR_EQ -> " |= "
      |  XOR_EQ -> " ^= "
-     |  LSHIFT_EQ -> " >>= "
-     |  RSHIFT_EQ -> " <<= "
+     |  LSHIFT_EQ -> " <<= "
+     |  RSHIFT_EQ -> " >>= "
 
 
 let simpStmtToString(statement : simpStmt) =
