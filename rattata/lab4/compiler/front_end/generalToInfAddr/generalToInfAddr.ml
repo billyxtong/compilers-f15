@@ -58,6 +58,28 @@ let toIntBinopFromRHS lval rhs binop =
                               TmpIntSharedExpr (TmpLValExpr lval), rhs'))
      | _ -> assert(false)
 
+(* because of the way asnops are handled, the rhs is already in infAddr,
+   but then I still need to handle shifts *)
+let handleInfAddrShift lval shiftOp (TmpIntExpr e2) =
+    let e1 = TmpIntSharedExpr (TmpLValExpr lval) in
+    let throwErrorLabel = GenLabel.create () in
+    let doShiftLabel = GenLabel.create () in
+    let t = TmpVarLVal (Tmp (Temp.create())) in
+    let throwError = TmpInfAddrMov(BIT32, TmpIntExpr
+              (TmpInfAddrBinopExpr(FAKEDIV, TmpIntArg (TmpConst 666),
+                                                  TmpIntArg (TmpConst 0))),
+                       t) in
+    let doTheShift = TmpInfAddrMov(BIT32, TmpIntExpr
+              (TmpInfAddrBinopExpr(shiftOp, e1, e2)), lval) in
+    let isNonNegative = TmpInfAddrBoolInstr (TmpInfAddrCmp (BIT32,
+            TmpIntExpr (TmpIntArg (TmpConst (-1))), TmpIntExpr e2))
+        ::TmpInfAddrJump(JLE, throwErrorLabel)::[] in
+    let isSmallEnough = TmpInfAddrBoolInstr (TmpInfAddrCmp (BIT32,
+            TmpIntExpr (TmpIntArg (TmpConst (31))), TmpIntExpr e2))
+        ::TmpInfAddrJump(JLE, doShiftLabel)::[] in
+    isNonNegative @ isSmallEnough @ (TmpInfAddrLabel throwErrorLabel)::throwError
+    ::TmpInfAddrLabel doShiftLabel::doTheShift::[]
+
 (* this will return (x+1) for x+=1, just 1 for x = 1. With
    all the proper constructors and types and such *)
 let getRHSForAsnop lval rhsExpr = function
@@ -74,6 +96,7 @@ let getRHSForAsnop lval rhsExpr = function
   | A.RSHIFT_EQ -> toIntBinopFromRHS lval rhsExpr RSHIFT
 
 let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
+    let () = print_string("hi\n") in
     let max_shift = A.IntConst 31 in
     let new_id = GenUnusedID.create () in
     let new_lval = A.TypedPostElabVarLVal new_id in
@@ -457,10 +480,17 @@ and trans_stmts retTmp retLabel idToTmpMap = function
      let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
           (* trans_exp gives us the instructions it generated, and also where it
              ended up putting the value. We then update the binding in idToTmpMap *)
+     (* Tricky part! something like a >>= 100. We still need to handle the shift,
+        but our normal handle shift function takes an ast. So I wrote another
+        one that takes infAddr *)
+     (match asnop with
+          A.LSHIFT_EQ -> handleInfAddrShift tmplval LSHIFT eInfAddr
+        | A.RSHIFT_EQ -> handleInfAddrShift tmplval RSHIFT eInfAddr
+        | _ ->
      let rhs = getRHSForAsnop tmplval eInfAddr asnop in
         instrsForLVal @ instrs_for_e @
         TmpInfAddrMov (getSizeForExpr eInfAddr, rhs, tmplval)
-        ::trans_stmts retTmp retLabel newMap stmts
+        ::trans_stmts retTmp retLabel newMap stmts)
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
        trans_cond retTmp retLabel idToTmpMap (e, ifStmts, elseStmts) @
         trans_stmts retTmp retLabel idToTmpMap stmts
