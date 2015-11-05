@@ -14,21 +14,21 @@ open PrintASTs
 open TcExprs
 
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
-let rec tc_header (header : untypedPostElabAST) = 
+let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) = 
   match header with
-        [] -> ()
+        [] -> typedAST
       | fdecl :: fdecls -> 
           (match fdecl with
                  UntypedPostElabTypedef(t, i) -> 
-                 if t = VOID then
-                    (ErrorMsg.error ("can't typedef voids\n");
-                     raise ErrorMsg.Error)
+                 if (isNestedVoidPtr t) then
+                    (ErrorMsg.error ("can't typedef void or nested void ptr\n");
+                                raise ErrorMsg.Error)
                  else
                    (match (M.find !typedefMap i, M.find !functionMap i) with
                           (None, None) -> 
                             let () = typedefMap := M.add !typedefMap i 
                                         (lowestTypedefType t) in
-                            tc_header fdecls
+                            tc_header fdecls typedAST
                         | _ -> (ErrorMsg.error ("typedef name already used\n");
                                 raise ErrorMsg.Error))
                | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
@@ -39,6 +39,11 @@ let rec tc_header (header : untypedPostElabAST) =
                    else
                    if List.exists (fun (typee, id) -> typee = VOID) funcParams then
                       (ErrorMsg.error ("can't have void as param type\n");
+                                raise ErrorMsg.Error)
+                   else
+                   if areAnyFuncParamsStructs (funcParams : param list)
+                   then
+                      (ErrorMsg.error ("can't have structs as param type \n");
                                 raise ErrorMsg.Error)
                    else
                    (match (M.find !typedefMap funcName, 
@@ -53,20 +58,46 @@ let rec tc_header (header : untypedPostElabAST) =
                                                     w/ wrong type/param types \n");
                                   raise ErrorMsg.Error)
                             else
-                              tc_header fdecls
+                              tc_header fdecls typedAST
                         | (None, None) -> 
                             (let () = functionMap := M.add !functionMap funcName 
                              (lowestTypedefType funcType, 
                              (List.map (fun (c, i) -> lowestTypedefType c) funcParams), true, true) in
-                             tc_header fdecls))
+                             tc_header fdecls typedAST))
                | UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
                           None -> 
                             let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
-                            tc_header fdecls
+                            tc_header fdecls typedAST
                         | _ -> (ErrorMsg.error ("struct name already used\n");
                                 raise ErrorMsg.Error))
-               | _ -> (ErrorMsg.error ("func/struct def'n in header file \n");
+               | UntypedPostElabStructDef(structName, fields) ->
+                   let nameTable = Core.Std.String.Map.empty in
+                   if (not (uniqueFieldNames fields nameTable) || not (areStructFieldsWellDefined fields)) then 
+                      (ErrorMsg.error ("bad field names/field is void or void ptr or undefined struct\n");
+                                raise ErrorMsg.Error)
+                   else
+                   (match M.find !structMap structName with
+                          Some (fieldMap, false) -> (* declared but undefined struct *)
+                            let newFields = List.map(fun (fieldType, fieldName) -> 
+                                                    (lowestTypedefType fieldType, fieldName)) fields in
+                            let () = List.iter(fun (fieldType, fieldName) -> 
+                              fieldMap := M.add !fieldMap fieldName fieldType) newFields in
+                            let () = structMap := M.add !structMap structName (fieldMap, true) in
+                            tc_header fdecls (TypedPostElabStructDef(structName, newFields)::typedAST) 
+                        | Some (_, true) -> (* already defined struct *) 
+                            (ErrorMsg.error ("redefining struct " ^ structName ^ "\n");
+                             raise ErrorMsg.Error)
+                        | None -> 
+                            let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, true) in
+                            let Some (fieldMap, _) = M.find !structMap structName in
+                            let newFields = List.map(fun (fieldType, fieldName) -> 
+                                                    (lowestTypedefType fieldType, fieldName)) fields in
+                            let () = List.iter(fun (fieldType, fieldName) -> 
+                              fieldMap := M.add !fieldMap fieldName fieldType) newFields in
+                            let () = structMap := M.add !structMap structName (fieldMap, true) in
+                            tc_header fdecls (TypedPostElabStructDef(structName, newFields)::typedAST)) 
+               | _ -> (ErrorMsg.error ("func def'n in header file \n");
                        raise ErrorMsg.Error))
 
 let rec init_func_env params = 
@@ -96,8 +127,13 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                       (ErrorMsg.error ("bad param names \n");
                                 raise ErrorMsg.Error)
                    else
-                   if List.exists (fun (typee, id) -> typee = VOID) funcParams then
+                   if List.exists (fun (typee, id) -> (isNestedVoidPtr typee)) funcParams then
                       (ErrorMsg.error ("can't have void as param type \n");
+                                raise ErrorMsg.Error)
+                   else
+                   if areAnyFuncParamsStructs funcParams
+                   then
+                      (ErrorMsg.error ("can't have structs as param type \n");
                                 raise ErrorMsg.Error)
                    else
                    (match (M.find !typedefMap funcName, M.find !functionMap funcName) with
@@ -124,7 +160,12 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 raise ErrorMsg.Error)
                    else
                    if List.exists (fun (typee, id) -> typee = VOID) funcParams then
-                      (ErrorMsg.error ("can't have void as param type \n");
+                      (ErrorMsg.error ("can't have void or structs as param types \n");
+                                raise ErrorMsg.Error)
+                   else
+                   if areAnyFuncParamsStructs funcParams
+                   then
+                      (ErrorMsg.error ("can't have structs as param type \n");
                                 raise ErrorMsg.Error)
                    else
                    (match (M.find !typedefMap funcName, M.find !functionMap funcName) with
@@ -137,7 +178,15 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                             else
                               if not ((matchFuncTypes fType funcType) && 
                                       (matchParamListTypes paramTypes funcParams))
-                              then (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
+                              then
+                                let () = print_string (string_of_bool (matchParamListTypes paramTypes funcParams)) in 
+                                let () = print_string ("\nfunc type in declaration: " ^ c0typeToString(fType)) in
+                                let () = print_string ("\nfunc type in definition: " ^ c0typeToString(funcType)) in
+                                let () = print_string ("\nparam types in dec: " ^ (concat " " 
+                                                          (List.map c0typeToString paramTypes))) in
+                                let () = print_string ("\nparam types in def: " ^ (concat " " 
+                                                          (List.map (fun (a,b) -> c0typeToString a) funcParams))) in
+                                (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
                                    raise ErrorMsg.Error)
                               else
                                 let () = H.remove declaredAndUsedButUndefinedFunctionTable funcName in
@@ -182,7 +231,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                   tc_prog gdecls (TypedPostElabFunDef(lowestTypedefType funcType, newFuncName, 
                                   newFuncParams, List.rev typeCheckedFuncBody)::typedAST))))
                | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
-                    if typeDefType = VOID then
+                    if (isNestedVoidPtr typeDefType) then
                     (ErrorMsg.error ("can't typedef voids\n");
                      raise ErrorMsg.Error)
                     else
@@ -198,12 +247,12 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                           None -> 
                             let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
                             tc_prog gdecls typedAST
-                        | _ -> (ErrorMsg.error ("redeclaring struct " ^ structName ^ "\n");
-                                raise ErrorMsg.Error))
+                        | _ -> tc_prog gdecls typedAST) (* (ErrorMsg.error ("redeclaring struct " ^ structName ^ "\n");
+                                raise ErrorMsg.Error) *)
                | UntypedPostElabStructDef(structName, fields) ->
                    let nameTable = Core.Std.String.Map.empty in
-                   if (not (uniqueFieldNames fields nameTable) || not (areStructFieldsDefined fields)) then 
-                      (ErrorMsg.error ("bad field names, or field is a struct that hasn't been defined \n");
+                   if (not (uniqueFieldNames fields nameTable) || not (areStructFieldsWellDefined fields)) then 
+                      (ErrorMsg.error ("bad field names/field is void or a struct that hasn't been defined \n");
                                 raise ErrorMsg.Error)
                    else
                    (match M.find !structMap structName with
@@ -248,10 +297,13 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
       (* necessary for statements of the form "int f = f();" *)
        (let (tcExpr, exprType) = tc_expression varMap e in
         let actualDeclType = lowestTypedefType typee in
-        (match actualDeclType with
-              VOID -> (ErrorMsg.error ("vars can't be void\n");
+        if (isNestedVoidPtr actualDeclType) 
+        then 
+          (ErrorMsg.error ("vars can't be void or arbitrarily nested void ptrs\n");
                        raise ErrorMsg.Error)
-            | Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
+        else
+        (match actualDeclType with
+              Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
                             raise ErrorMsg.Error)
             | _ -> 
               (match (M.find !typedefMap id, M.find varMap id) with
@@ -272,10 +324,13 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
       (match (M.find !typedefMap id, M.find varMap id) with
              (None, None) -> 
                (let actualType = lowestTypedefType typee in
+                if (isNestedVoidPtr actualType) 
+                then 
+                  (ErrorMsg.error ("vars can't be void or arbitrarily nested void ptrs\n");
+                       raise ErrorMsg.Error)
+                else
                 (match actualType with
-                      VOID -> (ErrorMsg.error ("vars can't be void\n");
-                               raise ErrorMsg.Error)
-                    | Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
+                      Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
                                     raise ErrorMsg.Error)
                     | _ -> let newVarMap = M.add varMap id (actualType, false) in 
                  tc_statements newVarMap 
@@ -328,6 +383,11 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                   raise ErrorMsg.Error)
   | A.UntypedPostElabReturn(e)::stms ->
       let (tcExpr, exprType) = tc_expression varMap e in
+      if not (typeNotLarge exprType)
+      then
+        (ErrorMsg.error ("return expr can't be struct\n");
+            raise ErrorMsg.Error)
+      else
       (* apparently all variables declared before the first return
          get to be treated as initialized...although those declared
          after don't *)
@@ -368,7 +428,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
        
 and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   
-  let () = tc_header untypedHeaderAST in
+  let typedHeaderAST = tc_header untypedHeaderAST [] in
   (* the main function is considered to always be declared at the top of the main file!
      It still needs to be defined eventually of course *)
   let () = (match M.find !functionMap "main" with
@@ -378,7 +438,7 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   let () = functionMap := M.add !functionMap "main" (INT, [], false, false) in
   (* type is INT, no params, isDefined = false, isExternal = false *)
   let typedProgAST = tc_prog untypedProgAST [] in
-  List.rev typedProgAST
+  List.rev (typedProgAST @ typedHeaderAST)
 
 (* Note: please check all of the typing rules for structs, becayse they're
    pretty complicated. Check out the lecture notes on structs, as well

@@ -61,7 +61,7 @@ let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
       | (p :: ps, (typee, _) :: remainingParams) ->
           let pType = lowestTypedefType p in
           let paramType = lowestTypedefType typee in
-          if ((pType = INT && paramType = INT) || (pType = BOOL && paramType = BOOL))
+          if matchTypes pType paramType
           then matchParamListTypes ps remainingParams else false
 
 let matchFuncTypes (funcType1 : c0type) (funcType2 : c0type) =
@@ -84,21 +84,37 @@ let rec uniqueFieldNames (fields : field list) nameTable =
                  None -> uniqueFieldNames fs (M.add nameTable datName ())
                | _ -> false)
 
-let rec areStructFieldsDefined fields =
+let rec isNestedVoidPtr(t : c0type) =
+  match t with
+        VOID -> true
+      | Pointer(c) -> isNestedVoidPtr c
+      | _ -> false
+
+let rec areStructFieldsWellDefined fields =
   match fields with
         [] -> true
       | (typee, _) :: fs -> 
           (match lowestTypedefType typee with
                  Struct(name) -> 
                    (match M.find !structMap name with
-                          Some (_, true) -> areStructFieldsDefined fs
+                          Some (_, true) -> areStructFieldsWellDefined fs
                         | _ -> false)
-               | _ -> areStructFieldsDefined fs)
+               | VOID -> false
+               | Pointer(c) -> if (isNestedVoidPtr c) then false else areStructFieldsWellDefined fs
+               | _ -> areStructFieldsWellDefined fs)
 
 let typeNotLarge (t : c0type) =
   match lowestTypedefType t with
         Struct(_) -> false
       | _ -> true
+
+let rec areAnyFuncParamsStructs (l : param list) =
+  match l with
+        [] -> false
+      | (t, _) :: ps ->
+          (match lowestTypedefType t with
+                 Struct(_) -> true
+               | _ -> areAnyFuncParamsStructs ps)
 
 let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
@@ -175,7 +191,13 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | (PtrExpr(_), PtrExpr(_)) ->
                         if matchTypes type2 type3 && typeNotLarge type2 && typeNotLarge type3
                         then
-                          (PtrExpr(PtrSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), type2)
+                          if not (type2 = Poop) (* if types match and first isn't NULL, use first *)
+                          then 
+                            (PtrExpr(PtrSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), type2)
+                          else if not (type3 = Poop) (* if first is NULL and second isn't, use second *)
+                          then (PtrExpr(PtrSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), type3)
+                          else (* whole exp is NULL *)
+                            (PtrExpr(PtrSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), Poop)
                         else
                           (ErrorMsg.error ("pointer exprs in ternary have diff. types\n");
                            raise ErrorMsg.Error)
@@ -252,8 +274,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       let (typedExp, typee) = tc_expression varEnv e in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
-             (_, Poop) -> (ErrorMsg.error ("trying to dereference null pointer\n");
-                           raise ErrorMsg.Error)
+             (_, Poop) -> (ErrorMsg.error ("can't dereference NULL\n");
+                   raise ErrorMsg.Error)
            | (PtrExpr(p), Pointer(c)) -> 
                (match c with
                       INT -> (IntExpr(IntSharedExpr(Deref(p))), c)
