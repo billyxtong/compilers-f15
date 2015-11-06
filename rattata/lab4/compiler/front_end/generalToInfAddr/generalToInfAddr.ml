@@ -96,7 +96,6 @@ let getRHSForAsnop lval rhsExpr = function
   | A.RSHIFT_EQ -> toIntBinopFromRHS lval rhsExpr RSHIFT
 
 let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
-    let () = print_string("hi\n") in
     let max_shift = A.IntConst 31 in
     let new_id = GenUnusedID.create () in
     let new_lval = A.TypedPostElabVarLVal new_id in
@@ -484,9 +483,9 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         but our normal handle shift function takes an ast. So I wrote another
         one that takes infAddr *)
      (match asnop with
-          A.LSHIFT_EQ -> handleInfAddrShift tmplval LSHIFT eInfAddr @
+          A.LSHIFT_EQ -> instrs_for_e @ handleInfAddrShift tmplval LSHIFT eInfAddr @
                          trans_stmts retTmp retLabel newMap stmts
-        | A.RSHIFT_EQ -> handleInfAddrShift tmplval RSHIFT eInfAddr @
+        | A.RSHIFT_EQ -> instrs_for_e @ handleInfAddrShift tmplval RSHIFT eInfAddr @
                          trans_stmts retTmp retLabel newMap stmts
         | _ ->
      let rhs = getRHSForAsnop tmplval eInfAddr asnop in
