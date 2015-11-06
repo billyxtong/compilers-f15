@@ -233,12 +233,6 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
                    raise ErrorMsg.Error))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
-      (* sorry in advance for the nested match statements *)
-      (* we're missing the case where we have 
-       * (alloc(struct s)) -> x
-       * but that gets elaborated to
-       * *(alloc(struct s)).x 
-       * which is illegal; check cc0 *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
@@ -326,7 +320,7 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
         UntypedPostElabVarLVal(id) ->
           (match M.find varEnv id with (* is it declared? *)
                    Some(typee, isInitialized) ->
-                     (if not isNested (* declared and initialized, all good *)
+                     (if not isNested (* if it's not nested we do stuff *)
                       then
                         (match typee with
                                Struct _ -> (ErrorMsg.error ("bad type for " ^ id ^ "; can't put struct in local var\n");
@@ -334,14 +328,14 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                              | _ ->
                                  (TypedPostElabVarLVal(id), typee))
                       else
-                        if not isInitialized
+                        if not isInitialized (* if it's nested, it has to be initialized *)
                         then (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                               raise ErrorMsg.Error)
                         else
                           (TypedPostElabVarLVal(id), typee))
                  | None -> (ErrorMsg.error ("undeclared variable " ^ id ^ "\n");
                             raise ErrorMsg.Error))
-      | UntypedPostElabFieldLVal(untypedLVal,fieldName) -> (* need to fix this *)
+      | UntypedPostElabFieldLVal(untypedLVal,fieldName) ->
           let (typedLVal, lvalType) = tc_lval_helper varEnv isNested untypedLVal in
           (match lvalType with
               Struct(structName) -> 
