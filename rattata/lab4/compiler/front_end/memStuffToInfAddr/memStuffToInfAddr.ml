@@ -306,8 +306,14 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
            handleMemForExpr (TmpPtrExpr ptrExp) in
        let (TmpIntExpr index_final, index_instrs) =
            handleMemForExpr (TmpIntExpr indexExpr) in
+       let arrayPtrTmp = Tmp (Temp.create()) in
+       let storeArrayPtr = TmpInfAddrMov(BIT64, TmpPtrExpr ptr_final,
+                                         TmpVarLVal arrayPtrTmp) in
+        let nullCheckInstrs =
+            handleNullPointerCheck (TmpPtrArg (TmpLoc (TmpVar arrayPtrTmp))) in
        (* The number of elems is stored at the address ptr_final - 8 *)
-       let numElemsPtr = TmpInfAddrPtrBinop(PTR_SUB, ptr_final,
+       let numElemsPtr = TmpInfAddrPtrBinop(PTR_SUB,
+                                     TmpPtrArg (TmpLoc (TmpVar arrayPtrTmp)),
                                             TmpIntArg (TmpConst 8)) in
        let numElemsExpr = TmpIntSharedExpr (TmpInfAddrDeref numElemsPtr) in
        let errorLabel = GenLabel.create() in
@@ -332,7 +338,8 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
        let storeAccessOffset = TmpInfAddrMov(BIT32, TmpIntExpr accessOffsetExpr,
                                              TmpVarLVal accessOffsetTmp) in
        let maskOffsetExpr = TmpInfAddrMaskUpper accessOffsetTmp in
-       let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD, ptr_final,
+       let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD,
+                                    TmpPtrArg (TmpLoc (TmpVar arrayPtrTmp)),
                                     TmpIntArg (TmpLoc (TmpVar accessOffsetTmp))) in
        let accessPtrFinal = Tmp (Temp.create()) in
        let storeAccessPtr = TmpInfAddrMov(BIT64, TmpPtrExpr accessPtrExpr,
@@ -340,7 +347,8 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
        (* Does where I put the storeAccessPtr in this order matter? *)
       (* Ok now actually put all of the instructions together *)
       (* The array pointer is evaluated first, I checked *)
-      let allInstrs = ptr_instrs @ index_instrs @ indexLowerCheck
+      let allInstrs = ptr_instrs @ index_instrs @ storeArrayPtr::nullCheckInstrs@
+             indexLowerCheck
              @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
              ::TmpInfAddrLabel(doTheAccessLabel)
              :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[] in
