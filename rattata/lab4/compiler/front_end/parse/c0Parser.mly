@@ -187,7 +187,10 @@ simp :
 simpNoDecl :
    exp asnop exp %prec ASNOP  { A.SimpAssign (expToLVal $1, $2, $3) }
  | exp                           { A.SimpStmtExpr $1 }
- | exp postop		 { expand_postop (expToLVal $1) $2 }
+ | nonParenExp postop		 { match $1 with
+                          A.PreElabDerefExpr _ -> failwith "something like *x++"
+                        | e -> expand_postop (expToLVal e) $2 }
+ | parenExp postop              { expand_postop (expToLVal $1) $2 }
   ;
 
 postop :
@@ -248,11 +251,17 @@ arglist :
    LPAREN RPAREN                     { [] }
  | LPAREN exp arglistfollow RPAREN   { $2::$3 }	  
 ;
+
+parenExp :
+   LPAREN exp RPAREN { $2 }
   
 exp :
-   LPAREN exp RPAREN { $2 }
+   parenExp                      { $1 }
+ | nonParenExp                   { $1 }
+				 
+nonParenExp :				 
  /* Pointer stuff */	
- | NULL	                         { A.PreElabNullExpr }
+   NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
  | ALLOC_ARRAY LPAREN c0type COMMA exp RPAREN
 	                       { A.PreElabArrayAlloc ($3, $5) }
