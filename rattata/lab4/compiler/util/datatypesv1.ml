@@ -121,8 +121,6 @@ type tmp3AddrProg = tmp3AddrFunDef list
    turn them all into the simplified instructions (call malloc,
    field access using movs, etc. But by the time we're converting
    to 3Addr, all mem ops should be simplified. *)
-type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
-              | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type tmpSharedTypeExpr = TmpInfAddrFunCall of ident * tmpExpr list
                        | TmpInfAddrFieldAccess of ident * tmpPtrExpr
                                                   * ident
@@ -165,7 +163,7 @@ and tmpLVal = TmpFieldAccessLVal of ident * tmpLVal * ident
              | TmpArrayAccessLVal of tmpLVal * tmpIntExpr
              | TmpVarLVal of tmp
              | TmpDerefLVal of tmpLVal
-type tmpInfAddrInstr = TmpInfAddrMov of size * assignOp * tmpExpr * tmpLVal
+type tmpInfAddrInstr = TmpInfAddrMov of size * tmpExpr * tmpLVal
                    | TmpInfAddrJump of jumpInstr
                    | TmpInfAddrMaskUpper of tmp
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
