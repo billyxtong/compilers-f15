@@ -62,6 +62,9 @@ let toIntBinopFromRHS lval rhs binop =
    but then I still need to handle shifts *)
 let handleInfAddrShift lval shiftOp (TmpIntExpr e2) =
     let e1 = TmpIntSharedExpr (TmpLValExpr lval) in
+    let e2Tmp = Tmp (Temp.create()) in
+    let storeE2 = TmpInfAddrMov(getSizeForType INT, TmpIntExpr e2,
+                                TmpVarLVal e2Tmp) in
     let throwErrorLabel = GenLabel.create () in
     let doShiftLabel = GenLabel.create () in
     let t = TmpVarLVal (Tmp (Temp.create())) in
@@ -69,16 +72,19 @@ let handleInfAddrShift lval shiftOp (TmpIntExpr e2) =
               (TmpInfAddrBinopExpr(FAKEDIV, TmpIntArg (TmpConst 666),
                                                   TmpIntArg (TmpConst 0))),
                        t) in
-    let doTheShift = TmpInfAddrMov(BIT32, TmpIntExpr
-              (TmpInfAddrBinopExpr(shiftOp, e1, e2)), lval) in
+    let doTheShift = TmpInfAddrMov(BIT32, TmpIntExpr (TmpInfAddrBinopExpr(
+          shiftOp, e1, TmpIntArg (TmpLoc (TmpVar e2Tmp)))),
+                                   lval) in
     let isNonNegative = TmpInfAddrBoolInstr (TmpInfAddrCmp (BIT32,
-            TmpIntExpr (TmpIntArg (TmpConst (-1))), TmpIntExpr e2))
+            TmpIntExpr (TmpIntArg (TmpConst (-1))),
+            TmpIntExpr (TmpIntArg (TmpLoc (TmpVar e2Tmp)))))
         ::TmpInfAddrJump(JLE, throwErrorLabel)::[] in
     let isSmallEnough = TmpInfAddrBoolInstr (TmpInfAddrCmp (BIT32,
-            TmpIntExpr (TmpIntArg (TmpConst (31))), TmpIntExpr e2))
+            TmpIntExpr (TmpIntArg (TmpConst (31))),
+            TmpIntExpr (TmpIntArg (TmpLoc (TmpVar e2Tmp)))))
         ::TmpInfAddrJump(JLE, doShiftLabel)::[] in
-    isNonNegative @ isSmallEnough @ (TmpInfAddrLabel throwErrorLabel)::throwError
-    ::TmpInfAddrLabel doShiftLabel::doTheShift::[]
+    storeE2 :: isNonNegative @ isSmallEnough @ (TmpInfAddrLabel throwErrorLabel)
+    ::throwError::TmpInfAddrLabel doShiftLabel::doTheShift::[]
 
 (* this will return (x+1) for x+=1, just 1 for x = 1. With
    all the proper constructors and types and such *)
