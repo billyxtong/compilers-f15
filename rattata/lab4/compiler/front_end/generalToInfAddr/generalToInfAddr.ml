@@ -484,8 +484,10 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         but our normal handle shift function takes an ast. So I wrote another
         one that takes infAddr *)
      (match asnop with
-          A.LSHIFT_EQ -> handleInfAddrShift tmplval LSHIFT eInfAddr
-        | A.RSHIFT_EQ -> handleInfAddrShift tmplval RSHIFT eInfAddr
+          A.LSHIFT_EQ -> handleInfAddrShift tmplval LSHIFT eInfAddr @
+                         trans_stmts retTmp retLabel newMap stmts
+        | A.RSHIFT_EQ -> handleInfAddrShift tmplval RSHIFT eInfAddr @
+                         trans_stmts retTmp retLabel newMap stmts
         | _ ->
      let rhs = getRHSForAsnop tmplval eInfAddr asnop in
         instrsForLVal @ instrs_for_e @
