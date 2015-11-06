@@ -205,7 +205,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                             raise ErrorMsg.Error))
            | _ -> (ErrorMsg.error ("ternary expression didn't typecheck \n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabFunCall(i, argList) ->
+  | UntypedPostElabFunCall(i, argList) -> 
       (match (M.find varEnv i, M.find !functionMap i) with
              (Some _, _) -> (ErrorMsg.error ("cannot call this function while var with same name is in scope \n");
                              raise ErrorMsg.Error)
@@ -213,9 +213,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                let () = (if not isDefined
                          then H.replace declaredAndUsedButUndefinedFunctionTable i ()
                          else ()) in
-               let argTypes = List.map (fun arg -> let (_, argType) = tc_expression varEnv arg 
-                                                   in lowestTypedefType argType) argList in
-               let typedArgs = List.map (fun arg -> let (typedArg, _) = tc_expression varEnv arg in typedArg) argList in
+               let typedArgList = List.map (fun arg -> tc_expression varEnv arg) argList in
+               let argTypes = List.map (fun (_, argType) -> lowestTypedefType argType) typedArgList in
+               let typedArgs = List.map (fun (typedArg, _) -> typedArg) typedArgList in
                let newFuncName = if isExternal then i else "_c0_" ^ i in
                (* internal functions must be called with prefix _c0_ *)
                if (argsMatch argTypes funcParams) then
