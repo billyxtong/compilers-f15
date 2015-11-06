@@ -2,7 +2,7 @@
    BITS WHEN WE NEED TO DO THAT *)
 
 (* ident and c0type have to be in here to avoid a circular build
-   error :(  *)
+   error :( *)
 type c0type = INT | BOOL | VOID | TypedefType of ident | Pointer of c0type
             | Array of c0type
             | Struct of ident

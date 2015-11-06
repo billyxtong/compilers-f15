@@ -46,6 +46,11 @@ let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) =
                       (ErrorMsg.error ("can't have structs as param type \n");
                                 raise ErrorMsg.Error)
                    else
+                   if not (funcType = VOID) && (isNestedVoidPtr funcType)
+                   then
+                     (ErrorMsg.error ("func ret type can't be a void ptr\n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find !typedefMap funcName, 
                            M.find !functionMap funcName) with
                           (Some _, _) -> 
@@ -136,6 +141,11 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                       (ErrorMsg.error ("can't have structs as param type \n");
                                 raise ErrorMsg.Error)
                    else
+                   if not (funcType = VOID) && (isNestedVoidPtr funcType)
+                   then
+                     (ErrorMsg.error ("func ret type can't be a void ptr\n");
+                                raise ErrorMsg.Error)
+                   else
                    (match (M.find !typedefMap funcName, M.find !functionMap funcName) with
                           (Some _, _) -> 
                             (ErrorMsg.error ("trying to shadow used name\n");
@@ -166,6 +176,11 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                    if areAnyFuncParamsStructs funcParams
                    then
                       (ErrorMsg.error ("can't have structs as param type \n");
+                                raise ErrorMsg.Error)
+                   else
+                   if not (funcType = VOID) && (isNestedVoidPtr funcType)
+                   then
+                     (ErrorMsg.error ("func ret type can't be a void ptr\n");
                                 raise ErrorMsg.Error)
                    else
                    (match (M.find !typedefMap funcName, M.find !functionMap funcName) with
