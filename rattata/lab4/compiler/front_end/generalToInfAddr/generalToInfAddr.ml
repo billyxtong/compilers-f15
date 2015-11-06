@@ -448,7 +448,7 @@ and trans_lval retTmp retLabel idToTmpMap = function
            trans_lval retTmp retLabel idToTmpMap arrayLVal in
         let storedArray = Tmp (Temp.create()) in
         let storedArrayAsLVal = TmpVarLVal storedArray in
-        let storeArrayInstr = TmpInfAddrMov(getSizeForType INT,
+        let storeArrayInstr = TmpInfAddrMov(getSizeForType (Pointer Poop),
                              TmpIntExpr (TmpIntSharedExpr (TmpLValExpr arrayTmpLVal)),
                                          TmpVarLVal storedArray) in
         let (instrsForIdx, idxFinal) =
