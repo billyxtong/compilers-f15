@@ -6,6 +6,7 @@ open String
 open PrintASTs
 open PrintDatatypes
 
+let count = ref 0
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
 let functionMap = ref Core.Std.String.Map.empty
@@ -265,6 +266,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(baseType)), Pointer(baseType)))
   | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
+      let () = count := !count + 1 in
+      let () = print_string (string_of_int(!count) ^ "\n") in
       let (typedExp, typee) = tc_expression varEnv e in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
