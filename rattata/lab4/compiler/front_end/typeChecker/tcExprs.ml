@@ -89,6 +89,7 @@ let rec isNestedVoidPtr(t : c0type) =
   match t with
         VOID -> true
       | Pointer(c) -> isNestedVoidPtr c
+      | Array(c) -> isNestedVoidPtr c
       | _ -> false
 
 let rec areStructFieldsWellDefined fields =
@@ -258,6 +259,10 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
         | _ -> (ErrorMsg.error ("bad expr on LHS, or LHS not a struct\n"); raise ErrorMsg.Error))
   | UntypedPostElabAlloc(t : c0type) ->
       let baseType = lowestTypedefType t in
+      if (isNestedVoidPtr baseType) then
+      (ErrorMsg.error ("can't alloc void\n");
+        raise ErrorMsg.Error)
+      else
       (match baseType with
              Struct(structName) ->
                (match M.find !structMap structName with
@@ -266,8 +271,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(baseType)), Pointer(baseType)))
   | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
-      let () = count := !count + 1 in
-      let () = print_string (string_of_int(!count) ^ "\n") in
+      (* let () = count := !count + 1 in
+      let () = print_string (string_of_int(!count) ^ "\n") in *)
       let (typedExp, typee) = tc_expression varEnv e in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
@@ -282,6 +287,10 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    raise ErrorMsg.Error))
   | UntypedPostElabArrayAlloc(typee, e) ->
       let baseType = lowestTypedefType typee in
+      if (isNestedVoidPtr baseType) then
+      (ErrorMsg.error ("can't alloc void\n");
+        raise ErrorMsg.Error)
+      else
       (match lowestTypedefType typee with
              Struct(structName) -> 
               (match M.find !structMap structName with
