@@ -150,6 +150,9 @@ let assemInstrToString(instr : assemInstr) =
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
       | LABEL(l) -> labelToString(l) ^ ":"
       | CALL(i) -> "call " ^ identToString(i)
+        (* Just gonna use rcx for this, since we reserve it for shifts in general *)
+      | MASK_UPPER(loc) -> "movq $0xffffffff, %rcx\n" ^
+                           "andq %rcx, " ^ assemLocToString(loc) BIT64
 
 let assemFunDefToString(AssemFunDef(funcName, instrList)) =
   ".globl " ^ identToString(funcName) ^ "\n" ^
@@ -220,6 +223,7 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
       | Tmp2AddrJump(jumpinstr) -> jumpInstrToString(jumpinstr)
       | Tmp2AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
       | Tmp2AddrLabel(l) -> labelToString(l)
+      | Tmp2AddrMaskUpper(t) -> "mask_upper(" ^ tmpToString t ^ ")"
       | Tmp2AddrFunCall(s, i,args,tmpOpt) ->
           let thing = identToString(i) ^ "(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
           (match tmpOpt with
@@ -257,6 +261,7 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
             concat "" ["return "; tmpArgToString(tmparg)]
       | Tmp3AddrJump(jumpinstr) -> jumpInstrToString(jumpinstr)
       | Tmp3AddrBoolInstr(boolinstr) -> tmpBoolInstrToString(boolinstr)
+      | Tmp3AddrMaskUpper(t) -> "mask_upper(" ^ tmpToString t ^ ")"
       | Tmp3AddrLabel(l) -> labelToString(l)
       | Tmp3AddrFunCall(s, i,args,tmpOpt) ->
           let thing = identToString(i) ^ "(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
@@ -343,6 +348,7 @@ let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
       | TmpInfAddrJump(jInstr) -> jumpInstrToString(jInstr)
       | TmpInfAddrBoolInstr(bInstr) -> tmpInfAddrBoolInstrToString(bInstr)
       | TmpInfAddrLabel(l) -> labelToString(l)
+      | TmpInfAddrMaskUpper(t) -> "mask_upper(" ^ tmpToString t ^ ")"
       | TmpInfAddrReturn(s, tExpr) -> concat "" ["return"; sizeToString s;
                                                  " "; tmpExprToString(tExpr)]
       | TmpInfAddrVoidFunCall(i,args) ->

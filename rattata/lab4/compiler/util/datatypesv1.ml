@@ -1,3 +1,6 @@
+(* BIG NOTE FOR HACKY THING: ALSO RESERVING ECX TO MASK OUT UPPER
+   BITS WHEN WE NEED TO DO THAT *)
+
 (* ident and c0type have to be in here to avoid a circular build
    error :( *)
 type c0type = INT | BOOL | VOID | TypedefType of ident | Pointer of c0type
@@ -46,6 +49,7 @@ type assemInstr = MOV of size * assemArg * assemLoc
                 | BOOL_INSTR of boolInstr
                 | LABEL of label
                 | CALL of ident
+                | MASK_UPPER of assemLoc
 type assemFunDef = AssemFunDef of ident * assemInstr list
 type assemProg = assemFunDef list
 
@@ -80,6 +84,7 @@ type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmpLoc
                  (* PtrBinops can only be ptr + const, ptr - const *)
                    | Tmp2AddrReturn of size * tmpArg
                    | Tmp2AddrJump of jumpInstr
+                   | Tmp2AddrMaskUpper of tmp
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
                     (* tmp option because voids have no dest *)
@@ -95,6 +100,7 @@ type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg * tmpLoc
                    | Tmp3AddrPtrBinop of ptrBinop * tmpArg * tmpArg * tmpLoc
                  (* PtrBinops can only be ptr + const, ptr - const *)
                    | Tmp3AddrBinop of tmp3AddrBinop
+                   | Tmp3AddrMaskUpper of tmp
                    | Tmp3AddrReturn of size * tmpArg
                    | Tmp3AddrJump of jumpInstr
                    | Tmp3AddrBoolInstr of tmpBoolInstr
@@ -159,6 +165,7 @@ and tmpLVal = TmpFieldAccessLVal of ident * tmpLVal * ident
              | TmpDerefLVal of tmpLVal
 type tmpInfAddrInstr = TmpInfAddrMov of size * tmpExpr * tmpLVal
                    | TmpInfAddrJump of jumpInstr
+                   | TmpInfAddrMaskUpper of tmp
                    | TmpInfAddrBoolInstr of tmpInfAddrBoolInstr
                    | TmpInfAddrLabel of label
                    | TmpInfAddrReturn of size * tmpExpr

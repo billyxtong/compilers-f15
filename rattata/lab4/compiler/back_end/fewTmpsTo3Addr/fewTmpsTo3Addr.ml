@@ -174,6 +174,7 @@ let munch_instr = function
        (* VoidFunCalls don't have sizes so we'll just say 32-bit
           because w/e *)
        instrs @ Tmp3AddrFunCall(BIT32, fName, dests, None)::[]
+  | TmpInfAddrMaskUpper t -> Tmp3AddrMaskUpper t::[]
            
 let rec finalPass = function
     [] -> []

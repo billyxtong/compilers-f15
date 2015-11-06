@@ -129,6 +129,7 @@ let translate tbl allocdRegs finalOffset paramRegArray
       | Tmp2AddrFunCall(opSize, fName, args, dest) ->
         translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
           opSize fName args dest
+      | Tmp2AddrMaskUpper t -> MASK_UPPER (translateTmpLoc tbl (TmpVar t))::[]
                                                  
 
 (* We want to find the amount of memory allocated for this function's local vars:
@@ -222,5 +223,4 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
                             paramRegArray funcToParamSizeMap) instrs)) in
   AssemFunDef(fName, finalInstrs)
 
-(* MAKE SURE NUMBER OF PUSH/POPS MATCH UP/SUM TO AN EVEN NUMBER
-   BECAUSE OF 16 BYTE ALIGNEMNT *)
+(* WE'RE USING ECX ALSO FOR MASKING OUT UPPER BITS. *)

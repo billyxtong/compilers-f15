@@ -57,6 +57,7 @@ let instrTo2Addr paramToTmpMap = function
   | Tmp3AddrPtrBinop (op, arg1, arg2, dest) -> ptrBinopTo2Addr
        (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
                                        trans_arg paramToTmpMap arg2)
+  | Tmp3AddrMaskUpper t -> Tmp2AddrMaskUpper t::[]       
 
 let rec funTo2Addr paramToTmpMap = function
    [] -> []

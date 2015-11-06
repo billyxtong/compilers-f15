@@ -321,11 +321,15 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
                  (* We're supposed to raise signal 12 (sigusr2) on
                     memor errors *)
                               TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
+       let accessOffsetTmp = Tmp (Temp.create()) in
        let accessOffsetExpr = TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (getSizeForType elemType)),
                                       index_final) in
+       let storeAccessOffset = TmpInfAddrMov(BIT32, TmpIntExpr accessOffsetExpr,
+                                             TmpVarLVal accessOffsetTmp) in
+       let maskOffsetExpr = TmpInfAddrMaskUpper accessOffsetTmp in
        let accessPtrExpr = TmpInfAddrPtrBinop(PTR_ADD, ptr_final,
-                                              accessOffsetExpr) in
+                                    TmpIntArg (TmpLoc (TmpVar accessOffsetTmp))) in
        let accessPtrFinal = Tmp (Temp.create()) in
        let storeAccessPtr = TmpInfAddrMov(BIT64, TmpPtrExpr accessPtrExpr,
                                           TmpVarLVal accessPtrFinal) in
@@ -334,7 +338,8 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
       (* The array pointer is evaluated first, I checked *)
       let allInstrs = ptr_instrs @ index_instrs @ indexLowerCheck
              @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
-             ::TmpInfAddrLabel(doTheAccessLabel)::storeAccessPtr::[] in
+             ::TmpInfAddrLabel(doTheAccessLabel)
+             :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[] in
       (TmpPtrArg (TmpLoc (TmpVar accessPtrFinal)), allInstrs)
 
 (* Ok I realized I don't have to redo everything I did for the exprs,
