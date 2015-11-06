@@ -395,8 +395,8 @@ let handleMemForInstr = function
     | TmpInfAddrLabel lbl -> TmpInfAddrLabel lbl::[]
     | TmpInfAddrMov (opSize, src, dest) ->
       (* Note: dest is evaluated first! *)
-        let typee = getTypeFromExpr src in
-        (* We need to know the type to do array accesses and such, but
+        let typee = (if opSize = BIT64 then (Pointer Poop) else getTypeFromExpr src) in
+        (* We need to know the size of the type to do array accesses and such, but
            LVal doesn't have the typed constructors (IntExpr, etc), so
            we have to get it from the rhs beforehand *)
         let (destFinal, instrsBeforeSrc, instrsAfterSrc) =
@@ -428,6 +428,7 @@ let handleMemForInstr = function
         let (e2_final, instrs2) = handleMemForExpr e2 in
         instrs1 @ instrs2 @
         TmpInfAddrBoolInstr (TmpInfAddrCmp (opSize, e1_final, e2_final))::[]
+    | TmpInfAddrMaskUpper _ -> assert(false)
 
 let handleMemForFunDef (fName, tmpParams, instrs) =
     TmpInfAddrFunDef(fName, tmpParams,
