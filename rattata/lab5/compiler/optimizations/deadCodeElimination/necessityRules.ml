@@ -27,9 +27,12 @@ let necessityRule3(Tmp2AddrBoolInstr(boolInstr) : tmp2AddrInstr) =
     TmpTest(arg,loc)-> necessityRuleHelper arg loc
    |TmpCmp(s,arg,loc)-> necessityRuleHelper arg loc
 
-let necessityRule4(Tmp2AddrMov(s,arg,loc) : tmp2AddrInstr) =
+let necessityRule4or5(Tmp2AddrMov(s,arg,loc) : tmp2AddrInstr) =
   match (arg,loc) with
-      
+    (TmpLoc(TmpDeref(t1)), TmpVar(t2)) -> [t1]
+   |(TmpLoc(TmpVar(t1)),TmpDeref(t2)) -> [t1,t2]
+   |_ -> []
+
 (* Returns a list of temps necessary for the instruction to execute.
  * Note that only certain types of instrs have "necessary" temps. *)
 let getNecessaryTemps (currLine : int) (indexedProg : tmp2AddrInstr array) =
@@ -38,6 +41,5 @@ let getNecessaryTemps (currLine : int) (indexedProg : tmp2AddrInstr array) =
     Tmp2AddrReturn(_) -> necessityRule1(instr)
    |Tmp2AddrBinop(_) -> necessityRule2(instr)
    |Tmp2AddrBoolInstr(_) -> necessityRule3(instr)
-   |Tmp2AddrMov(_) -> necessityRule4(instr)
-   |Tmp2AddrPtrBinop(_) -> necessityRule5(instr)
+   |Tmp2AddrMov(_) -> necessityRule4or5(instr)
    |_ -> []

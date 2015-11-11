@@ -20,6 +20,7 @@ module A = Array
 module L = List
 module H = Hashtbl
 open LivenessAnalysis
+open NecessityRules
 
 let linesToNeededTempsSet = H.create 10 
 (* linesToNeededTempsSet maps each line to a hashtable of temps where it's needed. We add
