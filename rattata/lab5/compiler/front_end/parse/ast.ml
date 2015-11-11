@@ -14,6 +14,8 @@ open Datatypesv1
 type shiftOp = ASTrshift | ASTlshift
 type param = c0type * ident 
 type field = c0type * ident (* for structs: new for L4 *)
+type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
+              | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
