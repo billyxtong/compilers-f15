@@ -1,5 +1,6 @@
+open Datatypesv1
 
-let necessityRule1(Tmp2AddrReturn(arg) : tmp2AddrInstr) =
+let necessityRule1(Tmp2AddrReturn(s,arg) : tmp2AddrInstr) =
   match arg with
     TmpLoc(TmpVar(t)) -> [t]
    |TmpLoc(TmpDeref(t)) -> [t]
@@ -7,10 +8,10 @@ let necessityRule1(Tmp2AddrReturn(arg) : tmp2AddrInstr) =
 
 let necessityRuleHelper (arg : tmpArg) (loc : tmpLoc) =
     match (arg,loc) with
-        (TmpLoc(TmpVar(t1)),TmpVar(t2))-> [t1,t2]
-       |(TmpLoc(TmpVar(t1)),TmpDeref(t2))-> [t1,t2]
-       |(TmpLoc(TmpDeref(t1)),TmpVar(t2))-> [t1,t2]
-       |(TmpLoc(TmpDeref(t1)),TmpDeref(t2))-> [t1,t2]
+        (TmpLoc(TmpVar(t1)),TmpVar(t2))-> [t1;t2]
+       |(TmpLoc(TmpVar(t1)),TmpDeref(t2))-> [t1;t2]
+       |(TmpLoc(TmpDeref(t1)),TmpVar(t2))-> [t1;t2]
+       |(TmpLoc(TmpDeref(t1)),TmpDeref(t2))-> [t1;t2]
        |(_,TmpVar(t))-> [t]
        |(_,TmpDeref(t))-> [t]
 
@@ -30,7 +31,7 @@ let necessityRule3(Tmp2AddrBoolInstr(boolInstr) : tmp2AddrInstr) =
 let necessityRule4or5(Tmp2AddrMov(s,arg,loc) : tmp2AddrInstr) =
   match (arg,loc) with
     (TmpLoc(TmpDeref(t1)), TmpVar(t2)) -> [t1]
-   |(TmpLoc(TmpVar(t1)),TmpDeref(t2)) -> [t1,t2]
+   |(TmpLoc(TmpVar(t1)),TmpDeref(t2)) -> [t1;t2]
    |_ -> []
 
 (* Returns a list of temps necessary for the instruction to execute.

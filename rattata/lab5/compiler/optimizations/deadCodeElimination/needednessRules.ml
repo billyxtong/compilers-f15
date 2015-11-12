@@ -1,6 +1,7 @@
 module L = List
 open LivenessAnalysis
 open NecessityRules
+open Datatypesv1
 
 (* N1: all necessary temps are also neeeded *)
 let needednessRule1 (currLine : int) (indexedProg : tmp2AddrInstr array) = 
@@ -15,8 +16,7 @@ let needednessRule2 (lineToPredecessorsArray : (int list) array)
                     (lineToNeededTempsArray : (tmp list) array)
                     (succLine : int) (currLine : int) =
 
-  L.filter (fun x -> if not (isDef x indexedProg currLine) 
-                     then true else false) (lineToNeededTempsArray.(succLine))
+  L.filter (fun x -> not (isDef x indexedProg currLine)) (lineToNeededTempsArray.(succLine))
 
 (* N3: Assume l: x <- y + z, where "+" is an effect-free operator.
  * If x is needed in l's successor l', then y and z are both needed in l.
@@ -54,7 +54,7 @@ let needednessRule3 (lineToPredecessorsArray : (int list) array)
         |(TmpConst(_),TmpDeref(t1)) -> 
             if 
             L.exists (fun t -> t = t1) (lineToNeededTempsArray.(succLine))
-            then [t1] else []
+            then [t1] else [])
             (* are any of the below cases necessary?
         |(TmpLoc(TmpVar(t1)),TmpVar(t2))->
             if 
@@ -83,19 +83,19 @@ let needednessRule3 (lineToPredecessorsArray : (int list) array)
             (TmpLoc(TmpVar(t1)),TmpVar(t2))-> 
               if 
               L.exists (fun t -> t = t2) (lineToNeededTempsArray.(succLine))
-              then [t1,t2] else []
+              then [t1;t2] else []
            |(TmpLoc(TmpVar(t1)),TmpDeref(t2))-> 
               if 
               L.exists (fun t -> t = t2) (lineToNeededTempsArray.(succLine))
-              then [t1,t2] else []
+              then [t1;t2] else []
            |(TmpLoc(TmpDeref(t1)),TmpVar(t2))-> 
               if 
               L.exists (fun t -> t = t2) (lineToNeededTempsArray.(succLine))
-              then [t1,t2] else []
+              then [t1;t2] else []
            |(TmpLoc(TmpDeref(t1)),TmpDeref(t2))-> 
               if 
               L.exists (fun t -> t = t2) (lineToNeededTempsArray.(succLine))
-              then [t1,t2] else []
+              then [t1;t2] else []
            |(_,TmpVar(t1))->
               if 
               L.exists (fun t -> t = t1) (lineToNeededTempsArray.(succLine))

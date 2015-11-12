@@ -22,12 +22,13 @@ let spec =
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
   +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
+  +> flag "--dump-NoDeadCode" no_arg ~doc:" Removing dead code"
   +> flag "--dump-NoMemMem" no_arg ~doc:" Pretty print after handling Mem-Mem instrs"
   +> flag "--dump-wonky" no_arg ~doc:" Pretty print the wonky assembly"
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
   +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
 
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoMemMem dump_wonky dump_final dump_all () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all () =
   try
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
@@ -77,10 +78,14 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if verbose (fun () -> "3Addr to 2Addr...");
     let twoAddr = To2Addr.to2Addr threeAddr in ();
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
+
+    say_if verbose (fun () -> "Killing dead code...");
+    let noDeadCode = KillDeadCode.killDeadCode twoAddr in ();
+    say_if dump_NoDeadCode (fun () -> tmp2AddrProgToString noDeadCode);
      
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers...");
-    let almostAssem = RegAlloc.regAlloc twoAddr in
+    let almostAssem = RegAlloc.regAlloc noDeadCode in
     say_if dump_assem (fun () -> assemProgToString almostAssem);
 
     (* RemoveMemMemInstrs *)
