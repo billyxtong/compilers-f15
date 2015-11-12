@@ -1,6 +1,8 @@
 # other starter code
 rattata/lab1
-rattata/lab2/tests*
+rattata/lab2
+rattata/lab3
+rattata/lab4
 
 # subversion
 *.svn*
