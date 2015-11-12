@@ -24,9 +24,14 @@ let trans_arg paramToTmpMap arg =
         Not_found -> arg
 
 let trans_loc paramToTmpMap loc =
-    try H.find paramToTmpMap (TmpLoc loc)
-    with
-        Not_found -> loc
+    match loc with
+        TmpVar t -> (try H.find paramToTmpMap (TmpLoc loc)
+                    with Not_found -> loc)
+      | TmpDeref t -> (try let TmpVar tMapResult =
+                             H.find paramToTmpMap (TmpLoc (TmpVar t)) in
+                           TmpDeref tMapResult
+                    (* Need to check by the vars, because that's how the map works *)
+                       with Not_found -> loc)
 
 let instrTo2Addr paramToTmpMap = function
     Tmp3AddrMov (opSize, src, dest) ->
@@ -57,7 +62,7 @@ let instrTo2Addr paramToTmpMap = function
   | Tmp3AddrPtrBinop (op, arg1, arg2, dest) -> ptrBinopTo2Addr
        (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
                                        trans_arg paramToTmpMap arg2)
-  | Tmp3AddrMaskUpper t -> Tmp2AddrMaskUpper t::[]       
+  | Tmp3AddrMaskUpper t -> Tmp2AddrMaskUpper t::[]
 
 let rec funTo2Addr paramToTmpMap = function
    [] -> []
