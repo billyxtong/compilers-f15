@@ -19,84 +19,52 @@
 module A = Array
 module L = List
 module H = Hashtbl
-open LivenessAnalysis
-open NecessityRules
+open NeedednessRules
 
-let linesToNeededTempsSet = H.create 10 
-(* linesToNeededTempsSet maps each line to a hashtable of temps where it's needed. We add
- * temps to linesToNeededTempsSet based on the rules for neededness in a backward dataflow analysis *)
+let isNeeded (lineNum : int) (tLoc : tmpLoc) 
+             (linesToNeededTempsArray : (int list) array) =
+  match tLoc with
+    TmpVar(t) ->
+      if (L.exists (fun temp -> t = temp) (linesToNeededTempsArray.(lineNum)))
+      then true else false
+   |TmpDeref(t) ->
+      if (L.exists (fun temp -> t = temp) (linesToNeededTempsArray.(lineNum)))
+      then true else false
 
-(* isNeeded checks is a tmp is needed anywhere else in the program. 
- * If it is, returns true; else return false. 
- *
- * This is done by checking our table of temp to needed lines table. If temp maps to an empty list, 
- * then it is not needed on any lines.*)
-
-(* t is a var, and currLine is the successor line of prevLine. This function determines 
- * whether t is needed on prevLine using 3 criteria: 
-   * it is needed on currLine, 
-   * prevLine is a predecessor of currLine, which is assumed,
-   * and t is not defined on prevLine. 
- * If these criteria are met, we add t to the list of temps needed at prevLine. *)
-
-let isNecessary (t : tmp) (currLine)
-
-let needednessRule1 (t : tmp) (currLine : int) =
-  let l = H.find currLine in
-  if isNecessary t currLine
-  then t :: l
-  else l
-
-let needednessRule2 (t : tmp) (currLine : int) (prevLine : int) =
-  let l = H.find prevLine in
-  if (isNeeded t currLine) && not (isDefined t prevLine) 
-  then t :: l
-  else l
-
-
-let needednessRule3 (t : tmp) (currLine : int) (prevLine : int) =
-
-let isNeeded (t : tmpLoc) (l : int) =
-  match t with
-    TmpVar(var) -> 
-      try 
-        let 
-  | TmpDeref(ptr) -> ""
-
-
-
-
-let killDeadInstr (lineToNeededTempsArray : (int list) array) (instr : tmp2AddrInstr) =
+let killDeadInstr (lineNum : int) (instr : tmp2AddrInstr)
+                  (lineToNeededTempsArray : (int list) array) =
   match instr with
-    Tmp2AddrMov(s,arg,loc) -> 
-      if not isNeeded loc lineToNeededTempsArray then [] else [Tmp2AddrMov(s,arg,loc)] 
-  | Tmp2AddrPtrBinop(op,arg,loc) -> ""
-  | Tmp2AddrBinop(op,arg,loc) -> ""
+    Tmp2AddrMov(s,arg,loc) ->
+      if not isNeeded lineNum loc lineToNeededTempsArray
+      then [] else [Tmp2AddrMov(s,arg,loc)]
+  | Tmp2AddrPtrBinop(op,arg,loc) ->
+      if not isNeeded lineNum loc lineToNeededTempsArray
+      then [] else [Tmp2AddrPtrBinop(op,arg,loc)]
+  | Tmp2AddrBinop(op,arg,loc) ->
+      (match op with
+         FAKEDIV-> [Tmp2AddrBinop(op,arg,loc)]
+        |FAKEMOD-> [Tmp2AddrBinop(op,arg,loc)]
+        |RSHIFT-> [Tmp2AddrBinop(op,arg,loc)]
+        |LSHIFT-> [Tmp2AddrBinop(op,arg,loc)]
+        |_ -> if not isNeeded lineNum loc lineToNeededTempsArray
+              then [] else [Tmp2AddrBinop(op,arg,loc)])
   | _ -> [instr] (* dead code will always be a mov or a binop *)
 
-let rec findNeededTemps lineToTempsArray lineToPredecessorsArray currLine funcBodyArray =
-  let instr = funcBodyArray.(currLine) in
-  match instr with
-    Tmp2AddrReturn(s,arg) -> 
-      (match arg with
-         TmpLoc(TmpVar(t)) -> 
-           let neededTempsTable = lineToTempsArray.(currLine) in
-           let () = lineToTempsArray.(currLine) <- H.add neededTempsTable t () in
-
-       | TmpLoc(TmpDeref(t)) -> ""
-       | _ -> "")
-
-let killDeadCodeInFunctions ((funcName, funcParams, funcBody) : tmp2AddrFunDef) = 
-  let funcBodyArray = A.of_list funcBody in 
+let killDeadCodeInFunctions ((funcName, funcParams, funcBody) : tmp2AddrFunDef) =
+  let funcBodyArray = A.of_list funcBody in
   (* naturally maps each instr to its line # in the prog *)
-  let len = A.length funcBodyArray in 
-  let lineToPredecessorsArray = A.make len [] in 
-  (* maps each line to a list of its predecessors*)
-  let lineToTempsArray = A.make len (H.create 5) in
-  (* maps each line to a table of needed temps at that line *)
+  let len = A.length funcBodyArray in
+  let lineToPredecessorsArray = A.make len [] in
+  (* maps each line to a list of its predecessors *)
   let () = findPredecessors lineToPredecessorsArray funcBodyArray in
   (* populates lineToPredecessorsArray *)
-  let newFuncBodyArray = A.map (killDeadInstr lineToPredecessorsArray) funcBodyArray in
+  let lineToTempsArray = A.make len [] in
+  (* maps each line to a list of needed temps at that line *)
+  let () = getNeededTemps funcBodyArray lineToPredecessorsArray
+                          lineToTempsArray (len - 1) (len - 1) in
+  (* populates lineToTempsArray with the temps needed at each line *)
+  let newFuncBodyArray = A.mapi (fun lineNum -> fun instr ->
+              killDeadInstr lineNum instr lineToTempsArray) funcBodyArray in
   (* kills dead instrs *)
   let newFuncBody = L.flatten (A.to_list newFuncBodyArray) in
   (* changes result back into a list of 2-address instrs *)

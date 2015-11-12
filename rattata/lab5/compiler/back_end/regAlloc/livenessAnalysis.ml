@@ -68,7 +68,7 @@ let isUsed t prog line =
             List.exists (fun arg -> isUsedInTmpArg t arg) args ||
             (* same deal as mov *)
             dest = Some (TmpDeref (Tmp t))
-       | Tmp2AddrMaskUpper (Tmp t') -> t = t'              
+       | Tmp2AddrMaskUpper (Tmp t') -> t = t'
        | _ -> false
 
 let rec findLiveLinesForTmpRec t prog predsPerLine liveLinesSet currLine =
