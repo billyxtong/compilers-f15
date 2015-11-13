@@ -212,11 +212,12 @@ and handleMemForExpr = function
        let doAllocLabel = GenLabel.create () in
        let throwError = TmpInfAddrVoidFunCall("raise",
                                 TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
-       let checkNumElemsNonnegative = TmpInfAddrBoolInstr
+       let checkNumElemsNonnegative = (if !OptimizeFlags.safeMode then
+           TmpInfAddrBoolInstr
            (TmpInfAddrCmp(BIT32, TmpIntExpr(TmpIntArg(TmpConst 0)),
                           TmpIntExpr numElemsExpr))
            ::TmpInfAddrJump(JGE, doAllocLabel)::throwError
-           ::TmpInfAddrLabel doAllocLabel::[] in
+           ::TmpInfAddrLabel doAllocLabel::[] else []) in
        let numElemsToAlloc = TmpIntExpr (TmpInfAddrBinopExpr(ADD, numElemsExpr,
                               TmpIntArg (TmpConst extraElemsForLength))) in
        let funCallExpr = TmpPtrSharedExpr (TmpInfAddrFunCall ("calloc",
@@ -292,6 +293,7 @@ and getStructAccessPtr structTypeName structPtr fieldName =
                            ^ "not defined before alloc\n") in assert(false)
 
 and handleNullPointerCheck ptr =
+     if not !OptimizeFlags.safeMode then [] else
      let doAccessLabel = GenLabel.create () in
      let throwError = TmpInfAddrVoidFunCall("raise",
                                 TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
@@ -347,11 +349,15 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
        (* Does where I put the storeAccessPtr in this order matter? *)
       (* Ok now actually put all of the instructions together *)
       (* The array pointer is evaluated first, I checked *)
-      let allInstrs = ptr_instrs @ index_instrs @ storeArrayPtr::nullCheckInstrs@
+      let allInstrs = (if !OptimizeFlags.safeMode then
+             ptr_instrs @ index_instrs @ storeArrayPtr::nullCheckInstrs @
              indexLowerCheck
              @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
              ::TmpInfAddrLabel(doTheAccessLabel)
-             :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[] in
+             :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[]
+             else
+             ptr_instrs @ index_instrs @ storeArrayPtr
+             :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[]) in
       (TmpPtrArg (TmpLoc (TmpVar accessPtrFinal)), allInstrs)
 
 (* Ok I realized I don't have to redo everything I did for the exprs,
