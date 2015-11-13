@@ -83,8 +83,10 @@ let handleInfAddrShift lval shiftOp (TmpIntExpr e2) =
             TmpIntExpr (TmpIntArg (TmpConst (31))),
             TmpIntExpr (TmpIntArg (TmpLoc (TmpVar e2Tmp)))))
         ::TmpInfAddrJump(JLE, doShiftLabel)::[] in
+    if !OptimizeFlags.safeMode then
     storeE2 :: isNonNegative @ isSmallEnough @ (TmpInfAddrLabel throwErrorLabel)
     ::throwError::TmpInfAddrLabel doShiftLabel::doTheShift::[]
+    else storeE2 :: doTheShift :: [] 
 
 (* this will return (x+1) for x+=1, just 1 for x = 1. With
    all the proper constructors and types and such *)
@@ -128,7 +130,9 @@ let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
                                       A.IntConst (-1)) in
     let isSmallEnough = A.LogNot (A.GreaterThan(A.IntSharedExpr (A.Ident rhs_id),
                                                 max_shift)) in
-    let condition = A.LogAnd (isNonNegative, isSmallEnough) in
+    let condition = (if !OptimizeFlags.safeMode then
+                       A.LogAnd (isNonNegative, isSmallEnough)
+                     else A.BoolConst 1) in
           (* If shift is too big, or is negative, div by zero.
              Else, do the shift *)
     let doTheShift = A.TypedPostElabAssignStmt(new_lval, A.EQ, A.IntExpr
