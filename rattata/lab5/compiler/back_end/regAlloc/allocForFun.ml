@@ -190,6 +190,18 @@ let getUsedRegs maxColor allocableRegList =
     (* have to convert it back to list without indices *)
     List.map (fun (i,p) -> p) filtered
 
+let getColoring instrs tempList =
+  if !OptimizeFlags.doRegAlloc then
+     let interferenceGraph = LivenessAnalysis.analyzeLiveness instrs tempList in
+     let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
+     let vertexOrdering = maxCardSearch interferenceGraph startVertex in
+     let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
+     tmpToColorMap
+  else
+     let tmpToColorMap = H.create (List.length tempList) in
+     let () = List.iter (fun t -> H.add tmpToColorMap t t) tempList in
+     tmpToColorMap
+
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   funcToParamSizeMap : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
@@ -197,17 +209,13 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
   let tempList = getTempList instrs in
-  let interferenceGraph = LivenessAnalysis.analyzeLiveness instrs tempList in
-  let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
-  let vertexOrdering = maxCardSearch interferenceGraph startVertex in
-  let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
+  let tmpToColorMap = getColoring instrs tempList in
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
   let allocdRegs = getUsedRegs maxColor allocableRegList in
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
   let offsetIncr = 8 in
-  (* we need a list of tmps to go through; just use vertexOrdering *)
-  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap vertexOrdering
+  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap tempList
       offsetIncr regArray (H.create 100) in
   let argSize = 8 in
   let argOffsetAboveRbp = argSize * (List.length pushInstrs + 1)
