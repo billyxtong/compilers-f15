@@ -24,68 +24,56 @@ open NeedednessRules
 open LivenessAnalysis
 open Datatypesv1
 
-(* creates an array where each index holds an array of its successors *)
-let findSuccessors (lineToPredecessorsArray : (int list) array) : ((int list) array) =
-  let successorsArray = A.make (A.length lineToPredecessorsArray) [] in
-  let () = A.iteri 
-  (fun index -> fun predecessors -> L.iter 
-      (fun predecessor -> (successorsArray.(predecessor) <- (index :: (successorsArray.(predecessor))))) predecessors) 
-  lineToPredecessorsArray in
-  successorsArray
+let rec findAllTemps instrList tempSet =
+  match instrList with
+    [] -> tempSet
+   |instr :: instrs ->
+       (match instr with
+          Tmp2AddrMov(s,arg,loc)->
+            let () = L.iter (fun t -> H.replace tempSet t (H.create 5)) (locToTmp loc :: argToTmp arg) in
+            findAllTemps instrs tempSet
+         |Tmp2AddrBinop(op,arg,loc)->
+            let () = L.iter (fun t -> H.replace tempSet t (H.create 5)) (locToTmp loc :: argToTmp arg) in
+            findAllTemps instrs tempSet
+         |Tmp2AddrPtrBinop(op,arg,loc)->
+            let () = L.iter (fun t -> H.replace tempSet t (H.create 5)) (locToTmp loc :: argToTmp arg) in
+            findAllTemps instrs tempSet
+         |Tmp2AddrFunCall(s,i,args,Some(TmpVar(Tmp dest)))->
+            let () = H.replace tempSet dest (H.create 5) in
+            findAllTemps instrs tempSet
+         |Tmp2AddrFunCall(s,i,args,Some(TmpDeref(Tmp dest)))->
+            let () = H.replace tempSet dest (H.create 5) in
+            findAllTemps instrs tempSet
+         |Tmp2AddrMaskUpper(Tmp t) -> 
+            let () = H.replace tempSet t (H.create 5) in
+            findAllTemps instrs tempSet
+         |Tmp2AddrReturn(s,arg) ->
+            let () = L.iter (fun t -> H.replace tempSet t (H.create 5)) (argToTmp arg) in
+            findAllTemps instrs tempSet
+         |_ -> findAllTemps instrs tempSet)
 
-(* sees if a temp is needed at a given lineNum by checking its needed temps *)
-let isNeeded (tLoc : tmpLoc) (linesToNeededTempsArray : (int list) array) 
-              (lineNum : int) =
-  match tLoc with
-    TmpVar(Tmp t) -> (L.exists (fun temp -> t = temp) (linesToNeededTempsArray.(lineNum)))
-   |TmpDeref(Tmp t) -> (L.exists (fun temp -> t = temp) (linesToNeededTempsArray.(lineNum)))
 
-let killDeadInstr (lineNum : int) (instr : tmp2AddrInstr)
-                  (lineToNeededTempsArray : (int list) array) 
-                  (lineToSuccessorsArray : (int list) array) =
-  let successors = lineToSuccessorsArray.(lineNum) in
-  match instr with
-    Tmp2AddrMov(s,arg,loc) ->
-      (match L.filter (fun l -> isNeeded loc lineToNeededTempsArray l) successors with
-        [] -> []
-       |_ -> [Tmp2AddrMov(s,arg,loc)])
-      (* note: a declared temp can be killed only if it is not needed in any of the successors *) 
-  | Tmp2AddrPtrBinop(op,arg,loc) ->
-      (match L.filter (fun l -> isNeeded loc lineToNeededTempsArray l) successors with
-        [] -> []
-       |_ -> [Tmp2AddrPtrBinop(op,arg,loc)])
-  | Tmp2AddrBinop(op,arg,loc) ->
-      (match op with
-         FAKEDIV-> [Tmp2AddrBinop(op,arg,loc)]
-        |FAKEMOD-> [Tmp2AddrBinop(op,arg,loc)]
-        |RSHIFT-> [Tmp2AddrBinop(op,arg,loc)]
-        |LSHIFT-> [Tmp2AddrBinop(op,arg,loc)]
-        |_ -> 
-            (match L.filter (fun l -> isNeeded loc lineToNeededTempsArray l) successors with
-               [] -> []
-              |_ ->[Tmp2AddrBinop(op,arg,loc)]))
-  | _ -> [instr] (* dead code will always be a mov or a binop *)
+let findNeededLinesForTemps predsPerLine tempsToLines prog =
+  let () = neededR1 ((A.length prog) - 1) tempsToLines prog in
+  let () = neededR3 ((A.length prog) - 1) tempsToLines prog in
+  neededR2 predsPerLine tempsToLines prog
 
-let killDeadCodeInFunctions (Tmp2AddrFunDef(funcName, funcParams, funcBody) : tmp2AddrFunDef) : tmp2AddrFunDef =
+let killDeadInstr currLine prog tempsToLines =
+  match getDefVars prog currLine with
+    [t] -> if (H.length (try H.find tempsToLines t with Not_found -> raise (Failure "killDeadInstr")) > 0) then [prog.(currLine)] else []
+   |[] -> [prog.(currLine)]
+
+let killDeadCodeInFunctions (Tmp2AddrFunDef(funcName, funcParams, funcBody)) =
+  let tempsToLines = findAllTemps funcBody (H.create 5) in
+  let () = L.iter(fun (Tmp t, _) -> H.replace tempsToLines t (H.create 5)) funcParams in
   let funcBodyArray = A.of_list funcBody in
-  (* naturally maps each instr to its line # in the prog *)
-  let len = A.length funcBodyArray in
-  let lineToPredecessorsArray = A.make len [] in
-  (* maps each line to a list of its predecessors *)
-  let () = findPredecessors lineToPredecessorsArray funcBodyArray 0 in
-  (* populates lineToPredecessorsArray *)
-  let lineToTempsArray = A.make len [] in
-  (* maps each line to a list of needed temps at that line *)
-  let () = getNeededTemps funcBodyArray lineToPredecessorsArray
-                          lineToTempsArray (len - 1) (len - 1) in
-  (* populates lineToTempsArray with the temps needed at each line *)
-  let lineToSuccessorsArray = findSuccessors lineToPredecessorsArray in
-  (* gives us an array mapping line numbers to their successors *)
-  let newFuncBodyArray = A.mapi (fun lineNum -> fun instr ->
-              killDeadInstr lineNum instr lineToTempsArray lineToSuccessorsArray) funcBodyArray in
-  (* kills dead instrs *)
-  let newFuncBody = L.flatten (A.to_list newFuncBodyArray) in
-  (* changes result back into a list of 2-address instrs *)
+  let predsPerLine = A.make (A.length funcBodyArray) [] in
+  let () = findPredecessors predsPerLine funcBodyArray 0 in
+  let () = findNeededLinesForTemps predsPerLine tempsToLines funcBodyArray in
+  let newFuncBody = 
+    L.flatten(A.to_list(
+      A.mapi (fun lineNum -> fun _ -> killDeadInstr lineNum funcBodyArray 
+                                      tempsToLines) funcBodyArray)) in
   Tmp2AddrFunDef(funcName, funcParams, newFuncBody)
 
 let killDeadCode (prog : tmp2AddrProg) : tmp2AddrProg =

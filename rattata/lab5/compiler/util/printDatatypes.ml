@@ -343,7 +343,7 @@ and tmpLValToString (tLVal: tmpLVal) =
 
 let tmpInfAddrInstrToString(t : tmpInfAddrInstr) =
   match t with
-        TmpInfAddrMov(s, tExpr,lval) -> concat "" [tmpLValToString lval; " <--";
+        TmpInfAddrMov(s,tExpr,lval) -> concat "" [tmpLValToString lval;
                                 sizeToString s; " "; tmpExprToString(tExpr)]
       | TmpInfAddrJump(jInstr) -> jumpInstrToString(jInstr)
       | TmpInfAddrBoolInstr(bInstr) -> tmpInfAddrBoolInstrToString(bInstr)

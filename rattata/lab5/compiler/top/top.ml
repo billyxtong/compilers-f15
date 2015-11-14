@@ -85,9 +85,9 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let twoAddr = To2Addr.to2Addr threeAddr in ();
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
-    (* say_if verbose (fun () -> "Killing dead code..."); *)
-    (* let noDeadCode = KillDeadCode.killDeadCode twoAddr in (); *)
-    (* say_if dump_NoDeadCode (fun () -> tmp2AddrProgToString noDeadCode); *)
+    say_if verbose (fun () -> "Killing dead code..."); 
+    let noDeadCode = KillDeadCode.killDeadCode twoAddr in (); 
+    say_if dump_NoDeadCode (fun () -> tmp2AddrProgToString noDeadCode); 
      
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers...");

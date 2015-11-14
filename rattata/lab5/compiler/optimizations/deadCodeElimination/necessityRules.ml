@@ -19,8 +19,6 @@ let necessityRule2(Tmp2AddrBinop(op,arg,loc) : tmp2AddrInstr) =
   match op with
     FAKEDIV-> necessityRuleHelper arg loc
    |FAKEMOD-> necessityRuleHelper arg loc
-   |RSHIFT-> necessityRuleHelper arg loc
-   |LSHIFT-> necessityRuleHelper arg loc
    |_ -> []
 
 let necessityRule3(Tmp2AddrBoolInstr(boolInstr) : tmp2AddrInstr) =
@@ -32,7 +30,9 @@ let necessityRule4(Tmp2AddrMov(s,arg,loc) : tmp2AddrInstr) =
   match (arg,loc) with
     (TmpLoc(TmpDeref(Tmp t1)), TmpVar(Tmp t2)) -> [t1]
    |(TmpLoc(TmpVar(Tmp t1)),TmpDeref(Tmp t2)) -> [t1;t2]
-   |_ -> []
+   |(TmpLoc(TmpDeref(Tmp t1)), TmpDeref(Tmp t2)) -> [t1;t2] 
+   (* is this true? it falls under memory store, so it should be; will test later *)
+   |_ -> [] (* var to var moves have no "necessary" temps *)
 
 let rec necessityRule5Helper (funcArgs : tmpArg list) (l : int list) =
   match funcArgs with
