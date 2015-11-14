@@ -6,3 +6,4 @@
 let safeMode = ref true (* default: do null ptr, array bounds, shift checks *)
 let doRegAlloc = ref true (* default: do register allocation *)
 let removeDeadCode = ref false (* don't remove dead code *)
+let doConstOpts = ref false (* don't do const propogation/folding *)

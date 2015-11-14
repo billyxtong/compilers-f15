@@ -21,6 +21,7 @@ let spec =
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
+  +> flag "--dump-ConstOpts" no_arg ~doc:" Pretty print the three address code after constant propogation + folding"
   +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
   +> flag "--dump-NoDeadCode" no_arg ~doc:" Removing dead code"
   +> flag "--dump-NoMemMem" no_arg ~doc:" Pretty print after handling Mem-Mem instrs"
@@ -33,10 +34,13 @@ let spec =
   +> flag "--unsafe" no_arg ~doc:" Don't check array bounds, null pointers, or shift operands"
   +> flag "--killDeadCode" no_arg ~doc:" Remove dead code using neededness analysis"
   +> flag "--noRegAlloc" no_arg ~doc:" Don't do register allocation"
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc () =
+  +> flag "--doConstOpts" no_arg ~doc:" Do constant propogation and folding "
+  
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts () =
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if unsafe then OptimizeFlags.safeMode := false in
+    let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
     let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
     
@@ -84,9 +88,14 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let threeAddr = FewTmpsTo3Addr.to3Addr infAddrWithMem in ();
     say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr);
 
+    let threeAddr' = (if !OptimizeFlags.doConstOpts then
+                      ConstPropAndFold.constPropAndFold threeAddr
+                      else threeAddr) in
+    say_if dump_ConstOps (fun () -> tmp3AddrProgToString threeAddr');
+
     (* Three address to Two address *)
     say_if verbose (fun () -> "3Addr to 2Addr...");
-    let twoAddr = To2Addr.to2Addr threeAddr in ();
+    let twoAddr = To2Addr.to2Addr threeAddr' in ();
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
     say_if verbose (fun () -> "Killing dead code..."); 
