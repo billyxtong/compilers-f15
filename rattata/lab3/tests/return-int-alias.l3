@@ -1,9 +1,0 @@
-//test return 9834
-
-typedef int blooblah;
-
-int main () {
-    blooblah x = 9834;
-    return x;
-}
-    

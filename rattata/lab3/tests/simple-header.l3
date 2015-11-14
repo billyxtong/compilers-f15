@@ -1,5 +1,0 @@
-//test typecheck
-
-int main () {
-    return blooblah(4);
-}

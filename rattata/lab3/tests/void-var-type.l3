@@ -1,6 +1,0 @@
-//test error
-
-int main () {
-    void x;
-    return 0;
-    }

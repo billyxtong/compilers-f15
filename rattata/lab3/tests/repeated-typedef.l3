@@ -1,8 +1,0 @@
-//test error
-
-typedef int blooblah;
-typedef int blooblah;
-
-int main () {
-   return 0;
-}

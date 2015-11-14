@@ -1,9 +1,0 @@
-//test error
-
-int main () {
-    return blooblah(0);
-}
-
-int blooblah(int x) {
-    return 0;
-}

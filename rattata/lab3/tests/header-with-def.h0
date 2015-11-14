@@ -1,4 +1,0 @@
-bool dont_define_me () {
-    bool too_late = true;
-    return too_late;
-    }

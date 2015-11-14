@@ -1,7 +1,0 @@
-//test error
-//no typedefs inside functions
-
-int main () {
-    typedef int blooblah;
-    return 0;
-    }
