@@ -27,10 +27,11 @@ let transArg tmpToConstMap = function
   | arg -> arg                         
 
 let handleMove multDefdTmps tmpToConstMap = function
-    (opSize, TmpConst c, TmpVar t) ->
+    (* only propoage bit32 for now: the only bit64 constant is NULL anyway *)
+    (BIT32, TmpConst c, TmpVar t) ->
     (* If this tmp is only defd once, remove this instruction, and now t maps to c *)
     (try let () = H.find multDefdTmps t
-         in Tmp3AddrMov (opSize, TmpConst c, TmpVar t)::[]
+         in Tmp3AddrMov (BIT32, TmpConst c, TmpVar t)::[]
      with Not_found -> let () = H.replace tmpToConstMap t c in [])
   | (opSize, TmpLoc (TmpVar tSrc), TmpVar tDest) ->
        (* if tSrc is mapped to a constant, then we can get rid of this
@@ -45,7 +46,13 @@ let handleMove multDefdTmps tmpToConstMap = function
        (* kill the current mapping of t *)
        let () = H.remove tmpToConstMap tDest in
        Tmp3AddrMov (opSize, TmpLoc (TmpDeref tSrc), TmpVar tDest)::[]
-  | (opSize, src, TmpDeref t) -> Tmp3AddrMov (opSize, src, TmpDeref t)::[]       
+  | (opSize, src, dest) -> Tmp3AddrMov (opSize, src, dest)::[]       
+
+let handleMustBeATmp tmpToConstMap tmpSize t =
+    try let c = H.find tmpToConstMap t in
+        let storeInstr = Tmp3AddrMov (tmpSize, TmpConst c, TmpVar t) in
+        storeInstr::[]
+    with Not_found -> []
 
 let rec handleInstrsForFunDef multDefdTmps tmpToConstMap = function
     [] -> []
@@ -54,14 +61,14 @@ let rec handleInstrsForFunDef multDefdTmps tmpToConstMap = function
        (* we have to store the moveResult first, because handleMove will
           actually modify tmpToConstMap *)
        moveResult @ handleInstrsForFunDef multDefdTmps tmpToConstMap rest
-  | Tmp3AddrBinop (opSize, arg1, arg2, dest) :: rest ->
+  | Tmp3AddrBinop (op, arg1, arg2, dest) :: rest ->
       let new_arg1 = transArg tmpToConstMap arg1 in
       let new_arg2 = transArg tmpToConstMap arg2 in
       (* kill current mapping of dest, if any *)
       let () = (match dest with
                       TmpVar t -> H.remove tmpToConstMap t
                      | _ -> ()) in
-      Tmp3AddrBinop (opSize, new_arg1, new_arg2, dest)
+      Tmp3AddrBinop (op, new_arg1, new_arg2, dest)
       :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
   | Tmp3AddrReturn (retSize, arg) :: rest ->
       Tmp3AddrReturn (retSize, transArg tmpToConstMap arg)
@@ -73,8 +80,48 @@ let rec handleInstrsForFunDef multDefdTmps tmpToConstMap = function
   | Tmp3AddrJump j :: rest ->
       (* we can actually just ignore jumps *)
       Tmp3AddrJump j :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
-            
-
+  | Tmp3AddrMaskUpper t :: rest ->
+           (* anything we mask the upper of is 32-bit *)
+       let storeInstrs = handleMustBeATmp tmpToConstMap BIT32 t in
+           (* This actually does need to be stored in a tmp :/ *)
+       storeInstrs @ Tmp3AddrMaskUpper t :: []
+       @ handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+  | Tmp3AddrPtrBinop (op, arg1, arg2, dest) :: rest ->
+      let new_arg1 = transArg tmpToConstMap arg1 in
+      let new_arg2 = transArg tmpToConstMap arg2 in
+      (* kill current mapping of dest, if any *)
+      let () = (match dest with
+                      TmpVar t -> H.remove tmpToConstMap t
+                     | _ -> ()) in
+      Tmp3AddrPtrBinop (op, new_arg1, new_arg2, dest)
+      :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+  | Tmp3AddrFunCall (retSize, fName, args, dest) :: rest ->
+      let new_args = List.map (transArg tmpToConstMap) args in
+      (* kill current mapping of dest, if any *)
+      let () = (match dest with
+                      Some (TmpVar t) -> H.remove tmpToConstMap t
+                     | _ -> ()) in
+      Tmp3AddrFunCall (retSize, fName, new_args, dest)
+      :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+  | Tmp3AddrBoolInstr (TmpTest (arg, TmpVar t)) :: rest ->
+      let new_arg = transArg tmpToConstMap arg in
+      let storeInstr = handleMustBeATmp tmpToConstMap BIT32 t in
+      storeInstr @ Tmp3AddrBoolInstr (TmpTest (new_arg, TmpVar t))
+      :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+  | Tmp3AddrBoolInstr (TmpCmp (opSize, arg, TmpVar t)) :: rest ->
+      let new_arg = transArg tmpToConstMap arg in
+      let storeInstr = handleMustBeATmp tmpToConstMap opSize t in
+      storeInstr @ Tmp3AddrBoolInstr (TmpCmp (opSize, new_arg, TmpVar t))
+      :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+  | Tmp3AddrBoolInstr (TmpTest (arg, loc)) :: rest ->
+      let new_arg = transArg tmpToConstMap arg in
+      Tmp3AddrBoolInstr (TmpTest (new_arg, loc))
+      :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+  | Tmp3AddrBoolInstr (TmpCmp (opSize, arg, loc)) :: rest ->
+      let new_arg = transArg tmpToConstMap arg in
+      Tmp3AddrBoolInstr (TmpCmp (opSize, new_arg, loc))
+      :: handleInstrsForFunDef multDefdTmps tmpToConstMap rest
+          
 let handleFunDef (Tmp3AddrFunDef (fName, params, instrs)) =
     (* maps tmps that just hold constants to the constant they hold *)
     let tmpToConstMap = H.create 100 in
