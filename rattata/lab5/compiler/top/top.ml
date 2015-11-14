@@ -27,11 +27,15 @@ let spec =
   +> flag "--dump-wonky" no_arg ~doc:" Pretty print the wonky assembly"
   +> flag "--dump-final" no_arg ~doc:" Pretty print the final assembly"
   +> flag "--dump-all" no_arg ~doc:" Pretty print everything"
+  +> flag "-O0" no_arg ~doc:" Literally do no optimizations, i.e. don't register allocate"
+  +> flag "-O1" no_arg ~doc:" Do normal stuff"
+  +> flag "-O2" no_arg ~doc:" Do optimizations!"
   +> flag "--unsafe" no_arg ~doc:" Don't check array bounds, null pointers, or shift operands"
   +> flag "--killDeadCode" no_arg ~doc:" Remove dead code using neededness analysis"
   +> flag "--noRegAlloc" no_arg ~doc:" Don't do register allocation"
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all unsafe killDeadCode noRegAlloc () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc () =
   try
+    let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
