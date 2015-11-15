@@ -77,6 +77,8 @@ let computeBinop op c1int c2int =
       | (FAKEMOD) -> Int32.rem c1 c2) in
     Int32.to_int result
 
+let intMin = -2147483648
+
 let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
     let new_arg1 = transArg tmpToConstMap arg1 in
     let new_arg2 = transArg tmpToConstMap arg2 in
@@ -89,6 +91,11 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
            (* this raises SIGFPE: just throw it explicitly *)
             Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
       | (FAKEMOD, TmpConst c1, TmpConst 0) ->
+            Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
+      | (FAKEDIV, TmpConst intMin, TmpConst -1) ->
+           (* this raises SIGFPE: just throw it explicitly *)
+            Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
+      | (FAKEMOD, TmpConst intMin, TmpConst -1) ->
             Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
       | (FAKEDIV, TmpLoc tLoc, TmpConst c) ->
             (* can't idiv by constants :( *)
