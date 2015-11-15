@@ -43,6 +43,13 @@ let rec handleMove multDefdTmps tmpToConstMap = function
                            and keep this instruction *)
                 let () = H.remove tmpToConstMap tDest in
                 Tmp3AddrMov (opSize, TmpLoc (TmpVar tSrc), TmpVar tDest)::[])
+  | (opSize, TmpLoc (TmpVar tSrc), TmpDeref tDest) ->
+      (* if tSrc is mapped to a constant, that constant goes here too.
+         But we can't map *tDest to the constant, so the chain ends *)
+       (try let c = H.find tmpToConstMap tSrc in
+            Tmp3AddrMov(opSize, TmpConst c, TmpDeref tDest)::[]
+        with Not_found -> 
+                Tmp3AddrMov (opSize, TmpLoc (TmpVar tSrc), TmpDeref tDest)::[])
   | (opSize, TmpLoc (TmpDeref tSrc), TmpVar tDest) ->
        (* kill the current mapping of t *)
        let () = H.remove tmpToConstMap tDest in
