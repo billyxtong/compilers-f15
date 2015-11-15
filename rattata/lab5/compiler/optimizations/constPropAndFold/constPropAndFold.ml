@@ -88,16 +88,16 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
             Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
       | (FAKEMOD, TmpConst c1, TmpConst 0) ->
             Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
-      | (FAKEDIV, TmpLoc (TmpVar t), TmpConst c) ->
+      | (FAKEDIV, TmpLoc tLoc, TmpConst c) ->
             (* can't idiv by constants :( *)
             let t' = Tmp (Temp.create()) in
             Tmp3AddrMov(BIT32, TmpConst c, TmpVar t')::
-            Tmp3AddrBinop(op, TmpLoc (TmpVar t), TmpLoc (TmpVar t'), dest)::[]
-      | (FAKEMOD, TmpLoc (TmpVar t), TmpConst c) ->
+            Tmp3AddrBinop(op, TmpLoc tLoc, TmpLoc (TmpVar t'), dest)::[]
+      | (FAKEMOD, TmpLoc tLoc, TmpConst c) ->
             (* can't idiv by constants :( *)
             let t' = Tmp (Temp.create()) in
             Tmp3AddrMov(BIT32, TmpConst c, TmpVar t')::
-            Tmp3AddrBinop(op, TmpLoc (TmpVar t), TmpLoc (TmpVar t'), dest)::[]
+            Tmp3AddrBinop(op, TmpLoc tLoc, TmpLoc (TmpVar t'), dest)::[]
       | (_, TmpConst c1, TmpConst c2) ->
             let cFinal = computeBinop op c1 c2 in
             handleMove multDefdTmps tmpToConstMap (BIT32, TmpConst cFinal, dest)
