@@ -39,7 +39,9 @@ let spec =
 let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts () =
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
-    let () = if opt2 then OptimizeFlags.doConstOpts := true in
+    let () = if opt2 then
+        OptimizeFlags.doConstOpts := true;
+        OptimizeFlags.removeDeadCode := true in
     let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
     let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
@@ -100,7 +102,9 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
     say_if verbose (fun () -> "Killing dead code..."); 
-    let noDeadCode = KillDeadCode.killDeadCode twoAddr in (); 
+    let noDeadCode = (if !OptimizeFlags.removeDeadCode then
+                        KillDeadCode.killDeadCode twoAddr
+                        else twoAddr) in (); 
     say_if dump_NoDeadCode (fun () -> tmp2AddrProgToString noDeadCode); 
      
     (* Allocate Registers *)
