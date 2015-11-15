@@ -22,6 +22,7 @@ let spec =
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
   +> flag "--dump-ConstOpts" no_arg ~doc:" Pretty print the three address code after constant propogation + folding"
+  +> flag "--dump-inlined" no_arg ~doc:" Pretty print the three address code after inlining"
   +> flag "--dump-2Addr" no_arg ~doc:" Pretty print the two address code"
   +> flag "--dump-NoDeadCode" no_arg ~doc:" Removing dead code"
   +> flag "--dump-NoMemMem" no_arg ~doc:" Pretty print after handling Mem-Mem instrs"
@@ -35,17 +36,20 @@ let spec =
   +> flag "--killDeadCode" no_arg ~doc:" Remove dead code using neededness analysis"
   +> flag "--noRegAlloc" no_arg ~doc:" Don't do register allocation"
   +> flag "--doConstOpts" no_arg ~doc:" Do constant propogation and folding "
+  +> flag "--doInlining" no_arg ~doc: "Do inlining"
   
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining () =
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt2 then
         OptimizeFlags.doConstOpts := true;
+        OptimizeFlags.doInlining := true;
         OptimizeFlags.removeDeadCode := true in
     let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
     let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
+    let () = if doInlining then OptimizeFlags.doInlining := true in
     
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
@@ -96,9 +100,15 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
                       else threeAddr) in
     say_if dump_ConstOps (fun () -> tmp3AddrProgToString threeAddr');
 
+    (* inlining *)
+    let inlinedThreeAddr = (if !OptimizeFlags.doInlining then
+                      Inlining.inlineFuncs threeAddr'
+                      else threeAddr') in
+    say_if dump_Inlined (fun () -> tmp3AddrProgToString inlinedThreeAddr);
+    
     (* Three address to Two address *)
     say_if verbose (fun () -> "3Addr to 2Addr...");
-    let twoAddr = To2Addr.to2Addr threeAddr' in ();
+    let twoAddr = To2Addr.to2Addr inlinedThreeAddr in ();
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
     say_if verbose (fun () -> "Killing dead code..."); 
