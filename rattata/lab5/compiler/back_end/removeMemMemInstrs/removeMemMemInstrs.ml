@@ -32,6 +32,13 @@ let handleMemMemInstr (instr: assemInstr) : assemInstr list =
              BOOL_INSTR (CMP (opSize, src,
                               AllocForFun.firstSpillReg))::
              MOV(opSize, AssemLoc AllocForFun.firstSpillReg, dest)::[]
+      | INT_BINOP(FAKEDIV, AssemLoc (MemAddr divisor), dest) ->
+        (* can't idiv by memAddr's *)
+             MOV(BIT32, AssemLoc (MemAddr divisor), AllocForFun.firstSpillReg)::
+             INT_BINOP(FAKEDIV, AssemLoc (AllocForFun.firstSpillReg), dest)::[]
+      | INT_BINOP(FAKEMOD, AssemLoc (MemAddr divisor), dest) ->
+             MOV(BIT32, AssemLoc (MemAddr divisor), AllocForFun.firstSpillReg)::
+             INT_BINOP(FAKEMOD, AssemLoc (AllocForFun.firstSpillReg), dest)::[]
       | INT_BINOP(op, src, dest) ->
              if areValidSrcDest src dest then INT_BINOP(op, src, dest)::[] else
              MOV(BIT32, AssemLoc (dest), AllocForFun.firstSpillReg)::
