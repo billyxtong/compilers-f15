@@ -1,6 +1,5 @@
 open Datatypesv1
 module H = Hashtbl
-open Pervasives (* for bits ops and shifts *)
     
 let getDefVar = function
     Tmp3AddrMov (opSize, src, TmpVar t) -> Some t
@@ -62,18 +61,21 @@ let handleMustBeATmp tmpToConstMap tmpSize t =
         storeInstr::[]
     with Not_found -> []
 
-let computeBinop op c1 c2 =
-    match op with
-        (ADD) -> c1 + c2
-      | (SUB) -> c1 - c2
-      | (MUL) -> c1 * c2
-      | (BIT_AND) -> c1 land c2
-      | (BIT_OR) -> c1 lor c2
-      | (BIT_XOR) -> c1 lxor c2
-      | (LSHIFT) -> c1 lsl c2
-      | (RSHIFT) -> c1 asr c2
-      | (FAKEDIV) -> c1 / c2
-      | (FAKEMOD) -> c1 mod c2
+let computeBinop op c1int c2int =
+    let c1 = Int32.of_int c1int in
+    let c2 = Int32.of_int c2int in
+    let result = (match op with
+        (ADD) -> Int32.add c1 c2
+      | (SUB) -> Int32.sub c1 c2
+      | (MUL) -> Int32.mul c1 c2
+      | (BIT_AND) -> Int32.logand c1 c2
+      | (BIT_OR) -> Int32.logor c1 c2
+      | (BIT_XOR) -> Int32.logxor c1 c2
+      | (LSHIFT) -> Int32.shift_left c1 (Int32.to_int c2)
+      | (RSHIFT) -> Int32.shift_right c1 (Int32.to_int c2)
+      | (FAKEDIV) -> Int32.div c1 c2
+      | (FAKEMOD) -> Int32.rem c1 c2) in
+    Int32.to_int result
 
 let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
     let new_arg1 = transArg tmpToConstMap arg1 in
