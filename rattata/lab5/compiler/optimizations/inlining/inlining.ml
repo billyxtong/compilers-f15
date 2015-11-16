@@ -1,6 +1,8 @@
 open Datatypesv1
 module H = Hashtbl
 
+let inlinedInstrsMap = H.create 10 (* basically memoizing inlining calls *)
+
 let isRecCall fName = function
     Tmp3AddrFunCall(retSize, callName, args, dest) -> callName = fName
   | _ -> false                                                      
@@ -19,7 +21,7 @@ let isNotRet = function
 
 let shouldInline funDefs fName =
     try let (params, instrs, isRec) = H.find funDefs fName in
-    List.length instrs < 50 && not isRec
+    List.length instrs < 100 && not isRec
     with Not_found -> (* not a function that we're compiling *) false
 
 let rec getParamInstrs args params =
@@ -46,25 +48,39 @@ let rec getInstrsWithNewLabels labelMap = function
                          getInstrsWithNewLabels labelMap rest
   | instr :: rest -> instr :: getInstrsWithNewLabels labelMap rest
 
-let handleInstrForFunDef funDefMap = function
-    Tmp3AddrFunCall (retSize, fName, args, dest) ->
+let rec handleInstrsForFunDef depth funDefMap = function
+    [] -> []
+  | Tmp3AddrFunCall (retSize, fName, args, dest) :: rest ->
         if not (shouldInline funDefMap fName) then
-          Tmp3AddrFunCall (retSize, fName, args, dest) :: [] else
-        let (funParams, funInstrs, isRec) = H.find funDefMap fName in
+          Tmp3AddrFunCall (retSize, fName, args, dest) ::
+          handleInstrsForFunDef depth funDefMap rest else
+        let (funParams, funInstrs, false) = H.find funDefMap fName in
+        (* first, inline those instrs *)
+        let maxDepth = 5 in
+        let inlinedInstrs = (if depth < maxDepth then
+                  getInlinedInstrsMemoized (depth + 1) fName funInstrs funDefMap
+                             else funInstrs) in
         let Tmp3AddrReturn (_, retArg) =
-             List.nth funInstrs ((List.length funInstrs) - 1) in
-        let instrsSansRet = List.filter isNotRet funInstrs in
+             List.nth inlinedInstrs ((List.length inlinedInstrs) - 1) in
+        let instrsSansRet = List.filter isNotRet inlinedInstrs in
         let instrsNewLabels = getInstrsWithNewLabels (H.create 100) instrsSansRet in
         let paramInstrs = getParamInstrs args funParams in
         let inlinedRetInstr = (match dest with
                      Some retDest -> Tmp3AddrMov(retSize, retArg, retDest)::[]
                    | None -> []) in
         paramInstrs @ instrsNewLabels @ inlinedRetInstr
-  | instr -> instr::[]        
+        @ handleInstrsForFunDef depth funDefMap rest
+  | instr :: rest -> instr :: handleInstrsForFunDef depth funDefMap rest
+
+and getInlinedInstrsMemoized depth fName instrs funDefMap =
+    let newInstrs = (try H.find inlinedInstrsMap fName
+              with Not_found -> handleInstrsForFunDef depth funDefMap instrs) in
+    let () = H.replace inlinedInstrsMap fName newInstrs in
+    newInstrs
 
 let handleFunDef funDefMap (Tmp3AddrFunDef (fName, params, instrs)) =
-    Tmp3AddrFunDef (fName, params,
-                    List.concat (List.map (handleInstrForFunDef funDefMap) instrs))
+    let newInstrs = getInlinedInstrsMemoized 0 fName instrs funDefMap in
+    Tmp3AddrFunDef (fName, params, newInstrs)
 
 let inlineFuncs funDefs =
     let funDefMap = makeFunDefMap (H.create 10) funDefs in
