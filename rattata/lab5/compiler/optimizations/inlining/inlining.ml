@@ -18,8 +18,9 @@ let isNotRet = function
   | _ -> true
 
 let shouldInline funDefs fName =
-    let (params, instrs, isRec) = H.find funDefs fName in
+    try let (params, instrs, isRec) = H.find funDefs fName in
     List.length instrs < 10 && not isRec
+    with Not_found -> (* not a function that we're compiling *) false
 
 let rec getParamInstrs args params =
     match (args, params) with
@@ -47,9 +48,9 @@ let rec getInstrsWithNewLabels labelMap = function
 
 let handleInstrForFunDef funDefMap = function
     Tmp3AddrFunCall (retSize, fName, args, dest) ->
-        let (funParams, funInstrs, isRec) = H.find funDefMap fName in
         if not (shouldInline funDefMap fName) then
           Tmp3AddrFunCall (retSize, fName, args, dest) :: [] else
+        let (funParams, funInstrs, isRec) = H.find funDefMap fName in
         let Tmp3AddrReturn (_, retArg) =
              List.nth funInstrs ((List.length funInstrs) - 1) in
         let instrsSansRet = List.filter isNotRet funInstrs in
