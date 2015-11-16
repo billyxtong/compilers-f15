@@ -42,15 +42,15 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt2 then
-        OptimizeFlags.doConstOpts := true;
+        (OptimizeFlags.doConstOpts := true;
         OptimizeFlags.doInlining := true;
-        OptimizeFlags.removeDeadCode := true in
+        OptimizeFlags.removeDeadCode := true;
+        ()) in
     let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
     let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
     let () = if doInlining then OptimizeFlags.doInlining := true in
-    
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
     (* main_source is the .l1/2/3/4 file. This is to distinguish from
