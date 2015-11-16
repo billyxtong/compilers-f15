@@ -356,7 +356,10 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
              ::TmpInfAddrLabel(doTheAccessLabel)
              :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[]
              else
-             ptr_instrs @ index_instrs @ storeArrayPtr
+             ptr_instrs @ index_instrs @ storeArrayPtr::nullCheckInstrs @
+             indexLowerCheck
+             @ indexUpperCheck @ TmpInfAddrLabel(errorLabel)::throwError
+             ::TmpInfAddrLabel(doTheAccessLabel)
              :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[]) in
       (TmpPtrArg (TmpLoc (TmpVar accessPtrFinal)), allInstrs)
 
