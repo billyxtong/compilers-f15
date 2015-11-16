@@ -9,3 +9,4 @@ let removeDeadCode = ref false (* don't remove dead code *)
 let doConstOpts = ref false (* don't do const propogation/folding *)
 let doInlining = ref false (* don't do inlining *)
 let doRegAllocTieBreaking = ref false    
+let removeUnneddedJumps = ref false

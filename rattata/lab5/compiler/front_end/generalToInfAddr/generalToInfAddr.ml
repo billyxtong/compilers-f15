@@ -583,7 +583,9 @@ let trans_global_decl decl =
             let finalStmts = infAddrStmts @ TmpInfAddrLabel retLabel ::
             TmpInfAddrReturn (retSize, TmpIntExpr (TmpIntArg
                                    (TmpLoc (TmpVar retTmp))))::[] in
-            let finalFinal = removeUnneededJumpsAndLabels finalStmts in
+            let finalFinal = (if !OptimizeFlags.removeUnneddedJumps then
+                                removeUnneededJumpsAndLabels finalStmts
+                              else finalStmts) in
             TmpInfAddrFunDef (fName, param_tmp_list, finalFinal)
 
 let toInfAddr (funDefList: A.typedPostElabAST) =
