@@ -202,10 +202,25 @@ let getColoring instrs tempList =
      let () = List.iter (fun t -> H.add tmpToColorMap t t) tempList in
      tmpToColorMap
 
+let progHasDivs instrs = List.exists (function Tmp2AddrBinop(FAKEDIV, _, _) -> true
+                                        | Tmp2AddrBinop(FAKEMOD, _, _) -> true
+                                        | _ -> false) instrs
+
+let progHasShifts instrs = List.exists (function Tmp2AddrBinop(LSHIFT, _, _) -> true
+                                        | Tmp2AddrBinop(RSHIFT, _, _) -> true
+                                        | _ -> false) instrs
+
+let getAllocableRegList instrs =
+    let base = [EBX; R10; R11; R12; R13] in
+    if not !OptimizeFlags.checkNoShiftsDivs then base else
+      let withDivs = (if progHasDivs instrs then base else EDX::base) in
+      let withShifts = (if progHasShifts instrs then withDivs else ECX::withDivs) in
+      withShifts
+
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   funcToParamSizeMap : assemFunDef =
   let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
-  let allocableRegList = [EBX; R10; R11; R12; R13] in
+  let allocableRegList = getAllocableRegList instrs in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
   let tempList = getTempList instrs in

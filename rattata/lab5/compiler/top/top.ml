@@ -18,6 +18,7 @@ let spec =
   +> flag "--dump-upeAST" no_arg ~doc:" Pretty print the untyped post-elab AST"
   +> flag "--dump-typedAST" no_arg ~doc:" Pretty print the typed post-elab AST"
   +> flag "--dump-infAddr" no_arg ~doc:" Pretty print the infAddr"
+  +> flag "--dump-memInfAddr" no_arg ~doc:" Pretty print the infAddr after mem stuff"
   +> flag "--dump-assem" no_arg ~doc:" Pretty print the assembly"
   +> flag "--only-typecheck" ~aliases:["-t"] no_arg ~doc:" Halt after typechecking"
   +> flag "--dump-3Addr" no_arg ~doc:" Pretty print the three address code"
@@ -38,16 +39,21 @@ let spec =
   +> flag "--doConstOpts" no_arg ~doc:" Do constant propogation and folding "
   +> flag "--doInlining" no_arg ~doc: "Do inlining"
   
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining () =
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt2 then
         (
-        (* OptimizeFlags.doConstOpts := true; *)
-        (* OptimizeFlags.doInlining := true; *)
-        (* OptimizeFlags.removeDeadCode := true; *)
+        OptimizeFlags.doConstOpts := true;
+        OptimizeFlags.doInlining := true;
+        OptimizeFlags.removeDeadCode := true;
+        (* don't use the checknoshiftsdivs, it's not correct *)
+        (* OptimizeFlags.checkNoShiftsDivs := true; *)
+
+        (* the regAllocTieBreaking might do more harm than good *)
         (* OptimizeFlags.doRegAllocTieBreaking := true; *)
-        OptimizeFlags.removeUnneddedJumps := true;
+        (* the remove unneeded jumps doesn't seem to have any effect *)
+        (* OptimizeFlags.removeUnneddedJumps := true; *)
         ()) in
     let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
@@ -91,7 +97,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     (* convert memory stuff to Inf Addr *)
     say_if verbose (fun () -> "converting memory stuff to Inf Addr");
     let infAddrWithMem = MemStuffToInfAddr.handleMemStuff infAddr in ();
-    say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddrWithMem);
+    say_if dump_memInfAddr (fun () -> tmpInfAddrProgToString infAddrWithMem);
     
     (* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *)

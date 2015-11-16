@@ -10,3 +10,4 @@ let doConstOpts = ref false (* don't do const propogation/folding *)
 let doInlining = ref false (* don't do inlining *)
 let doRegAllocTieBreaking = ref false    
 let removeUnneddedJumps = ref false
+let checkNoShiftsDivs = ref false
