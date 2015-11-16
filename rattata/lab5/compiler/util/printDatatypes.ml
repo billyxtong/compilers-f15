@@ -150,9 +150,9 @@ let assemInstrToString(instr : assemInstr) =
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
       | LABEL(l) -> labelToString(l) ^ ":"
       | CALL(i) -> "call " ^ identToString(i)
-        (* Just gonna use rcx for this, since we reserve it for shifts in general *)
-      | MASK_UPPER(loc) -> "movq $0xffffffff, %rcx\n" ^
-                           "andq %rcx, " ^ assemLocToString(loc) BIT64
+        (* Just gonna use eax for this, since we reserve it for divs/rets in general *)
+      | MASK_UPPER(loc) -> "movq $0xffffffff, %rax\n" ^
+                           "andq %rax, " ^ assemLocToString(loc) BIT64
 
 let assemFunDefToString(AssemFunDef(funcName, instrList)) =
   ".globl " ^ identToString(funcName) ^ "\n" ^
