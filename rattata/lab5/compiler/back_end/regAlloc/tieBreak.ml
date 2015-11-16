@@ -30,20 +30,28 @@ let instrUses = function
   | Tmp2AddrBoolInstr(TmpTest (arg, loc)) -> tmpArgUses arg @ tmpLocUses loc
   | Tmp2AddrBoolInstr(TmpCmp (opSize, arg, loc)) -> tmpArgUses arg @ tmpLocUses loc
 
-let incrMap map t =
+let incrMap map depth t =
     (try let currCount = H.find map t in
-         H.replace map t (currCount + 1)
-     with Not_found -> H.add map t 1)
+         H.replace map t (currCount + depth)
+     with Not_found -> H.add map t (1 * depth))
                       
-let rec makeNumUsesMap map = function
+let rec makeNumUsesMap depth map = function
    [] -> map
  | instr :: rest ->
+      let newDepth = (match instr with
+                        Tmp2AddrBoolInstr (TmpCmp _) -> depth + 1
+                      | Tmp2AddrJump (JMP_UNCOND, _) -> depth - 1
+                      | _ -> depth) in
       let usesInInstr = instrUses instr in
-      let () = List.iter (fun t -> incrMap map t) usesInInstr in
-      makeNumUsesMap map rest
+      let () = List.iter (fun t -> incrMap map newDepth t) usesInInstr in
+      makeNumUsesMap newDepth map rest
         
 let tieBreakFunc t1 t2 = t2 - t1
 
+let doNothing t1 t2 = 0
+
 let getTieBreakFunc instrs =
-    let numUsesMap = makeNumUsesMap (H.create 100) instrs in
+    if !OptimizeFlags.doRegAllocTieBreaking then
+    let numUsesMap = makeNumUsesMap 0 (H.create 100) instrs in
     fun t1 -> fun t2 -> (H.find numUsesMap t2 - H.find numUsesMap t1)
+    else doNothing                        
