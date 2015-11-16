@@ -19,7 +19,7 @@ let isNotRet = function
 
 let shouldInline funDefs fName =
     try let (params, instrs, isRec) = H.find funDefs fName in
-    List.length instrs < 10 && not isRec
+    List.length instrs < 50 && not isRec
     with Not_found -> (* not a function that we're compiling *) false
 
 let rec getParamInstrs args params =

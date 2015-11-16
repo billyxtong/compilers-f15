@@ -39,8 +39,8 @@ let rec makeNumUsesMap depth map = function
    [] -> map
  | instr :: rest ->
       let newDepth = (match instr with
-                        Tmp2AddrBoolInstr (TmpCmp _) -> depth + 1
-                      | Tmp2AddrJump (JMP_UNCOND, _) -> depth - 1
+                        Tmp2AddrBoolInstr (TmpCmp _) -> depth 
+                      | Tmp2AddrJump (JMP_UNCOND, _) -> depth 
                       | _ -> depth) in
       let usesInInstr = instrUses instr in
       let () = List.iter (fun t -> incrMap map newDepth t) usesInInstr in
