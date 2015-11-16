@@ -145,10 +145,14 @@ let rec handleSharedExpr exprType = function
                TmpVarLVal t)::[])
    | TmpInfAddrDeref (ptrExp) ->
        let (TmpPtrExpr e_result, instrs) = handleMemForExpr (TmpPtrExpr ptrExp) in
-       let nullCheckInstrs = handleNullPointerCheck e_result in
+       let resultTmp = Tmp (Temp.create()) in
+       let storeResult = TmpInfAddrMov(BIT64, TmpPtrExpr e_result,
+                                       TmpVarLVal resultTmp) in
+       let resultTmpExpr = TmpPtrArg (TmpLoc (TmpVar resultTmp)) in
+       let nullCheckInstrs = handleNullPointerCheck resultTmpExpr in
        
-       (sharedExprToTypedExpr exprType (TmpInfAddrDeref e_result),
-        instrs @ nullCheckInstrs)
+       (sharedExprToTypedExpr exprType (TmpInfAddrDeref resultTmpExpr),
+        instrs @ storeResult::nullCheckInstrs)
    | TmpInfAddrFieldAccess(structTypeName, structPtr, fieldName) ->
        let (fieldPtr, instrs) = getStructAccessPtr structTypeName
                                 structPtr fieldName in
@@ -380,11 +384,16 @@ and handleMemForLVal typee = function
       (* recursive call: all instrs we use for a nested thing need to happen
          before RHS *)
         handleMemForLVal (Pointer Poop) ptr in
-    let TmpPtrExpr ptrFinalAsExpr = lvalToExpr (Pointer Poop) ptrFinal in
-    let nullCheckInstrs = handleNullPointerCheck ptrFinalAsExpr in
+    let resultTmp = Tmp (Temp.create()) in
+    (* we have to do the storing to avoid the n^2 for pointer checks *)
+    let ptrFinalExpr = lvalToExpr (Pointer Poop) ptrFinal in
+    let storeResult = TmpInfAddrMov(BIT64, ptrFinalExpr,
+                                    TmpVarLVal resultTmp) in
+    let resultTmpExpr = TmpPtrArg (TmpLoc (TmpVar resultTmp)) in
+    let nullCheckInstrs = handleNullPointerCheck resultTmpExpr in
     (* We know that the inner element is a pointer, what type doesn't matter *)
-            (TmpDerefLVal(ptrFinal), ptrInstrsBeforeRHS @ ptrInstrsAfterRHS,
-             nullCheckInstrs)
+            (TmpDerefLVal(TmpVarLVal resultTmp), ptrInstrsBeforeRHS @ ptrInstrsAfterRHS,
+             storeResult::nullCheckInstrs)
   | TmpFieldAccessLVal (structName, structptr, fieldName) ->
       (* We know that structptr is a pointer of some kind; doesn't matter what *)
       let TmpPtrExpr structPtrExpr = lvalToExpr (Pointer Poop) structptr in
