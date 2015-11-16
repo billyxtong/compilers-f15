@@ -19,10 +19,11 @@ val hasEdge: graph -> (vertex * vertex) -> bool
 
 val getNeighbors: graph -> vertex -> neighbors option
                                  
-(* Given a graph (an interference graph) and the vertex at which
-   to start, returns a simplicial elimination order of the
+(* Given a graph (an interference graph) and a tie-breaking function
+   for when priorities are equal,
+   returns a simplicial elimination order of the
    vertices, in a list *)
-val maxCardSearch: graph -> vertex -> vertex list
+val maxCardSearch: graph -> (vertex -> vertex -> int) -> vertex list
     
 (* Takes an interference graph and an ordering of vertices,
    returns an mapping of each vertex to a color (an integer) *)

@@ -109,10 +109,12 @@ and actualMaxCardSearch (g:graph) wts_pq processed_verts =
                   terminated from the if statement\n"
       | Some (v, _) -> process_vert g wts_pq processed_verts v
                 
-let maxCardSearch (g:graph) start_v =
+let maxCardSearch (g:graph) tieBreakFunc =
     let pq_elems =
        fold (fun v -> fun _ -> fun acc -> (v, 0)::acc) g [] in
-    let cmp (_, wt1) (_, wt2) = wt2 - wt1 in
+    let cmp (v1, wt1) (v2, wt2) =
+        if not (wt2 - wt1 = 0) then wt2 - wt1 else tieBreakFunc v1 v2
+                                 in
     (* wt2 - wt1 because we actually want a max-heap here *)
     let wts_pq = PQ.of_list pq_elems cmp in
     actualMaxCardSearch g wts_pq (create (length g))

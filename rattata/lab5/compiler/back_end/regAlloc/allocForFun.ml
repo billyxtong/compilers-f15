@@ -193,8 +193,8 @@ let getUsedRegs maxColor allocableRegList =
 let getColoring instrs tempList =
   if !OptimizeFlags.doRegAlloc then
      let interferenceGraph = LivenessAnalysis.analyzeLiveness instrs tempList in
-     let startVertex = 0 in (* where cardSearch starts from; arbitrary for now *)
-     let vertexOrdering = maxCardSearch interferenceGraph startVertex in
+     let tieBreakFunc = TieBreak.getTieBreakFunc instrs in
+     let vertexOrdering = maxCardSearch interferenceGraph tieBreakFunc in
      let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
      tmpToColorMap
   else
