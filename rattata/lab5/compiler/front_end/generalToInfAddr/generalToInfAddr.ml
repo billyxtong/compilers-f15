@@ -553,6 +553,16 @@ let updateFunParamsMap fName params =
     let typesArray = Array.of_list (List.map params (fun (typee, _) -> typee)) in
     H.add funParamsMap fName typesArray
     
+let rec removeUnneededJumpsAndLabels = function
+    [] -> []
+  | instr::[] -> instr::[]
+  | TmpInfAddrJump(JMP_UNCOND, jumpLabel)::TmpInfAddrLabel(lbl)::rest ->
+        if jumpLabel = lbl then
+          TmpInfAddrLabel(lbl)::removeUnneededJumpsAndLabels rest
+        else TmpInfAddrJump(JMP_UNCOND, jumpLabel)::TmpInfAddrLabel(lbl)::
+               removeUnneededJumpsAndLabels rest
+  | instr1 :: instr2 :: rest ->
+       instr1 :: removeUnneededJumpsAndLabels (instr2 :: rest)
 
 let trans_global_decl decl =
   (* Each function has a unique retTmp and retLabel *)
@@ -569,11 +579,12 @@ let trans_global_decl decl =
                        Some t -> (Tmp t, getSizeForType typee)
                      | None -> assert(false)) in
             let infAddrStmts = trans_stmts retTmp retLabel idToTmpMap stmts in
-            let finalStmts = infAddrStmts @ TmpInfAddrLabel retLabel ::
             let retSize = getSizeForType typee in 
+            let finalStmts = infAddrStmts @ TmpInfAddrLabel retLabel ::
             TmpInfAddrReturn (retSize, TmpIntExpr (TmpIntArg
                                    (TmpLoc (TmpVar retTmp))))::[] in
-            TmpInfAddrFunDef (fName, param_tmp_list, finalStmts)
+            let finalFinal = removeUnneededJumpsAndLabels finalStmts in
+            TmpInfAddrFunDef (fName, param_tmp_list, finalFinal)
 
 let toInfAddr (funDefList: A.typedPostElabAST) =
      (* We will have a simple return label that all returns jump to *)
