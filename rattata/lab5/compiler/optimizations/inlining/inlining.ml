@@ -3,6 +3,9 @@ module H = Hashtbl
 
 let inlinedInstrsMap = H.create 10 (* basically memoizing inlining calls *)
 
+let inlineMaxLength = 50
+let maxDepth = 5
+
 let isRecCall fName = function
     Tmp3AddrFunCall(retSize, callName, args, dest) -> callName = fName
   | _ -> false                                                      
@@ -21,7 +24,7 @@ let isNotRet = function
 
 let shouldInline funDefs fName =
     try let (params, instrs, isRec) = H.find funDefs fName in
-    List.length instrs < 100 && not isRec
+    List.length instrs < inlineMaxLength && not isRec
     with Not_found -> (* not a function that we're compiling *) false
 
 let rec getParamInstrs args params =
@@ -56,7 +59,6 @@ let rec handleInstrsForFunDef depth funDefMap = function
           handleInstrsForFunDef depth funDefMap rest else
         let (funParams, funInstrs, false) = H.find funDefMap fName in
         (* first, inline those instrs *)
-        let maxDepth = 5 in
         let inlinedInstrs = (if depth < maxDepth then
                   getInlinedInstrsMemoized (depth + 1) fName funInstrs funDefMap
                              else funInstrs) in
