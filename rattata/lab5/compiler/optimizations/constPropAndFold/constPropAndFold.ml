@@ -89,9 +89,9 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
     match (op, new_arg1, new_arg2) with
         (FAKEDIV, TmpConst c1, TmpConst 0) ->
            (* this raises SIGFPE: just throw it explicitly *)
-            Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
+            Tmp3AddrBinop(FAKEDIV, TmpConst 666, TmpConst 0, dest)::[]
       | (FAKEMOD, TmpConst c1, TmpConst 0) ->
-            Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
+            Tmp3AddrBinop(FAKEDIV, TmpConst 666, TmpConst 0, dest)::[]
       | (FAKEDIV, TmpLoc tLoc, TmpConst c) ->
             (* can't idiv by constants :( *)
             let t' = Tmp (Temp.create()) in
@@ -104,7 +104,7 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
             Tmp3AddrBinop(op, TmpLoc tLoc, TmpLoc (TmpVar t'), dest)::[]
       | (_, TmpConst c1, TmpConst c2) ->
             if (op = FAKEDIV || op = FAKEMOD) && c1 = intMin && c2 = -1
-            then Tmp3AddrFunCall(BIT32, "raise", [TmpConst 8], None)::[]
+            then Tmp3AddrBinop(FAKEDIV, TmpConst 666, TmpConst 0, dest)::[]
             else
             let cFinal = computeBinop op c1 c2 in
             handleMove multDefdTmps tmpToConstMap (BIT32, TmpConst cFinal, dest)
