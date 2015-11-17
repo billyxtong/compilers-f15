@@ -272,7 +272,8 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   let tmpToColorMap = getColoring instrs progTmps params in
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
-  let allocdRegs = getUsedRegs maxColor allocableRegList in
+  (* let allocdRegs = getUsedRegs maxColor allocableRegList @ paramRegList in *)
+  let allocdRegs = paramRegList @ allocableRegList in
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
   let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
   let firstArgOffsetAboveRbp = bytesForArg * (List.length pushInstrs + 1)
