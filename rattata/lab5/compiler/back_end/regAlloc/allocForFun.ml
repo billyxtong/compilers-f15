@@ -162,10 +162,13 @@ let rec getTempSet instrList tempSet =
                                                              getTempSet instrs tempSet)
                  | _ -> getTempSet instrs tempSet)
 
-let getTempList instrList = let tempSet = getTempSet instrList
+let getTempList params instrList =
+                            let tempSet = getTempSet instrList
                                 (H.create (List.length instrList)) in
                             let addTempToList t () acc = t::acc in
-                            H.fold addTempToList tempSet []
+                            let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
+                            paramTmps @ H.fold addTempToList tempSet []
+                              
 let mappingForParam argOffsetAboveRbp paramRegArray i =
     (* We know that the first 6 params will be mapped to registers, and the
        rest will be in offsets of 8 bytes above what was RSP on
@@ -223,7 +226,7 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   let allocableRegList = getAllocableRegList instrs in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let regArray = Array.of_list allocableRegList in
-  let tempList = getTempList instrs in
+  let tempList = getTempList params instrs in
   let tmpToColorMap = getColoring instrs tempList in
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
