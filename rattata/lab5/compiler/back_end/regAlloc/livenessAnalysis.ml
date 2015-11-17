@@ -141,10 +141,22 @@ let rec makeAllParamsInterfere graph = function
        let () = L.iter (fun p -> G.addEdge graph (param, p)) rest in
        makeAllParamsInterfere graph rest
 
+(* third and fourth params params are edx and ecx which are reserved for
+   division/shifts *)
+let make3rdAnd4thParamsInterfereWithEverything paramTmps progTmps graph =
+    match paramTmps with
+         p1::p2::p3::p4::rest ->
+               let () = L.iter (fun t -> G.addEdge graph (p3, t)) progTmps in
+               L.iter (fun t -> G.addEdge graph (p4, t)) progTmps
+       | p1::p2::p3::[] -> L.iter (fun t -> G.addEdge graph (p3, t)) progTmps 
+       | _ -> ()
+
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine
      paramTmps =
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
+  let () = make3rdAnd4thParamsInterfereWithEverything paramTmps temps
+        interferenceGraph in
   let () = makeAllParamsInterfere interferenceGraph paramTmps in
   let () = L.iter (fun t -> handleTemp t prog predsPerLine
                       interferenceGraph liveTmpsPerLine) temps in
