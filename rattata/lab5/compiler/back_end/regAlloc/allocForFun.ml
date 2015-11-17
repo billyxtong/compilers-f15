@@ -232,8 +232,8 @@ let getUsedRegs maxColor allocableRegList =
     List.map (fun (i,p) -> p) filtered
 
 let getColoring instrs tempList params =
+  let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
   if !OptimizeFlags.doRegAlloc then
-     let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
      let interferenceGraph =
           LivenessAnalysis.analyzeLiveness instrs tempList paramTmps in
      let tieBreakFunc = TieBreak.getTieBreakFunc instrs in
@@ -244,7 +244,7 @@ let getColoring instrs tempList params =
      tmpToColorMap
   else
      let tmpToColorMap = H.create (List.length tempList) in
-     let () = List.iter (fun t -> H.add tmpToColorMap t t) tempList in
+     let () = List.iter (fun t -> H.add tmpToColorMap t t) (tempList @ paramTmps) in
      tmpToColorMap
 
 let progHasDivs instrs = List.exists (function Tmp2AddrBinop(FAKEDIV, _, _) -> true
