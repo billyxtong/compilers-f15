@@ -342,9 +342,28 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
                     memor errors *)
                               TmpIntExpr (TmpIntArg (TmpConst 12))::[]) in
        let accessOffsetTmp = Tmp (Temp.create()) in
-       let accessOffsetExpr = TmpInfAddrBinopExpr(MUL,
+       let accessOffsetExpr = 
+         if !OptimizeFlags.arrayStrengthReduction
+         then
+           let s = getSizeForType elemType in
+           (if s = 4
+           then 
+            TmpInfAddrBinopExpr(LSHIFT, index_final,
+                          TmpIntArg (TmpConst (2)))
+           else 
+             if s = 8 then
+              TmpInfAddrBinopExpr(LSHIFT, index_final,
+                          TmpIntArg (TmpConst (3)))
+             else
+              TmpInfAddrBinopExpr(MUL,
+                          TmpIntArg (TmpConst (s)),
+                                      index_final)
+            )
+         else 
+            TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (getSizeForType elemType)),
-                                      index_final) in
+                                      index_final) 
+       in
        let storeAccessOffset = TmpInfAddrMov(BIT32, TmpIntExpr accessOffsetExpr,
                                              TmpVarLVal accessOffsetTmp) in
        let maskOffsetExpr = TmpInfAddrMaskUpper accessOffsetTmp in

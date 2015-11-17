@@ -3,12 +3,20 @@ module H = Hashtbl
 open LivenessAnalysis
 open NecessityRules
 open Datatypesv1
+open PrintDatatypes
 
 let rec neededR1 currLine tempsToLines prog =
   if (currLine = (-1)) then () else
   let necessaryTempsOnCurrLine = getNecessaryTemps currLine prog in
-  let () = L.iter(fun temp -> let lines = (try H.find tempsToLines temp with Not_found -> raise (Failure "neededR1\n")) in
-                    H.add lines currLine ()) necessaryTempsOnCurrLine in
+  let () = L.iter
+    (fun temp -> 
+      let lines = 
+        (try H.find tempsToLines temp 
+         with Not_found -> 
+           let () = print_string (tmp2AddrInstrToString (prog.(currLine))) in
+           let () = print_string ("missing t" ^ (string_of_int temp) ^ "\n") in
+           raise (Failure "neededR1\n")) 
+         in H.add lines currLine ()) necessaryTempsOnCurrLine in
   neededR1 (currLine - 1) tempsToLines prog
 
 let locToTmp loc =

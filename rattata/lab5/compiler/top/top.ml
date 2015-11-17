@@ -38,15 +38,17 @@ let spec =
   +> flag "--noRegAlloc" no_arg ~doc:" Don't do register allocation"
   +> flag "--doConstOpts" no_arg ~doc:" Do constant propogation and folding "
   +> flag "--doInlining" no_arg ~doc: "Do inlining"
+  +> flag "--arrayStrengthReduction" no_arg ~doc: "Do strength reduction on array bounds"
   
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction () =
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt2 then
         (
-        OptimizeFlags.doConstOpts := true;
-        OptimizeFlags.doInlining := true;
-        OptimizeFlags.removeDeadCode := true;
+        (* OptimizeFlags.doConstOpts := true; *)
+        (* OptimizeFlags.doInlining := true; *)
+        (* OptimizeFlags.removeDeadCode := true; *)
+        OptimizeFlags.arrayStrengthReduction := true; 
         (* don't use the checknoshiftsdivs, it's not correct *)
         (* OptimizeFlags.checkNoShiftsDivs := true; *)
 
@@ -60,6 +62,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
     let () = if doInlining then OptimizeFlags.doInlining := true in
+    let () = if arrayStrengthReduction then OptimizeFlags.arrayStrengthReduction := true in
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
     (* main_source is the .l1/2/3/4 file. This is to distinguish from
@@ -104,6 +107,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let threeAddr = FewTmpsTo3Addr.to3Addr infAddrWithMem in ();
     say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr);
 
+    (* constant folding and propagation *)
     let threeAddr' = (if !OptimizeFlags.doConstOpts then
                       ConstPropAndFold.constPropAndFold threeAddr
                       else threeAddr) in
@@ -114,12 +118,14 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
                       Inlining.inlineFuncs threeAddr'
                       else threeAddr') in
     say_if dump_Inlined (fun () -> tmp3AddrProgToString inlinedThreeAddr);
-    
+   
+
     (* Three address to Two address *)
     say_if verbose (fun () -> "3Addr to 2Addr...");
     let twoAddr = To2Addr.to2Addr inlinedThreeAddr in ();
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
+    (* eliminating dead code *)
     say_if verbose (fun () -> "Killing dead code..."); 
     let noDeadCode = (if !OptimizeFlags.removeDeadCode then
                         KillDeadCode.killDeadCode twoAddr

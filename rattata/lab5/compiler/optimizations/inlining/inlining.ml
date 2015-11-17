@@ -4,7 +4,7 @@ module H = Hashtbl
 let inlinedInstrsMap = H.create 10 (* basically memoizing inlining calls *)
 
 let inlineMaxLength = 50
-let maxDepth = 5
+let maxDepth = 6
 
 let isRecCall fName = function
     Tmp3AddrFunCall(retSize, callName, args, dest) -> callName = fName
