@@ -21,17 +21,55 @@ let assemLocForColor regArray offsetIncr colorNum =
        first stack spot is offsetIncr(rsp), we add one *)
     else MemAddr(RBP, - ((colorNum - (A.length regArray) + 1) * offsetIncr))
 
-(* colorList consists of tuples (t, colorForTmp) where t is the temp number
-   and color is the color of t. We need t in order to add it to the
-   map properly *)
-let rec makeTmpToAssemLocMap tmpToColorMap tmpList offsetIncr regArray resultMap =
-    match tmpList with
-        [] -> resultMap
-      | t::tmps ->
-           let color = H.find tmpToColorMap t in
-           let currAssemLoc = assemLocForColor regArray offsetIncr color in
-           let () = H.add resultMap (Tmp t) currAssemLoc in
-           makeTmpToAssemLocMap tmpToColorMap tmps offsetIncr regArray resultMap
+let rec makeColorToAssemLocMapFromParams tmpToColorMap paramTmps paramRegs resultMap
+    nextArgOffsetAboveRBP =
+    match (paramTmps, paramRegs) with
+         (paramT :: params, reg :: regs) ->
+               let paramColor = (try H.find tmpToColorMap paramT
+                                 with Not_found -> assert(false)) in
+               let () = H.add resultMap paramColor (Reg reg) in
+               makeColorToAssemLocMapFromParams tmpToColorMap params regs resultMap
+                 nextArgOffsetAboveRBP
+      | ([], _) -> (resultMap, paramRegs) (* we need to know if there were any
+                                             paramRegs left over! *)
+      | (paramT :: params, []) -> (* what if we ran out of regs? *)
+               let currLoc = MemAddr(RBP, nextArgOffsetAboveRBP) in
+               let paramColor = (try H.find tmpToColorMap paramT
+                                 with Not_found -> assert(false)) in
+               let () = H.add resultMap paramColor currLoc in
+               makeColorToAssemLocMapFromParams tmpToColorMap params [] resultMap
+                 (nextArgOffsetAboveRBP + bytesForArg)
+
+let rec addColorToAssemLocMappingsForProgTmps tmpToColorMap progTmps allocableRegs
+    colorToAssemLocMap nextOffsetBelowRBP =
+    match progTmps with
+         [] -> ()
+       | t :: temps ->
+               let tColor = (try H.find tmpToColorMap t
+                                 with Not_found -> assert(false)) in
+               (try let _ = H.find colorToAssemLocMap tColor in
+                  (* we already have an assemLoc for this color, move on *)
+                  addColorToAssemLocMappingsForProgTmps tmpToColorMap temps
+                    allocableRegs (* note: all allocableRegs *) colorToAssemLocMap
+                    nextOffsetBelowRBP
+                with Not_found ->
+           (match allocableRegs with
+               reg :: regs ->
+                    let () = H.add colorToAssemLocMap tColor (Reg reg) in
+                    addColorToAssemLocMappingsForProgTmps tmpToColorMap temps
+                    (* don't include curr reg *)
+                    regs colorToAssemLocMap nextOffsetBelowRBP
+             | [] -> let currLoc = MemAddr(RBP, -nextOffsetBelowRBP) in
+                     let () = H.add colorToAssemLocMap tColor currLoc in
+                     addColorToAssemLocMappingsForProgTmps tmpToColorMap temps
+                     [] colorToAssemLocMap (nextOffsetBelowRBP + bytesForArg)))
+
+let rec makeTmpToAssemLocMap tmpToColorMap tmpList colorToAssemLocMap resultMap =
+    let getAssemLoc t = (try let color = H.find tmpToColorMap t in
+                             H.find colorToAssemLocMap color
+                         with Not_found -> assert(false)) in
+    let () = List.iter (fun t -> H.add resultMap (Tmp t) (getAssemLoc t)) tmpList in
+    resultMap
 
 let translateTmpArg tbl = function
     TmpConst c -> Const c
@@ -150,6 +188,8 @@ let rec getTempSet instrList tempSet =
                        (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
                  | Tmp2AddrBinop(op, src, TmpVar (Tmp dest)) ->
                        (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
+                 | Tmp2AddrPtrBinop(op, src, TmpVar (Tmp dest)) ->
+                      (let () = H.replace tempSet dest () in getTempSet instrs tempSet)
                  | Tmp2AddrFunCall(retSize, fName, args, Some (TmpVar (Tmp dest))) ->
                                               (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
@@ -162,12 +202,10 @@ let rec getTempSet instrList tempSet =
                                                              getTempSet instrs tempSet)
                  | _ -> getTempSet instrs tempSet)
 
-let getTempList params instrList =
-                            let tempSet = getTempSet instrList
-                                (H.create (List.length instrList)) in
-                            let addTempToList t () acc = t::acc in
-                            let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
-                            paramTmps @ H.fold addTempToList tempSet []
+let getTempList instrList =
+  let tempSet = getTempSet instrList (H.create (List.length instrList)) in
+  let addTempToList t () acc = t::acc in
+  H.fold addTempToList tempSet []
                               
 let mappingForParam argOffsetAboveRbp paramRegArray i =
     (* We know that the first 6 params will be mapped to registers, and the
@@ -193,11 +231,15 @@ let getUsedRegs maxColor allocableRegList =
     (* have to convert it back to list without indices *)
     List.map (fun (i,p) -> p) filtered
 
-let getColoring instrs tempList =
+let getColoring instrs tempList params =
   if !OptimizeFlags.doRegAlloc then
-     let interferenceGraph = LivenessAnalysis.analyzeLiveness instrs tempList in
+     let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
+     let interferenceGraph =
+          LivenessAnalysis.analyzeLiveness instrs tempList paramTmps in
      let tieBreakFunc = TieBreak.getTieBreakFunc instrs in
      let vertexOrdering = maxCardSearch interferenceGraph tieBreakFunc in
+     (* let () = print_string("vertices: " ^ (String.concat ", " *)
+     (*                        (List.map string_of_int vertexOrdering))) in *)
      let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
      tmpToColorMap
   else
@@ -222,23 +264,27 @@ let getAllocableRegList instrs =
 
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   funcToParamSizeMap : assemFunDef =
-  let paramRegArray = Array.of_list [EDI; ESI; EDX; ECX; R8; R9] in
+  let paramRegList = [EDI; ESI; EDX; ECX; R8; R9] in
+  let paramRegArray = Array.of_list paramRegList in
   let allocableRegList = getAllocableRegList instrs in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
-  let regArray = Array.of_list allocableRegList in
-  let tempList = getTempList params instrs in
-  let tmpToColorMap = getColoring instrs tempList in
+  let progTmps = getTempList instrs in
+  let tmpToColorMap = getColoring instrs progTmps params in
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
   (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
   let allocdRegs = getUsedRegs maxColor allocableRegList in
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
-  let offsetIncr = 8 in
-  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap tempList
-      offsetIncr regArray (H.create 100) in
-  let argSize = 8 in
-  let argOffsetAboveRbp = argSize * (List.length pushInstrs + 1)
+  let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
+  let firstArgOffsetAboveRbp = bytesForArg * (List.length pushInstrs + 1)
                                     (* +1 for return address *) in
-  let () = addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params in
+  let (colorToAssemLocMap, leftoverParamRegs) =
+      makeColorToAssemLocMapFromParams tmpToColorMap paramTmps paramRegList
+        (H.create 1000) firstArgOffsetAboveRbp in
+  let firstOffsetBelowRbp = bytesForArg in
+  let () = addColorToAssemLocMappingsForProgTmps tmpToColorMap progTmps
+       allocableRegList colorToAssemLocMap firstOffsetBelowRbp in
+  let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap (progTmps @ paramTmps)
+       colorToAssemLocMap (H.create 1000) in
   let finalOffset = H.fold maxDistBelowRBPOnStack tmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)
