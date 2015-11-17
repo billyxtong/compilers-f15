@@ -154,6 +154,32 @@ let make3rdAnd4thParamsInterfereWithEverything paramTmps progTmps graph =
        | p1::p2::p3::[] -> L.iter (fun t -> G.addEdge graph (p3, t)) progTmps 
        | _ -> ()
 
+let rec makeAllPairsInterfere graph tmpList1 tmpList2 =
+    match tmpList1 with
+         [] -> ()
+       | t1::t1rest ->
+            let () = L.iter (fun t -> G.addEdge graph(t, t1)) tmpList2 in
+            makeAllPairsInterfere graph t1rest tmpList2        
+
+let getArgsThatAreTmps args =
+    let removeConsts = List.filter
+           (fun arg -> match arg with TmpConst _ -> false | TmpLoc _ -> true) args in
+    let undoDerefs = List.map (fun (TmpLoc tLoc) -> match tLoc with
+                                         TmpVar (Tmp t) -> t
+                                       | TmpDeref (Tmp t) -> t) removeConsts
+    in undoDerefs
+
+let makeArgsInterferePerCall graph paramTmps = function
+    Tmp2AddrFunCall (retSize, fName, args, dest) ->
+        let argsThatAreTmps = getArgsThatAreTmps args in
+        makeAllPairsInterfere graph paramTmps argsThatAreTmps
+ |  _ -> ()
+
+(* any time we make a function call inside this function, those args interfere
+   with the params of the caller *)
+let makeFuncArgsInterfereWithParams graph paramTmps instrs =
+    L.iter (makeArgsInterferePerCall graph paramTmps) instrs
+      
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine
      paramTmps =
   let liveTmpsPerLine = A.make (A.length prog) [] in
@@ -173,4 +199,6 @@ let analyzeLiveness (instrs : tmp2AddrInstr list) progTmps paramTmps =
   let len = A.length progArray in
   let lineToPredecessorsArray = A.make len [] in
   let () = findPredecessors lineToPredecessorsArray progArray 0 in
-  drawGraph progTmps progArray lineToPredecessorsArray paramTmps
+  let resultGraph = drawGraph progTmps progArray lineToPredecessorsArray paramTmps in
+  let () = makeFuncArgsInterfereWithParams resultGraph paramTmps instrs in
+  resultGraph
