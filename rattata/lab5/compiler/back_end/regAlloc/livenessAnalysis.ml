@@ -121,8 +121,11 @@ let rec findPredecessors (predecessorsArray : (int list) array)
 let drawEdgesForTmp interferenceGraph liveTmpsOnLine t =
     L.iter (fun t' -> G.addEdge interferenceGraph (t, t')) liveTmpsOnLine
 
-let drawEdgesForLine prog line liveTmpsOnLine interferenceGraph =
-  if line == 0 then () (* no interference on line 0 *) else
+let drawEdgesForLine paramTmps prog line liveTmpsOnLine interferenceGraph =
+  if line == 0 then (* all params are considered to be defined on line -1 *)
+    L.iter (drawEdgesForTmp interferenceGraph liveTmpsOnLine) paramTmps
+
+  else
   L.iter (drawEdgesForTmp interferenceGraph liveTmpsOnLine)
          (getDefVars prog (line - 1 ))
       
@@ -159,9 +162,9 @@ let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine
         interferenceGraph in
   let () = makeAllParamsInterfere interferenceGraph paramTmps in
   let () = L.iter (fun t -> handleTemp t prog predsPerLine
-                      interferenceGraph liveTmpsPerLine) temps in
+                      interferenceGraph liveTmpsPerLine) (temps @ paramTmps) in
   let lineNums = Array.mapi (fun i -> fun _ -> i) prog in
-  let () = A.iter (fun lineNum -> drawEdgesForLine prog lineNum
+  let () = A.iter (fun lineNum -> drawEdgesForLine paramTmps prog lineNum
       (liveTmpsPerLine.(lineNum)) interferenceGraph) lineNums in
   interferenceGraph
 
