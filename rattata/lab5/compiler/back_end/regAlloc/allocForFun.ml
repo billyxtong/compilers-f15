@@ -330,7 +330,8 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
        colorToAssemLocMap (H.create 1000) in
   let allocdRegs = getUsedRegsList (H.create 10) tmpToAssemLocMap
          (paramTmps @ progTmps) in
-  let regsToPushAtTop = (if fName = "_c0_main" then RBP :: allocdRegs
+  let regsToPushAtTop = (if fName = "_c0_main" || not !OptimizeFlags.onlyPushRegsOnce
+                         then RBP :: allocdRegs
                          else RBP::[]) in
   let pushInstrs = List.map (fun r -> PUSH r) regsToPushAtTop in
   let firstArgOffsetAboveRbp = bytesForArg * ((List.length pushInstrs) + 1)
