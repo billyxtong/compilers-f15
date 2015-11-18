@@ -42,15 +42,17 @@ let spec =
   
 let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction () =
   try
+        OptimizeFlags.onlyPushRegsOnce := true;
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt2 then
         (
         (* OptimizeFlags.doConstOpts := true; *)
         (* OptimizeFlags.doInlining := true; *)
-        (* OptimizeFlags.removeDeadCode := true; *)
-        OptimizeFlags.arrayStrengthReduction := true; 
-        (* don't use the checknoshiftsdivs, it's not correct *)
-        (* OptimizeFlags.checkNoShiftsDivs := true; *)
+        OptimizeFlags.removeDeadCode := true;
+        OptimizeFlags.arrayStrengthReduction := true;
+
+        OptimizeFlags.onlyPushRegsOnce := true;
+          (* this one also doesn't quite work *)
 
         (* the regAllocTieBreaking might do more harm than good *)
         (* OptimizeFlags.doRegAllocTieBreaking := true; *)

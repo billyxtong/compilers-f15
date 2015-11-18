@@ -10,5 +10,6 @@ let doConstOpts = ref false (* don't do const propogation/folding *)
 let doInlining = ref false (* don't do inlining *)
 let doRegAllocTieBreaking = ref false 
 let removeUnneddedJumps = ref false
-let checkNoShiftsDivs = ref false
+let tryToUseECXEDX = ref false
 let arrayStrengthReduction = ref false
+let onlyPushRegsOnce = ref false

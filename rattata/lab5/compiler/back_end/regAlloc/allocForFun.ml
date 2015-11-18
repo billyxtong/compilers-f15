@@ -244,11 +244,7 @@ let progHasShifts instrs = List.exists (function Tmp2AddrBinop(LSHIFT, _, _) -> 
                                         | _ -> false) instrs
 
 let getAllocableRegList instrs =
-    let base = [EBX; R10; R11; R12; R13] in
-    if not !OptimizeFlags.checkNoShiftsDivs then base else
-      let withDivs = (if progHasDivs instrs then base else EDX::base) in
-      let withShifts = (if progHasShifts instrs then withDivs else ECX::withDivs) in
-      withShifts
+    [EBX; R10; R11; R12; R13]
 
 let rec getUsedRegsList regSet tmpToAssemLocMap tmps =
     match tmps with
