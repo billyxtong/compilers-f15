@@ -207,30 +207,6 @@ let getTempList instrList =
   let addTempToList t () acc = t::acc in
   H.fold addTempToList tempSet []
                               
-let mappingForParam argOffsetAboveRbp paramRegArray i =
-    (* We know that the first 6 params will be mapped to registers, and the
-       rest will be in offsets of 8 bytes above what was RSP on
-       entrance to the function. HOWEVER since the  *)
-    if i < Array.length paramRegArray then Reg paramRegArray.(i) else
-    let offsetFromArgStart = bytesForArg * (i - (Array.length paramRegArray)) in
-           (* there's no +1  because if i == length, it should be 0 *)
-    MemAddr(RBP, argOffsetAboveRbp + offsetFromArgStart)
-
-let addParamMappings tmpToAssemLocMap argOffsetAboveRbp paramRegArray params =
-    let paramTmps = List.map (fun (t, paramSize) -> t) params in
-    List.iteri (fun i -> fun p ->
-        H.add tmpToAssemLocMap p (mappingForParam argOffsetAboveRbp
-                                    paramRegArray i)) paramTmps
-
-let combineForMaxColor t color currMax = max color currMax
-
-let getUsedRegs maxColor allocableRegList =
-    let paramListIndices = List.mapi (fun i p -> (i,p)) allocableRegList in
-    (* The order of regs in allocableRegList corrrespond to the colors *)
-    let filtered = List.filter (fun (i,p) -> i <= maxColor) paramListIndices in
-    (* have to convert it back to list without indices *)
-    List.map (fun (i,p) -> p) filtered
-
 let getColoring instrs tempList params =
   let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
   if !OptimizeFlags.doRegAlloc then
@@ -262,6 +238,21 @@ let getAllocableRegList instrs =
       let withShifts = (if progHasShifts instrs then withDivs else ECX::withDivs) in
       withShifts
 
+let rec getUsedRegsList regSet tmpToAssemLocMap tmps =
+    match tmps with
+        [] ->  let addRegToList r () acc = r::acc in H.fold addRegToList regSet []
+      | t :: rest ->
+           (try (match H.find tmpToAssemLocMap (Tmp t) with
+                 | MemAddr _ -> getUsedRegsList regSet tmpToAssemLocMap rest
+                 | MemAddrDeref _  -> getUsedRegsList regSet tmpToAssemLocMap rest
+                 | Reg r -> let () = H.replace regSet r () in
+                           getUsedRegsList regSet tmpToAssemLocMap rest
+                 | RegDeref r -> let () = H.replace regSet r () in
+                           getUsedRegsList regSet tmpToAssemLocMap rest)
+          with Not_found -> assert(false))
+                             
+let combineForMaxColor t color currMax = max color currMax
+
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   funcToParamSizeMap : assemFunDef =
   let paramRegList = [EDI; ESI; EDX; ECX; R8; R9] in
@@ -271,12 +262,11 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   let progTmps = getTempList instrs in
   let tmpToColorMap = getColoring instrs progTmps params in
   let maxColor = H.fold combineForMaxColor tmpToColorMap (-1) in
-  (* -1 because if no colors are used, maxColor should not be 0 (that means one is used) *)
-  (* let allocdRegs = getUsedRegs maxColor allocableRegList @ paramRegList in *)
-  let allocdRegs = paramRegList @ allocableRegList in
-  let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
+  (* -1 because if no colors are used, maxColor should not be 0 *)
+  let numPushInstrs = min (maxColor + 1) (List.length allocableRegList +
+                                          List.length paramRegList) in
   let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
-  let firstArgOffsetAboveRbp = bytesForArg * (List.length pushInstrs + 1)
+  let firstArgOffsetAboveRbp = bytesForArg * (numPushInstrs + 1)
                                     (* +1 for return address *) in
   let (colorToAssemLocMap, leftoverParamRegs) =
       makeColorToAssemLocMapFromParams tmpToColorMap paramTmps paramRegList
@@ -286,6 +276,9 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
        allocableRegList colorToAssemLocMap firstOffsetBelowRbp in
   let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap (progTmps @ paramTmps)
        colorToAssemLocMap (H.create 1000) in
+  let allocdRegs = getUsedRegsList (H.create 10) tmpToAssemLocMap
+         (paramTmps @ progTmps) in
+  let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
   let finalOffset = H.fold maxDistBelowRBPOnStack tmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)

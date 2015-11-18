@@ -201,4 +201,5 @@ let analyzeLiveness (instrs : tmp2AddrInstr list) progTmps paramTmps =
   let () = findPredecessors lineToPredecessorsArray progArray 0 in
   let resultGraph = drawGraph progTmps progArray lineToPredecessorsArray paramTmps in
   let () = makeFuncArgsInterfereWithParams resultGraph paramTmps instrs in
+  (* let () = makeAllPairsInterfere resultGraph progTmps paramTmps in *)
   resultGraph
