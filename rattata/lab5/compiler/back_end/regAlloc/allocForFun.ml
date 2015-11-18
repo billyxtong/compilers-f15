@@ -145,6 +145,12 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
         MOV((try (H.find funcToParamSizeMap fName).(i)
              with Not_found -> BIT64),
           translateTmpArg tbl arg, getArgDest paramRegArray i)) args in
+    let rspSUBInstr = if rspShiftAmount = 0 && !OptimizeFlags.removeSubAddZeroToRsp
+                      then []
+                      else PTR_BINOP(PTR_SUB, Const rspShiftAmount, Reg RSP)::[] in
+    let rspADDInstr = if rspShiftAmount = 0 && !OptimizeFlags.removeSubAddZeroToRsp
+                      then []
+                      else PTR_BINOP(PTR_ADD, Const rspShiftAmount, Reg RSP)::[] in
     (* See if we need to move EAX to a certain result tmp (we wouldn't have to
        for void function calls *)
     (* See which registers we need to save (only the ones we're using *)
@@ -152,9 +158,8 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
                           None -> []
                         | Some t -> MOV(opSize, AssemLoc (Reg EAX),
                                        translateTmpLoc tbl t)::[]) in
-    pushRegsInstrs @
-    PTR_BINOP(PTR_SUB, Const rspShiftAmount, Reg RSP):: moveInstrs @ [CALL fName]
-    @ [PTR_BINOP(PTR_ADD, Const rspShiftAmount, Reg RSP)] @ popRegsInstrs @ resultInstr 
+    pushRegsInstrs @ rspSUBInstr @ moveInstrs @ [CALL fName]
+    @ rspADDInstr @ popRegsInstrs @ resultInstr 
 
 let translate tbl allocdRegs finalOffset paramRegArray
     funcToParamSizeMap regsPushedAtTop (instr : tmp2AddrInstr) : assemInstr list =
@@ -167,9 +172,12 @@ let translate tbl allocdRegs finalOffset paramRegArray
               PTR_BINOP(binop, translateTmpArg tbl arg, translateTmpLoc tbl dest)::[]
       | Tmp2AddrReturn(opSize, arg) ->
         (* Need to pop in opposite order as pushed *)
+        let rspADDInstr = if finalOffset = 0 && !OptimizeFlags.removeSubAddZeroToRsp
+          then []
+          else PTR_BINOP (PTR_ADD, Const finalOffset, Reg RSP)::[] in
         let popInstrs = List.map (fun r -> POP r) (List.rev regsPushedAtTop) in
                                MOV(opSize, translateTmpArg tbl arg, Reg EAX)::
-                               PTR_BINOP(PTR_ADD, Const finalOffset, Reg RSP)::[]
+                               rspADDInstr
                                @ (popInstrs)@ RETURN::[]
       | Tmp2AddrJump j -> JUMP j::[]
       | Tmp2AddrLabel jumpLabel -> LABEL jumpLabel::[]
@@ -339,9 +347,11 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   let finalOffset = H.fold maxDistBelowRBPOnStack finalTmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)
+  let rspSUBInstr = if finalOffset = 0 && !OptimizeFlags.removeSubAddZeroToRsp
+                    then []
+                    else PTR_BINOP (PTR_SUB, Const finalOffset, Reg RSP)::[] in
   let finalInstrs = pushInstrs @
-  MOV(BIT64, AssemLoc (Reg RSP), Reg RBP)
-  :: PTR_BINOP (PTR_SUB, Const finalOffset, Reg RSP):: [] @
+  MOV(BIT64, AssemLoc (Reg RSP), Reg RBP)::[] @ rspSUBInstr @
   (List.concat (List.map (translate finalTmpToAssemLocMap allocdRegs finalOffset
                             paramRegArray funcToParamSizeMap regsToPushAtTop
                          ) instrs)) in
