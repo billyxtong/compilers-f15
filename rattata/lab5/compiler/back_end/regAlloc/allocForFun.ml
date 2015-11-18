@@ -102,8 +102,29 @@ let getArgDest paramRegArray i =
     MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray))
       (* this puts the 7th arg at 0(rsp) BEFORE the call. Which should be 8(rsp) after *)
 
+let getPushPopsAndRSPshiftForFunCall fName allocdRegs spaceForArgs finalOffset
+  numPushesAtTop =
+    let (pushRegsInstrs, popRegsInstrs) =
+          (List.map (fun r -> PUSH r) allocdRegs,
+           List.map (fun r -> POP r) (List.rev allocdRegs)) in
+    (* Now make sure we align RSP to 16 bytes. Note that we know that RSP
+       is 8-byte-but-not-16-bye aligned at the moment. *)
+    (* mod 16 = 0 because we always push RBP which takes 8 bytes, and every
+    other time we push registers before a function call, we push twice:
+    once at the top of this function, and once before the call. Because we're a
+    little silly. *)
+    let priorRSPShift = finalOffset + spaceForArgs +
+            (bytesForArg * numPushesAtTop) +
+            (bytesForArg * (List.length pushRegsInstrs)) in
+    let () = assert(priorRSPShift mod 8 = 0) in
+    (* Note that RSP is 8-byte-but-not-16-bye aligned at the moment. *)
+    let is16ByteAligned =  priorRSPShift mod 16 = 8 in
+    let rspShiftAmount = (if is16ByteAligned then spaceForArgs
+                          else spaceForArgs + 8) in
+    (pushRegsInstrs, popRegsInstrs, rspShiftAmount)
+
 let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
-      opSize fName args dest =
+      opSize fName args dest regsPushedAtTop =
     (* 1. Figure out how many args we'll need to put on the stack.
        2. Figure out how much we'll need to decrease RSP by, both to make
        room for the stack args, and to make sure it's 16-byte aligned.
@@ -113,17 +134,13 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
        6. Restore RSP
        7. Move result from EAX to wherever we want (if there is a result)
     *)
+    let numPushesAtTop = List.length regsPushedAtTop in
     let numStackArgs = max 0 (List.length args - (Array.length paramRegArray)) in
                  (* numStackArgs can't be less than 0, even if the right term is *)
     let spaceForArgs = bytesForArg * numStackArgs in
-    let is16ByteAligned = (finalOffset + spaceForArgs) mod 16 = 0 in
-    (* mod 16 = 0 because we always push RBP which takes 8 bytes, and every
-    other time we push registers before a function call, we push twice:
-    once at the top of this function, and once before the call. Because we're a
-    little silly. *)
-    let rspShiftAmount = (if is16ByteAligned then spaceForArgs
-                          else spaceForArgs + 8) in
-            (* Adding 8 makes it 16-byte-aligned if it isn't *)
+    let (pushRegsInstrs, popRegsInstrs, rspShiftAmount) =
+         getPushPopsAndRSPshiftForFunCall fName allocdRegs spaceForArgs finalOffset
+             numPushesAtTop in
     let moveInstrs = List.mapi (fun i -> fun arg ->
         MOV((try (H.find funcToParamSizeMap fName).(i)
              with Not_found -> BIT64),
@@ -131,20 +148,16 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
     (* See if we need to move EAX to a certain result tmp (we wouldn't have to
        for void function calls *)
     (* See which registers we need to save (only the ones we're using *)
-    let pushRegsInstrs = List.map (fun r -> PUSH r) allocdRegs in
-    let popRegsInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) in
     let resultInstr = (match dest with
                           None -> []
                         | Some t -> MOV(opSize, AssemLoc (Reg EAX),
                                        translateTmpLoc tbl t)::[]) in
-    (* Now make sure we align RSP to 16 bytes. Note that we know that RSP
-       is 8-byte-but-not-16-bye aligned at the moment. *)
     pushRegsInstrs @
     PTR_BINOP(PTR_SUB, Const rspShiftAmount, Reg RSP):: moveInstrs @ [CALL fName]
     @ [PTR_BINOP(PTR_ADD, Const rspShiftAmount, Reg RSP)] @ popRegsInstrs @ resultInstr 
 
 let translate tbl allocdRegs finalOffset paramRegArray
-    funcToParamSizeMap (instr : tmp2AddrInstr) : assemInstr list =
+    funcToParamSizeMap regsPushedAtTop (instr : tmp2AddrInstr) : assemInstr list =
    match instr with
         Tmp2AddrMov(opSize, arg, dest) -> MOV(opSize, translateTmpArg tbl arg,
                                               translateTmpLoc tbl dest)::[]
@@ -154,7 +167,7 @@ let translate tbl allocdRegs finalOffset paramRegArray
               PTR_BINOP(binop, translateTmpArg tbl arg, translateTmpLoc tbl dest)::[]
       | Tmp2AddrReturn(opSize, arg) ->
         (* Need to pop in opposite order as pushed *)
-        let popInstrs = List.map (fun r -> POP r) (List.rev allocdRegs) @ [POP RBP] in
+        let popInstrs = List.map (fun r -> POP r) (List.rev regsPushedAtTop) in
                                MOV(opSize, translateTmpArg tbl arg, Reg EAX)::
                                PTR_BINOP(PTR_ADD, Const finalOffset, Reg RSP)::[]
                                @ (popInstrs)@ RETURN::[]
@@ -166,7 +179,7 @@ let translate tbl allocdRegs finalOffset paramRegArray
               BOOL_INSTR (CMP (opSize, translateTmpArg tbl arg, translateTmpLoc tbl t))::[]
       | Tmp2AddrFunCall(opSize, fName, args, dest) ->
         translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
-          opSize fName args dest
+          opSize fName args dest regsPushedAtTop
       | Tmp2AddrMaskUpper t -> MASK_UPPER (translateTmpLoc tbl (TmpVar t))::[]
                                                  
 
@@ -317,14 +330,15 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
        colorToAssemLocMap (H.create 1000) in
   let allocdRegs = getUsedRegsList (H.create 10) tmpToAssemLocMap
          (paramTmps @ progTmps) in
-  let numPushInstrs = List.length allocdRegs + 1 in (* + 1 for pushing RBP *)
-  let firstArgOffsetAboveRbp = bytesForArg * (numPushInstrs + 1)
+  let regsToPushAtTop = (if fName = "_c0_main" then RBP :: allocdRegs
+                         else RBP::allocdRegs) in
+  let pushInstrs = List.map (fun r -> PUSH r) regsToPushAtTop in
+  let firstArgOffsetAboveRbp = bytesForArg * ((List.length pushInstrs) + 1)
                                     (* +1 for return address *) in
   let finalTmpToAssemLocMap = updateAssemLocsWithActualArgRBPOffset
           tmpToAssemLocMap firstArgOffsetAboveRbp in
   (* let () = print_string("num push: " ^ string_of_int numPushInstrs ^ ", num allocd: " *)
   (*                       ^ string_of_int (List.length allocdRegs)) in *)
-  let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
   let finalOffset = H.fold maxDistBelowRBPOnStack finalTmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)
@@ -332,7 +346,8 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   MOV(BIT64, AssemLoc (Reg RSP), Reg RBP)
   :: PTR_BINOP (PTR_SUB, Const finalOffset, Reg RSP):: [] @
   (List.concat (List.map (translate finalTmpToAssemLocMap allocdRegs finalOffset
-                            paramRegArray funcToParamSizeMap) instrs)) in
+                            paramRegArray funcToParamSizeMap regsToPushAtTop
+                         ) instrs)) in
   AssemFunDef(fName, finalInstrs)
 
 (* WE'RE USING EAX ALSO FOR MASKING OUT UPPER BITS. *)
