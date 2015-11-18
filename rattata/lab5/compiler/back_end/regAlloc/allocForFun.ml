@@ -53,9 +53,6 @@ let rec addColorToAssemLocMappingsForProgTmps tmpToColorMap progTmps allocableRe
                     allocableRegs (* note: all allocableRegs *) colorToAssemLocMap
                     nextOffsetBelowRBP
                 with Not_found ->
-                  let () = print_string("new color: " ^ string_of_int tColor ^
-                                    " for t"^string_of_int t ^
-                                        "\n") in
            (match allocableRegs with
                reg :: regs ->
                     let () = H.add colorToAssemLocMap tColor (Reg reg) in
@@ -210,8 +207,7 @@ let getTempList instrList =
   let addTempToList t () acc = t::acc in
   H.fold addTempToList tempSet []
                               
-let getColoring instrs tempList params =
-  let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
+let getColoring instrs tempList paramTmps =
   if !OptimizeFlags.doRegAlloc then
      let interferenceGraph =
           LivenessAnalysis.analyzeLiveness instrs tempList paramTmps in
@@ -282,14 +278,19 @@ let updateAssemLocsWithActualArgRBPOffset tmpToAssemLocMap firstArgOffsetAboveRb
                tmpToAssemLocMap
     in newMap
 
+let rec padParamsto6Tmps paramTmps =
+    if List.length paramTmps >= 6 then paramTmps
+    else padParamsto6Tmps (paramTmps @ [Temp.create()])
+
 let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   funcToParamSizeMap : assemFunDef =
-  let () = print_string("fun name: " ^ fName ^ "\n") in
   let paramRegList = [EDI; ESI; EDX; ECX; R8; R9] in
   (* DO NOT ALLOCATE THE SPILLAGE REGISTER HERE!!! OR REGISTERS USED FOR WONKY *)
   let paramRegArray = Array.of_list paramRegList in
   let progTmps = getTempList instrs in
-  let tmpToColorMap = getColoring instrs progTmps params in
+  let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
+  let paddedParamTmps = padParamsto6Tmps paramTmps in
+  let tmpToColorMap = getColoring instrs progTmps paddedParamTmps in
   let generalPurposeRegs = getAllocableRegList instrs in
   (* here's the deal: we need to know how many registers we're pushing, in order
      to know what the start offset above rbp should be for the args. But, we
@@ -299,24 +300,30 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
   let paramTmps = List.map (fun (Tmp t, pSize) -> t) params in
   let firstArgOffsetAboveRbpFAKE = 0 in
   let (colorToAssemLocMap, leftoverParamRegs) =
-      makeColorToAssemLocMapFromParams tmpToColorMap paramTmps paramRegList
+      makeColorToAssemLocMapFromParams tmpToColorMap paddedParamTmps paramRegList
         (H.create 1000) firstArgOffsetAboveRbpFAKE in
+  let () = assert (List.length leftoverParamRegs = 0) in
+  (* let usableParamRegs = List.filter (fun r -> (not (r = EDX) && not (r = ECX))) *)
+  (*     leftoverParamRegs in *)
+  (* we make the 3rd and 4th params interfere with everything in livenessAnalysis.ml,
+     but what about functions that take fewer than 3 params? then we have to block
+     the use of EDX/ECX in this way *)
   let allocableRegList = generalPurposeRegs @ leftoverParamRegs in
-  let () = print_string("leftover: " ^ string_of_int (List.length leftoverParamRegs)) in
   let firstOffsetBelowRbp = bytesForArg in
   let () = addColorToAssemLocMappingsForProgTmps tmpToColorMap progTmps
        allocableRegList colorToAssemLocMap firstOffsetBelowRbp in
+  (* paramTmps or paddedParamTmps? *)
   let tmpToAssemLocMap = makeTmpToAssemLocMap tmpToColorMap (progTmps @ paramTmps)
        colorToAssemLocMap (H.create 1000) in
   let allocdRegs = getUsedRegsList (H.create 10) tmpToAssemLocMap
          (paramTmps @ progTmps) in
-  let firstArgOffsetAboveRbp = bytesForArg * (List.length allocdRegs + 1)
+  let numPushInstrs = List.length allocdRegs + 1 in (* + 1 for pushing RBP *)
+  let firstArgOffsetAboveRbp = bytesForArg * (numPushInstrs + 1)
                                     (* +1 for return address *) in
   let finalTmpToAssemLocMap = updateAssemLocsWithActualArgRBPOffset
           tmpToAssemLocMap firstArgOffsetAboveRbp in
-  let numPushInstrs = List.length allocdRegs + 1 in
-  let () = print_string("num push: " ^ string_of_int numPushInstrs ^ ", num allocd: "
-                        ^ string_of_int (List.length allocdRegs)) in
+  (* let () = print_string("num push: " ^ string_of_int numPushInstrs ^ ", num allocd: " *)
+  (*                       ^ string_of_int (List.length allocdRegs)) in *)
   let pushInstrs = PUSH RBP :: List.map (fun r -> PUSH r) allocdRegs in  
   let finalOffset = H.fold maxDistBelowRBPOnStack finalTmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the

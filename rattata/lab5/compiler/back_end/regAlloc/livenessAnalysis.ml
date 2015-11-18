@@ -179,9 +179,14 @@ let makeArgsInterferePerCall graph paramTmps = function
    with the params of the caller *)
 let makeFuncArgsInterfereWithParams graph paramTmps instrs =
     L.iter (makeArgsInterferePerCall graph paramTmps) instrs
-      
+
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine
      paramTmps =
+     (* here's the deal: pretend we always have at least 6 params. Suppose we have
+        two params. Then create 4 new tmps, which we will be live nowhere. But,
+        it is useful because they will be assigned to various registers, and we
+        can interfere them in args to functions that we call. It's basically
+        a hacky way of doing precoloring. *)
   let liveTmpsPerLine = A.make (A.length prog) [] in
   let interferenceGraph = G.emptyGraph() in
   let () = make3rdAnd4thParamsInterfereWithEverything paramTmps temps
