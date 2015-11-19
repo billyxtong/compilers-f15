@@ -4,18 +4,38 @@ module H = Hashtbl
 let inlinedInstrsMap = H.create 10 (* basically memoizing inlining calls *)
 
 let inlineMaxLength = 50
-let maxDepth = 6
+let maxDepth = 3
 
-let isRecCall fName = function
-    Tmp3AddrFunCall(retSize, callName, args, dest) -> callName = fName
+(* returns true if targetName is recursive up to depth maxDepth, starting
+   the search from fName *)
+let rec funIsRecursive maxSearchDepth funDefMap targetName depth fName =
+    if depth >= maxSearchDepth then false else
+    try (let (params, instrs, isSingleRec) = H.find funDefMap fName in
+         let funCalls = List.filter (function Tmp3AddrFunCall _ -> true | _ -> false)
+             instrs in
+         let calledFunNames = List.map
+         (function Tmp3AddrFunCall (retSize, fName, args, dest) -> fName) funCalls in
+         List.exists (fun s -> s = targetName) calledFunNames
+         || List.exists (funIsRecursive maxSearchDepth funDefMap targetName (depth + 1))
+           calledFunNames)
+     with Not_found -> (* external function, we can just assume they're not recursive
+                          I guess, we won't inline them anyway*) false
+
+let updateWithRecursionStatus funDefMap fName (params, instrs, wasRecBefore) =
+    let maxSearchDepth = H.length funDefMap in
+    let isActuallyRec = funIsRecursive maxSearchDepth funDefMap fName 0 fName in
+    H.replace funDefMap fName (params, instrs, isActuallyRec)
+
+let isRecCall targetName = function
+    Tmp3AddrFunCall(retSize, callName, args, dest) -> callName = targetName
   | _ -> false                                                      
 
 (* maps fName to tmpParam list, instrs, whether it's recursive *)
 let rec makeFunDefMap map = function
     [] -> map
   | Tmp3AddrFunDef (fName, params, instrs) :: rest ->
-      let isRec = List.exists (isRecCall fName) instrs in
-      let () = H.add map fName (params, instrs, isRec) in
+      let isRecForNow = false in (* we will search for recursion later *)
+      let () = H.add map fName (params, instrs, isRecForNow) in
       makeFunDefMap map rest
 
 let isNotRet = function
@@ -86,4 +106,5 @@ let handleFunDef funDefMap (Tmp3AddrFunDef (fName, params, instrs)) =
 
 let inlineFuncs funDefs =
     let funDefMap = makeFunDefMap (H.create 10) funDefs in
+    let () = H.iter (updateWithRecursionStatus funDefMap) funDefMap in
     List.map (handleFunDef funDefMap) funDefs
