@@ -113,8 +113,23 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
             else
             let cFinal = computeBinop op c1 c2 in
             handleMove multDefdTmps tmpToConstMap (BIT32, TmpConst cFinal, dest)
+      | (ADD, TmpLoc tLoc, TmpConst c) -> 
+          if c = 0 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
+      | (ADD, TmpConst c, TmpLoc tLoc) -> 
+          if c = 0 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
+      | (SUB, TmpLoc tLoc, TmpConst c) -> 
+          if c = 0 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
+      | (MUL, TmpLoc tLoc, TmpConst c) -> 
+          if c = 1 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
+      | (MUL, TmpConst c, TmpLoc tLoc) ->
+          if c = 1 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
       | _ -> Tmp3AddrBinop(op, new_arg1, new_arg2, dest)::[]
-            
+    (* add ezpz constant folding *)        
 
 let rec handleInstrsForFunDef multDefdTmps tmpToConstMap = function
     [] -> []
