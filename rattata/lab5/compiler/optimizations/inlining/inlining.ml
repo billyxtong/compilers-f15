@@ -22,7 +22,7 @@ let rec funIsRecursive maxSearchDepth funDefMap targetName depth fName =
                           I guess, we won't inline them anyway*) false
 
 let updateWithRecursionStatus funDefMap fName (params, instrs, wasRecBefore) =
-    let maxSearchDepth = H.length funDefMap in
+    let maxSearchDepth = 4 in (* H.length funDefMap in *)
     let isActuallyRec = funIsRecursive maxSearchDepth funDefMap fName 0 fName in
     H.replace funDefMap fName (params, instrs, isActuallyRec)
 
