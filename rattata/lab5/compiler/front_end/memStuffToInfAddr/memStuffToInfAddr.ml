@@ -333,10 +333,6 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
            TmpIntExpr numElemsExpr, TmpIntExpr index_final))::
                              TmpInfAddrJump(JGE, errorLabel)::
                              TmpInfAddrJump(JL, doTheAccessLabel)::[] in
-       let weakLowerCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp(BIT32,
-           TmpIntExpr (TmpIntArg (TmpConst 0)), TmpIntExpr index_final)) in
-       let weakUpperCheck = TmpInfAddrBoolInstr (TmpInfAddrCmp(BIT32,
-           TmpIntExpr numElemsExpr, TmpIntExpr index_final)) in
        let throwError = TmpInfAddrVoidFunCall("raise", 
                  (* We're supposed to raise signal 12 (sigusr2) on
                     memor errors *)
@@ -384,10 +380,6 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
              :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[]
              else
              ptr_instrs @ index_instrs @ storeArrayPtr
-             (* ::indexLowerCheck *)
-             (* @ indexUpperCheck @ TmpInfAddrLabel(errorLabel) *)
-             (* ::TmpInfAddrLabel(doTheAccessLabel) *)
-             (* weakLowerCheck :: weakUpperCheck *)
              :: storeAccessOffset::maskOffsetExpr::storeAccessPtr::[]) in
       (TmpPtrArg (TmpLoc (TmpVar accessPtrFinal)), allInstrs)
 
