@@ -46,7 +46,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt2 then
         (
-        (* OptimizeFlags.doConstOpts := true; *)
+        OptimizeFlags.doConstOpts := true;
         (* OptimizeFlags.doInlining := true; *)
         OptimizeFlags.removeDeadCode := true;
         OptimizeFlags.arrayStrengthReduction := true;

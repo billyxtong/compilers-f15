@@ -96,6 +96,8 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
             Tmp3AddrMov(BIT32, TmpConst 0, TmpVar newT)::
             Tmp3AddrBinop(FAKEDIV, TmpConst 666, TmpLoc (TmpVar newT), dest)::[]
       | (FAKEDIV, TmpLoc tLoc, TmpConst c) ->
+          if c = 1 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+          else 
             (* can't idiv by constants :( *)
             let t' = Tmp (Temp.create()) in
             Tmp3AddrMov(BIT32, TmpConst c, TmpVar t')::
@@ -113,21 +115,16 @@ let handleBinop multDefdTmps tmpToConstMap op arg1 arg2 dest =
             else
             let cFinal = computeBinop op c1 c2 in
             handleMove multDefdTmps tmpToConstMap (BIT32, TmpConst cFinal, dest)
-      | (ADD, TmpLoc tLoc, TmpConst c) -> 
-          if c = 0 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
-          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
-      | (ADD, TmpConst c, TmpLoc tLoc) -> 
-          if c = 0 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
-          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
-      | (SUB, TmpLoc tLoc, TmpConst c) -> 
-          if c = 0 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
-          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
-      | (MUL, TmpLoc tLoc, TmpConst c) -> 
-          if c = 1 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
-          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
-      | (MUL, TmpConst c, TmpLoc tLoc) ->
-          if c = 1 then Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
-          else Tmp3AddrBinop(op, new_arg1, new_arg2, dest) :: []
+      | (ADD, TmpLoc tLoc, TmpConst 0) -> 
+          Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+      | (ADD, TmpConst 0, TmpLoc tLoc) -> 
+          Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+      | (SUB, TmpLoc tLoc, TmpConst 0) -> 
+          Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+      | (MUL, TmpLoc tLoc, TmpConst 1) -> 
+          Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
+      | (MUL, TmpConst 1, TmpLoc tLoc) ->
+          Tmp3AddrMov(BIT32, TmpLoc(tLoc), dest) :: []
       | _ -> Tmp3AddrBinop(op, new_arg1, new_arg2, dest)::[]
     (* add ezpz constant folding *)        
 
