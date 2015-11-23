@@ -14,3 +14,4 @@ let tryToUseECXEDX = ref false
 let arrayStrengthReduction = ref false
 let onlyPushRegsOnce = ref false
 let removeSubAddZeroToRsp = ref false
+let numNonParamRegsToAlloc = ref 5

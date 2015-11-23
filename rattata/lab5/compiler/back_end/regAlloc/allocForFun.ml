@@ -252,7 +252,12 @@ let progHasShifts instrs = List.exists (function Tmp2AddrBinop(LSHIFT, _, _) -> 
                                         | _ -> false) instrs
 
 let getAllocableRegList instrs =
-    [EBX; R10; R11; R12; R13]
+    let base = [EBX; R10; R11; R12; R13] in
+    let baseWithIdx = List.mapi (fun i -> fun r -> (i,r)) base in
+    let upToMax = List.filter (fun (i,r) -> i < !OptimizeFlags.numNonParamRegsToAlloc)
+          baseWithIdx in
+    let result = List.map (fun (i,r) -> r) upToMax in
+    result
 
 let rec getUsedRegsList regSet tmpToAssemLocMap tmps =
     match tmps with
