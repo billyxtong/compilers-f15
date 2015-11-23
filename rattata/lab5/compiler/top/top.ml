@@ -41,8 +41,9 @@ let spec =
   +> flag "--arrayStrengthReduction" no_arg ~doc: " Do strength reduction on array bounds"
   +> flag "--doTieBreaking" no_arg ~doc: " Try to do reg alloc tie breaking"
   +> flag "--removeJumps" no_arg ~doc: " Remove unneeded unconditional jumps"
+  +> flag "--onlyPushOnce" no_arg ~doc: " Only push/pop register when calling a function (rather than both in the caller and callee). Exception is main, which also pushes when called"
   +> flag "-r" (optional string) ~doc: " How many extra general purpose regs to allocate"
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps numRegs () =
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs () =
   try
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in
@@ -62,6 +63,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
     let () = if doInlining then OptimizeFlags.doInlining := true in
     let () = if arrayStrengthReduction then OptimizeFlags.arrayStrengthReduction := true in
+    let () = if onlyPushOnce then OptimizeFlags.onlyPushRegsOnce := true in
     let () = if doTieBreaking then OptimizeFlags.doRegAllocTieBreaking
                                               := true in
     let () = if removeJumps then OptimizeFlags.removeUnneddedJumps := true in
