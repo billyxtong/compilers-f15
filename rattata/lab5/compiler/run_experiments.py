@@ -17,13 +17,13 @@ def parse_output_for_setting(filename):
     #     file_string = f.read()
     # with open(bench1file) as f:
     #     file_string += f.read()
-    by_test_file = file_string.split("Timing file ")
+    by_test_file = file_string.split("Timing file ")[1:]
     for test_file_string in by_test_file:
         assert(test_file_string[:10] == "../bench0/" or
                test_file_string[:10] == "../bench1/")
         test_filename_end = test_file_string.find(".l4")
         test_filename = test_file_string[10:test_filename_end]
-        first_time_indicator = "bin/c0c -O0: "
+        first_time_indicator = "-O0: "
         first_time_start = (test_file_string.find(first_time_indicator)
                             + len(first_time_indicator))
         recordedTime = ""
@@ -36,7 +36,7 @@ def parse_output_for_setting(filename):
 def parse_all(base_dir):
     for filename in os.listdir(base_dir):
         if filename.endswith(".txt"):
-            parse_output_for_setting
+            parse_output_for_setting(os.path.join(base_dir, filename))
         
 def time_all(opts):
     opts_list = opts.items()
@@ -66,7 +66,8 @@ def main():
              "Alloc5More":"-r 5",
              "unsafe":"--unsafeForExperiments"
              }
-    time_all(opts)
+    # time_all(opts)
+    parse_all("timingOutput")
              
 if __name__ == "__main__":
     main()
