@@ -53,6 +53,11 @@ let rec findAllTemps instrList tempSet =
          |_ -> findAllTemps instrs tempSet)
 
 
+let isFunCall prog currLine =
+  match (prog.(currLine)) with
+    Tmp2AddrFunCall(_) -> true
+   |_ -> false
+
 let findNeededLinesForTemps predsPerLine tempsToLines prog =
   let () = neededR1 ((A.length prog) - 1) tempsToLines prog in
   let () = neededR3 ((A.length prog) - 1) tempsToLines prog in
@@ -60,7 +65,8 @@ let findNeededLinesForTemps predsPerLine tempsToLines prog =
 
 let killDeadInstr currLine prog tempsToLines =
   match getDefVars prog currLine with
-    [t] -> if (H.length (try H.find tempsToLines t with Not_found -> raise (Failure "killDeadInstr")) > 0) then [prog.(currLine)] else []
+    [t] -> if (H.length (try H.find tempsToLines t with Not_found -> raise (Failure "killDeadInstr")) > 0) 
+            || (isFunCall prog currLine) then [prog.(currLine)] else []
    |[] -> [prog.(currLine)]
 
 let killDeadCodeInFunctions (Tmp2AddrFunDef(funcName, funcParams, funcBody)) =

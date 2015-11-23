@@ -48,18 +48,13 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in
     let () = if opt2 then
         (
-        (* OptimizeFlags.doConstOpts := true; *)
-        (* OptimizeFlags.doInlining := true; *)
-        (* OptimizeFlags.removeDeadCode := true; *)
-        (* OptimizeFlags.arrayStrengthReduction := true; *)
+
         OptimizeFlags.numNonParamRegsToAlloc := 5;
+        OptimizeFlags.doConstOpts := true;
+        OptimizeFlags.doInlining := true;
+        (* OptimizeFlags.removeDeadCode := true; *)
+        OptimizeFlags.arrayStrengthReduction := true;
 
-        (* OptimizeFlags.onlyPushRegsOnce := true; *)
-
-        (* the regAllocTieBreaking might do more harm than good *)
-        (* OptimizeFlags.doRegAllocTieBreaking := true; *)
-        (* the remove unneeded jumps doesn't seem to have any effect *)
-        (* OptimizeFlags.removeUnneddedJumps := true; *)
         ()) in
     let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
@@ -103,27 +98,30 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     if typecheck_only then exit 0;
 
     (* convert Post-Elab AST to Infinte Addr, except for memory stuff *)
-    say_if verbose (fun () -> "converting to infAddr, except memory stuff");
+    say_if verbose (fun () -> "converting to infAddr, except memory stuff...");
     let infAddr = GeneralToInfAddr.toInfAddr typedPostElabAst in ();
     say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
 
     (* convert memory stuff to Inf Addr *)
-    say_if verbose (fun () -> "converting memory stuff to Inf Addr");
+    say_if verbose (fun () -> "converting memory stuff to Inf Addr...");
     let infAddrWithMem = MemStuffToInfAddr.handleMemStuff infAddr in ();
     say_if dump_memInfAddr (fun () -> tmpInfAddrProgToString infAddrWithMem);
     
     (* Convert Inf Addr (arbitrarily nested right hand side) *)
     (*    to three address *)
+    say_if verbose(fun () -> "converting memInfAddr to 3Addr...");
     let threeAddr = FewTmpsTo3Addr.to3Addr infAddrWithMem in ();
     say_if dump_3Addr (fun () -> tmp3AddrProgToString threeAddr);
 
     (* constant folding and propagation *)
+    say_if verbose(fun () -> "performing constant propagation and folding...");
     let threeAddr' = (if !OptimizeFlags.doConstOpts then
                       ConstPropAndFold.constPropAndFold threeAddr
                       else threeAddr) in
     say_if dump_ConstOps (fun () -> tmp3AddrProgToString threeAddr');
 
     (* inlining *)
+    say_if verbose(fun () -> "performing inlining...");
     let inlinedThreeAddr = (if !OptimizeFlags.doInlining then
                       Inlining.inlineFuncs threeAddr'
                       else threeAddr') in
@@ -136,11 +134,12 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if dump_2Addr (fun () -> tmp2AddrProgToString twoAddr);
 
     (* eliminating dead code *)
+    (*
     say_if verbose (fun () -> "Killing dead code..."); 
     let noDeadCode = (if !OptimizeFlags.removeDeadCode then
                         KillDeadCode.killDeadCode twoAddr
                         else twoAddr) in (); 
-    say_if dump_NoDeadCode (fun () -> tmp2AddrProgToString noDeadCode); 
+    say_if dump_NoDeadCode (fun () -> tmp2AddrProgToString noDeadCode); *)
      
     (* Allocate Registers *)
     say_if verbose (fun () -> "Allocating Registers...");

@@ -44,7 +44,9 @@ let rec necessityRule5Helper (funcArgs : tmpArg list) (l : int list) =
          |_ -> necessityRule5Helper args l)
 
 let necessityRule5(Tmp2AddrFunCall(s,fName,fArgs,dest) : tmp2AddrInstr) =
-  necessityRule5Helper fArgs []
+  match dest with
+    Some d -> necessityRule5Helper (TmpLoc(d) :: fArgs) []
+   |None -> necessityRule5Helper (TmpLoc(TmpVar (Tmp (Temp.create()))) :: fArgs) []
 
 (* Returns a list of temps necessary for the instruction to execute.
  * Note that only certain types of instrs have "necessary" temps. *)

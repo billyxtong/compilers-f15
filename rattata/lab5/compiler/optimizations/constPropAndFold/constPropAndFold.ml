@@ -7,8 +7,7 @@ let getDefVar = function
   | Tmp3AddrBinop (op, arg1, arg2, TmpVar t) -> Some t
   | Tmp3AddrMaskUpper t -> Some t
   | Tmp3AddrFunCall (retSize, fName, args, Some (TmpVar t)) -> Some t
-  | _ -> None                                                                 
-                                                                 
+  | _ -> None  
 
 let rec getTempSetMultipleDefs resultSet defdSet = function
     [] -> resultSet
@@ -24,7 +23,7 @@ let rec getTempSetMultipleDefs resultSet defdSet = function
 let transArg tmpToConstMap = function
     TmpLoc (TmpVar t) -> (try TmpConst (H.find tmpToConstMap t)
                           with Not_found -> TmpLoc (TmpVar t))
-  | arg -> arg                         
+  | arg -> arg 
 
 let rec handleMove multDefdTmps tmpToConstMap = function
     (* only propoage bit32 for now: the only bit64 constant is NULL anyway *)
