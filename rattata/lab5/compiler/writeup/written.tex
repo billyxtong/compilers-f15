@@ -24,7 +24,7 @@ Below we include a graph that shows the effects of "--unsafe" in the compilation
 
 
 
-Unsafe mode was implemented on our x-address code.
+Unsafe mode was (mostly) implemented in the conversion for the elaborated AST to what we called ``infinite-address code": sequential code with jumps, labels, cmps, but arbitrarily nested expressions, which is where we add the safety checks in safe mode.
 
 \section{Optimization 1: Dead Code Elimination}
 
@@ -56,21 +56,28 @@ As we can see, $include results from individual tests here$
 
 Constant folding and propagation was performed on our three-address code.
 
-\section{Optimization 3: Precoloring Registers}
+\section{Optimization 3: Precoloring Temps}
 
+The calling conventions specify six registers to be used for passing arguments to function. Up until L5, we reserved those registers for use only as arguments. After reserving two registers for handling memory-to-memory operations, using RBP as the base pointer, and reserving EAX to hold return values, this left us with only five registers to be allocated for arbitrary temps.
 
+To handle this, we implemented the ability to precolor temps. This allowed us to require that certain temps be allocated certain registers, without losing the ability to allocate that register to other temps. This provided us with four more registers to allocate (we still reserved ECX and EDX for shifts and division, respectively). 
 
+This turned out to be the most effective optimization we implemented. Unfortunately, the way we implemented precoloring made it difficult to toggle whether or not argument registers could be allocated elsewhere. To demonstrate the effect of having extra registers to allocate, we implemented a flag which sets how many of the original five general purpose registers to allocate (making the overall number of registers available to allocate at least four, and at most nine).
 
-As we can see, $include results from individual tests here$
-
+As we can see,
+ $include results from individual tests here$
 
 
 \section{Optimization 4: Inlining}
 
+We performed standard function inlining on our three-address code. The most effective heuristic we found was to inline a function if:
+1. It was not recursive, including any level of mutual recursion, and
+2. The function length was most 50 lines (in three-address code).
+
+We also found it effect to ``recursively" inline functions. For example, suppose $f$ calls $g$ within a loop, but all $g$ does is call $h$ once. Then just inlining $g$ into $f$ will leave the $f$ with a call to $h$. It is more effective actually inline $h$ into $g$, and then inline the resulting code into $f$. We ended up inlining to a depth of 3, although we found little variation in performance about a depth of 2.
 
 As we can see, $include results from individual tests here$
 
-Inlining was performed on our three-address code.
 
 \section{Combinations of Optimizations}
 

@@ -84,7 +84,7 @@ def main():
              "unsafe":"--unsafeForExperiments"
              }
     #time_all(opts)
-    parse_all("timeSafe", "formattedOutput")
+    parse_all("timeData", "formattedOutput")
              
 if __name__ == "__main__":
     main()
