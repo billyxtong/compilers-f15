@@ -1,0 +1,348 @@
+Standard ML of New Jersey v110.78 [built: Fri Jul 17 17:45:05 2015]
+[opening ../grader/driver.sml]
+structure Grade : <sig>
+-- 15-411 Compiler Benchmarks --
+-- Building compiler --
+ocamlbuild -use-ocamlfind -Is top,util,front_end/parse,front_end/generalToInfAddr,front_end/typeChecker,front_end/elab,back_end/formatAssem,back_end/regAlloc,back_end/to3Addr,back_end/to2Addr,back_end/toWonkyAssem,back_end/removeMemMemInstrs,back_end/fewTmpsTo3Addr,back_end/condenseMoves,front_end/memStuffToInfAddr,optimizations/deadCodeElimination,optimizations,optimizations/constPropAndFold,optimizations/inlining -libs str top.native
+mkdir -p bin
+install top.native bin/c0c
+-- Compiler built (elapsed time 0.576s) --
+
+[1m-- Timing file ../bench0/cell.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/cell.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/cell-l4.s --
+[32m            -O0: 1239314[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/cell.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/cell-l4.s --
+[32m   --unsafe -O0: 1250871[0m
+-- Compiler: bin/c0c -O1 ../bench0/cell.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/cell-l4.s --
+[32m            -O1: 1239265[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/cell.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/cell-l4.s --
+[32m   --unsafe -O1: 1238917[0m
+-- Compiler: bin/c0c -O2 ../bench0/cell.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/cell-l4.s --
+[32m            -O2: 1239238[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/cell.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/cell-l4.s --
+[32m   --unsafe -O2: 1239228[0m
+
+[1m-- Timing file ../bench0/collatz.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/collatz.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/collatz-l4.s --
+[32m            -O0: 173270[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/collatz.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/collatz-l4.s --
+[32m   --unsafe -O0: 173277[0m
+-- Compiler: bin/c0c -O1 ../bench0/collatz.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/collatz-l4.s --
+[32m            -O1: 173277[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/collatz.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/collatz-l4.s --
+[32m   --unsafe -O1: 173275[0m
+-- Compiler: bin/c0c -O2 ../bench0/collatz.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/collatz-l4.s --
+[32m            -O2: 173271[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/collatz.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/collatz-l4.s --
+[32m   --unsafe -O2: 173288[0m
+
+[1m-- Timing file ../bench0/fibrec.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/fibrec.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/fibrec-l4.s --
+[32m            -O0: 267995[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/fibrec.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/fibrec-l4.s --
+[32m   --unsafe -O0: 267996[0m
+-- Compiler: bin/c0c -O1 ../bench0/fibrec.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/fibrec-l4.s --
+[32m            -O1: 267999[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/fibrec.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/fibrec-l4.s --
+[32m   --unsafe -O1: 267986[0m
+-- Compiler: bin/c0c -O2 ../bench0/fibrec.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/fibrec-l4.s --
+[32m            -O2: 267988[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/fibrec.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/fibrec-l4.s --
+[32m   --unsafe -O2: 267986[0m
+
+[1m-- Timing file ../bench0/floyd.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/floyd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/floyd-l4.s --
+[32m            -O0: 126275[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/floyd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/floyd-l4.s --
+[32m   --unsafe -O0: 125921[0m
+-- Compiler: bin/c0c -O1 ../bench0/floyd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/floyd-l4.s --
+[32m            -O1: 125175[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/floyd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/floyd-l4.s --
+[32m   --unsafe -O1: 125647[0m
+-- Compiler: bin/c0c -O2 ../bench0/floyd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/floyd-l4.s --
+[32m            -O2: 125829[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/floyd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/floyd-l4.s --
+[32m   --unsafe -O2: 125234[0m
+
+[1m-- Timing file ../bench0/gcd.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/gcd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/gcd-l4.s --
+[32m            -O0: 156411[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/gcd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/gcd-l4.s --
+[32m   --unsafe -O0: 159642[0m
+-- Compiler: bin/c0c -O1 ../bench0/gcd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/gcd-l4.s --
+[32m            -O1: 156419[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/gcd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/gcd-l4.s --
+[32m   --unsafe -O1: 156414[0m
+-- Compiler: bin/c0c -O2 ../bench0/gcd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/gcd-l4.s --
+[32m            -O2: 159642[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/gcd.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/gcd-l4.s --
+[32m   --unsafe -O2: 159377[0m
+
+[1m-- Timing file ../bench0/list.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/list.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/list-l4.s --
+[32m            -O0: 176514[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/list.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/list-l4.s --
+[32m   --unsafe -O0: 176121[0m
+-- Compiler: bin/c0c -O1 ../bench0/list.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/list-l4.s --
+[32m            -O1: 176620[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/list.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/list-l4.s --
+[32m   --unsafe -O1: 176119[0m
+-- Compiler: bin/c0c -O2 ../bench0/list.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/list-l4.s --
+[32m            -O2: 176556[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/list.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/list-l4.s --
+[32m   --unsafe -O2: 176608[0m
+
+[1m-- Timing file ../bench0/mmult.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/mmult.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult-l4.s --
+[32m            -O0: 850645[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/mmult.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult-l4.s --
+[32m   --unsafe -O0: 850240[0m
+-- Compiler: bin/c0c -O1 ../bench0/mmult.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult-l4.s --
+[32m            -O1: 849998[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/mmult.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult-l4.s --
+[32m   --unsafe -O1: 849752[0m
+-- Compiler: bin/c0c -O2 ../bench0/mmult.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult-l4.s --
+[32m            -O2: 850582[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/mmult.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult-l4.s --
+[32m   --unsafe -O2: 850523[0m
+
+[1m-- Timing file ../bench0/mmult2.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/mmult2.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult2-l4.s --
+[32m            -O0: 678347[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/mmult2.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult2-l4.s --
+[32m   --unsafe -O0: 677149[0m
+-- Compiler: bin/c0c -O1 ../bench0/mmult2.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult2-l4.s --
+[32m            -O1: 678902[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/mmult2.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult2-l4.s --
+[32m   --unsafe -O1: 678333[0m
+-- Compiler: bin/c0c -O2 ../bench0/mmult2.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult2-l4.s --
+[32m            -O2: 678867[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/mmult2.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/mmult2-l4.s --
+[32m   --unsafe -O2: 678364[0m
+
+[1m-- Timing file ../bench0/msort.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/msort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/msort-l4.s --
+[32m            -O0: 382583[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/msort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/msort-l4.s --
+[32m   --unsafe -O0: 383210[0m
+-- Compiler: bin/c0c -O1 ../bench0/msort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/msort-l4.s --
+[32m            -O1: 383838[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/msort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/msort-l4.s --
+[32m   --unsafe -O1: 383766[0m
+-- Compiler: bin/c0c -O2 ../bench0/msort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/msort-l4.s --
+[32m            -O2: 383767[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/msort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/msort-l4.s --
+[32m   --unsafe -O2: 383397[0m
+
+[1m-- Timing file ../bench0/prime.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/prime.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/prime-l4.s --
+[32m            -O0: 85896[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/prime.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/prime-l4.s --
+[32m   --unsafe -O0: 86371[0m
+-- Compiler: bin/c0c -O1 ../bench0/prime.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/prime-l4.s --
+[32m            -O1: 86506[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/prime.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/prime-l4.s --
+[32m   --unsafe -O1: 85897[0m
+-- Compiler: bin/c0c -O2 ../bench0/prime.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/prime-l4.s --
+[32m            -O2: 85896[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/prime.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/prime-l4.s --
+[32m   --unsafe -O2: 85887[0m
+
+[1m-- Timing file ../bench0/qsort.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/qsort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/qsort-l4.s --
+[32m            -O0: 953511[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/qsort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/qsort-l4.s --
+[32m   --unsafe -O0: 954739[0m
+-- Compiler: bin/c0c -O1 ../bench0/qsort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/qsort-l4.s --
+[32m            -O1: 955141[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/qsort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/qsort-l4.s --
+[32m   --unsafe -O1: 953578[0m
+-- Compiler: bin/c0c -O2 ../bench0/qsort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/qsort-l4.s --
+[32m            -O2: 953424[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/qsort.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/qsort-l4.s --
+[32m   --unsafe -O2: 954557[0m
+
+[1m-- Timing file ../bench0/shifts.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/shifts.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/shifts-l4.s --
+[32m            -O0: 195420[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/shifts.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/shifts-l4.s --
+[32m   --unsafe -O0: 195424[0m
+-- Compiler: bin/c0c -O1 ../bench0/shifts.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/shifts-l4.s --
+[32m            -O1: 195424[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/shifts.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/shifts-l4.s --
+[32m   --unsafe -O1: 195424[0m
+-- Compiler: bin/c0c -O2 ../bench0/shifts.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/shifts-l4.s --
+[32m            -O2: 195423[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/shifts.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/shifts-l4.s --
+[32m   --unsafe -O2: 195422[0m
+
+[1m-- Timing file ../bench0/tree.l4 --[0m
+-- Compiler: bin/c0c -O0 ../bench0/tree.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/tree-l4.s --
+[32m            -O0: 357547[0m
+-- Compiler: bin/c0c -O0 --unsafe ../bench0/tree.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/tree-l4.s --
+[32m   --unsafe -O0: 357152[0m
+-- Compiler: bin/c0c -O1 ../bench0/tree.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/tree-l4.s --
+[32m            -O1: 357263[0m
+-- Compiler: bin/c0c -O1 --unsafe ../bench0/tree.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/tree-l4.s --
+[32m   --unsafe -O1: 357107[0m
+-- Compiler: bin/c0c -O2 ../bench0/tree.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/tree-l4.s --
+[32m            -O2: 357705[0m
+-- Compiler: bin/c0c -O2 --unsafe ../bench0/tree.l4 --
+num regs: 0
+-- Running linker on ../log/bench0/tree-l4.s --
+[32m   --unsafe -O2: 358082[0m
+-- Elapsed time 38.803s --
