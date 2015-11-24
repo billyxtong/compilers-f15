@@ -2,8 +2,8 @@
 \usepackage[utf8]{inputenc}
 
 \title{15-411: L5 Written Report}
-\author{William Tong}
-\date{November 2015}
+\author{Ben Plaut and William Tong}
+\date{November 23, 2015}
 
 \begin{document}
 
@@ -11,7 +11,81 @@
 
 \section{Introduction}
 
-Hi!
+For L5, we chose to implement 4 optimizations: dead code elimination, constant folding and propagation, precoloring registers, and inlining. We apply these at three different optimization levels, which are -O0, -O1, and -O2. At -O0, we apply no optimizations at all, not even register allocation. At -O1, we apply register allocation. At -O2, we apply all of our optimizations. Finally, using the new --unsafe flag, we allow our compiler to bypass checking of memory safety for even faster compilation. With all optimizations and unsafe mode, our compiler reaches a performance score of 0.7661.
+
+\section{Optimization 0: Unsafe Mode}
+
+Unsafe mode allowed our compiler to run without having to guarantee memory safety. In our implementation, we chose to forgo the checking of array access bounds and NULL pointer dereferences. This improved performance significantly in tests that involved many reads from and writes to memory. 
+
+Below we include a graph that shows the effects of "--unsafe" in the compilation of the benchmark tests. As you can see, unsafe mode causes a large decrease in compilation time on tests that index into arrays over and over, such as mmult and mmult2. 
+
+
+
+
+
+
+Unsafe mode was implemented on our x-address code.
+
+\section{Optimization 1: Dead Code Elimination}
+
+Dead code elimination was implemented as described in lecture. We eliminate dead code in each function as follows. First, we made a set of every single temp used in the function. We then map these temps to the lines that they're needed on using neededness rules 1 and 3 as described in lecture by using a backward dataflow analysis. This "seeds" the neededness for each temp. Then, using neededness rule 2, we propagate each temp's neededness until we reach a line where the temp is already marked as needed or defined. 
+
+On its own, dead code elimination did very little to improve the performance of our compiler, and in many cases actually decreased performance by as much as 10 percent. This was due to the additional pass made on the two-address code to find and eliminate dead code, but very few of the normal tests and none of the tests in the benchmark suite actually contained any dead code in the form of unused variables. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with constant folding and propagation. Below we include a graph that shows the effects on performance with and without dead code elimination in isolation.
+
+
+
+
+
+
+As we can see, $include results from individual tests here$
+
+Dead code elimination was performed on our two-address code.
+
+
+\section{Optimization 2: Constant Folding and Propagation}
+
+We implemented a weak form of constant folding and propagation due to not implementing SSA or reaching definitions. In order to avoid possibly propagating across jumps, we only propagate for temps defined exactly once in the program. Using a forward dataflow analysis, we find all temps, and if they are mapped to a constant in a move, replace all subsequent instances of this temp in the program with that constant. We then remove the move instruction. Finally, if we ever reach an instruction where after constant propagation we have a binop on two constant arguments, we simply fold them and map the temp to the new constant, creating another propagable temp.
+
+On its own, constant folding and propagation did very little to improve the performance of our compiler, and in many cases actually decreased performance by as much as 10 percent. This was due to the additional pass made on the three-address code to find propagable temps, but without SSA form or reaching definitions, this optimization does not reach its full potential. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with dead code elimination. Below we include a graph that shows the effects on performance with and without constant folding and propagation in isolation.
+
+
+
+
+
+As we can see, $include results from individual tests here$
+
+Constant folding and propagation was performed on our three-address code.
+
+\section{Optimization 3: Precoloring Registers}
+
+
+
+
+As we can see, $include results from individual tests here$
+
+
+
+\section{Optimization 4: Inlining}
+
+
+As we can see, $include results from individual tests here$
+
+Inlining was performed on our three-address code.
+
+\section{Combinations of Optimizations}
+
+In testing the efficacy of our optimizations, we tried every combination of at least two combinations as well as the "--unsafe" flag. Our results can be seen in the following infographic:
+
+
+
+
+
+
+The best individual optimization was clearly the revamp made on the register allocator. Before the optimization, our compiler did not efficiently exploit registers. We pushed and popped every register in every function call, didn't allow use of registers reserved for specific operations, and spilled a ton of temps onto the stack. 
+
+Other things of note: the best combination of optimizations was X and Y, optimizations A and B actually decreased performance across the board, etc.
+
 
 \end{document}
+
 
