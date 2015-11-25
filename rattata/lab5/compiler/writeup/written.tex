@@ -43,7 +43,7 @@ We implemented a weak form of constant folding and propagation due to not implem
 
 On its own, constant folding and propagation did very little to improve the performance of our compiler, and in many cases actually decreased performance by as much as 10 percent. This was due to the additional pass made on the three-address code to find propagable temps, but without SSA form or reaching definitions, this optimization does not reach its full potential. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with dead code elimination. Below we include a graph that shows the effects on performance with and without constant folding and propagation in isolation.
 
-\includegraphics[scale=0.1]{}
+\includegraphics[scale=0.1]{O1_vs_constOpts-page-001}
 
 
 

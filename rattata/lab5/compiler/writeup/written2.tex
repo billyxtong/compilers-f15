@@ -17,7 +17,7 @@ For L5, we chose to implement 4 optimizations: dead code elimination, constant f
 
 \section{Optimization 0: Unsafe Mode}
 
-Unsafe mode allowed our compiler to run without having to guarantee memory safety. In our implementation, we chose to forgo the checking of array access bounds and NULL pointer dereferences. This improved performance significantly in tests that involved many reads from and writes to memory. 
+Unsafe mode allows us to assume no exceptions will be thrown. This means we can forgo checks for memory safety, such as array accesses being in-bounds and NULL pointer dereferences, as well as not checking values for shifts.  
 
 Below we include a graph that shows the effects of "--unsafe" in the compilation of the benchmark tests. As you can see, unsafe mode causes a large decrease in compilation time on most tests. 
 
@@ -27,9 +27,9 @@ Unsafe mode was (mostly) implemented in the conversion for the elaborated AST to
 
 \section{Optimization 1: Dead Code Elimination}
 
-We eliminate dead code in each function as follows. First, we made a set of every single temp used in the function. We then map these temps to the lines that they're needed on using neededness rules 1 and 3 as described in lecture by using a backward dataflow analysis. This "seeds" the neededness for each temp. Then, using neededness rule 2, we propagate each temp's neededness until we reach a line where the temp is already marked as needed or defined. 
+We eliminate dead code in each function as follows. First, we made a set of every single temp used in the function. We then map these temps to the lines that they're needed on using neededness rules 1 and 3 as described in lecture. This "seeds" the neededness for each temp. Then, using neededness rule 2, we propagate each temp's neededness in a backward dataflow analysis until we reach a line where the temp is already marked as needed or defined. 
 
-On its own, dead code elimination improved only the performance of our compiler on the collatz, qsort, shifts, and tree tests. This could be because... In the tests it did not help, we can see that 
+On its own, dead code elimination improved only the performance of our compiler on the collatz, qsort, shifts, and tree tests. This could be because... In the tests it did not help, we can see that...
 
 This was due to the additional pass made on the two-address code to find and eliminate dead code, but very few of the normal tests and none of the tests in the benchmark suite actually contained any dead code in the form of unused variables. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with constant folding and propagation. Below we include a graph that shows the effects on performance with and without dead code elimination in isolation.
 
