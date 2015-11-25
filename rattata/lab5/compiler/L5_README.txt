@@ -5,12 +5,13 @@ the back or front end in the lexer, parser, typechecker, or codegen
 mechanisms (infinite address, 3-address, 2-address, assembly). We 
 instead optimize our compiler as well as its generated assembly code
 so the correct programs we already compile can run even faster. We
-implement four optimizations:
+implement five optimizations:
 
 1. Dead code elimination
 2. Constant folding and propagation
 3. Register allocator optimizations (such as precoloring)
 4. Inlining
+5. Limiting push/pop instructions
 
 as well as an "unsafe" mode that forgoes checks that are necessary
 to prove memory safety (array access bounds and NULL dereferences).
@@ -58,7 +59,9 @@ allocated certain registers, without losing the ability to allocate that
 register to other temps. This provided us with four more registers to 
 allocate (we still reserved ECX and EDX for shifts and division, respectively).
 
-4) 
+4) We implement standard function inlining. We inline functions that are fewer than 50 line (in three-address code), and are not recursive.
+
+5) Previously, each function would push all of the registers it used both upon entrance, and before each function call: effectively twice as much as necessary. This optimization solves that, and is implemented in back_end/regAlloc/allocForFun.ml.
 
 
 
