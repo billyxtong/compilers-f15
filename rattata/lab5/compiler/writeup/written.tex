@@ -1,7 +1,9 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
 \usepackage{graphicx}
 \graphicspath{ {figures/}   }
+
 
 \title{15-411: L5 Written Report}
 \author{Manganese}
@@ -13,7 +15,9 @@
 
 \section{Introduction}
 
-For L5, we chose to implement 4 optimizations: dead code elimination, constant folding and propagation, precoloring registers, and inlining. We apply these at three different optimization levels, which are -O0, -O1, and -O2. At -O0, we apply no optimizations at all, not even register allocation. At -O1, we apply register allocation. At -O2, we apply all of our optimizations. Finally, using the new --unsafe flag, we allow our compiler to bypass checking of memory safety for even faster compilation. With all optimizations and unsafe mode, our compiler reaches a performance score of 0.7661.
+For L5, we chose to implement 4 optimizations: dead code elimination, constant folding and propagation, precoloring registers, and inlining. We apply these at three different optimization levels, which are -O0, -O1, and -O2. At -O0, we apply no optimizations at all, not even register allocation. At -O1, we apply register allocation. At -O2, we apply all of our optimizations. Finally, using the new --unsafe flag, we allow our compiler to bypass checking of memory safety for even faster compilation. With all optimizations and unsafe mode, our compiler reaches a performance score of 0.7661. Below is a comparison of runtimes between O0, O1, and O2 (in unsafe mode, since that's what counted in the end).
+
+\includegraphics[scale=0.5]{O0-O1-O2_unsafe-page-001}
 
 \section{Optimization 0: Unsafe Mode}
 
@@ -70,7 +74,21 @@ We also found it effective to ``recursively" inline functions. For example, supp
 
 As we can see, inlining increased performance by a non-trivial amount in tests with many small functions calling each other, such as cell, qsort, and mmult2. In tests such as fibrec, floyd, and shifts, performance remained mostly the same because we either had recursive functions (which didn't get inlined) or not many functions calling each other (so inlining didn't really get used much). 
 
-\section{Combinations of Optimizations}
+\section{Optimization 5: Limiting Push/Pop Instructions}
+
+A final optimization involved the limiting of push/pop instructions relating to function calls. Previously, each function pushed/popped all of the registered it used both upon entrance, and before it made any function call. This let us avoid dealing with callee/caller conventions, but amounted to each function pushing/popping twice as much as necessary.
+
+In L5, we changed register allocation so that each function pushes all of the registers it uses before it makes a function call, but only the main function pushes upon entrance. We effectively set up our own callee convention, where all registers are caller-saved.
+
+However, we still have to deal with external functions which use a different calling convention. This is why main must push registers upon entrance as well: so as to not modify the contents of callee-saved registers. However, we never have to deal with this in any other case, since main is the only one of our functions that is called from an external function. This is why we chose to treat all registers are caller-saved instead of callee-saved (if we had done that, we would have had to deal with every case where we called an external function).
+
+Although this did not significantly improve runtime across the board, it did drastically speed up collatz. This makes sense, since a recursive function with have many recursive calls, so the excessive pushing/popping for function calls had a greater cost.
+
+This optimization also let us pass a few test cases in tests1 that we were stack overflowing on previously, so that was cool too.
+
+\includegraphics[scale=0.5]{O1_vs_onlyPushOnce-page-001}
+
+\section{Weird Things}
 
 In testing the efficacy of our optimizations, we saw that the best individual optimization was clearly the revamp made on the register allocator. Before the optimization, our compiler did not efficiently exploit registers. We pushed and popped every register in every function call, didn't allow use of registers reserved for specific operations, and spilled a ton of temps onto the stack. This resulted in reads to and writes from memory that could've been prevented by having more registers.
 
