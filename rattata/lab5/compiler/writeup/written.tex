@@ -17,7 +17,7 @@ For L5, we chose to implement 4 optimizations: dead code elimination, constant f
 
 \section{Optimization 0: Unsafe Mode}
 
-Unsafe mode allowed our compiler to run without having to guarantee memory safety. In our implementation, we chose to forgo the checking of array access bounds and NULL pointer dereferences. This improved performance significantly in tests that involved many reads from and writes to memory. 
+Unsafe mode allows us to assume that our compiler throws no exception. This means that we can forgo the checks for memory safety, such as making sure array accesses are in-bounds and there are no NULL pointer dereferences, as well as the number of bits for shifts. 
 
 Below we include a graph that shows the effects of "--unsafe" in the compilation of the benchmark tests. As you can see, unsafe mode causes a large decrease in compilation time on most tests. 
 
@@ -27,28 +27,21 @@ Unsafe mode was (mostly) implemented in the conversion for the elaborated AST to
 
 \section{Optimization 1: Dead Code Elimination}
 
-We eliminate dead code in each function as follows. First, we made a set of every single temp used in the function. We then map these temps to the lines that they're needed on using neededness rules 1 and 3 as described in lecture by using a backward dataflow analysis. This "seeds" the neededness for each temp. Then, using neededness rule 2, we propagate each temp's neededness until we reach a line where the temp is already marked as needed or defined. 
+We eliminate dead code in each function as follows. First, we made a set of every single temp used in the function. We then map these temps to the lines that they're needed on using neededness rules 1 and 3 as described in lecture. This "seeds" the neededness for each temp. Then, using neededness rule 2, we propagate each temp's neededness in a backward dataflow analysis until we reach a line where the temp is already marked as needed or defined. 
 
-On its own, dead code elimination improved only the performance of our compiler on the collatz, qsort, shifts, and tree tests. This could be because... In the tests it did not help, we can see that 
-
-This was due to the additional pass made on the two-address code to find and eliminate dead code, but very few of the normal tests and none of the tests in the benchmark suite actually contained any dead code in the form of unused variables. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with constant folding and propagation. Below we include a graph that shows the effects on performance with and without dead code elimination in isolation.
+On its own, dead code elimination improved only the performance of our compiler on the collatz, qsort, shifts, and tree tests. We do not know why this is, because these four tests do not seem to have one thing in common that other tests do not share. However, we hypothesize that in the tests this optimization did not help, the additional pass made to find and eliminate dead code was simply useless because few of the normal tests and none of the tests in the benchmark suite actually contained any dead code in the form of unused variables. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with constant folding and propagation. Below we include a graph that shows the effects on performance with and without dead code elimination in isolation.
 
 \includegraphics[scale=0.5]{O1_vs_deadcode-page-001}
 
 Dead code elimination was performed on our two-address code.
 
-
 \section{Optimization 2: Constant Folding and Propagation}
 
 We implemented a weak form of constant folding and propagation due to not implementing SSA or reaching definitions. In order to avoid possibly propagating across jumps, we only propagate for temps defined exactly once in the program. Using a forward dataflow analysis, we find all temps, and if they are mapped to a constant in a move, replace all subsequent instances of this temp in the program with that constant. We then remove the move instruction. Finally, if we ever reach an instruction where after constant propagation we have a binop on two constant arguments, we simply fold them and map the temp to the new constant, creating another propagable temp.
 
-On its own, constant folding and propagation did very little to improve the performance of our compiler, and in many cases actually decreased performance by as much as 10 percent. This was due to the additional pass made on the three-address code to find propagable temps, but without SSA form or reaching definitions, this optimization does not reach its full potential. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with dead code elimination. Below we include a graph that shows the effects on performance with and without constant folding and propagation in isolation.
+On its own, constant folding and propagation did little to improve the performance of our compiler, and in tests mmult, msort, prime actually decreased performance by about 40, 30, and 20 percent respectively. While some of the slowdown can be explained by the additional pass made to find propagable temps, the rest can only be explained by "weird voodoo magic". On the tests where this optimization did help, we see a max increase in performance of about 30 percent. Without SSA form or reaching definitions, this optimization does not reach its full potential. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with dead code elimination. Below we include a graph that shows the effects on performance with and without constant folding and propagation in isolation.
 
 \includegraphics[scale=0.5]{O1_vs_constOpts-page-001}
-
-
-
-As we can see, $include results from individual tests here$
 
 Constant folding and propagation was performed on our three-address code.
 
@@ -62,8 +55,7 @@ This turned out to be the most effective optimization we implemented. Unfortunat
 
 \includegraphics[scale=0.5]{allocating_more_regs-page-001}
 
-As we can see, having additional registers to allocate drastically improves performance on almost all tests, with fibrec and prime being the only exceptions. This could be because...
-
+As we can see, having additional registers to allocate drastically improves performance on almost all tests, with fibrec and prime being the only exceptions. One possible reason for this is that these two tests have very few temps that need to be allocated to registers, while being naive in their implementation (canonic inefficient implementations of fib and isPrime lead to a large number of redundant computations). 
 
 \section{Optimization 4: Inlining}
 
@@ -76,24 +68,13 @@ We also found it effective to ``recursively" inline functions. For example, supp
 
 \includegraphics[scale=0.5]{O1_vs_inlining-page-001}
 
-As we can see, $include results from individual tests here$
-
+As we can see, inlining increased performance by a non-trivial amount in tests with many small functions calling each other, such as cell, qsort, and mmult2. In tests such as fibrec, floyd, and shifts, performance remained mostly the same because we either had recursive functions (which didn't get inlined) or not many functions calling each other (so inlining didn't really get used much). 
 
 \section{Combinations of Optimizations}
 
-In testing the efficacy of our optimizations, we tried every combination of at least two optimizations as well as the "--unsafe" flag. Our results can be seen in the following infographic:
-
-
-
-
-
-
-The best individual optimization was clearly the revamp made on the register allocator. Before the optimization, our compiler did not efficiently exploit registers. We pushed and popped every register in every function call, didn't allow use of registers reserved for specific operations, and spilled a ton of temps onto the stack. This resulted in reads to and writes from memory that could've been prevented by having more registers.
+In testing the efficacy of our optimizations, we saw that the best individual optimization was clearly the revamp made on the register allocator. Before the optimization, our compiler did not efficiently exploit registers. We pushed and popped every register in every function call, didn't allow use of registers reserved for specific operations, and spilled a ton of temps onto the stack. This resulted in reads to and writes from memory that could've been prevented by having more registers.
 
 There are several occurrences of note in this lab. First, there were several points during the lab when we experienced some strange timing issues. At one point unsafe mode caused the results for the mmult benchmark to be slower by a factor of 3. At another, our optimizations were causing significant slow-downs in the execution of some tests, and significant speed-ups in others. We haven't been able to come up with a reason behind these occurrences besides what Rob calls "weird voodoo magic".
-
-Other things of note: the best combination of optimizations was X and Y, optimizations A and B actually decreased performance across the board, etc.
-
 
 \end{document}
 
