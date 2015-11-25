@@ -43,23 +43,36 @@ let spec =
   +> flag "--removeJumps" no_arg ~doc: " Remove unneeded unconditional jumps"
   +> flag "--onlyPushOnce" no_arg ~doc: " Only push/pop register when calling a function (rather than both in the caller and callee). Exception is main, which also pushes when called"
   +> flag "-r" (optional string) ~doc: " How many extra general purpose regs to allocate"
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs () =
+  +> flag "--unsafeForExperiments" no_arg ~doc:" A separate unsafe flag for running experiments"
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs unsafeForExperiments () =
   try
-    let () = if opt0 then OptimizeFlags.doRegAlloc := false in
-    let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in
-    let () = if opt2 then
-        (
+    let () = OptimizeFlags.numNonParamRegsToAlloc := 0 in
+    (* let () = OptimizeFlags.onlyPushRegsOnce := true in *)
+    (* let () = OptimizeFlags.doInlining := true in *)
+    (* let () = OptimizeFlags.removeDeadCode := true in *)
+    (* let () = OptimizeFlags.doConstOpts := true in *)
+    let () = OptimizeFlags.safeMode := false in
+    (* let () = if opt0 then OptimizeFlags.doRegAlloc := false in *)
+    (* let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in *)
+    (* let () = if opt2 then *)
+    (*     ( *)
+    (*     (\* OptimizeFlags.doConstOpts := true; *\) *)
+    (*     (\* OptimizeFlags.doInlining := true; *\) *)
+    (*     (\* OptimizeFlags.removeDeadCode := true; *\) *)
+    (*     (\* OptimizeFlags.arrayStrengthReduction := true; *\) *)
+    (*     OptimizeFlags.numNonParamRegsToAlloc := 5; *)
 
-        OptimizeFlags.numNonParamRegsToAlloc := 5;
-        OptimizeFlags.doConstOpts := true;
-        OptimizeFlags.doInlining := true;
-        (* OptimizeFlags.removeDeadCode := true; *)
-        OptimizeFlags.arrayStrengthReduction := true;
+    (*     (\* OptimizeFlags.onlyPushRegsOnce := true; *\) *)
 
-        ()) in
-    let () = if unsafe then OptimizeFlags.safeMode := false in
-    let () = if doConstOpts then OptimizeFlags.doConstOpts := true in
-    let () = if noRegAlloc then OptimizeFlags.doRegAlloc := false in
+    (*     (\* the regAllocTieBreaking might do more harm than good *\) *)
+    (*     (\* OptimizeFlags.doRegAllocTieBreaking := true; *\) *)
+    (*     (\* the remove unneeded jumps doesn't seem to have any effect *\) *)
+    (*     (\* OptimizeFlags.removeUnneddedJumps := true; *\) *)
+    (*     ()) in *)
+    (* let () = if unsafe then OptimizeFlags.safeMode := false in *)
+    let () = if unsafeForExperiments then (OptimizeFlags.safeMode := false) in
+    let () = if doConstOpts then (OptimizeFlags.doConstOpts := true) in
+    let () = if noRegAlloc then (OptimizeFlags.doRegAlloc := false) in
     let () = if killDeadCode then OptimizeFlags.removeDeadCode := true in
     let () = if doInlining then OptimizeFlags.doInlining := true in
     let () = if arrayStrengthReduction then OptimizeFlags.arrayStrengthReduction := true in
@@ -70,6 +83,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let () = (match numRegs with
                   Some n -> OptimizeFlags.numNonParamRegsToAlloc := int_of_string n
                 | None -> ()) in
+    let () = print_string("num regs: " ^ string_of_int !OptimizeFlags.numNonParamRegsToAlloc ^ "\n") in
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
     (* main_source is the .l1/2/3/4 file. This is to distinguish from
