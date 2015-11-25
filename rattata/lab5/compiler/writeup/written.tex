@@ -15,7 +15,7 @@
 
 \section{Introduction}
 
-For L5, we implemented 5 optimizations: dead code elimination, constant folding and propagation, precoloring registers, function inlining, and limited push/pop instructions. We apply these at three different optimization levels, which are -O0, -O1, and -O2. At -O0, we apply no optimizations at all, not even register allocation. At -O1, we apply register allocation. At -O2, we apply all of our optimizations. Finally, using the new --unsafe flag, we allow our compiler to bypass checking of memory safety for even faster compilation. With all optimizations and unsafe mode, our compiler reaches a performance score of 0.7661. Below is a comparison of runtimes between O0, O1, and O2 (in unsafe mode, since that's what counted in the end).
+For L5, we implemented 5 optimizations: dead code elimination, constant folding and propagation, precoloring registers, function inlining, and limited push/pop instructions. We apply these at three different optimization levels, which are -O0, -O1, and -O2. At -O0, we apply no optimizations at all, not even register allocation. At -O1, we apply register allocation. At -O2, we apply all of our optimizations. Finally, using the new --unsafe flag, we allow our compiler to bypass checking of memory safety for even faster compilation. With all optimizations and unsafe mode, our compiler reaches a performance score of 0.7661. Below is a comparison of runtimes between O0, O1, and O2 (in unsafe mode, since that's what counted in the end). In all figures, 1.0 is defined as the number of cycles consumed by the executable produced by our compiler with -O0 (in safe mode).
 
 \includegraphics[scale=0.5]{O0-O1-O2_unsafe-page-001}
 
