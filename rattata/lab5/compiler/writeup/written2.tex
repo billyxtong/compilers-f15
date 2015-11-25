@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\graphicspath{ {figures/}   }
+
+\title{15-411: L5 Written Report}
+\author{Manganese}
+\date{November 23, 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+For L5, we chose to implement 4 optimizations: dead code elimination, constant folding and propagation, precoloring registers, and inlining. We apply these at three different optimization levels, which are -O0, -O1, and -O2. At -O0, we apply no optimizations at all, not even register allocation. At -O1, we apply register allocation. At -O2, we apply all of our optimizations. Finally, using the new --unsafe flag, we allow our compiler to bypass checking of memory safety for even faster compilation. With all optimizations and unsafe mode, our compiler reaches a performance score of 0.7661.
+
+\section{Optimization 0: Unsafe Mode}
+
+Unsafe mode allowed our compiler to run without having to guarantee memory safety. In our implementation, we chose to forgo the checking of array access bounds and NULL pointer dereferences. This improved performance significantly in tests that involved many reads from and writes to memory. 
+
+Below we include a graph that shows the effects of "--unsafe" in the compilation of the benchmark tests. As you can see, unsafe mode causes a large decrease in compilation time on most tests. 
+
+\includegraphics[scale=0.5]{everything-page-001}
+
+Unsafe mode was (mostly) implemented in the conversion for the elaborated AST to what we called ``infinite-address code": sequential code with jumps, labels, cmps, but arbitrarily nested expressions, which is where we add the safety checks in safe mode.
+
+\section{Optimization 1: Dead Code Elimination}
+
+We eliminate dead code in each function as follows. First, we made a set of every single temp used in the function. We then map these temps to the lines that they're needed on using neededness rules 1 and 3 as described in lecture by using a backward dataflow analysis. This "seeds" the neededness for each temp. Then, using neededness rule 2, we propagate each temp's neededness until we reach a line where the temp is already marked as needed or defined. 
+
+On its own, dead code elimination improved only the performance of our compiler on the collatz, qsort, shifts, and tree tests. This could be because... In the tests it did not help, we can see that 
+
+This was due to the additional pass made on the two-address code to find and eliminate dead code, but very few of the normal tests and none of the tests in the benchmark suite actually contained any dead code in the form of unused variables. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with constant folding and propagation. Below we include a graph that shows the effects on performance with and without dead code elimination in isolation.
+
+\includegraphics[scale=0.5]{O1_vs_deadcode-page-001}
+
+Dead code elimination was performed on our two-address code.
+
+
+\section{Optimization 2: Constant Folding and Propagation}
+
+We implemented a weak form of constant folding and propagation due to not implementing SSA or reaching definitions. In order to avoid possibly propagating across jumps, we only propagate for temps defined exactly once in the program. Using a forward dataflow analysis, we find all temps, and if they are mapped to a constant in a move, replace all subsequent instances of this temp in the program with that constant. We then remove the move instruction. Finally, if we ever reach an instruction where after constant propagation we have a binop on two constant arguments, we simply fold them and map the temp to the new constant, creating another propagable temp.
+
+On its own, constant folding and propagation did very little to improve the performance of our compiler, and in many cases actually decreased performance by as much as 10 percent. This was due to the additional pass made on the three-address code to find propagable temps, but without SSA form or reaching definitions, this optimization does not reach its full potential. It did help in eliminating some of the extraneous moves we generated, but that was only in combination with dead code elimination. Below we include a graph that shows the effects on performance with and without constant folding and propagation in isolation.
+
+\includegraphics[scale=0.5]{O1_vs_constOpts-page-001}
+
+
+
+As we can see, $include results from individual tests here$
+
+Constant folding and propagation was performed on our three-address code.
+
+\section{Optimization 3: Precoloring Temps}
+
+The calling conventions specify six registers to be used for passing arguments to function. Up until L5, we reserved those registers for use only as arguments. After reserving two registers for handling memory-to-memory operations, using RBP as the base pointer, and reserving EAX to hold return values, this left us with only five registers to be allocated for arbitrary temps.
+
+To handle this, we implemented the ability to precolor temps. This allowed us to require that certain temps be allocated certain registers, without losing the ability to allocate that register to other temps. This provided us with four more registers to allocate (we still reserved ECX and EDX for shifts and division, respectively). 
+
+This turned out to be the most effective optimization we implemented. Unfortunately, the way we implemented precoloring made it difficult to toggle whether or not argument registers could be allocated elsewhere. To demonstrate the effect of having extra registers to allocate, we implemented a flag which sets how many of the original five general purpose registers to allocate (making the overall number of registers available to allocate at least four, and at most nine).
+
+\includegraphics[scale=0.5]{allocating_more_regs-page-001}
+
+As we can see, having additional registers to allocate drastically improves performance on almost all tests, with fibrec and prime being the only exceptions. This could be because...
+
+
+\section{Optimization 4: Inlining}
+
+We performed standard function inlining on our three-address code. The most effective heuristic we found was to inline a function if:
+
+1. It was not recursive, including any level of mutual recursion, and
+2. The function length was most 50 lines (in three-address code).
+
+We also found it effective to ``recursively" inline functions. For example, suppose $f$ calls $g$ within a loop, but all $g$ does is call $h$ once. Then just inlining $g$ into $f$ will leave the $f$ with a call to $h$. It is more effective actually inline $h$ into $g$, and then inline the resulting code into $f$. We ended up inlining to a depth of 3, although we found little variation in performance at about a depth of 2.
+
+\includegraphics[scale=0.5]{O1_vs_inlining-page-001}
+
+As we can see, $include results from individual tests here$
+
+
+\section{Combinations of Optimizations}
+
+In testing the efficacy of our optimizations, we tried every combination of at least two optimizations as well as the "--unsafe" flag. Our results can be seen in the following infographic:
+
+
+
+
+
+
+The best individual optimization was clearly the revamp made on the register allocator. Before the optimization, our compiler did not efficiently exploit registers. We pushed and popped every register in every function call, didn't allow use of registers reserved for specific operations, and spilled a ton of temps onto the stack. This resulted in reads to and writes from memory that could've been prevented by having more registers.
+
+There are several occurrences of note in this lab. First, there were several points during the lab when we experienced some strange timing issues. At one point unsafe mode caused the results for the mmult benchmark to be slower by a factor of 3. At another, our optimizations were causing significant slow-downs in the execution of some tests, and significant speed-ups in others. We haven't been able to come up with a reason behind these occurrences besides what Rob calls "weird voodoo magic".
+
+Other things of note: the best combination of optimizations was X and Y, optimizations A and B actually decreased performance across the board, etc.
+
+
+\end{document}
+
+
+
