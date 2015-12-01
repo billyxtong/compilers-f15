@@ -1,0 +1,9 @@
+struct s{
+  int x;
+};
+
+
+int main(){
+  struct s[] a = alloc_array(struct s, 1);
+  return a[0].x;
+}
