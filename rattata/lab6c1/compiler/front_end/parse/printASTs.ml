@@ -2,6 +2,7 @@ open Datatypesv1
 open PrintDatatypes
 open Ast
 open String
+module C = Char
 
 (* ============ Pre-Elab AST Print Functions ================= *)
 
@@ -31,7 +32,14 @@ let rec preElabLValToString(lval : preElabLVal) =
 
 and preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
-        PreElabConstExpr(c,t) -> constToString c
+        PreElabConstExpr(c,t) -> 
+          if not (t = CHAR) then constToString c 
+          else concat "" ["\'"; make 1 (C.chr c); "\'"]
+      | PreElabStringConstExpr(asciiChars : int list) -> 
+          let charList = List.map (C.chr) asciiChars in
+          let singletonStringList = List.map (make 1) charList in
+          let str = concat "" singletonStringList in
+          concat "" ["\""; str; "\""]
       | PreElabNullExpr -> "NULL"
       | PreElabIdentExpr(id) -> identToString id
       | PreElabBinop(expr1, op, expr2) -> concat "" ["("; preElabExprToString expr1; " ";
@@ -145,7 +153,14 @@ let rec untypedPostElabLValToString(lval : untypedPostElabLVal) =
 
 and untypedPostElabExprToString(expression : untypedPostElabExpr) =
   match expression with
-        UntypedPostElabConstExpr(c,t) -> constToString c
+        UntypedPostElabConstExpr(c,t) -> 
+          if not (t = CHAR) then constToString c 
+          else concat "" ["\'"; make 1 (C.chr c); "\'"]
+      | UntypedPostElabStringConstExpr(asciiChars : int list) -> 
+          let charList = List.map (C.chr) asciiChars in
+          let singletonStringList = List.map (make 1) charList in
+          let str = concat "" singletonStringList in
+          concat "" ["\""; str; "\""]
       | UntypedPostElabNullExpr -> "NULL"
       | UntypedPostElabIdentExpr(id) -> id
       | UntypedPostElabBinop(expr1, op, expr2) -> concat "" ["("; 
@@ -264,6 +279,20 @@ and boolExprToString(bExpr : boolExpr) =
       | LogNot(bExpr) -> concat "" ["!"; boolExprToString bExpr]
       | LogAnd(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " && "; boolExprToString(bExpr2)]
       
+and stringExprToString(sExpr : stringExpr) =
+  match sExpr with
+    StringConst(asciiChars) ->  
+          let charList = List.map (C.chr) asciiChars in
+          let singletonStringList = List.map (make 1) charList in
+          concat "" singletonStringList
+  | StringSharedExpr(s) -> sharedTypeExprToString(s)
+
+and charExprToString(cExpr : charExpr) =
+  match cExpr with
+    CharConst(c) -> 
+      concat "" ["\'"; make 1 (C.chr c); "\'"]
+  | CharSharedExpr(s) -> sharedTypeExprToString(s)
+
 and typedPostElabLValToString(lval : typedPostElabLVal) =
   match lval with
         TypedPostElabVarLVal(i) -> identToString(i)

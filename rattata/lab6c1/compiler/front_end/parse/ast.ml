@@ -14,8 +14,8 @@ open Datatypesv1
 type stringConst = int list 
 (* strings eventually become char arrays, and chars are represented by ints in ASCII *)
 type shiftOp = ASTrshift | ASTlshift
-type param = c0type * ident 
-type field = c0type * ident (* for structs: new for L4 *)
+type param = c0type * ident
+type field = c0type * ident (* for structs *)
 type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
@@ -65,25 +65,26 @@ and intExpr = IntConst of const
               | LessThan of intExpr * intExpr
               | IntEquals of intExpr * intExpr
               | BoolEquals of boolExpr * boolExpr
+              | CharEquals of charExpr * charExpr
               | PtrEquals of ptrExpr * ptrExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
-(* new in L4: lvalues are no longer just var names *)
  and stringExpr = StringConst of stringConst
                 (* strings are transformed into char arrays, 
                  * which are just int arrays because ASCII representation is a thing *)
-                | StringSharedExpr of sharedTypeExpr 
+                | StringSharedExpr of sharedTypeExpr
+ and charExpr = CharConst of const
+              | CharSharedExpr of sharedTypeExpr
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
-            (* Same deal as FieldAccess expr (for what the two
-               idents are) *)
               TypedPostElabFieldLVal of ident * typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
               TypedPostElabArrayAccessLVal of typedPostElabLVal * intExpr 
 and typedPostElabExpr = IntExpr of intExpr
                        | BoolExpr of boolExpr
                        | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
-                       | PtrExpr of ptrExpr (* new in L4 *)
+                       | PtrExpr of ptrExpr
                        | StringExpr of stringExpr
+                       | CharExpr of charExpr
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of typedPostElabLVal *
                                           assignOp * typedPostElabExpr
@@ -91,7 +92,6 @@ and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                                        typedPostElabBlock
                   | TypedPostElabWhile of boolExpr * typedPostElabBlock
                   | TypedPostElabReturn of typedPostElabExpr
-                      (* functions can now return any type! *)
                   | TypedPostElabAssert of boolExpr
                   | TypedPostElabVoidReturn (* takes no args *)
                   | VoidFunCall of ident * typedPostElabExpr list
@@ -120,7 +120,7 @@ type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
               UntypedPostElabDerefLVal of untypedPostElabLVal |
               UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr 
 and untypedPostElabExpr =
-     UntypedPostElabConstExpr of const * c0type
+     UntypedPostElabConstExpr of const * c0type (* now handles int, bool, char constants *)
    | UntypedPostElabStringConstExpr of stringConst
    | UntypedPostElabNullExpr
    | UntypedPostElabIdentExpr of ident
@@ -144,7 +144,7 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
          typecheck the RHS. BUT if we elaborate this to
          "int f; f = f()", then the var is in scope and it will
          throw an typechecking error *)
-                         | UntypedPostElabInitDecl of ident * c0type 
+                         | UntypedPostElabInitDecl of ident * c0type
                                        * untypedPostElabExpr
                          | UntypedPostElabAssignStmt of untypedPostElabLVal * 
                                               assignOp * untypedPostElabExpr
@@ -181,7 +181,8 @@ type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
               PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
               PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
 and preElabExpr = PreElabConstExpr of const * c0type
-                 | PreElabCharConstExpr of int
+              (* | PreElabCharConstExpr of int *) 
+                 (* this is unneeded because the above handles int, bool, char constants *)
                  | PreElabStringConstExpr of stringConst
                  | PreElabNullExpr (* new in L4: represents NULL *)
                  | PreElabIdentExpr of ident

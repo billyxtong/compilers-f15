@@ -6,7 +6,6 @@ open String
 open PrintASTs
 open PrintDatatypes
 
-let count = ref 0
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
 let functionMap = ref Core.Std.String.Map.empty
@@ -31,6 +30,7 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
   match (t1, t2) with
         (INT, INT) -> true
       | (BOOL, BOOL) -> true
+      | (CHAR, CHAR) -> true
       | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
       | (Array(c1), Array(c2)) -> matchTypes c1 c2
       | (Struct(i1), Struct(i2)) -> (i1 = i2)
@@ -124,8 +124,10 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       (match typee with
              INT -> (IntExpr(IntConst(constant)), INT)
            | BOOL -> (BoolExpr(BoolConst(constant)), BOOL)
-           | _ -> (ErrorMsg.error ("constants must be int or bool\n");
+           | CHAR -> (CharExpr(CharConst(constant)), CHAR)
+           | _ -> (ErrorMsg.error ("constants must be int, bool, or char\n");
                    raise ErrorMsg.Error))
+  | UntypedPostElabStringConstExpr(str) -> (StringExpr(StringConst(str)), STRING)
   | UntypedPostElabNullExpr -> (PtrExpr(Null), Poop)
   | UntypedPostElabIdentExpr(i : ident) ->
       (match M.find varEnv i with
@@ -138,6 +140,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                (match actualType with
                       INT -> (IntExpr(IntSharedExpr(Ident(i))), actualType)
                     | BOOL -> (BoolExpr(BoolSharedExpr(Ident(i))), actualType)
+                    | CHAR -> (CharExpr(CharSharedExpr(Ident(i))), actualType)
+                    | STRING -> (StringExpr(StringSharedExpr(Ident(i))), actualType)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | Array(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | _ -> (ErrorMsg.error ("can't reference a struct without ptr\n");
@@ -160,6 +164,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                (match (tcExpr1, tcExpr2) with
                       (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntEquals(exp1, exp2)), BOOL)
                     | (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(BoolEquals(exp1, exp2)), BOOL)
+                    | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharEquals(exp1, exp2)), BOOL)
                     | (PtrExpr(exp1), PtrExpr(exp2)) -> 
                         if matchTypes type1 type2 && notAStruct type1 && notAStruct type2 then
                         (BoolExpr(PtrEquals(exp1, exp2)), BOOL)
@@ -190,6 +195,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                (match (tcExpr2, tcExpr3) with
                       (IntExpr(_), IntExpr(_)) -> (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), INT)
                     | (BoolExpr(_), BoolExpr(_)) -> (BoolExpr(BoolSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), BOOL)
+                    | (CharExpr(_), CharExpr(_)) -> (CharExpr(CharSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), CHAR)
+                    | (StringExpr(_), StringExpr(_)) -> (StringExpr(StringSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), STRING)
                     | (PtrExpr(_), PtrExpr(_)) ->
                         if matchTypes type2 type3 && typeNotLarge type2 && typeNotLarge type3
                         then
@@ -249,6 +256,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                          (match fieldType with
                            INT -> (IntExpr(IntSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), INT)
                          | BOOL -> (BoolExpr(BoolSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), BOOL)
+                         | CHAR -> (CharExpr(CharSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), CHAR)
+                         | STRING -> (StringExpr(StringSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))),
+                                                STRING)
                          | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), fieldType))
                      | None -> 
                          (ErrorMsg.error ("struct " ^ structName ^
@@ -271,8 +281,6 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                             raise ErrorMsg.Error))
            | _ -> (PtrExpr(Alloc(baseType)), Pointer(baseType)))
   | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
-      (* let () = count := !count + 1 in
-      let () = print_string (string_of_int(!count) ^ "\n") in *)
       let (typedExp, typee) = tc_expression varEnv e in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
@@ -281,7 +289,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            | (PtrExpr(p), Pointer(c)) -> 
                (match c with
                       INT -> (IntExpr(IntSharedExpr(Deref(p))), c)
-                    | BOOL -> (BoolExpr(BoolSharedExpr(Deref(p))), c) 
+                    | BOOL -> (BoolExpr(BoolSharedExpr(Deref(p))), c)
+                    | CHAR -> (CharExpr(CharSharedExpr(Deref(p))), c)
                     | _ -> (PtrExpr(PtrSharedExpr(Deref(p))), c))
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
