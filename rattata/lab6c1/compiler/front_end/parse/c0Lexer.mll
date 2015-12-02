@@ -55,7 +55,9 @@ let eof () =
 let id = ['A'-'Z' 'a'-'z' '_']['A'-'Z' 'a'-'z' '0'-'9' '_']*
 let decnum = ("0" | ['1'-'9'](['0'-'9']*))
 let hexnum = "0"['x' 'X']['0'-'9' 'a'-'f' 'A'-'F']+
-
+let chars = Array.to_list (Array.mapi
+           (fun i -> fun _ -> Char.chr i) Array.make 128 0)
+let stringForChar = List.map (fun c -> "'" ^ String.make 1 c ^ "'") chars    
 let ws = [' ' '\t' '\r' '\011' '\012']
 
 rule initial =
@@ -122,12 +124,17 @@ rule initial =
   | "true"        { P.TRUE }
   | "false"       { P.FALSE }
   | "bool"        { P.BOOL }
+  | "string"      { P.STRING }
+  | "char"        { P.CHAR }      
   | "void"        { P.VOID }
 
   | "if"          { P.IF }
   | "else"        { P.ELSE }
   | "while"       { P.WHILE }
   | "for"         { P.FOR }
+
+  | "\""          { P.DOUBLE_QUOTE }
+  | "'"           { P.SINGLE_QUOTE }      
 
   | "typedef"     { P.TYPEDEF }
   | "assert"      { P.ASSERT }
@@ -139,8 +146,6 @@ rule initial =
   | "NULL"        { P.NULL }
   | "alloc"       { P.ALLOC }
   | "alloc_array" { P.ALLOC_ARRAY }
-  | "char"        { assert false }
-  | "string"      { assert false }
 
   | "return"    { P.RETURN }
   | "int"       { P.INT }
@@ -165,6 +170,7 @@ rule initial =
   | "//"        { comment_line lexbuf }
   | '#'         { assert false }
   | eof         { eof () }
+  | stringForChar as c { P.CHAR c }      
   | _           { ErrorMsg.error 
                     ("illegal character: \"" ^ text lexbuf ^ "\"");
                   initial lexbuf }

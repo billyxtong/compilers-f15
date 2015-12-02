@@ -52,7 +52,11 @@ let rec expToLVal = function
 let expToC0Type = function
     A.PreElabIdentExpr id -> D.TypedefType id
   | _ -> assert(false)					   
-		     
+
+let charStringToChar c = (* because the char 'a' is actually the string "'a'" *)
+    let () = assert(String.get 0 c = '\'' && String.get 2 c = '\'') in
+    String.get 1 c
+	       
 %}
 
 %token EOF
@@ -82,7 +86,9 @@ let expToC0Type = function
 %token LSHIFT RSHIFT LSHIFT_EQ RSHIFT_EQ
 %token COLON QUESMARK
 %token LBRACK RBRACK
-%token DOT ARROW       
+%token DOT ARROW
+%token DOUBLE_QUOTE SINGLE_QUOTE
+%token <string> CHAR       
 /* UNARY and ASNOP and LOG_BINOP are dummy terminals.
  * We need dummy terminals if we wish to assign a precedence
  * to a rule that does not correspond to the precedence of
@@ -259,9 +265,11 @@ exp :
    parenExp                      { $1 }
  | nonParenExp                   { $1 }
 				 
-nonParenExp :				 
+nonParenExp :
+ /* String stuff */
+   CHAR                          { A.PreElabCharConstExpr $1 }
  /* Pointer stuff */	
-   NULL	                         { A.PreElabNullExpr }
+ | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
  | ALLOC_ARRAY LPAREN c0type COMMA exp RPAREN
 	                       { A.PreElabArrayAlloc ($3, $5) }
