@@ -181,6 +181,7 @@ type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
               PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
               PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
 and preElabExpr = PreElabConstExpr of const * c0type
+                 | PreElabCharConstExpr of int
                  | PreElabStringConstExpr of stringConst
                  | PreElabNullExpr (* new in L4: represents NULL *)
                  | PreElabIdentExpr of ident
