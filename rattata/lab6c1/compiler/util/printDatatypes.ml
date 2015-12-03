@@ -6,6 +6,7 @@ let identToString(i : ident) = i
 let sizeToString = function
       BIT32 -> "(32-bit)"
     | BIT64 -> "(64-bit)"
+    | BIT8 -> "(8-bit)"
 
 let rec c0typeToString (c : c0type) =
   match c with
