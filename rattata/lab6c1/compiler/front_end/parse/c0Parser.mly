@@ -267,8 +267,8 @@ exp :
 				 
 nonParenExp :
  /* String stuff */
-   CHAR_CONST                          { A.PreElabCharConstExpr
-					  (charStringToAscii $1) }
+   CHAR_CONST                          { A.PreElabConstExpr
+					  ((charStringToAscii $1), D.CHAR) }
  /* Pointer stuff */	
  | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
