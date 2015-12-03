@@ -207,6 +207,7 @@ c0typeNotIdent :
    INT                           { D.INT }
  | BOOL 		         { D.BOOL }
  | VOID                          { D.VOID }
+ | CHAR                          { D.CHAR }				 
  | c0type STAR                   { D.Pointer $1 }
  | STRUCT VAR_IDENT                  { D.Struct $2 }
    /* It's ok if the struct name type has been typedefed */

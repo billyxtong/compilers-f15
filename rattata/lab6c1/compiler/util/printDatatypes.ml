@@ -12,6 +12,8 @@ let rec c0typeToString (c : c0type) =
         INT -> "int "
       | BOOL -> "bool "
       | VOID -> "void "
+      | CHAR -> "char "
+      | STRING -> "string "
       | TypedefType(identifier) -> identToString(identifier) ^ " "
       | Pointer(c) -> c0typeToString(c) ^ "*"
       | Array(c) -> c0typeToString(c) ^ "[]"
