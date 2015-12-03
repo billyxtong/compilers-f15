@@ -53,9 +53,9 @@ let expToC0Type = function
     A.PreElabIdentExpr id -> D.TypedefType id
   | _ -> assert(false)					   
 
-let charStringToChar c = (* because the char 'a' is actually the string "'a'" *)
-    let () = assert(String.get 0 c = '\'' && String.get 2 c = '\'') in
-    String.get 1 c
+let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *)
+    let () = assert(String.get c 0 = '\'' && String.get c 2 = '\'') in
+    Char.to_int (String.get c 1) (* just use the ascii integer code *)
 	       
 %}
 
@@ -88,7 +88,7 @@ let charStringToChar c = (* because the char 'a' is actually the string "'a'" *)
 %token LBRACK RBRACK
 %token DOT ARROW
 %token DOUBLE_QUOTE SINGLE_QUOTE
-%token <string> CHAR       
+%token <string> CHAR_CONST       
 /* UNARY and ASNOP and LOG_BINOP are dummy terminals.
  * We need dummy terminals if we wish to assign a precedence
  * to a rule that does not correspond to the precedence of
@@ -267,7 +267,8 @@ exp :
 				 
 nonParenExp :
  /* String stuff */
-   CHAR                          { A.PreElabCharConstExpr $1 }
+   CHAR_CONST                          { A.PreElabCharConstExpr
+					  (charStringToAscii $1) }
  /* Pointer stuff */	
  | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
