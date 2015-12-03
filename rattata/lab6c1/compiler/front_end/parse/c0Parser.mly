@@ -53,7 +53,27 @@ let expToC0Type = function
     A.PreElabIdentExpr id -> D.TypedefType id
   | _ -> assert(false)					   
 
+let matchSpecialChar c =
+  let () = print_string("length: " ^ string_of_int(String.length c) ^ "\n") in
+    match String.get c 2 with
+        'n' -> Char.to_int '\n'
+      | 'r' -> Char.to_int '\r'
+      | 't' -> Char.to_int '\t'
+      | '\'' -> Char.to_int '\''
+      | '\"' -> Char.to_int '\"'
+	(* these ones apparently don't have versions in ocaml, so we'll
+           just arbitrarily make them negative numbers *)
+      | 'f' -> -1
+      | 'a' -> -2
+      | 'b' -> -3
+      | 'v' -> -4
+	       
 let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *)
+    let () = print_string("hi0: " ^ String.of_char(String.get c 0) ^
+			    " hi1: " ^ String.of_char(String.get c 1) ^
+			 " hi2 " ^ String.of_char(String.get c 2) ^ "\n") in
+    if String.length c = 4 (* special character, '\n' for example) *)
+    then matchSpecialChar c else   
     let () = assert(String.get c 0 = '\'' && String.get c 2 = '\'') in
     Char.to_int (String.get c 1) (* just use the ascii integer code *)
 	       

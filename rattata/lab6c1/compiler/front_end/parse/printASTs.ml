@@ -34,11 +34,16 @@ and preElabExprToString(preelabexpr : preElabExpr) =
   match preelabexpr with
         PreElabConstExpr(c,t) -> 
           if not (t = CHAR) then constToString c 
-          else concat "" ["\'"; make 1 (C.chr c); "\'"]
+          else let charString = if c >= 0 then make 1 (C.chr c)
+                     else string_of_int c in
+               (* there are some characters that we need to handle
+                  that don't have ascii numbers apparently,
+                  like \f, so I'm just making them negative numbers. - Ben *)
+            concat "" ["\'"; charString; "\'"]
       | PreElabStringConstExpr(asciiChars : int list) -> 
-          let charList = List.map (C.chr) asciiChars in
-          let singletonStringList = List.map (make 1) charList in
-          let str = concat "" singletonStringList in
+          let charList = List.map (fun c -> preElabExprToString
+                       (PreElabConstExpr(c, CHAR))) asciiChars in
+          let str = concat "" charList in
           concat "" ["\""; str; "\""]
       | PreElabNullExpr -> "NULL"
       | PreElabIdentExpr(id) -> identToString id
@@ -155,11 +160,16 @@ and untypedPostElabExprToString(expression : untypedPostElabExpr) =
   match expression with
         UntypedPostElabConstExpr(c,t) -> 
           if not (t = CHAR) then constToString c 
-          else concat "" ["\'"; make 1 (C.chr c); "\'"]
-      | UntypedPostElabStringConstExpr(asciiChars : int list) -> 
-          let charList = List.map (C.chr) asciiChars in
-          let singletonStringList = List.map (make 1) charList in
-          let str = concat "" singletonStringList in
+          else let charString = if c >= 0 then make 1 (C.chr c)
+                     else string_of_int c in
+               (* there are some characters that we need to handle
+                  that don't have ascii numbers apparently,
+                  like \f, so I'm just making them negative numbers. - Ben *)
+            concat "" ["\'"; charString; "\'"]
+      | UntypedPostElabStringConstExpr(asciiChars : int list) ->
+          let charList = List.map (fun c -> preElabExprToString
+                       (PreElabConstExpr(c, CHAR))) asciiChars in
+          let str = concat "" charList in
           concat "" ["\""; str; "\""]
       | UntypedPostElabNullExpr -> "NULL"
       | UntypedPostElabIdentExpr(id) -> id
@@ -282,15 +292,19 @@ and boolExprToString(bExpr : boolExpr) =
 and stringExprToString(sExpr : stringExpr) =
   match sExpr with
     StringConst(asciiChars) ->  
-          let charList = List.map (C.chr) asciiChars in
-          let singletonStringList = List.map (make 1) charList in
-          concat "" singletonStringList
+          let charList = List.map (fun c -> preElabExprToString
+                       (PreElabConstExpr(c, CHAR))) asciiChars in
+          let str = concat "" charList in
+          concat "" ["\""; str; "\""]
   | StringSharedExpr(s) -> sharedTypeExprToString(s)
 
 and charExprToString(cExpr : charExpr) =
   match cExpr with
-    CharConst(c) -> 
-      concat "" ["\'"; make 1 (C.chr c); "\'"]
+    CharConst(c) ->  let charString = if c >= 0 then make 1 (C.chr c) else string_of_int c in
+               (* there are some characters that we need to handle
+                  that don't have ascii numbers apparently,
+                  like \f, so I'm just making them negative numbers. - Ben *)
+            concat "" ["\'"; charString; "\'"]
   | CharSharedExpr(s) -> sharedTypeExprToString(s)
 
 and typedPostElabLValToString(lval : typedPostElabLVal) =

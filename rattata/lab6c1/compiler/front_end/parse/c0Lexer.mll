@@ -55,7 +55,8 @@ let eof () =
 let id = ['A'-'Z' 'a'-'z' '_']['A'-'Z' 'a'-'z' '0'-'9' '_']*
 let decnum = ("0" | ['1'-'9'](['0'-'9']*))
 let hexnum = "0"['x' 'X']['0'-'9' 'a'-'f' 'A'-'F']+
-let char = "'"['A'-'Z' 'a'-'z' '0'-'9' '_']"'"
+let char = "'"_"'" | "'\\n'" | "'\\r'" | "'\\f'" | "'\\t'" | "'\\a'"
+         | "'\\b'" | "'\\v'" | "'\\\''"  | "'\\\"'"
 let ws = [' ' '\t' '\r' '\011' '\012']
 
 rule initial =
@@ -131,6 +132,8 @@ rule initial =
   | "while"       { P.WHILE }
   | "for"         { P.FOR }
 
+  | char as c { P.CHAR_CONST c }      
+
   | "\""          { P.DOUBLE_QUOTE }
   | "'"           { P.SINGLE_QUOTE }      
 
@@ -168,7 +171,6 @@ rule initial =
   | "//"        { comment_line lexbuf }
   | '#'         { assert false }
   | eof         { eof () }
-  | char as c { P.CHAR_CONST c }      
   | _           { ErrorMsg.error 
                     ("illegal character: \"" ^ text lexbuf ^ "\"");
                   initial lexbuf }
