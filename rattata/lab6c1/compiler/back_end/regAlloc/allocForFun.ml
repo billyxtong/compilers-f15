@@ -234,8 +234,6 @@ let getColoring instrs tempList paramTmps =
           LivenessAnalysis.analyzeLiveness instrs tempList paramTmps in
      let tieBreakFunc = TieBreak.getTieBreakFunc instrs in
      let vertexOrdering = maxCardSearch interferenceGraph tieBreakFunc in
-     (* let () = print_string("vertices: " ^ (String.concat ", " *)
-     (*                        (List.map string_of_int vertexOrdering))) in *)
      let tmpToColorMap = greedilyColor interferenceGraph vertexOrdering in
      tmpToColorMap
   else
@@ -347,8 +345,6 @@ let allocForFun (Tmp2AddrFunDef(fName, params, instrs) : tmp2AddrFunDef)
                                     (* +1 for return address *) in
   let finalTmpToAssemLocMap = updateAssemLocsWithActualArgRBPOffset
           tmpToAssemLocMap firstArgOffsetAboveRbp in
-  (* let () = print_string("num push: " ^ string_of_int numPushInstrs ^ ", num allocd: " *)
-  (*                       ^ string_of_int (List.length allocdRegs)) in *)
   let finalOffset = H.fold maxDistBelowRBPOnStack finalTmpToAssemLocMap 0 in
   (* Move RSP into RBP BEFORE we change RSP! We need to use RBP to refer to the
      args on the stack above it *)

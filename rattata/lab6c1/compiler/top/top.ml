@@ -83,7 +83,6 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     let () = (match numRegs with
                   Some n -> OptimizeFlags.numNonParamRegsToAlloc := int_of_string n
                 | None -> ()) in
-    let () = print_string("num regs: " ^ string_of_int !OptimizeFlags.numNonParamRegsToAlloc ^ "\n") in
     let say_if flag s = if (dump_all || flag) then say (s ()) else () in
 
     (* main_source is the .l1/2/3/4 file. This is to distinguish from
