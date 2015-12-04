@@ -57,6 +57,7 @@ let decnum = ("0" | ['1'-'9'](['0'-'9']*))
 let hexnum = "0"['x' 'X']['0'-'9' 'a'-'f' 'A'-'F']+
 let char = "'"_"'" | "'\\n'" | "'\\r'" | "'\\f'" | "'\\t'" | "'\\a'"
          | "'\\b'" | "'\\v'" | "'\\\''"  | "'\\\"'"
+let c0string = "\""_*"\""         
 let ws = [' ' '\t' '\r' '\011' '\012']
 
 rule initial =
@@ -134,8 +135,7 @@ rule initial =
 
   | char as c { P.CHAR_CONST c }      
 
-  | "\""          { P.DOUBLE_QUOTE }
-  | "'"           { P.SINGLE_QUOTE }      
+  | c0string as s { P.STRING_CONST s }
 
   | "typedef"     { P.TYPEDEF }
   | "assert"      { P.ASSERT }
@@ -150,10 +150,6 @@ rule initial =
 
   | "return"    { P.RETURN }
   | "int"       { P.INT }
-
-(* don't think main should be a separate token anymore *)
-(*   | "main"      { P.MAIN } *)
-
 
   | decnum as n { decnumber n lexbuf }
   | hexnum as n { hexnumber n lexbuf }
@@ -174,6 +170,11 @@ rule initial =
   | _           { ErrorMsg.error 
                     ("illegal character: \"" ^ text lexbuf ^ "\"");
                   initial lexbuf }
+
+(* and lex_string = *)
+(*   parse *)
+(*     "\""      { initial lexbuf } *)
+(*   | _         { lex_string lexbuf } *)
 
 and comment =
   parse

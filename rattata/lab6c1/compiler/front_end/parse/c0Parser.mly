@@ -69,9 +69,6 @@ let matchSpecialChar c =
       | 'v' -> -4
 	       
 let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *)
-    let () = print_string("hi0: " ^ String.of_char(String.get c 0) ^
-			    " hi1: " ^ String.of_char(String.get c 1) ^
-			 " hi2 " ^ String.of_char(String.get c 2) ^ "\n") in
     if String.length c = 4 (* special character, '\n' for example) *)
     then matchSpecialChar c else   
     let () = assert(String.get c 0 = '\'' && String.get c 2 = '\'') in
@@ -108,7 +105,8 @@ let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *
 %token LBRACK RBRACK
 %token DOT ARROW
 %token DOUBLE_QUOTE SINGLE_QUOTE
-%token <string> CHAR_CONST       
+%token <string> CHAR_CONST
+%token <string> STRING_CONST		  
 /* UNARY and ASNOP and LOG_BINOP are dummy terminals.
  * We need dummy terminals if we wish to assign a precedence
  * to a rule that does not correspond to the precedence of
@@ -227,7 +225,8 @@ c0typeNotIdent :
    INT                           { D.INT }
  | BOOL 		         { D.BOOL }
  | VOID                          { D.VOID }
- | CHAR                          { D.CHAR }				 
+ | CHAR                          { D.CHAR }
+ | STRING                        { D.STRING }				 
  | c0type STAR                   { D.Pointer $1 }
  | STRUCT VAR_IDENT                  { D.Struct $2 }
    /* It's ok if the struct name type has been typedefed */
@@ -290,6 +289,7 @@ nonParenExp :
  /* String stuff */
    CHAR_CONST                          { A.PreElabConstExpr
 					  ((charStringToAscii $1), D.CHAR) }
+ | STRING_CONST               { A.PreElabStringConstExpr [0; 0; 0] }
  /* Pointer stuff */	
  | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
