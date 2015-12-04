@@ -31,6 +31,7 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
         (INT, INT) -> true
       | (BOOL, BOOL) -> true
       | (CHAR, CHAR) -> true
+      | (STRING, STRING) -> true
       | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
       | (Array(c1), Array(c2)) -> matchTypes c1 c2
       | (Struct(i1), Struct(i2)) -> (i1 = i2)
@@ -231,6 +232,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                (match funcType with
                       INT -> (IntExpr(IntSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | BOOL -> (BoolExpr(BoolSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
+                    | CHAR -> (CharExpr(CharSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
+                    | STRING -> (StringExpr(StringSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | VOID -> (VoidExpr(VoidFunCall(newFuncName, typedArgs)), funcType)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | Array(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
@@ -291,6 +294,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                       INT -> (IntExpr(IntSharedExpr(Deref(p))), c)
                     | BOOL -> (BoolExpr(BoolSharedExpr(Deref(p))), c)
                     | CHAR -> (CharExpr(CharSharedExpr(Deref(p))), c)
+                    | STRING -> (StringExpr(StringSharedExpr(Deref(p))), c)
                     | _ -> (PtrExpr(PtrSharedExpr(Deref(p))), c))
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
@@ -332,6 +336,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                                   (match arrayType with
                                          INT -> (IntExpr(IntSharedExpr(ArrayAccess(p, i))), arrayType)
                                        | BOOL -> (BoolExpr(BoolSharedExpr(ArrayAccess(p, i))), arrayType)
+                                       | CHAR -> (CharExpr(CharSharedExpr(ArrayAccess(p, i))), arrayType)
+                                       | STRING -> (StringExpr(StringSharedExpr(ArrayAccess(p, i))), arrayType)
                                        | _ -> (PtrExpr(PtrSharedExpr(ArrayAccess(p, i))), arrayType)))
                     | _ -> (ErrorMsg.error ("first expr not an array\n");
                             raise ErrorMsg.Error)))

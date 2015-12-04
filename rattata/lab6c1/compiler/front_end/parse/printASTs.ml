@@ -285,6 +285,7 @@ and boolExprToString(bExpr : boolExpr) =
       | LessThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " < "; intExprToString(iExpr2)]
       | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
       | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
+      | CharEquals(cExpr1,cExpr2) -> concat "" [charExprToString(cExpr1); " == "; charExprToString(cExpr2)]
       | PtrEquals(pExpr1,pExpr2) -> concat "" [ptrExprToString(pExpr1); " == "; ptrExprToString(pExpr2)]
       | LogNot(bExpr) -> concat "" ["!"; boolExprToString bExpr]
       | LogAnd(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " && "; boolExprToString(bExpr2)]
@@ -323,6 +324,8 @@ and typedPostElabExprToString(e : typedPostElabExpr) =
       | BoolExpr(b) -> boolExprToString(b)
       | VoidExpr(stmt) -> typedPostElabStmtToString(stmt)
       | PtrExpr(p) -> ptrExprToString(p)
+      | CharExpr(c) -> charExprToString(c)
+      | StringExpr(s) -> stringExprToString(s)
 
 and typedPostElabStmtToString(s : typedPostElabStmt) =
   match s with
