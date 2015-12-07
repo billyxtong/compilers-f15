@@ -281,8 +281,8 @@ and boolExprToString(bExpr : boolExpr) =
   match bExpr with
         BoolConst(c) -> if c = 0 then "false" else "true"
       | BoolSharedExpr(s) -> sharedTypeExprToString(s)
-      | GreaterThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " > "; intExprToString(iExpr2)]
-      | LessThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " < "; intExprToString(iExpr2)]
+      | IntGreaterThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " > "; intExprToString(iExpr2)]
+      | IntLessThan(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " < "; intExprToString(iExpr2)]
       | IntEquals(iExpr1,iExpr2) -> concat "" [intExprToString(iExpr1); " == "; intExprToString(iExpr2)]
       | BoolEquals(bExpr1,bExpr2) -> concat "" [boolExprToString(bExpr1); " == "; boolExprToString(bExpr2)]
       | CharEquals(cExpr1,cExpr2) -> concat "" [charExprToString(cExpr1); " == "; charExprToString(cExpr2)]
