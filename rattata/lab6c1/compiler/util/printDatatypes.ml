@@ -105,7 +105,7 @@ let boolInstrToString (instr : boolInstr) =
                                                assemLocToString(arg2) s]
                | BIT64 -> concat "" ["cmpq "; assemArgToString(arg1) s; ", "; 
                                                assemLocToString(arg2) s]
-               | BIT8 -> concat "" ["cmpq "; assemArgToString(arg1) s; ", "; 
+               | BIT8 -> concat "" ["cmpb "; assemArgToString(arg1) s; ", "; 
                                                assemLocToString(arg2) s])
                             
 
