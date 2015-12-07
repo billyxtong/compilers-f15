@@ -67,7 +67,15 @@ let matchSpecialChar c =
       | 'a' -> -2
       | 'b' -> -3
       | 'v' -> -4
-	       
+
+(* let charToAscii c = *)
+(*     match c with *)
+(*         '\f' -> -1 *)
+(*       | '\a' -> -2 *)
+(*       | '\b' -> -3 *)
+(*       | '\v' -> -4 *)
+(*       | _ -> Char.to_int c *)
+		  
 let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *)
     if String.length c = 4 (* special character, '\n' for example) *)
     then matchSpecialChar c else   
@@ -289,7 +297,8 @@ nonParenExp :
  /* String stuff */
    CHAR_CONST                          { A.PreElabConstExpr
 					  ((charStringToAscii $1), D.CHAR) }
- | STRING_CONST               { A.PreElabStringConstExpr [0; 0; 0] }
+ | STRING_CONST               { A.PreElabStringConstExpr
+			         (List.map (String.to_list $1) Char.to_int) }
  /* Pointer stuff */	
  | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
