@@ -63,19 +63,12 @@ let matchSpecialChar c =
       | '\"' -> Char.to_int '\"'
 	(* these ones apparently don't have versions in ocaml, so we'll
            just arbitrarily make them negative numbers *)
+      | '0' -> 0			    
       | 'f' -> -1
       | 'a' -> -2
       | 'b' -> -3
       | 'v' -> -4
 
-(* let charToAscii c = *)
-(*     match c with *)
-(*         '\f' -> -1 *)
-(*       | '\a' -> -2 *)
-(*       | '\b' -> -3 *)
-(*       | '\v' -> -4 *)
-(*       | _ -> Char.to_int c *)
-		  
 let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *)
     if String.length c = 4 (* special character, '\n' for example) *)
     then matchSpecialChar c else   
