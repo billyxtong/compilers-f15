@@ -3,7 +3,7 @@
 
 (* ident and c0type have to be in here to avoid a circular build
    error :( *)
-type c0type = INT | BOOL | VOID | TypedefType of ident | Pointer of c0type
+type c0type = INT | BOOL | VOID | CHAR | STRING | TypedefType of ident | Pointer of c0type
             | Array of c0type
             | Struct of ident
             | Poop (* for null pointer polymorphism *) 
@@ -22,14 +22,14 @@ type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 |
 
 (* actually I think I'm just going to use old memAddr type for now
    (which is only direct offsets *)
-type memAddr = reg * int 
+type memAddr = reg * int
 
 (* These are for actual assembly instructions. Tmps are not allowed. *)
 type intBinop = ADD | MUL | SUB | FAKEDIV | FAKEMOD
               | BIT_AND | BIT_OR | BIT_XOR
               | RSHIFT | LSHIFT
 type ptrBinop = PTR_ADD | PTR_SUB
-type size = BIT32 | BIT64                
+type size = BIT8 | BIT32 | BIT64
 type assemLoc = Reg of reg | MemAddr of memAddr | RegDeref of reg
               | MemAddrDeref of memAddr
 type assemArg = AssemLoc of assemLoc | Const of const

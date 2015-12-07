@@ -155,10 +155,12 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       (match op with
              GT -> (match (tcExpr1, tcExpr2) with
                           (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntGreaterThan(exp1, exp2)), BOOL)
+                        | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharGreaterThan(exp1, exp2)), BOOL)
                         | _ -> (ErrorMsg.error ("greater than expression didn't typecheck \n");
                                raise ErrorMsg.Error))
            | LT -> (match (tcExpr1, tcExpr2) with
                           (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntLessThan(exp1, exp2)), BOOL)
+                        | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharLessThan(exp1, exp2)), BOOL)
                         | _ -> (ErrorMsg.error ("less than expression didn't typecheck \n");
                                raise ErrorMsg.Error))
            | DOUBLE_EQ ->

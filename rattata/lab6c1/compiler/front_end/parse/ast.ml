@@ -63,11 +63,11 @@ and intExpr = IntConst of const
               | BoolSharedExpr of sharedTypeExpr
               | IntGreaterThan of intExpr * intExpr
               | IntLessThan of intExpr * intExpr
+              | CharGreaterThan of charExpr * charExpr
+              | CharLessThan of charExpr * charExpr
               | IntEquals of intExpr * intExpr
               | BoolEquals of boolExpr * boolExpr
               | CharEquals of charExpr * charExpr
-              | CharGreaterThan of charExpr * charExpr
-              | CharLessThan of charExpr * charExpr
               | PtrEquals of ptrExpr * ptrExpr
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
