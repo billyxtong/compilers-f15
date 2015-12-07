@@ -48,6 +48,7 @@ let addTypeToShared e = function
   | CHAR -> TmpIntExpr (TmpIntSharedExpr e) (* chars are ints! *)
   | BOOL -> TmpBoolExpr (TmpBoolSharedExpr e)
   | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr e)
+  | STRING -> TmpPtrExpr (TmpPtrSharedExpr e)                   
   | _ -> assert(false)                   
 
 let addTypeToTmp t = function
@@ -55,6 +56,7 @@ let addTypeToTmp t = function
   | CHAR -> TmpIntExpr (TmpIntArg (TmpLoc (TmpVar (Tmp t)))) (* chars are ints! *)
   | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc (TmpVar (Tmp t))))
   | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar (Tmp t))))
+  | STRING -> TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar (Tmp t))))
   | _ -> assert(false)                   
 
 
