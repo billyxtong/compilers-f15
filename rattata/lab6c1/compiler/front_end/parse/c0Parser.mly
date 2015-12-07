@@ -290,8 +290,12 @@ nonParenExp :
  /* String stuff */
    CHAR_CONST                          { A.PreElabConstExpr
 					  ((charStringToAscii $1), D.CHAR) }
- | STRING_CONST               { A.PreElabStringConstExpr
-			         (List.map (String.to_list $1) Char.to_int) }
+ | STRING_CONST               { let s = $1 in A.PreElabStringConstExpr
+			(List.map
+                      (String.to_list (String.sub s 1 (String.length s - 2)))
+					   Char.to_int) }
+	              /* throw out the first and last characters, which are just
+                         double quotes */
  /* Pointer stuff */	
  | NULL	                         { A.PreElabNullExpr }
  | ALLOC LPAREN c0type RPAREN    { A.PreElabAlloc $3 }
