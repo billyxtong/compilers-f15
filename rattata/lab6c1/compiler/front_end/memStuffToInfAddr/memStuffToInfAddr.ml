@@ -12,7 +12,8 @@ let structDefsMap = H.create 100
 
 let smallFieldSize = 4
 let ptrFieldSize = 8
-let ptrAlignment = 8  
+let ptrAlignment = 8
+let charSize = 1  
 
 let rec makeStructInnerMap fields offset map =
       match fields with
@@ -23,6 +24,8 @@ let rec makeStructInnerMap fields offset map =
                              | BOOL -> smallFieldSize
                              | Pointer _ -> ptrFieldSize
                              | Array _ -> ptrFieldSize
+                             | CHAR -> charSize
+                             | STRING -> ptrFieldSize
                              | Struct structName -> (
                                  let (fields, structSize) =
                                    H.find structDefsMap structName in structSize)
@@ -57,11 +60,15 @@ let get32vs64ForType = function
   | BOOL -> BIT32
   | Pointer _ -> BIT64
   | Array _ -> BIT64
+  | CHAR _ -> BIT8
+  | STRING _ -> BIT64    
   | _ -> assert(false)
 
 let getSizeForType = function
      INT -> smallFieldSize
    | BOOL -> smallFieldSize
+   | CHAR -> charSize
+   | STRING -> ptrFieldSize     
    | Pointer _ -> ptrFieldSize
    | Array _ -> ptrFieldSize
    | Struct structTypeName ->
