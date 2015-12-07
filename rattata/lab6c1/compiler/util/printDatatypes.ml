@@ -65,6 +65,7 @@ let regToString (r : reg) regSize =
     match regSize with
         BIT32 -> regToString32 r
       | BIT64 -> regToString64 r
+      | BIT8 -> regToString64 r
 
 let memAddrToString ((register, offset) : memAddr) = 
     concat "" [string_of_int(offset); "("; regToString64(register); ")"]
@@ -103,7 +104,10 @@ let boolInstrToString (instr : boolInstr) =
                  BIT32 -> concat "" ["cmpl "; assemArgToString(arg1) s; ", "; 
                                                assemLocToString(arg2) s]
                | BIT64 -> concat "" ["cmpq "; assemArgToString(arg1) s; ", "; 
+                                               assemLocToString(arg2) s]
+               | BIT8 -> concat "" ["cmpq "; assemArgToString(arg1) s; ", "; 
                                                assemLocToString(arg2) s])
+                            
 
 let assemIntInstrToString((intOp, src, dest) : assemIntInstr) =
     let srcString = (match (intOp, src) with
@@ -135,6 +139,9 @@ let assemInstrToString(instr : assemInstr) =
                           assemArgToString(src) s; ", ";
                           assemLocToString(dest) s]
                | BIT64 -> concat "" ["movq "; 
+                          assemArgToString(src) s; ", ";
+                          assemLocToString(dest) s]
+               | BIT8 -> concat "" ["movb "; 
                           assemArgToString(src) s; ", ";
                           assemLocToString(dest) s])
       | PTR_BINOP(op,src,dest) -> 
@@ -202,6 +209,8 @@ let tmpBoolInstrToString(tmpbool : tmpBoolInstr) =
                 BIT32 -> concat "" ["cmpl "; tmpArgToString(arg); ", "; 
                                               tmpLocToString(t)]
               | BIT64 -> concat "" ["cmpq "; tmpArgToString(arg); ", "; 
+                                              tmpLocToString(t)]
+              | BIT8 -> concat "" ["cmpb "; tmpArgToString(arg); ", "; 
                                               tmpLocToString(t)])
 
 let tmp2AddrBinopToString((binop, arg, temp) : tmp2AddrBinop) =
