@@ -216,7 +216,7 @@ and handleMemForExpr = function
        let spaceForLength = 8 in
        let extraElemsForLength = (* how many extra elems do we need
                       to alloc to get 8 bytes for the length? *)
-         (if getSizeForType elemType = spaceForLength then 1 else 2) in
+         spaceForLength / (getSizeForType elemType) in
        let (TmpIntExpr numElemsExpr, instrsForNumElems) =
           handleMemForExpr (TmpIntExpr numElems) in
       (* check that numElems is nonnegative. *)
@@ -361,7 +361,7 @@ and getArrayAccessPtr elemType ptrExp indexExpr =
               TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (s)),
                                       index_final)
-            )
+           )
          else 
             TmpInfAddrBinopExpr(MUL,
                           TmpIntArg (TmpConst (getSizeForType elemType)),
@@ -436,7 +436,8 @@ let handleMemForInstr = function
     | TmpInfAddrLabel lbl -> TmpInfAddrLabel lbl::[]
     | TmpInfAddrMov (opSize, src, dest) ->
       (* Note: dest is evaluated first! *)
-        let typee = (if opSize = BIT64 then (Pointer Poop) else getTypeFromExpr src) in
+        let typee = (if opSize = BIT64 then (Pointer Poop) else
+                     if opSize = BIT8 then CHAR else getTypeFromExpr src) in
         (* We need to know the size of the type to do array accesses and such, but
            LVal doesn't have the typed constructors (IntExpr, etc), so
            we have to get it from the rhs beforehand *)
