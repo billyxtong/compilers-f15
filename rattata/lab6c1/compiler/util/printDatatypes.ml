@@ -42,6 +42,25 @@ let regToString32 (r : reg) =
       | R14 -> "%r14d" (* callee-saved *)
       | R15 -> "%r15d" (* callee-saved *)
 
+let regToString8 (r : reg) = 
+  match r with
+        EAX -> "%al"
+      | EBX -> "%bl" (* callee-saved *)
+      | ECX -> "%cl"
+      | EDX -> "%dl"
+      | RBP -> "%rbp" (* callee-saved *)
+      | RSP -> "%rsp" (* callee-saved *)
+      | ESI -> "%sil" (* callee-saved *) 
+      | EDI -> "%dil" (* callee-saved *)
+      | R8  -> "%r8b"
+      | R9  -> "%r9b"
+      | R10 -> "%r10b"
+      | R11 -> "%r11b"
+      | R12 -> "%r12b" (* callee-saved *)
+      | R13 -> "%r13b" (* callee-saved *)
+      | R14 -> "%r14b" (* callee-saved *)
+      | R15 -> "%r15b" (* callee-saved *)
+
 let regToString64 (r : reg) = 
   match r with
         EAX -> "%rax"
@@ -65,7 +84,7 @@ let regToString (r : reg) regSize =
     match regSize with
         BIT32 -> regToString32 r
       | BIT64 -> regToString64 r
-      | BIT8 -> regToString64 r
+      | BIT8 -> regToString8 r
 
 let memAddrToString ((register, offset) : memAddr) = 
     concat "" [string_of_int(offset); "("; regToString64(register); ")"]

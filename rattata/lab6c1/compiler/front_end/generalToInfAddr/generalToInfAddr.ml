@@ -444,6 +444,19 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
             instrs_for_exp1 @ instrs_for_exp2 @
              make_cond_instrs retTmp retLabel idToTmpMap priorInstr
                  stmtsForIf stmtsForElse JE JNE
+       | A.CharEquals (char_exp1, char_exp2) ->
+            let (instrs_for_exp1, tmp_exp1) =
+               trans_char_exp retTmp retLabel idToTmpMap char_exp1 in
+            let (instrs_for_exp2, tmp_exp2) =
+               trans_char_exp retTmp retLabel idToTmpMap char_exp2 in
+            let priorInstr = TmpInfAddrBoolInstr
+            (TmpInfAddrCmp(getSizeForType CHAR, TmpIntExpr tmp_exp2,
+                           TmpIntExpr tmp_exp1)) in
+               (* again, chars are just ints! *)
+            instrs_for_exp1 @ instrs_for_exp2 @
+             make_cond_instrs retTmp retLabel idToTmpMap priorInstr
+                 stmtsForIf stmtsForElse JE JNE
+         
        | A.PtrEquals (p1, p2) ->
             let (instrs1, tmpP1) = trans_ptr_exp retTmp retLabel idToTmpMap p1 in
             let (instrs2, tmpP2) = trans_ptr_exp retTmp retLabel idToTmpMap p2 in
