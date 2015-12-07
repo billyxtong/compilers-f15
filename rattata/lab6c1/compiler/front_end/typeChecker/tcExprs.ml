@@ -128,7 +128,11 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            | CHAR -> (CharExpr(CharConst(constant)), CHAR)
            | _ -> (ErrorMsg.error ("constants must be int, bool, or char\n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabStringConstExpr(str) -> (StringExpr(StringConst(str)), STRING)
+  | UntypedPostElabStringConstExpr(str) -> 
+      if L.exists(fun c -> c = 0) str then
+      (ErrorMsg.error ("null character cannot appear in strings\n");
+        raise ErrorMsg.Error)
+      else (StringExpr(StringConst(str)), STRING)
   | UntypedPostElabNullExpr -> (PtrExpr(Null), Poop)
   | UntypedPostElabIdentExpr(i : ident) ->
       (match M.find varEnv i with
