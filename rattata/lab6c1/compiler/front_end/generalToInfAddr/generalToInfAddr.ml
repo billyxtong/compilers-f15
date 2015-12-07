@@ -17,6 +17,8 @@ let funParamsMap = H.create 10
 
 let getSizeForType = function
     INT -> BIT32
+  | CHAR -> BIT8
+  | STRING -> BIT64    
   | BOOL -> BIT32
   | Pointer _ -> BIT64
   | VOID -> BIT32 (* unfortunately, this case can validly happen if a
@@ -27,10 +29,13 @@ let getSizeForType = function
   | Poop -> assert(false)
   | TypedefType _ -> assert(false) (* should be stripped away in typecheck *)
     
-let getSizeForExpr = function
-    TmpIntExpr _ -> BIT32
-  | TmpBoolExpr _ -> BIT32
-  | TmpPtrExpr _ -> BIT64
+let getSizeForAstExpr = function
+    A.IntExpr _ -> BIT32
+  | A.BoolExpr _ -> BIT32
+  | A.PtrExpr _ -> BIT64
+  | A.StringExpr _ -> BIT64
+  | A.CharExpr _ -> BIT8
+  | A.VoidExpr _ -> assert(false)    
 
 let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
@@ -40,12 +45,14 @@ let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
    I'm sorry, style gods *)
 let addTypeToShared e = function
     INT -> TmpIntExpr (TmpIntSharedExpr e)
+  | CHAR -> TmpIntExpr (TmpIntSharedExpr e) (* chars are ints! *)
   | BOOL -> TmpBoolExpr (TmpBoolSharedExpr e)
   | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr e)
   | _ -> assert(false)                   
 
 let addTypeToTmp t = function
     INT -> TmpIntExpr (TmpIntArg (TmpLoc (TmpVar (Tmp t))))
+  | CHAR -> TmpIntExpr (TmpIntArg (TmpLoc (TmpVar (Tmp t)))) (* chars are ints! *)
   | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc (TmpVar (Tmp t))))
   | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc (TmpVar (Tmp t))))
   | _ -> assert(false)                   
@@ -126,9 +133,9 @@ let rec handle_shift retTmp retLabel idToTmpMap (e1, op, e2) =
     let rhs_id = GenUnusedID.create () in
     let rhs_lval = A.TypedPostElabVarLVal rhs_id in
     let evaluateRHS = A.TypedPostElabAssignStmt(rhs_lval, A.EQ, A.IntExpr e2) in
-    let isNonNegative = A.GreaterThan(A.IntSharedExpr (A.Ident rhs_id),
+    let isNonNegative = A.IntGreaterThan(A.IntSharedExpr (A.Ident rhs_id),
                                       A.IntConst (-1)) in
-    let isSmallEnough = A.LogNot (A.GreaterThan(A.IntSharedExpr (A.Ident rhs_id),
+    let isSmallEnough = A.LogNot (A.IntGreaterThan(A.IntSharedExpr (A.Ident rhs_id),
                                                 max_shift)) in
     let condition = (if !OptimizeFlags.safeMode then
                        A.LogAnd (isNonNegative, isSmallEnough)
@@ -153,6 +160,11 @@ and trans_exp retTmp retLabel idToTmpMap = function
                       (instrs, TmpBoolExpr (TmpBoolArg (TmpLoc t)))
     | A.PtrExpr e -> let (instrs, e') = trans_ptr_exp retTmp retLabel idToTmpMap e
                      in (instrs, TmpPtrExpr e')
+    | A.CharExpr e -> let (instrs, e') = trans_char_exp retTmp retLabel idToTmpMap e
+                     (* chars literally become ints starting in infAddr *)
+                      in (instrs, TmpIntExpr e')
+    | A.StringExpr e ->  let (instrs, e') = trans_string_exp retTmp retLabel idToTmpMap e
+                      in (instrs, TmpPtrExpr e')
     | A.VoidExpr _ -> assert(false)
       
 (* Returns a list of tmpExprs, resulting from calling trans_exp on each of the args *)
@@ -188,6 +200,32 @@ and trans_ptr_exp retTmp retLabel idToTmpMap = function
          let (instrs, TmpPtrExpr eInfAddr) = trans_shared_expr retTmp retLabel
         (* It doesn't matter what the type is a ptr to; just that it's a ptr *)
               (Pointer Poop) idToTmpMap e in (instrs, eInfAddr)
+
+(* All chars are treated exactly as ints starting in infAddr *)
+and trans_char_exp retTmp retLabel idToTmpMap = function
+      A.CharConst c -> ([], TmpIntArg (TmpConst c))
+    | A.CharSharedExpr e ->
+           let (instrs, TmpIntExpr eInfAddr) = trans_shared_expr retTmp retLabel CHAR
+               idToTmpMap e in (instrs, eInfAddr)
+
+and trans_string_exp retTmp retLabel idToTmpMap = function
+     A.StringConst s -> (* turn into array alloc and series of assigns *)
+          let ptrTmp = Tmp (Temp.create()) in
+          let strLength = List.length s + 1 (* for null terminator *) in
+          let allocExpr = TmpPtrExpr (TmpAllocArray (CHAR,
+                                      TmpIntArg (TmpConst strLength))) in
+          let allocInstr = TmpInfAddrMov(BIT64, allocExpr, TmpVarLVal ptrTmp) in
+          let getAssignInstr i c = 
+            TmpInfAddrMov(BIT8,
+                TmpIntExpr (TmpIntArg (TmpConst c)),
+                TmpArrayAccessLVal (TmpVarLVal ptrTmp, TmpIntArg (TmpConst i))) in
+          let assignInstrs = List.mapi s getAssignInstr in
+          (* Note: we don't have to assign the null terminator separately,
+             because the array alloc will zero it out *)
+          (allocInstr :: assignInstrs, TmpPtrArg (TmpLoc (TmpVar ptrTmp)))
+   | A.StringSharedExpr e ->
+           let (instrs, TmpPtrExpr eInfAddr) = trans_shared_expr retTmp retLabel STRING
+               idToTmpMap e in (instrs, eInfAddr)
 
 (* Returns a tuple (instrs, e) where e is the resulting expression,
    and instrs is any required instructions (which is empty for everything
@@ -369,7 +407,7 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
                               1 -> trans_stmts retTmp retLabel idToTmpMap stmtsForIf
                             | 0 -> trans_stmts retTmp retLabel idToTmpMap stmtsForElse
                             | _ -> assert(false))
-       | A.GreaterThan (int_exp1, int_exp2) -> 
+       | A.IntGreaterThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
             let (instrs_for_exp1, tmp_exp1) =
@@ -382,7 +420,7 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
             instrs_for_exp1 @ instrs_for_exp2 @
               (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JG JLE )
-       | A.LessThan (int_exp1, int_exp2) -> 
+       | A.IntLessThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
             let (instrs_for_exp1, tmp_exp1) =
@@ -502,7 +540,7 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         | _ ->
      let rhs = getRHSForAsnop tmplval eInfAddr asnop in
         instrsForLVal @ instrs_for_e @
-        TmpInfAddrMov (getSizeForExpr eInfAddr, rhs, tmplval)
+        TmpInfAddrMov (getSizeForAstExpr e, rhs, tmplval)
         ::trans_stmts retTmp retLabel newMap stmts)
    | A.TypedPostElabIf (e, ifStmts, elseStmts) :: stmts ->
        trans_cond retTmp retLabel idToTmpMap (e, ifStmts, elseStmts) @
@@ -522,7 +560,7 @@ and trans_stmts retTmp retLabel idToTmpMap = function
         let (instrs_for_e, eInfAddr) = trans_exp retTmp retLabel idToTmpMap e in
         (* Move our value to the ret tmp, then jump to the return *)
         instrs_for_e @
-        TmpInfAddrMov(getSizeForExpr eInfAddr, eInfAddr, TmpVarLVal retTmp)::
+        TmpInfAddrMov(getSizeForAstExpr e, eInfAddr, TmpVarLVal retTmp)::
         TmpInfAddrJump(JMP_UNCOND, retLabel) :: []
    | A.TypedPostElabAssert e :: stmts ->
      (* If e is true we proceed on, else we call the abort function, with
