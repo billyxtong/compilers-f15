@@ -1,0 +1,37 @@
+This directory contains the driver files for testing your compiler.
+
+You can test your test cases with
+
+% ../grader/gradetests [options] [suites to tests...]
+
+You can test your compiler with
+
+% ../grader/gradecompiler [options] [suites to test...]
+
+For a complete list of options, use the -h flag.
+
+Two very important flags:
+ -q (or -qq, -qqq, -qqqq...) make the grader output less and less
+    information.
+ -j <num> makes the grader work in parallel. On a 4-core machine it
+    makes sense to run the graders with the flag -j3 or -j4
+
+DEBUGGING:
+The harness is written in Standard ML and run with Standard ML of New Jersey.
+
+If you install sml with apt-get, you may get this error message: 
+/usr/lib/smlnj/bin/sml: Fatal error -- Uncaught exception Fail with
+"anchor $json-lib.cm not defined" raised at
+../cm/main/cm-boot.sml:169.50-169.56
+
+This is because not all of the standard SML/NJ libraries are currently
+distributed by apt-get.  A fix is available: in the root of your
+group's repository, run
+
+$ wget https://www.cs.cmu.edu/~rjsimmon/15411-f15/etc/json-lib.tgz
+$ tar xzvf json-lib.tgz
+
+You can check the two directories that are generated, JSON and ml-lpt,
+into your repository. 
+
+

@@ -18,7 +18,6 @@ rattata/lab5
 *.cmo
 *top.native
 *a.out
-*grader
 
 # You get these when you compile the tests I guess
 *.s
