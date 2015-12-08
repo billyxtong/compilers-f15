@@ -129,7 +129,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            | _ -> (ErrorMsg.error ("constants must be int, bool, or char\n");
                    raise ErrorMsg.Error))
   | UntypedPostElabStringConstExpr(str) -> 
-      if L.exists(fun c -> c = 0) str then
+      if List.exists(fun c -> c = 0) str then
       (ErrorMsg.error ("null character cannot appear in strings\n");
         raise ErrorMsg.Error)
       else (StringExpr(StringConst(str)), STRING)

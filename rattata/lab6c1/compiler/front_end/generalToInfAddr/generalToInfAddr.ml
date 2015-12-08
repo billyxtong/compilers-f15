@@ -422,6 +422,19 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
             instrs_for_exp1 @ instrs_for_exp2 @
               (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
                  stmtsForElse JG JLE )
+       | A.CharGreaterThan (char_exp1, char_exp2) -> 
+           (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
+         (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
+            let (instrs_for_exp1, tmp_exp1) =
+               trans_char_exp retTmp retLabel idToTmpMap char_exp1 in
+            let (instrs_for_exp2, tmp_exp2) =
+               trans_char_exp retTmp retLabel idToTmpMap char_exp2 in
+            let priorInstr = TmpInfAddrBoolInstr
+                 (TmpInfAddrCmp(getSizeForType CHAR, TmpIntExpr tmp_exp2,
+                                TmpIntExpr tmp_exp1)) in
+            instrs_for_exp1 @ instrs_for_exp2 @
+              (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
+                 stmtsForElse JG JLE )
        | A.IntLessThan (int_exp1, int_exp2) -> 
            (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
          (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
@@ -431,6 +444,20 @@ and trans_cond retTmp retLabel idToTmpMap (condition, stmtsForIf, stmtsForElse)
                trans_int_exp retTmp retLabel idToTmpMap int_exp2 in
             let priorInstr = TmpInfAddrBoolInstr
                  (TmpInfAddrCmp(getSizeForType INT, TmpIntExpr tmp_exp2,
+                                TmpIntExpr tmp_exp1)) in
+            instrs_for_exp1 @ instrs_for_exp2 @
+              (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
+                 stmtsForElse JL JGE )
+       | A.CharLessThan (char_exp1, char_exp2) -> 
+           (* NOTE THAT WE SWITCH THE ORDER BECAUSE CMP IS WEIRD *)
+         (* MAKE SURE TO CHECK THIS. Pretty sure it's right though *)
+            let (instrs_for_exp1, tmp_exp1) =
+               trans_char_exp retTmp retLabel idToTmpMap char_exp1 in
+            let (instrs_for_exp2, tmp_exp2) =
+               trans_char_exp retTmp retLabel idToTmpMap char_exp2 in
+            let priorInstr = TmpInfAddrBoolInstr
+              (* there's no TmpCharExpr; they're just ints! *)
+                 (TmpInfAddrCmp(getSizeForType CHAR, TmpIntExpr tmp_exp2,
                                 TmpIntExpr tmp_exp1)) in
             instrs_for_exp1 @ instrs_for_exp2 @
               (make_cond_instrs retTmp retLabel idToTmpMap priorInstr stmtsForIf
