@@ -11,7 +11,7 @@ open Datatypesv1
 (* Typed Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
-type stringConst = int list 
+type stringConst = int list
 (* strings eventually become char arrays, and chars are represented by ints in ASCII *)
 type shiftOp = ASTrshift | ASTlshift
 type param = c0type * ident
@@ -20,18 +20,20 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
+                    | FuncPointerDeref of typedPostElabExpr * typedPostElabExpr list (* L6: calling func ptr *)
+                    | AddressOfFunction of ident (* L6: address of operator for function names *)
                     | FieldAccess of ident * ptrExpr * ident
                 (* FieldAccess here is an arrow! *)
                        (* first ident: type name of struct
-                        * ptrExpr: the pointer expression 
+                        * ptrExpr: the pointer expression
                         * second ident: actual struct field
                         *
-                        * example: p->x where p is a struct s*. 
+                        * example: p->x where p is a struct s*.
                         * first ident: s
                         * ptrExpr: PtrSharedExpr(Ident(p))
                         * second ident: x
                         *
-                        * example: p->q->x, where p is a struct s0*, 
+                        * example: p->q->x, where p is a struct s0*,
                         *                         s0 has a field s1* q,
                         *                         and s1 has a field x.
                         *
@@ -72,7 +74,7 @@ and intExpr = IntConst of const
               | LogNot of boolExpr
               | LogAnd of boolExpr * boolExpr
  and stringExpr = StringConst of stringConst
-                (* strings are transformed into char arrays, 
+                (* strings are transformed into char arrays,
                  * which are just int arrays because ASCII representation is a thing *)
                 | StringSharedExpr of sharedTypeExpr
  and charExpr = CharConst of const
@@ -80,7 +82,7 @@ and intExpr = IntConst of const
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
               TypedPostElabFieldLVal of ident * typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
-              TypedPostElabArrayAccessLVal of typedPostElabLVal * intExpr 
+              TypedPostElabArrayAccessLVal of typedPostElabLVal * intExpr
 and typedPostElabExpr = IntExpr of intExpr
                        | BoolExpr of boolExpr
                        | VoidExpr of typedPostElabStmt (* for void function calls ONLY *)
@@ -102,6 +104,7 @@ and typedPostElabBlock = typedPostElabStmt list
 type typedPostElabGlobalDecl =
     (* After typechecking, we can throw out declarations and typedefs *)
     TypedPostElabFunDef of c0type * ident * param list * typedPostElabBlock
+  | TypedPostElabFuncTypeDef of c0type * ident * param list
   | TypedPostElabStructDef of ident * field list (* new for L4 *)
     (* we need to hang onto struct declarations for a bit *)
 type typedPostElabAST = typedPostElabGlobalDecl list      
@@ -112,7 +115,7 @@ type typedPostElabAST = typedPostElabGlobalDecl list
  (* Untyped Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
-type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND 
+type generalBinop = IntBinop of intBinop | DOUBLE_EQ | GT | LOG_AND
                    (* Billy just ignore these ones underneath,
                       I'm just using them for parsing *)
                   | LT | LEQ | GEQ | LOG_OR | NEQ
@@ -120,7 +123,7 @@ type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
              (* Field access here is a dot! *)
               UntypedPostElabFieldLVal of untypedPostElabLVal * ident |
               UntypedPostElabDerefLVal of untypedPostElabLVal |
-              UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr 
+              UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr
 and untypedPostElabExpr =
      UntypedPostElabConstExpr of const * c0type (* now handles int, bool, char constants *)
    | UntypedPostElabStringConstExpr of stringConst
@@ -132,11 +135,12 @@ and untypedPostElabExpr =
    | UntypedPostElabTernary of untypedPostElabExpr *
                    untypedPostElabExpr * untypedPostElabExpr
    | UntypedPostElabFunCall of ident * untypedPostElabExpr list
-    (* new in L4 *)                                 
-   | UntypedPostElabFieldAccessExpr of untypedPostElabExpr * ident 
-   | UntypedPostElabAlloc of c0type 
+   | UntypedPostElabFunPtrCall of untypedPostElabExpr * untypedPostElabExpr list (* L6: calling func ptr *)
+   | UntypedPostElabAddressOfFunction of ident (* L6: address of operator for function names *)
+   | UntypedPostElabFieldAccessExpr of untypedPostElabExpr * ident
+   | UntypedPostElabAlloc of c0type
    | UntypedPostElabDerefExpr of untypedPostElabExpr
-   | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr 
+   | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr
    | UntypedPostElabArrayAccessExpr of untypedPostElabExpr * untypedPostElabExpr
 type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
       (* Decls are int x, AssignStmts are x = 4, InitDecls are int x = 4.
@@ -169,6 +173,7 @@ type untypedPostElabGlobalDecl =
     | UntypedPostElabFunDef of c0type * ident * param list *
                                untypedPostElabBlock
     | UntypedPostElabTypedef of c0type * ident         
+    | UntypedPostElabFuncTypedef of c0type * ident * param list
     | UntypedPostElabStructDecl of ident (* new for L4 *)
     | UntypedPostElabStructDef of ident * field list (* new for L4 *)
 type untypedPostElabAST = untypedPostElabGlobalDecl list
@@ -182,19 +187,17 @@ type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
               (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
               PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
               PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
-and preElabExpr = PreElabConstExpr of const * c0type
-              (* | PreElabCharConstExpr of int *) 
-                 (* this is unneeded because the above handles int, bool, char constants *)
-                 | PreElabStringConstExpr of stringConst
-                 | PreElabNullExpr (* new in L4: represents NULL *)
+and preElabExpr = PreElabConstExpr of const * c0type 
+                 (* handles int, bool, char constants *)
+                 | PreElabStringConstExpr of stringConst (* L5: strings *)
+                 | PreElabNullExpr
                  | PreElabIdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
                  | PreElabNot of preElabExpr
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
                  | PreElabFunCall of ident * preElabExpr list
-                 (* new in L4: everything below. Replaced a lot of "exp" with idents. Is that correct? *)
-                 (* Not all of them should be idents. You can do something like f().x if
-                    f returns a struct. -Ben. *)
+                 | PreElabFunPtrCall of preElabExpr * preElabExpr list (* L6: calling a function pointer *)
+                 | PreElabAddressOfFunction of ident (* L6: address of operator for function names *)
                  | PreElabFieldAccessExpr of preElabExpr * ident (* field access here is a dot *)
                  | PreElabAlloc of c0type 
                  | PreElabDerefExpr of preElabExpr
@@ -220,7 +223,8 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
  and block = preElabStmt list
 type globalDecl = FunDecl of c0type * ident * param list
            | FunDef of c0type * ident * param list * block
-           | Typedef of c0type * ident 
+           | Typedef of c0type * ident
+           | FuncTypedef of c0type * ident * param list 
            | PreElabStructDecl of ident (* new for L4 *)
            | PreElabStructDef of ident * field list (* new for L4 *)
 type preElabAST = globalDecl list

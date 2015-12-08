@@ -6,10 +6,10 @@
 type c0type = INT | BOOL | VOID | CHAR | STRING | TypedefType of ident | Pointer of c0type
             | Array of c0type
             | Struct of ident
-            | Poop (* for null pointer polymorphism *) 
-            (* | PoopDeref  for dereferencing nulls which is somehow ok *)
+            | FuncID of ident (* C1 convention for function pointers *)
+            | Poop (* for null pointer polymorphism *)
 and ident = string
-(* we now have chars, but maybe we can represent them with ASCII? *)
+(* we now have chars, but we can represent them with ASCII *)
 type const = int
 
 type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15

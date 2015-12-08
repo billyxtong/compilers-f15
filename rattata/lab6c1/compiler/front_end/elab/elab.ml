@@ -19,6 +19,9 @@ and elaboratePreElabExpr(expression : preElabExpr) =
       | PreElabTernary(e1, e2, e3) -> UntypedPostElabTernary(elaboratePreElabExpr e1,
                                           elaboratePreElabExpr e2, elaboratePreElabExpr e3)
       | PreElabFunCall(i, exprs) -> UntypedPostElabFunCall(i, List.map elaboratePreElabExpr exprs)
+      | PreElabFunPtrCall(expr, exprs) -> UntypedPostElabFunPtrCall(elaboratePreElabExpr expr,
+                                                List.map elaboratePreElabExpr exprs)
+      | PreElabAddressOfFunction(ident) -> UntypedPostElabAddressOfFunction(ident)
       | PreElabFieldAccessExpr(e,i) -> UntypedPostElabFieldAccessExpr(elaboratePreElabExpr(e), i) 
       | PreElabAlloc(c) -> UntypedPostElabAlloc(c)
       | PreElabDerefExpr(e) -> UntypedPostElabDerefExpr(elaboratePreElabExpr(e))
@@ -100,6 +103,7 @@ let elaborateDecl (decl : globalDecl) =
         FunDecl(c,i,ps) -> UntypedPostElabFunDecl(c,i,ps)
       | FunDef(c,i,ps,body) -> UntypedPostElabFunDef(c,i,ps,elaborateBlock body)
       | Typedef(c,i) -> UntypedPostElabTypedef(c,i)
+      | FuncTypedef(c,i,ps) -> UntypedPostElabFuncTypedef(c,i,ps)
       | PreElabStructDecl(i) -> UntypedPostElabStructDecl(i)
       | PreElabStructDef(i,fs) -> UntypedPostElabStructDef(i,fs)
 

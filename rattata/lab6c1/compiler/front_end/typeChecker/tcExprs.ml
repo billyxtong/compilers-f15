@@ -250,6 +250,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
                    raise ErrorMsg.Error))
+  | UntypedPostElabFunPtrCall(expr, params) ->
+      let (typedExpr, exprType) = tc_expression varEnv expr in
+      let 
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
