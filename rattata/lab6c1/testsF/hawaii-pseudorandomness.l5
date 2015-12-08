@@ -1,0 +1,48 @@
+//test return 6
+
+typedef int i2i(int x, int y);
+
+int plus(int a, int b) {
+  return a + b;
+}
+
+int minus(int a, int b) {
+  return a - b;
+}
+
+int mult(int a, int b) {
+  return a * b;
+}
+
+int mod(int a, int b) {
+  return a % b;
+}
+
+i2i* getfun(int i) {
+  int x = i % 4;
+
+  if (x == 0) {
+    return &plus;
+  } else if (x == 1) {
+    return &minus;
+  } else if (x == 2) {
+    return &mult;
+  } else return &mod;
+}
+
+int main() {
+  int total = 20000;
+  i2i*[] funarray = alloc_array(i2i*, total);
+
+  for (int i = 0; i < total; i++) {
+    int fun = i * i * 17 + 97;
+    funarray[i] = getfun(fun);
+  }
+
+  int result = 0;
+  int seed = 11;
+  for (int i = 0; i < total; i++) {
+    result = (*funarray[i])(result, seed);
+  }
+  return result;
+}

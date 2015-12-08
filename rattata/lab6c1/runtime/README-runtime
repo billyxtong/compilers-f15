@@ -1,0 +1,45 @@
+This directory contains the files defining the link-time and run-time
+environment for your generated assembly files.  The autograder uses
+(almost) identical runtime files to grade your code upon hand-in.
+
+=== Regular runtime ===
+
+We suggest you copy the runtime files to the directory where you are
+are implementing your compiler.
+
+% cp -p runtime/* compiler/
+
+IF YOU DO THIS, MAKE SURE YOU DO NOT CHECK IN THE RUNTIME FILES
+
+Now the driver can link the runtime with your generated
+<file>.s, using the command
+
+% gcc -m64 <file>.s run411.c
+
+to generate the executable a.out, which it will then run and
+test for the correct answer.
+
+=== Benchmarking runtime (Lab 5) ===
+
+Same instructions as above, but use bench.c instead of run411.c. The
+compiled binary will take arguments, which you can view by passing the
+argument '-h'. The '-k' parameter will cause the executable to print
+out the checksum rather than the cycle count.
+
+The interface for benchmark files is
+
+void* init(int param);
+void prepare(void* data, int param);
+void run(void* data, int param);
+void checksum(void* data, int param);
+
+p = init(n) - initializes data structures for the problem instance with
+              parameter n, default n = 1000.  Run once per benchmark.
+
+prepare(p,n) - sets data structures to defined initial value
+run(p,n)     - run test, with cycle counting
+
+prepare(p,n); run(p,n) are iterated some number of times until we have
+convergence to a good cycle count, but a maximum of 1000 iterations
+
+checksum(p,n) - a checksum to validate result of a run

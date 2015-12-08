@@ -1,0 +1,170 @@
+//test return 270
+
+struct heap_container {
+  string data;
+  int size;
+  int capacity;
+};
+
+typedef struct heap_container* heap;
+
+heap heap_new()
+{
+  heap temp = alloc(struct heap_container);
+  temp->size = 0;
+  temp->capacity = 1;
+  temp->data = string_fromchar(char_chr(1));
+  
+  return temp;
+}
+
+void heap_insert(heap h, int t)
+{
+  if (h == NULL)
+  {
+    return;
+  }
+
+  if (h->size + 1 > h->capacity)
+  {
+    for (int i=0; i<h->capacity; i++)
+    {
+      h->data = string_join(h->data, string_fromchar(char_chr(1)));
+    }
+    
+    h->capacity *= 2;
+  }
+  
+  char[] temparr = string_to_chararray(h->data);
+  temparr[h->size] = char_chr(t+1);
+  h->data = string_from_chararray(temparr);
+  
+  int cur = h->size;
+  while (cur != 0)
+  {
+    int parent = (cur - 1) / 2;
+    if (char_ord(string_charat(h->data,cur)) < char_ord(string_charat(h->data,parent)))
+    {
+      temparr = string_to_chararray(h->data);
+      char temp = temparr[cur];
+      temparr[cur] = temparr[parent];
+      temparr[parent] = temp;
+      h->data = string_from_chararray(temparr);
+    }
+    
+    cur = parent;
+  }
+  
+  h->size++;
+}
+
+int heap_delete(heap h)
+{
+  if (h == NULL)
+  {
+    return -1;
+  }
+  
+  if (h->size == 1)
+  {
+    h->size = 0;
+    
+    return char_ord(string_charat(h->data,0))-1;
+  }
+  
+  int ret = char_ord(string_charat(h->data,0))-1;
+  h->size--;
+  
+  char[] temparr = string_to_chararray(h->data);
+  temparr[0] = temparr[h->size];
+  h->data = string_from_chararray(temparr);
+  
+  bool cont = true;
+  int cur = 0;
+  while (cont)
+  {
+    int left = (cur + 1) * 2 - 1;
+    int right = (cur + 1) * 2;
+    
+    if (left > h->size)
+    {
+      cont = false;
+    } else if (right > h->size)
+    {
+      if (char_ord(string_charat(h->data,cur)) < char_ord(string_charat(h->data,left)))
+      {
+        cont = false;
+      } else {
+        temparr = string_to_chararray(h->data);
+        char temp = temparr[cur];
+        temparr[cur] = temparr[left];
+        temparr[left] = temp;
+        h->data = string_from_chararray(temparr);
+      
+        cur = left;
+      }
+    } else if ((char_ord(string_charat(h->data,cur)) < char_ord(string_charat(h->data,left)))
+            && (char_ord(string_charat(h->data,cur)) < char_ord(string_charat(h->data,right))))
+    {
+      cont = false;
+    } else {
+      if (char_ord(string_charat(h->data,left)) < char_ord(string_charat(h->data,right)))
+      {
+        temparr = string_to_chararray(h->data);
+        char temp = temparr[cur];
+        temparr[cur] = temparr[left];
+        temparr[left] = temp;
+        h->data = string_from_chararray(temparr);
+        
+        cur = left;
+      } else {
+        temparr = string_to_chararray(h->data);
+        char temp = temparr[cur];
+        temparr[cur] = temparr[right];
+        temparr[right] = temp;
+        h->data = string_from_chararray(temparr);
+      
+        cur = right;
+      }
+    }
+  }
+  
+  return ret;
+}
+
+int heap_size(heap h)
+{
+  if (h == NULL)
+  {
+    return 0;
+  }
+  
+  return h->size;
+}
+
+int main()
+{
+  int wow_factor = 525600129;
+  heap h = heap_new();
+  while (wow_factor != 0)
+  {
+    if ((wow_factor & 1) == 1)
+    {
+      heap_insert(h, 1);
+    } else {
+      heap_insert(h, 0);
+    }
+    
+    wow_factor >>= 1;
+  }
+  
+  int ret = 0;
+  int cur = 0;
+  while (heap_size(h) > 0)
+  {
+    ret += cur * heap_delete(h);
+    cur++;
+  }
+  
+  return ret;
+}

@@ -1,0 +1,27 @@
+//test return 1404
+
+int main()
+{
+  int wow_factor = 525600129;
+  string katniss = "";
+  while (wow_factor != 0)
+  {
+    if ((wow_factor & 1) == 1)
+    {
+      katniss = string_join("1", katniss);
+    } else {
+      katniss = string_join("0", katniss);
+    }
+    
+    wow_factor >>= 1;
+  }
+  
+  int ret = 0;
+  for (int i=0; i<string_length(katniss); i++)
+  {
+    char cinder = string_charat(katniss,i);
+    ret += char_ord(cinder);
+  }
+  
+  return ret;
+}

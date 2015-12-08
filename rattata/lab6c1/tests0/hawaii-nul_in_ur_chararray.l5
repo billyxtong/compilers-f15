@@ -1,0 +1,16 @@
+//test return 3
+
+int main() {
+  char[] charlie = alloc_array(char, 7);
+  charlie[0] = 'c';
+  charlie[1] = 'h';
+  charlie[2] = 'a';
+  charlie[3] = '\0';
+  charlie[4] = 'l';
+  charlie[5] = 'i';
+  charlie[6] = 'e';
+
+  string x = string_from_chararray(charlie);
+
+  return string_length(x);
+}

@@ -1,0 +1,10 @@
+//test error
+
+typedef int defint;
+
+typedef int defint(int i);
+
+int main() {
+  defint* x = NULL;
+  return 0;
+}

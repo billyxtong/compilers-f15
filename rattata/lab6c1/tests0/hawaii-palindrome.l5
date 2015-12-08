@@ -1,0 +1,23 @@
+//test return 10000
+
+bool palindrome(string s) {
+  int l = string_length(s);
+  if (l == 0) return true;
+  for (int i = 0; i < l; i++) {
+    if (string_charat(s, i) != string_charat(s, l - i - 1)) return false;
+  }
+  return true;
+}
+
+int main() {
+  assert(palindrome(""));
+  assert(!palindrome("hubbub"));
+  assert(!palindrome("Anna"));
+  assert(palindrome("anna"));
+  assert(palindrome("racecar"));
+
+  assert(palindrome(string_join("forward","drawrof")));
+  assert(!palindrome("memememememememememnememememememememem"));
+
+  return 10000;
+}

@@ -1,0 +1,14 @@
+//test return 2320
+
+int main()
+{
+  string jar = "who do you think you are?";
+  int ret = 0;
+  for (int i=0; i<string_length(jar); i++)
+  {
+    char cinder = string_charat(jar,i);
+    ret += char_ord(cinder);
+  }
+  
+  return ret;
+}

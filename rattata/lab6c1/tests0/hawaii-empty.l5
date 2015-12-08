@@ -1,0 +1,10 @@
+//test return 4
+
+int main()
+{
+  string yeah = "yeah why";
+  char[] tmparray = string_to_chararray(yeah);
+  tmparray[4] = char_chr(0);
+  yeah = string_from_chararray(tmparray);
+  return string_length(yeah);
+}

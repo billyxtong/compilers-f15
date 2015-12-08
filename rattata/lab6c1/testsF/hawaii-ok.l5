@@ -1,0 +1,168 @@
+//test error
+
+typedef int curry1 (int a);
+typedef int curry2 (int b,curry1  *fun);
+typedef int curry3 (int c,curry2  *fun);
+typedef int curry4 (int d,curry3  *fun);
+typedef int curry5 (int e,curry4  *fun);
+typedef int curry6 (int f,curry5  *fun);
+typedef int curry7 (int g,curry6  *fun);
+typedef int curry8 (int h,curry7  *fun);
+typedef int curry9 (int i,curry8  *fun);
+typedef int curry10(int j,curry9  *fun);
+typedef int curry11(int k,curry10 *fun);
+typedef int curry12(int l,curry11 *fun);
+typedef int curry13(int m,curry12 *fun);
+typedef int curry14(int n,curry13 *fun);
+typedef int curry15(int o,curry14 *fun);
+typedef int curry16(int p,curry15 *fun);
+typedef int curry17(int q,curry16 *fun);
+typedef int curry18(int r,curry17 *fun);
+typedef int curry19(int s,curry18 *fun);
+typedef int curry20(int t,curry19 *fun);
+typedef int curry21(int u,curry20 *fun);
+typedef int curry22(int v,curry21 *fun);
+typedef int curry23(int w,curry22 *fun);
+typedef int curry24(int x,curry23 *fun);
+typedef int curry25(int y,curry24 *fun);
+typedef int curry26(int z,curry25 *fun);
+
+int curry1_def(int a)
+{
+	return a+1;
+}
+
+int curry2_def(int a,curry1* b)
+{
+	return (*b)(a)+2;
+}
+
+int curry3_def(int a,curry2* b)
+{
+	return (*b)(a,&curry1_def)+3;
+}
+
+int curry4_def(int a,curry3* b)
+{
+	return (*b)(a,&curry2_def)+4;
+}
+
+int curry5_def(int a,curry4* b)
+{
+	return (*b)(a,&curry3_def)+5;
+}
+
+int curry6_def(int a,curry5* b)
+{
+	return (*b)(a,&curry4_def)+6;
+}
+
+int curry7_def(int a,curry6* b)
+{
+	return (*b)(a,&curry5_def)+7;
+}
+
+int curry8_def(int a,curry6* b)
+{
+	return (*b)(a,&curry6_def)+8;
+}
+
+int curry9_def(int a,curry8* b)
+{
+	return (*b)(a,&curry7_def)+9;
+}
+
+int curry10_def(int a,curry9* b)
+{
+	return (*b)(a,&curry8_def)+10;
+}
+
+int curry11_def(int a,curry10* b)
+{
+	return (*b)(a,&curry9_def)+11;
+}
+
+int curry12_def(int a,curry11* b)
+{
+	return (*b)(a,&curry10_def)+12;
+}
+
+int curry13_def(int a,curry12* b)
+{
+	return (*b)(a,&curry11_def)+13;
+}
+
+int curry14_def(int a,curry13* b)
+{
+	return (*b)(a,&curry12_def)+14;
+}
+
+int curry15_def(int a,curry14* b)
+{
+	return (*b)(a,&curry13_def)+15;
+}
+
+int curry16_def(int a,curry15* b)
+{
+	return (*b)(a,&curry14_def)+16;
+}
+
+int curry17_def(int a,curry16* b)
+{
+	return (*b)(a,&curry15_def)+17;
+}
+
+int curry18_def(int a,curry17* b)
+{
+	return (*b)(a,&curry16_def)+18;
+}
+
+int curry19_def(int a,curry18* b)
+{
+	return (*b)(a,&curry17_def)+19;
+}
+
+int curry20_def(int a,curry19* b)
+{
+	return (*b)(a,&curry18_def)+20;
+}
+
+int curry21_def(int a,curry20* b)
+{
+	return (*b)(a,&curry19_def)+21;
+}
+
+int curry22_def(int a,curry21* b)
+{
+	return (*b)(a,&curry20_def)+22;
+}
+
+int curry23_def(int a,curry22* b)
+{
+	return (*b)(a,&curry21_def)+23;
+}
+
+int curry24_def(int a,curry23* b)
+{
+	return (*b)(a,&curry22_def)+24;
+}
+
+int curry25_def(int a,curry24* b)
+{
+	return (*b)(a,&curry23_def)+25;
+}
+
+int curry26_def(int a,curry25* b)
+{
+	return (*b)(a,&curry24_def)+26;
+}
+
+int curry27_def(int a,curry26* b)
+{
+	return (*b)(a,&curry25_def)+27;
+}
+
+int main()
+{
+  return curry27_def(1,&curry26_def);
+}

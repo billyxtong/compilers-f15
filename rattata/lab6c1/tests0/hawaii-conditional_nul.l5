@@ -1,0 +1,6 @@
+//test error
+
+int main() {
+  string x = true ? "nul" : "\0";
+  return 0;
+}

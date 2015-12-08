@@ -1,0 +1,14 @@
+//test return 22
+
+int main() {
+  char a = 'a';
+  char b = 'b';
+  char a2 = a;
+  char b2 = b;
+
+  assert(a == a2 && b == b2);
+  assert(a < b && a2 < b2);
+  assert(b > a2 && b2 > a);
+
+  return a < '\t' ? 20 : b < '\"'? 21 : 22;
+}

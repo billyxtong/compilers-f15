@@ -1,0 +1,16 @@
+//test return 128
+
+int main() {
+  char[] allchars = alloc_array(char, 129);
+  for (int i = 0; i < 128; i++) {
+    allchars[i] = char_chr(i);
+  }
+  string allstring = string_from_chararray(allchars);
+
+  assert(string_length(allstring) == 0);
+
+  allchars[0] = '\t';
+  allstring = string_from_chararray(allchars);
+
+  return string_length(allstring);
+}
