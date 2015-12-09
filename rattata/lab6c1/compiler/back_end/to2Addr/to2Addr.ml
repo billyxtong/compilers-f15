@@ -59,6 +59,14 @@ let instrTo2Addr paramToTmpMap = function
                          Some dest' -> Some (trans_loc paramToTmpMap dest')
                        | None -> None) in
       Tmp2AddrFunCall (retSize, fName, newArgs, newDest)::[]
+  | Tmp3AddrFunPtrCall (retSize, funPtr, args, dest) ->
+      (* same as for normal func calls *)
+      let newArgs = List.map (trans_arg paramToTmpMap) args in
+      let newDest = (match dest with
+                         Some dest' -> Some (trans_loc paramToTmpMap dest')
+                       | None -> None) in
+      Tmp2AddrFunPtrCall (retSize, funPtr, newArgs, newDest)::[]
+  | Tmp3AddrGetFunAddress (id, dest) -> Tmp2AddrGetFunAddress (id, dest)::[]
   | Tmp3AddrPtrBinop (op, arg1, arg2, dest) -> ptrBinopTo2Addr
        (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,
                                        trans_arg paramToTmpMap arg2)
