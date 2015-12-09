@@ -179,6 +179,9 @@ let assemInstrToString(instr : assemInstr) =
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
       | LABEL(l) -> labelToString(l) ^ ":"
       | CALL(i) -> "call " ^ identToString(i)
+      | GET_FUNC_ADDR (i, aLoc) -> "movq $" ^identToString i ^ " " ^
+                                   assemLocToString aLoc BIT64
+      | FUN_PTR_CALL(aLoc) -> "call *" ^ assemLocToString aLoc BIT64
         (* Just gonna use eax for this, since we reserve it for divs/rets in general *)
       | MASK_UPPER(loc) -> "movq $0xffffffff, %rax\n" ^
                            "andq %rax, " ^ assemLocToString(loc) BIT64
@@ -261,6 +264,14 @@ let tmp2AddrInstrToString(tmp2instr : tmp2AddrInstr) =
                  Some t -> tmpLocToString(t) ^ " <--" ^ sizeToString s
                              ^ " " ^ thing
                | None -> thing)
+      | Tmp2AddrFunPtrCall(s, tLoc,args,tmpOpt) ->
+          let thing = "(*" ^ tmpLocToString tLoc ^ ")(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
+          (match tmpOpt with
+                 Some t -> tmpLocToString(t) ^ " <--" ^ sizeToString s
+                             ^ " " ^ thing
+               | None -> thing)
+      | Tmp2AddrGetFunAddress (fName, tLoc) -> tmpLocToString tLoc ^ " <-- &"
+                                               ^ identToString fName
 
 let tmp2AddrFunDefToString (Tmp2AddrFunDef (i,temps,instrList)) =
   identToString(i) ^ "(" ^ (concat ", "
@@ -300,6 +311,14 @@ let tmp3AddrInstrToString(tmp3instr : tmp3AddrInstr) =
                  Some t -> tmpLocToString(t) ^ " <--" ^ sizeToString s
                            ^ " " ^ thing
                | None -> thing)
+      | Tmp3AddrFunPtrCall(s, tLoc,args,tmpOpt) ->
+          let thing = "(*" ^ tmpLocToString tLoc ^ ")(" ^ (concat "," (List.map tmpArgToString args)) ^ ")" in
+          (match tmpOpt with
+                 Some t -> tmpLocToString(t) ^ " <--" ^ sizeToString s
+                             ^ " " ^ thing
+               | None -> thing)
+      | Tmp3AddrGetFunAddress (fName, tLoc) -> tmpLocToString tLoc ^ " <-- &"
+                                               ^ identToString fName
 
 let tmp3AddrFunDefToString (Tmp3AddrFunDef (i,temps,instrList)) =
   identToString(i) ^ "(" ^ (concat ", "
@@ -320,6 +339,8 @@ let rec tmpSharedTypeExprToString(t : tmpSharedTypeExpr) =
                                       tmpIntExprToString(i) ^ "]"
       | TmpInfAddrDeref(p) -> "*(" ^ tmpPtrExprToString(p) ^")"
       | TmpLValExpr (lval) -> tmpLValToString(lval)                               
+      | TmpInfAddrFunPtrCall (p, args) -> tmpPtrExprToString p ^ "(" ^
+        (concat "," (List.map tmpExprToString args)) ^ ")"
 
 and tmpPtrExprToString(p : tmpPtrExpr) =
   match p with
@@ -335,6 +356,7 @@ and tmpPtrExprToString(p : tmpPtrExpr) =
                | PTR_SUB -> concat "" ["subq "; 
                             tmpPtrExprToString(arg); ", ";
                             tmpIntExprToString(temp)])
+      | TmpInfAddrAddressOfFunction id -> "&" ^ identToString id          
 
 and tmpIntExprToString(tmpintexpr : tmpIntExpr) =
   match tmpintexpr with

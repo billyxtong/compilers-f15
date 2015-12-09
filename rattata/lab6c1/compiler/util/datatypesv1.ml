@@ -49,6 +49,8 @@ type assemInstr = MOV of size * assemArg * assemLoc
                 | BOOL_INSTR of boolInstr
                 | LABEL of label
                 | CALL of ident
+                | FUN_PTR_CALL of assemLoc
+                | GET_FUNC_ADDR of ident * assemLoc
                 | MASK_UPPER of assemLoc
 type assemFunDef = AssemFunDef of ident * assemInstr list
 type assemProg = assemFunDef list
@@ -88,6 +90,8 @@ type tmp2AddrInstr = Tmp2AddrMov of size * tmpArg * tmpLoc
                    | Tmp2AddrBoolInstr of tmpBoolInstr
                    | Tmp2AddrLabel of label
                     (* tmp option because voids have no dest *)
+                   | Tmp2AddrGetFunAddress of ident * tmpLoc
+                   | Tmp2AddrFunPtrCall of size * tmpLoc * tmpArg list * tmpLoc option
                    | Tmp2AddrFunCall of size * ident * tmpArg list * tmpLoc option
 type tmp2AddrFunDef = Tmp2AddrFunDef of ident * tmpParam list *
                                         tmp2AddrInstr list
@@ -109,6 +113,8 @@ type tmp3AddrInstr = Tmp3AddrMov of size * tmpArg * tmpLoc
                   option because void function don't need to move
                   the result anywhere *)
                    | Tmp3AddrFunCall of size * ident * tmpArg list * tmpLoc option
+                   | Tmp3AddrGetFunAddress of ident * tmpLoc
+                   | Tmp3AddrFunPtrCall of size * tmpLoc * tmpArg list * tmpLoc option
                (* alloc, alloc_array become call malloc *)
 type tmp3AddrFunDef = Tmp3AddrFunDef of ident * tmpParam list *
                                         tmp3AddrInstr list
@@ -122,6 +128,7 @@ type tmp3AddrProg = tmp3AddrFunDef list
    field access using movs, etc. But by the time we're converting
    to 3Addr, all mem ops should be simplified. *)
 type tmpSharedTypeExpr = TmpInfAddrFunCall of ident * tmpExpr list
+                       | TmpInfAddrFunPtrCall of tmpPtrExpr * tmpExpr list
                        | TmpInfAddrFieldAccess of ident * tmpPtrExpr
                                                   * ident
                       (* first ident is the struct type name, for
@@ -146,6 +153,7 @@ and tmpPtrExpr = TmpPtrArg of tmpArg
                | TmpAlloc of c0type
                | TmpAllocArray of c0type * tmpIntExpr
                | TmpInfAddrPtrBinop of ptrBinop * tmpPtrExpr * tmpIntExpr
+               | TmpInfAddrAddressOfFunction of ident
 and tmpIntExpr = TmpIntArg of tmpArg
                | TmpIntSharedExpr of tmpSharedTypeExpr
                | TmpInfAddrBinopExpr of intBinop * tmpIntExpr * 
