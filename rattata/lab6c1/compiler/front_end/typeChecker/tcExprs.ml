@@ -252,7 +252,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    raise ErrorMsg.Error))
   | UntypedPostElabFunPtrCall(expr, params) ->
       let (typedExpr, exprType) = tc_expression varEnv expr in
-      let 
+      let () = print_string("incomplete but I want it to compile\n") in assert(false)
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
