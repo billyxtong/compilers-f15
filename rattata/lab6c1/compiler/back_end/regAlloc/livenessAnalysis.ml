@@ -20,6 +20,8 @@ let getDefVars prog line =
        | Tmp2AddrBinop(op, src, TmpVar (Tmp dest)) -> dest::[]
        | Tmp2AddrPtrBinop(op, src, TmpVar (Tmp dest)) -> dest::[]
        | Tmp2AddrFunCall(opSize, fName, args, Some (TmpVar (Tmp dest))) -> dest::[]
+       | Tmp2AddrFunPtrCall(opSize, tLoc, args, Some (TmpVar (Tmp dest))) -> dest::[]
+       | Tmp2AddrGetFunAddress (fName, TmpVar (Tmp dest)) -> dest :: []
        (* it's not defined if the dest is its deref! *)
        | Tmp2AddrMov(opSize, src, TmpDeref (Tmp dest)) -> []
        | Tmp2AddrBinop(op, src, TmpDeref (Tmp dest)) -> []
@@ -30,6 +32,9 @@ let getDefVars prog line =
        | Tmp2AddrLabel _ -> []
        | Tmp2AddrBoolInstr _ -> []
        | Tmp2AddrFunCall(opSize, fName, args, None) -> []
+       | Tmp2AddrFunPtrCall(opSize, tLoc, args, None) -> []
+       | Tmp2AddrFunPtrCall(opSize, tLoc, args, Some (TmpDeref (Tmp dest))) -> []
+       | Tmp2AddrGetFunAddress (fName, TmpDeref (Tmp dest)) -> []
        | Tmp2AddrMaskUpper (Tmp t) -> t::[]
   
 
@@ -66,6 +71,11 @@ let isUsed t prog line =
             (isUsedInTmpArg t arg) || (isUsedInTmpLoc t loc)
        | Tmp2AddrFunCall(retSize, fName, args, dest) ->
             List.exists (fun arg -> isUsedInTmpArg t arg) args ||
+            (* same deal as mov *)
+            dest = Some (TmpDeref (Tmp t))
+       | Tmp2AddrFunPtrCall(retSize, tLoc, args, dest) ->
+            List.exists (fun arg -> isUsedInTmpArg t arg) args ||
+            isUsedInTmpLoc t tLoc ||
             (* same deal as mov *)
             dest = Some (TmpDeref (Tmp t))
        | Tmp2AddrMaskUpper (Tmp t') -> t = t'
