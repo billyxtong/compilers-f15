@@ -1,0 +1,10 @@
+//test return 4
+
+f(x) { return x;  }
+g(x) { return f(x) + 4;  }
+
+main(){
+  p = alloc(int);
+  *p = 0;
+  return g(*p);
+}

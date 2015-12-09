@@ -1,0 +1,16 @@
+//test return 1
+//some other expressions with chars and strings
+
+int main(){
+  char c0 = (true ? 'a' : 'b');
+  string s0 = (false ? "hello" : "goodbye");
+  char* c1 = alloc(char);
+  *c1 = c0;
+  char[] c2 = alloc_array(char, 2);
+  c2[0] = *c1;
+  c2[1] = '\0';
+  string s1 = string_from_chararray(c2);
+  string* s2 = alloc(string);
+  *s2 = s1;
+  return string_compare(s0,*s2);
+}

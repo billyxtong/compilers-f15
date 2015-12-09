@@ -1,0 +1,9 @@
+//test return 0
+//escape sequences, default string
+
+int main(){
+  string emptyString = "";
+  string newLine = "new line\n";
+  string otherEscapes = "what a\t weird \"string\" \vpoops\b";
+  return 0;
+}

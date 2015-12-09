@@ -1,0 +1,9 @@
+typedef bool cmp(int a, int b);
+
+bool leq(int a, int b){ return a < b; }
+
+cmp* leqwrapper(){ return &leq; }
+
+int main(){
+  return (*leqwrapper())(0,1) ? 0 : 1;
+}

@@ -1,0 +1,8 @@
+//test return 0
+
+f(){ return "hi" };
+
+main(){
+  println(f());
+  return 0;
+}

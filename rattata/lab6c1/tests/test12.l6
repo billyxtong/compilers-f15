@@ -1,0 +1,26 @@
+//test return 1
+
+bool cmp(void* p, void* q);
+
+bool is_reverse_sorted(cmp* pred, void*[] A, int lower, int upper)
+{
+  for (int i = lower; i < upper-1; i++) {
+    if (!(*pred)(A[i+1], A[i])) /* call function ’pred’ */
+    return false;
+  }
+  return true;
+}
+
+bool geq(void* x, void* y){
+  return *(char*)x >= *(char*)y;
+}
+
+int main() {
+  int n = 10;
+  void*[] A = alloc_array(void*, n);
+  for (int i = 0; i < n; i++) {
+    char* p = alloc(char); *p = 10-i;
+    A[i] = (void*)p;
+  }
+  return is_reverse_sorted(&geq, A, 0, n) ? 1 : 0;
+}

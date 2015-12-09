@@ -1,0 +1,10 @@
+typedef bool cmp(int a, int b);
+
+bool geq(int a, int b) {return a > b;}
+
+cmp* wrap(){return &geq;}
+
+int main(){
+  cmp* x = &(*wrap());
+  return 0;
+}

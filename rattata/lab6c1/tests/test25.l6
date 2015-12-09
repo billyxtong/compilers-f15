@@ -1,0 +1,7 @@
+f(x){ return x; }
+
+int main() {
+   int* x = f(alloc(int));
+   *x = f(22);
+   return *f(x) + f(*x);
+}

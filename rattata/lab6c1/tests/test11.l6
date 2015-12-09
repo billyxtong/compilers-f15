@@ -1,0 +1,28 @@
+//test return 1
+
+typedef bool cmp(int* p, int* q);
+
+bool is_sorted(cmp* pred, int*[] A, int lower, int upper)
+{
+  for (int i = lower; i < upper-1; i++) {
+    if (!(*pred)(A[i], A[i+1])) /* call function ’pred’ */
+    return false;
+  }
+  return true;
+}
+
+bool leq(int* x, int* y){
+  return *x <= *y;
+}
+
+int main() {
+  int n = 10;
+  int*[] A = alloc_array(int*, n);
+  for (int i = 0; i < n; i++) {
+    int* p = alloc(int); *p = i;
+    A[i] = p;
+  }
+  return is_sorted(&leq, A, 0, n) ? 1 : 0;
+}
+
+

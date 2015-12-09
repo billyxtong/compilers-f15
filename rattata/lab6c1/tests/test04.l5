@@ -1,0 +1,7 @@
+//test error
+//empty single quotes is not default char
+
+int main(){
+  char c = '';
+  return 0;
+}

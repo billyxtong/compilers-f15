@@ -1,0 +1,9 @@
+//test return 0
+
+f(x) { return x;  }
+h(x) { return *f(x);  }
+
+int main(){
+  g = alloc(int);
+  return h(g);
+}

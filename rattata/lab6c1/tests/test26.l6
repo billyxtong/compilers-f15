@@ -1,0 +1,15 @@
+struct foo {
+  int tag;
+  int data;
+
+};
+
+struct bar {
+  int data;
+  struct bar* next;
+
+};
+
+f(x) { return x->data;  }
+
+int main() { return f(NULL);  }

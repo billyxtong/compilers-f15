@@ -1,0 +1,9 @@
+//test error
+//strings can't be compared without string functions
+
+int main(){
+  string s0 = "hello";
+  string s1 = "hello";
+  if (s0 != s1) return -1;
+  return 0;
+}

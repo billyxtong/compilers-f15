@@ -1,0 +1,10 @@
+//test return 0
+//regular chars and assign statements
+
+int main(){
+ char c0 = 'h';
+ char c1 = '5';
+ char c2 = ':';
+ char c3 = '.';
+ return 0; 
+}

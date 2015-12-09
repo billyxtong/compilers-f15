@@ -1,0 +1,11 @@
+//test return 0
+
+main(){
+  chars = alloc_array(char, 5);
+  for (i = 0; i < 4; i++){
+    char[i] = char_chr(i);
+  }
+  char[4] = '\0';
+  println(string_from_chararray(chars));
+  return 0;
+}

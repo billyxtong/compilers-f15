@@ -1,0 +1,10 @@
+typedef int cmp;
+typedef bool cmp(int a, int b);
+//typedef cmp x;
+
+bool leq(int a, int b) {return a < b;}
+
+int main(){
+  cmp* y = &leq;
+  return 0;
+}

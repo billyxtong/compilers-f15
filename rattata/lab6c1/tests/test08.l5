@@ -1,0 +1,17 @@
+//test return 0
+//IO and some library functions
+
+int main(){
+  string s0 = "Hello from test08! ";
+  string s1 = "Let's test conio by reading and printing a line: ";
+  string s2 = string_join(s0,s1);
+  println(s2);
+  string s = readline();
+  println("Here's what you just inputted: %s", s);
+  println("Cool! Now let's test some other library functions with strings.");
+  print("The length of your string: ");
+  printint(string_length(s));
+  println("The first 5 characters of your string: %s", string_sub(s, 0, 5));
+  print("Looks like everything works! Toodles!");
+  return 0;
+}

@@ -1,0 +1,8 @@
+//test return 0
+
+int main(){
+  int z = 0;
+  a = z;
+  y = a;
+  return y;
+}

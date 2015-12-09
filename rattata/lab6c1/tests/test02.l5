@@ -1,0 +1,16 @@
+//test return 0
+//char escape sequences
+
+int main(){
+  char c0 = '\0';
+  char c1 = '\t';
+  char c2 = '\r';
+  char c3 = '\f';
+  char c4 = '\a';
+  char c5 = '\b';
+  char c6 = '\n';
+  char c7 = '\v';
+  char c8 = '\'';
+  char c9 = '\"';
+  return 0;
+}
