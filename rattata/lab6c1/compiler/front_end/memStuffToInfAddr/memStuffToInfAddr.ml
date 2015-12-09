@@ -221,7 +221,9 @@ and handleMemForExpr = function
        let spaceForLength = 8 in
        let extraElemsForLength = (* how many extra elems do we need
                       to alloc to get 8 bytes for the length? *)
-         spaceForLength / (getSizeForType elemType) in
+         if not (getSizeForType elemType = 0) then
+            spaceForLength / (getSizeForType elemType)
+         else (* if you have an array of empty structs *) 0 in
        let (TmpIntExpr numElemsExpr, instrsForNumElems) =
           handleMemForExpr (TmpIntExpr numElems) in
       (* check that numElems is nonnegative. *)
