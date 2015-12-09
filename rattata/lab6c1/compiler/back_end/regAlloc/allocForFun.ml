@@ -102,7 +102,7 @@ let getArgDest paramRegArray i =
     MemAddr(RSP, bytesForArg * (i - Array.length paramRegArray))
       (* this puts the 7th arg at 0(rsp) BEFORE the call. Which should be 8(rsp) after *)
 
-let getPushPopsAndRSPshiftForFunCall fName allocdRegs spaceForArgs finalOffset
+let getPushPopsAndRSPshiftForFunCall allocdRegs spaceForArgs finalOffset
   numPushesAtTop =
     let (pushRegsInstrs, popRegsInstrs) =
           (List.map (fun r -> PUSH r) allocdRegs,
@@ -123,8 +123,12 @@ let getPushPopsAndRSPshiftForFunCall fName allocdRegs spaceForArgs finalOffset
                           else spaceForArgs + 8) in
     (pushRegsInstrs, popRegsInstrs, rspShiftAmount)
 
+(* I want to use the same translateFunCall for both normal fun calls and
+   fun ptr calls, but we need to be able to case on which it is *)
+type funToCall = FunName of ident | FunPtr of tmpLoc
+
 let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
-      opSize fName args dest regsPushedAtTop =
+      opSize fToCall args dest regsPushedAtTop =
     (* 1. Figure out how many args we'll need to put on the stack.
        2. Figure out how much we'll need to decrease RSP by, both to make
        room for the stack args, and to make sure it's 16-byte aligned.
@@ -139,11 +143,15 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
                  (* numStackArgs can't be less than 0, even if the right term is *)
     let spaceForArgs = bytesForArg * numStackArgs in
     let (pushRegsInstrs, popRegsInstrs, rspShiftAmount) =
-         getPushPopsAndRSPshiftForFunCall fName allocdRegs spaceForArgs finalOffset
+         getPushPopsAndRSPshiftForFunCall allocdRegs spaceForArgs finalOffset
              numPushesAtTop in
+    let getArgSize i = (match fToCall with
+               FunName fName -> (try (H.find funcToParamSizeMap fName).(i)
+                                 with Not_found -> BIT64)
+             | FunPtr funPtr -> BIT64) in
+       (* uh I guess just assume they're all 64-bit??? still very questionable *)
     let moveInstrs = List.mapi (fun i -> fun arg ->
-        MOV((try (H.find funcToParamSizeMap fName).(i)
-             with Not_found -> BIT64),
+        MOV(getArgSize i,
           translateTmpArg tbl arg, getArgDest paramRegArray i)) args in
     let rspSUBInstr = if rspShiftAmount = 0 && !OptimizeFlags.removeSubAddZeroToRsp
                       then []
@@ -154,11 +162,14 @@ let translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
     (* See if we need to move EAX to a certain result tmp (we wouldn't have to
        for void function calls *)
     (* See which registers we need to save (only the ones we're using *)
+    let callInstr = (match fToCall with
+                       FunName fName -> CALL fName
+                     | FunPtr funPtr -> FUN_PTR_CALL (translateTmpLoc tbl funPtr)) in
     let resultInstr = (match dest with
                           None -> []
                         | Some t -> MOV(opSize, AssemLoc (Reg EAX),
                                        translateTmpLoc tbl t)::[]) in
-    pushRegsInstrs @ rspSUBInstr @ moveInstrs @ [CALL fName]
+    pushRegsInstrs @ rspSUBInstr @ moveInstrs @ [callInstr]
     @ rspADDInstr @ popRegsInstrs @ resultInstr 
 
 let translate tbl allocdRegs finalOffset paramRegArray
@@ -186,11 +197,15 @@ let translate tbl allocdRegs finalOffset paramRegArray
       | Tmp2AddrBoolInstr TmpCmp(opSize, arg, t) ->
               BOOL_INSTR (CMP (opSize, translateTmpArg tbl arg, translateTmpLoc tbl t))::[]
       | Tmp2AddrFunCall(opSize, fName, args, dest) ->
-        translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
-          opSize fName args dest regsPushedAtTop
+          translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
+          opSize (FunName fName) args dest regsPushedAtTop
       | Tmp2AddrMaskUpper t -> MASK_UPPER (translateTmpLoc tbl (TmpVar t))::[]
-                                                 
-
+      | Tmp2AddrFunPtrCall(opSize, funPtr, args, dest) ->
+          translateFunCall tbl allocdRegs finalOffset paramRegArray funcToParamSizeMap
+          opSize (FunPtr funPtr) args dest regsPushedAtTop
+      | Tmp2AddrGetFunAddress (fName, dest) ->
+          GET_FUNC_ADDR(fName, translateTmpLoc tbl dest)::[]
+        
 (* We want to find the amount of memory allocated for this function's local vars:
    the largest distance below RBP on the stack *)
 let maxDistBelowRBPOnStack t loc currMax =
