@@ -291,7 +291,12 @@ exp :
 nonParenExp :
  /* Function ptr stuff */
    AMPERSAND VAR_IDENT %prec UNARY          { A.PreElabAddressOfFunction $2 }
- | LPAREN STAR exp RPAREN arglist     { A.PreElabFunPtrCall ($3, $5) }
+ | LPAREN exp RPAREN arglist     { match $2 with
+				      A.PreElabDerefExpr p -> 
+				             A.PreElabFunPtrCall (p, $4)
+                                    | _ -> assert(false)								 
+
+				 }
  /* String stuff */
  | CHAR_CONST                          { A.PreElabConstExpr
 					  ((charStringToAscii $1), D.CHAR) }
