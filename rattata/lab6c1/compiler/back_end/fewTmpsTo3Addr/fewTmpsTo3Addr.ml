@@ -95,11 +95,30 @@ and munch_exp d e depth : tmp3AddrInstr list * tmpArg =
          (* type of pointer doesn't matter *)
          (instrs @ Tmp3AddrMov(getSizeForType (Pointer Poop), pDest, TmpVar t)::[],
           TmpLoc (TmpDeref t))
+   | TmpCharExpr e -> munch_exp d (TmpIntExpr e) depth
+   | TmpIntExpr (TmpIntSharedExpr (TmpInfAddrFunPtrCall (funPtr, args))) ->
+        munch_fun_ptr_call d (funPtr, args) depth BIT32
+   | TmpBoolExpr (TmpBoolSharedExpr (TmpInfAddrFunPtrCall (funPtr, args))) ->
+        munch_fun_ptr_call d (funPtr, args) depth BIT32
+   | TmpPtrExpr (TmpPtrSharedExpr (TmpInfAddrFunPtrCall (funPtr, args))) ->
+        munch_fun_ptr_call d (funPtr, args) depth BIT64
+   | TmpPtrExpr (TmpInfAddrAddressOfFunction fName) ->
+        let t = Tmp (Temp.create()) in
+        (Tmp3AddrGetFunAddress (fName, TmpVar t)::[], TmpLoc (TmpVar t))
    | e -> let () = print_string("failing: " ^ PrintDatatypes.tmpExprToString e
                                   ^ "\n") in
                                   assert(false)
 
+and munch_fun_ptr_call d (funPtr, args) depth opSize =
+  let t = Tmp (Temp.create()) in
+  let (instrsForPtr, TmpLoc ptrDest) = munch_exp (Tmp (Temp.create()))
+      (TmpPtrExpr funPtr) depth in
+  let (argInstrs, argDests) = munch_fun_args args in
+  (instrsForPtr @ argInstrs @
+   Tmp3AddrFunPtrCall (opSize, ptrDest, argDests, Some (TmpVar t))::[],
+   TmpLoc (TmpVar t))
 
+     
 (* in a ptr binop, the second arg is always an int. *)
 and munch_ptr_binop d (ptr_binop, e1, e2) depth =
    let (instrs1, dest1) = munch_exp d (TmpPtrExpr e1) depth in
