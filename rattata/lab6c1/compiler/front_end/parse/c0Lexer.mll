@@ -102,7 +102,7 @@ rule initial =
   | ">="        { P.GEQ }
 
   | "~"         { P.BIT_NOT }
-  | "&"         { P.BIT_AND }
+  | "&"         { P.AMPERSAND }
   | "|"         { P.BIT_OR }
   | "^"         { P.XOR }
 
