@@ -354,6 +354,10 @@ and tmpExprToString(tExpr : tmpExpr) =
   match tExpr with
         TmpBoolExpr(bExpr) -> tmpBoolExprToString(bExpr)
       | TmpIntExpr(iExpr) -> tmpIntExprToString(iExpr)
+          (* chars are just ints but we have a separate constructor because
+             sometimes we need to know that they're chars, i.e. for sizes
+             in array accesses *)
+      | TmpCharExpr(iExpr) -> tmpIntExprToString(iExpr)
       | TmpPtrExpr(pExpr) -> tmpPtrExprToString(pExpr)
 
 and tmpInfAddrBoolInstrToString(tInstr : tmpInfAddrBoolInstr) =

@@ -155,6 +155,7 @@ and tmpBoolExpr = TmpBoolArg of tmpArg
 and tmpExpr = TmpBoolExpr of tmpBoolExpr
              | TmpIntExpr of tmpIntExpr
              | TmpPtrExpr of tmpPtrExpr
+             | TmpCharExpr of tmpIntExpr (* chars are ints! *)
 and tmpInfAddrBoolInstr = TmpInfAddrTest of tmpBoolExpr * tmpBoolExpr
 (* Note: by this point, we've already reversed the operations for
    cmp. That is, cmp (a,b) followed by jg will jump if b > a *)

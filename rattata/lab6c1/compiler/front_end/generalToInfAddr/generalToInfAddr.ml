@@ -45,7 +45,7 @@ let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
    I'm sorry, style gods *)
 let addTypeToShared e = function
     INT -> TmpIntExpr (TmpIntSharedExpr e)
-  | CHAR -> TmpIntExpr (TmpIntSharedExpr e) (* chars are ints! *)
+  | CHAR -> TmpCharExpr (TmpIntSharedExpr e) (* chars are ints! *)
   | BOOL -> TmpBoolExpr (TmpBoolSharedExpr e)
   | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr e)
   | STRING -> TmpPtrExpr (TmpPtrSharedExpr e)                   
@@ -164,7 +164,7 @@ and trans_exp retTmp retLabel idToTmpMap = function
                      in (instrs, TmpPtrExpr e')
     | A.CharExpr e -> let (instrs, e') = trans_char_exp retTmp retLabel idToTmpMap e
                      (* chars literally become ints starting in infAddr *)
-                      in (instrs, TmpIntExpr e')
+                      in (instrs, TmpCharExpr e')
     | A.StringExpr e ->  let (instrs, e') = trans_string_exp retTmp retLabel idToTmpMap e
                       in (instrs, TmpPtrExpr e')
     | A.VoidExpr _ -> assert(false)
@@ -207,8 +207,9 @@ and trans_ptr_exp retTmp retLabel idToTmpMap = function
 and trans_char_exp retTmp retLabel idToTmpMap = function
       A.CharConst c -> ([], TmpIntArg (TmpConst c))
     | A.CharSharedExpr e ->
-           let (instrs, TmpIntExpr eInfAddr) = trans_shared_expr retTmp retLabel CHAR
-               idToTmpMap e in (instrs, eInfAddr)
+           match trans_shared_expr retTmp retLabel CHAR  idToTmpMap e with
+              (instrs, TmpIntExpr eInfAddr) -> (instrs, eInfAddr)
+            | (instrs, TmpCharExpr eInfAddr) -> (instrs, eInfAddr)
 
 and trans_string_exp retTmp retLabel idToTmpMap = function
      A.StringConst s -> (* turn into array alloc and series of assigns *)
