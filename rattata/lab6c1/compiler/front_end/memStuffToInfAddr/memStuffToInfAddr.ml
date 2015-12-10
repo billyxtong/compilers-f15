@@ -155,6 +155,16 @@ let rec handleSharedExpr exprType = function
         (tmpToTypedExpr (TmpVar t) exprType, TmpInfAddrMov (get32vs64ForType exprType,
                sharedExprToTypedExpr exprType (TmpInfAddrFunCall(fName, args)),
                TmpVarLVal t)::[])
+   | TmpInfAddrFunPtrCall (fPtr, args) ->        
+        let () = assert(allArgsAreTmps args) in
+        let (TmpPtrExpr fPtrFinal, instrsForPtr) = handleMemForExpr (TmpPtrExpr fPtr) in
+        (* move this into a new tmp first to make sure we only evaluate it once. *)
+        let t = Tmp (Temp.create()) in
+        (tmpToTypedExpr (TmpVar t) exprType,
+               instrsForPtr @ 
+               TmpInfAddrMov (get32vs64ForType exprType,
+               sharedExprToTypedExpr exprType (TmpInfAddrFunPtrCall(fPtrFinal, args)),
+               TmpVarLVal t)::[])
    | TmpInfAddrDeref (ptrExp) ->
        let (TmpPtrExpr e_result, instrs) = handleMemForExpr (TmpPtrExpr ptrExp) in
        let resultTmp = Tmp (Temp.create()) in
@@ -283,6 +293,8 @@ and handleMemForExpr = function
             in
         (TmpPtrExpr (TmpInfAddrPtrBinop(op, final_ptr_expr, int_result)),
          final_instrs1 @ instrs2)
+   | TmpPtrExpr (TmpInfAddrAddressOfFunction fName) ->
+        (TmpPtrExpr (TmpInfAddrAddressOfFunction fName), [])
 
 and getStructAccessPtr structTypeName structPtr fieldName =
     try
