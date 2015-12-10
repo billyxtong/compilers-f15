@@ -9,8 +9,10 @@ open PrintDatatypes
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
 let functionMap = ref Core.Std.String.Map.empty
-let typedefMap = ref Core.Std.String.Map.empty
-let (structMap : (mytype Core.Std.String.Map.t) ref) = ref (Core.Std.String.Map.empty)
+let typedefMap = ref Core.Std.String.Map.empty 
+(* maps typedef'd function name types to their return type and arg types *)
+let (structMap : (mytype Core.Std.String.Map.t) ref) = 
+  ref (Core.Std.String.Map.empty)
 
 let isValidVarDecl (identifier : ident) =
   if sub identifier 0 1 = "\\" then true else false
@@ -35,6 +37,7 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
       | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
       | (Array(c1), Array(c2)) -> matchTypes c1 c2
       | (Struct(i1), Struct(i2)) -> (i1 = i2)
+      | (FuncID(i1), FuncID(i2)) -> (i1 = i2)
       | (Poop, Poop) -> true
       | (Pointer(c), Poop) -> true
       | (Poop, Pointer(c)) -> true
@@ -129,7 +132,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            | _ -> (ErrorMsg.error ("constants must be int, bool, or char\n");
                    raise ErrorMsg.Error))
   | UntypedPostElabStringConstExpr(str) -> 
-      if L.exists(fun c -> c = 0) str then
+      if List.exists(fun c -> c = 0) str then
       (ErrorMsg.error ("null character cannot appear in strings\n");
         raise ErrorMsg.Error)
       else (StringExpr(StringConst(str)), STRING)
@@ -147,6 +150,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | BOOL -> (BoolExpr(BoolSharedExpr(Ident(i))), actualType)
                     | CHAR -> (CharExpr(CharSharedExpr(Ident(i))), actualType)
                     | STRING -> (StringExpr(StringSharedExpr(Ident(i))), actualType)
+                    | FuncID(i) -> 
+                        (ErrorMsg.error ("can't reference a function without ptr\n");
+                            raise ErrorMsg.Error)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | Array(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | _ -> (ErrorMsg.error ("can't reference a struct without ptr\n");
@@ -241,6 +247,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | CHAR -> (CharExpr(CharSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | STRING -> (StringExpr(StringSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | VOID -> (VoidExpr(VoidFunCall(newFuncName, typedArgs)), funcType)
+                    | FuncID(ident) -> 
+                      (ErrorMsg.error ("functions can't return functions, only function pointers \n");
+                         raise ErrorMsg.Error)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | Array(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | _ -> (ErrorMsg.error ("functions can't return structs \n");
@@ -249,10 +258,24 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                  (ErrorMsg.error ("parameters don't typecheck \n");
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
-                   raise ErrorMsg.Error))
-  | UntypedPostElabFunPtrCall(expr, params) ->
+                   raise ErrorMsg.Error)) (*
+  | UntypedPostElabFunPtrCall(expr, argList) -> 
       let (typedExpr, exprType) = tc_expression varEnv expr in
-      let 
+      let typedArgList = List.map (fun arg -> tc_expression varEng arg) argList in
+      (match exprType with
+         Some()
+
+
+)      
+
+
+*)
+  | UntypedPostElabAddressOfFunction(ident) -> 
+      (match M.find !functionMap ident with
+         None -> (ErrorMsg.error ("undeclared/undefined function\n");
+                     raise ErrorMsg.Error)
+       | Some(funcType, funcParams, isDefined, isExternal) -> 
+           )
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in

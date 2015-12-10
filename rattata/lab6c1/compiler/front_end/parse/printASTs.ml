@@ -53,15 +53,22 @@ and preElabExprToString(preelabexpr : preElabExpr) =
       | PreElabNot(expr1) -> concat "" ["!"; preElabExprToString(expr1)]
       | PreElabTernary(e1, e2, e3) -> "(" ^ (preElabExprToString e1) ^ " ? " ^
               (preElabExprToString e2) ^ " : " ^ (preElabExprToString e3) ^ ")"
-      | PreElabFunCall(func, args) -> identToString(func) ^ "(" ^ (concat ", " (List.map preElabExprToString args)) ^ ")"
+      | PreElabFunCall(func, args) -> identToString(func) ^ "(" 
+            ^ (concat ", " (List.map preElabExprToString args)) ^ ")"
+      | PreElabFunPtrCall(expr, exprs) -> "(" ^ preElabExprToString(expr) ^ ")(" 
+            ^ concat ", " (List.map preElabExprToString exprs) ^ ")"
+      | PreElabAddressOfFunction(id) -> "&" ^ identToString(id)
       | PreElabFieldAccessExpr(e,i) -> 
           (match e with
-                 PreElabDerefExpr(inner) -> "*(" ^ preElabExprToString(inner) ^ ")." ^ identToString(i)
+                 PreElabDerefExpr(inner) -> "*(" ^ preElabExprToString(inner) ^ 
+                                            ")." ^ identToString(i)
                | _ -> preElabExprToString(e) ^ "." ^ identToString(i))
       | PreElabAlloc(t) -> "alloc(" ^ c0typeToString(t) ^ ")"
       | PreElabDerefExpr(e) -> "*(" ^ preElabExprToString(e) ^ ")"
-      | PreElabArrayAlloc(t,e) -> "alloc_array(" ^ c0typeToString(t) ^ ", " ^ preElabExprToString(e) ^ ")"
-      | PreElabArrayAccessExpr(e1,e2) -> preElabExprToString(e1) ^ "[" ^ preElabExprToString(e2) ^ "]"
+      | PreElabArrayAlloc(t,e) -> "alloc_array(" ^ c0typeToString(t) ^ ", " 
+                                                 ^ preElabExprToString(e) ^ ")"
+      | PreElabArrayAccessExpr(e1,e2) -> preElabExprToString(e1) ^ "[" 
+                                                ^ preElabExprToString(e2) ^ "]"
 
 let preElabDeclToString(preelabdecl : preElabDecl) =
   match preelabdecl with
@@ -136,6 +143,8 @@ let globalDeclToString(g : globalDecl) =
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           blockToString(stmts) ^ "}"
       | Typedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^ ";"
+      | FuncTypedef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
+                   "(" ^ (concat ", " (List.map paramToString params)) ^ ");"
       | PreElabStructDecl(i) -> "struct " ^ identToString(i) ^ ";"
       | PreElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
                                    (concat "" (List.map fieldToString fs)) ^ "};"
@@ -186,6 +195,9 @@ and untypedPostElabExprToString(expression : untypedPostElabExpr) =
       | UntypedPostElabFunCall(func, args) -> 
           identToString(func) ^ "(" ^ (concat ", " 
                 (List.map untypedPostElabExprToString args)) ^ ")"
+      | UntypedPostElabFunPtrCall(expr, exprs) -> "(" ^ untypedPostElabExprToString(expr) ^ ")(" 
+            ^ concat ", " (List.map untypedPostElabExprToString exprs) ^ ")"
+      | UntypedPostElabAddressOfFunction(id) -> "&" ^ identToString(id)
       | UntypedPostElabFieldAccessExpr(e,i) -> untypedPostElabExprToString(e) 
                                                   ^ "." ^ identToString(i)
       | UntypedPostElabAlloc(t) -> "alloc(" ^ c0typeToString(t) ^ ")"
@@ -232,6 +244,8 @@ let untypedPostElabGlobalDeclToString(g : untypedPostElabGlobalDecl) =
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           untypedPostElabBlockToString(stmts) ^ "}"
       | UntypedPostElabTypedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^ ";"
+      | UntypedPostElabFuncTypedef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
+                   "(" ^ (concat ", " (List.map paramToString params)) ^ ");"
       | UntypedPostElabStructDecl(i) -> "struct " ^ identToString(i) ^ ";"
       | UntypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n  " ^ 
                                    (concat "  " (List.map fieldToString fs)) ^ "};"
@@ -254,8 +268,10 @@ let rec sharedTypeExprToString(s : sharedTypeExpr) =
                                        typedPostElabExprToString(e2)]
       | FunCall(func,args) -> identToString(func) ^ "(" ^ (concat ", " 
                       (List.map typedPostElabExprToString args)) ^ ")"
-      | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "." ^ identToString(i2) (*^
-                                  " (type = " ^ identToString(i2) ^ ")"*)
+      | FuncPointerDeref(expr, exprs) -> "(" ^ typedPostElabExprToString(expr) ^ ")(" 
+            ^ concat ", " (List.map typedPostElabExprToString exprs) ^ ")"
+      | AddressOfFunction(id) -> "&" ^ identToString(id)
+      | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "." ^ identToString(i2)
       | ArrayAccess(p,i) -> ptrExprToString(p) ^ "[" ^ intExprToString(i) ^ "]"
       | Deref(p) -> "*(" ^ ptrExprToString(p) ^ ")"
       | Ident(i) -> identToString(i)
@@ -350,13 +366,14 @@ and typedPostElabStmtToString(s : typedPostElabStmt) =
 and typedPostElabBlockToString(stmts : typedPostElabStmt list) = 
   concat "\n  " (List.map typedPostElabStmtToString stmts) ^ "\n"
 
-
 let typedPostElabGlobalDeclToString(decl : typedPostElabGlobalDecl) =
   match decl with 
         TypedPostElabFunDef(c, i, params, stmts) ->
           c0typeToString(c) ^ identToString(i) ^ "(" ^ 
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           typedPostElabBlockToString(stmts) ^ "}"
+      | TypedPostElabFuncTypedef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
+                   "(" ^ (concat ", " (List.map paramToString params)) ^ ");"
       | TypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
                                    (concat "" (List.map fieldToString fs)) ^ "};"
 

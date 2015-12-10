@@ -1,3 +1,5 @@
+//test error
+
 typedef bool cmp(int a, int b);
 
 bool geq(int a, int b) {return a > b;}

@@ -250,6 +250,16 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                             tc_prog gdecls typedAST
                         | _ -> (ErrorMsg.error ("cannot shadow previously declared typedef/func names \n");
                                 raise ErrorMsg.Error))
+               | UntypedPostElabFuncTypedef(retType, name, params) ->
+                   (match (M.find !typedefMap name, M.find !functionMap name) with
+                      (None, None) ->             
+                        let paramTypes = List.map (fun (t,i) -> lowestTypedefType t) params in
+                        let () = typedefMap := M.add !typedefMap name 
+                            (FuncPrototype(lowestTypedefType retType, paramTypes)) in
+                        tc_prog gdecls typedAST
+                     | _ -> 
+                        (ErrorMsg.error ("cannot shadow previously declared typedef/func names \n");
+                          raise ErrorMsg.Error))
                | UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
                           None -> 

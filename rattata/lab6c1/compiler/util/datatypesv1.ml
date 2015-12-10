@@ -1,27 +1,19 @@
 (* BIG NOTE FOR HACKY THING: ALSO RESERVING ECX TO MASK OUT UPPER
    BITS WHEN WE NEED TO DO THAT *)
 
-(* ident and c0type have to be in here to avoid a circular build
-   error :( *)
 type c0type = INT | BOOL | VOID | CHAR | STRING | TypedefType of ident | Pointer of c0type
             | Array of c0type
             | Struct of ident
             | FuncID of ident (* C1 convention for function pointers *)
+            | FuncPrototype of c0type * c0type list (* function return type and param types *)
             | Poop (* for null pointer polymorphism *)
 and ident = string
-(* we now have chars, but we can represent them with ASCII *)
+(* we now have char consts, but we can represent them with ASCII *)
 type const = int
 
 type reg = EAX | EBX | ECX | EDX | RBP | RSP | ESI | EDI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15
 
 (* the int is the memory offest from the register *)
-(* type memAddr = DirectOffset of reg * int *)
-(*              | ArrayStyleOffset of reg * reg * int *)
-       (* Direct is 4(rsp) which is *(rsp + 4), ArrayStyle is (rsp, rbx, 4),
-          which is *(rsp + rbx * 4) *)
-
-(* actually I think I'm just going to use old memAddr type for now
-   (which is only direct offsets *)
 type memAddr = reg * int
 
 (* These are for actual assembly instructions. Tmps are not allowed. *)
