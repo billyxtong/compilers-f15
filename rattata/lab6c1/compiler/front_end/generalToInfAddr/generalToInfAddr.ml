@@ -206,6 +206,7 @@ and trans_ptr_exp retTmp retLabel idToTmpMap = function
          let (instrs, TmpPtrExpr eInfAddr) = trans_shared_expr retTmp retLabel
         (* It doesn't matter what the type is a ptr to; just that it's a ptr *)
               (Pointer Poop) idToTmpMap e in (instrs, eInfAddr)
+     | A.AddressOfFunction fName -> ([], TmpInfAddrAddressOfFunction fName)
 
 (* All chars are treated exactly as ints starting in infAddr *)
 and trans_char_exp retTmp retLabel idToTmpMap = function
@@ -272,14 +273,14 @@ and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
          let (instrs, argExps) = trans_fun_args retTmp retLabel (Some fName)
              idToTmpMap argList in
          (instrs, addTypeToShared (TmpInfAddrFunCall(fName, argExps)) exprType)
-  (* | A.FuncPointerDeref (fPtr, args) -> *)
-  (*        let (arg_instrs, argExps) = trans_fun_args retTmp retLabel None *)
-  (*            idToTmpMap args in *)
-  (*        let A.Deref actualPtr = fPtr in *)
-  (*        let (fun_ptr_instrs, fPtrExp) = *)
-  (*            trans_ptr_exp retTmp retLabel idToTmpMap actualPtr in *)
-  (*        (instrs, addTypeToShared (TmpInfAddrFunPtrCall( *)
-
+  | A.FuncPointerDeref (fPtr, args) ->
+         let (arg_instrs, argExps) = trans_fun_args retTmp retLabel None
+             idToTmpMap args in
+         let (fun_ptr_instrs, fPtrExp) =
+             trans_ptr_exp retTmp retLabel idToTmpMap fPtr in
+         (* fun ptr evaluated first *)
+         (fun_ptr_instrs @ arg_instrs,
+          addTypeToShared (TmpInfAddrFunPtrCall(fPtrExp, argExps)) exprType)
   | A.ArrayAccess (arrayExpr, idxExpr) ->
         (* evaluate the array first! Store the pointer to make sure it's
         evaluated first. *)
