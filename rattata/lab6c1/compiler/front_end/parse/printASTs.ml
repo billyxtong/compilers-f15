@@ -270,7 +270,6 @@ let rec sharedTypeExprToString(s : sharedTypeExpr) =
                       (List.map typedPostElabExprToString args)) ^ ")"
       | FuncPointerDeref(expr, exprs) -> "(" ^ typedPostElabExprToString(expr) ^ ")(" 
             ^ concat ", " (List.map typedPostElabExprToString exprs) ^ ")"
-      | AddressOfFunction(id) -> "&" ^ identToString(id)
       | FieldAccess(i1,p,i2) -> ptrExprToString(p) ^ "." ^ identToString(i2)
       | ArrayAccess(p,i) -> ptrExprToString(p) ^ "[" ^ intExprToString(i) ^ "]"
       | Deref(p) -> "*(" ^ ptrExprToString(p) ^ ")"
@@ -283,6 +282,7 @@ and ptrExprToString(p : ptrExpr) =
       | Alloc(c) -> "alloc(" ^ c0typeToString(c) ^ ")"
       | AllocArray(c,i) -> "alloc_array(" ^ c0typeToString(c) ^ ", " ^
                                       intExprToString(i) ^ ")"
+      | AddressOfFunction(id) -> "&" ^ identToString(id)
 
 and intExprToString(iExpr : intExpr) =
   match iExpr with

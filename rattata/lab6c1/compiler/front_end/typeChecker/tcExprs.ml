@@ -299,7 +299,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                      raise ErrorMsg.Error)
        | Some(funcType, funcParams, isDefined, isExternal) -> 
            let fType = FuncPrototype(funcType, funcParams) in
-           (addTypeToSharedExpr (AddressOfFunction(ident)) fType, Pointer(fType)))
+           (PtrExpr (AddressOfFunction ident), Pointer(fType)))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
