@@ -247,7 +247,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | CHAR -> (CharExpr(CharSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | STRING -> (StringExpr(StringSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | VOID -> (VoidExpr(VoidFunCall(newFuncName, typedArgs)), funcType)
-                    | FuncID(ident) -> 
+                    | FuncPrototype(t, ts) -> 
                       (ErrorMsg.error ("functions can't return functions, only function pointers \n");
                          raise ErrorMsg.Error)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
@@ -258,24 +258,26 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                  (ErrorMsg.error ("parameters don't typecheck \n");
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
-                   raise ErrorMsg.Error)) (*
+                   raise ErrorMsg.Error)) 
   | UntypedPostElabFunPtrCall(expr, argList) -> 
       let (typedExpr, exprType) = tc_expression varEnv expr in
       let typedArgList = List.map (fun arg -> tc_expression varEng arg) argList in
+      let argTypes = List.map (fun (expression, expressionType) -> expressionType) typedArgList in
       (match exprType with
-         Some()
-
-
-)      
-
-
-*)
+         FuncPrototype(ret,paramTypes) -> 
+           if matchTypes exprType ret && argsMatch paramTypes argTypes
+           then
+             (FuncPointerDeref(typedExpr,typedArgList),ret)
+           else
+        |_ -> (ErrorMsg.error ("not right func ptr type\n");
+                   raise ErrorMsg.Error))
   | UntypedPostElabAddressOfFunction(ident) -> 
       (match M.find !functionMap ident with
          None -> (ErrorMsg.error ("undeclared/undefined function\n");
                      raise ErrorMsg.Error)
        | Some(funcType, funcParams, isDefined, isExternal) -> 
-           let () = print_string("incomplete but I want it to compile\n") in assert(false))
+           let fType = FuncPrototype(funcType, funcParams) in
+           (AddressOfFunction(ident), Pointer(fType)))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in

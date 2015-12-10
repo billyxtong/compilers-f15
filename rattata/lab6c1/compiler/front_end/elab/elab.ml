@@ -1,5 +1,27 @@
 open Ast
 
+let transformString (oldString : int list) (newString : int list) =
+  match oldString with
+    [] -> List.rev newString 
+    |[c] -> transformString [] (c :: newString)
+    |c1::c2::cs -> 
+        if (compare '\\' Char.chr(c1)) = 0
+        then 
+          (match Char.chr c2 with
+             't' -> transformString cs (9 :: newString) (* C0 ascii codes for these characters*)
+            |'r' -> transformString cs (13 :: newString) (* should they be the OCaml ones? *)
+            |'f' -> transformString cs (12 :: newString)
+            |'a' -> transformString cs (7 :: newString)
+            |'b' -> transformString cs (8 :: newString)
+            |'n' -> transformString cs (10 :: newString)
+            |'v' -> transformString cs (11 :: newString)
+            |'\'' -> transformString cs (39 :: newString)
+            |'\"'-> transformString cs (34 :: newString) (* why is this highlighted? *)
+            |'0' -> transformString cs (0 :: newString)
+            |'\\' -> transformString cs (93 :: newString))
+        else transformString (c2::cs) (c1::newString)
+
+
 let rec elaboratePreElabLVal(lval : preElabLVal) =
   match lval with
         PreElabVarLVal(i) -> UntypedPostElabVarLVal(i)
@@ -10,7 +32,7 @@ let rec elaboratePreElabLVal(lval : preElabLVal) =
 and elaboratePreElabExpr(expression : preElabExpr) =
   match expression with
         PreElabConstExpr(constant, typee) -> UntypedPostElabConstExpr(constant, typee)
-      | PreElabStringConstExpr(str) -> UntypedPostElabStringConstExpr(str)
+      | PreElabStringConstExpr(str) -> UntypedPostElabStringConstExpr(transformString str [])
       | PreElabNullExpr -> UntypedPostElabNullExpr
       | PreElabIdentExpr(id) -> UntypedPostElabIdentExpr(id)
       | PreElabBinop(expr1, op, expr2) -> UntypedPostElabBinop(elaboratePreElabExpr(expr1), 
