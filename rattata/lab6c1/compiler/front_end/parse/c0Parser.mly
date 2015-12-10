@@ -99,7 +99,7 @@ let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *
 %token MINUSMINUS PLUSPLUS
 %token LOG_NOT LOG_AND LOG_OR
 %token NEQ DOUBLE_EQ LT LEQ GT GEQ
-%token BIT_NOT BIT_AND BIT_OR XOR
+%token BIT_NOT AMPERSAND BIT_OR XOR
 %token AND_EQ OR_EQ XOR_EQ
 %token LSHIFT RSHIFT LSHIFT_EQ RSHIFT_EQ
 %token COLON QUESMARK
@@ -124,7 +124,7 @@ let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *
 %left LOG_AND
 %left BIT_OR
 %left XOR      
-%left BIT_AND
+%left AMPERSAND
 %left NEQ DOUBLE_EQ
 %left LT LEQ GT GEQ
 %left LSHIFT RSHIFT      
@@ -159,6 +159,8 @@ typedef :
     TYPEDEF c0type VAR_IDENT SEMI    { let () = H.add
 		                       ParseUtil.parsingTypedefMap $3 () in
 				       A.Typedef ($2, $3) }
+  | TYPEDEF fdecl             { let A.FunDecl(retType, fName, params) = $2 in
+				A.FuncTypedef (retType, fName, params) }
 
 sdecl :
     STRUCT VAR_IDENT SEMI         { A.PreElabStructDecl $2 }
@@ -287,8 +289,16 @@ exp :
  | nonParenExp                   { $1 }
 				 
 nonParenExp :
+ /* Function ptr stuff */
+   AMPERSAND VAR_IDENT %prec UNARY          { A.PreElabAddressOfFunction $2 }
+ | LPAREN exp RPAREN arglist     { match $2 with
+				      A.PreElabDerefExpr p -> 
+				             A.PreElabFunPtrCall (p, $4)
+                                    | _ -> assert(false)								 
+
+				 }
  /* String stuff */
-   CHAR_CONST                          { A.PreElabConstExpr
+ | CHAR_CONST                          { A.PreElabConstExpr
 					  ((charStringToAscii $1), D.CHAR) }
  | STRING_CONST               { let s = $1 in A.PreElabStringConstExpr
 			(List.map
@@ -330,7 +340,7 @@ nonParenExp :
 /* Bitwise ops */       
  | exp BIT_OR exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_OR, $3) }
- | exp BIT_AND exp                  { A.PreElabBinop
+ | exp AMPERSAND exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_AND, $3) }
  | exp XOR exp                  { A.PreElabBinop
 				     ($1, A.IntBinop D.BIT_XOR, $3) }

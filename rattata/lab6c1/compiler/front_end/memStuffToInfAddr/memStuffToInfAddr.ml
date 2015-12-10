@@ -53,6 +53,7 @@ let updateStructDefsMap structTypeName fields =
 let getTypeFromExpr = function
      TmpIntExpr _ -> INT
    | TmpBoolExpr _ -> BOOL
+   | TmpCharExpr _ -> CHAR     
    | TmpPtrExpr _ -> Pointer Poop (* Again, doesn't matter what type of ptr *)
 
 let get32vs64ForType = function
@@ -83,6 +84,7 @@ let getSizeForType = function
 
 let tmpToTypedExpr t exprType = match exprType with
                          INT -> TmpIntExpr (TmpIntArg (TmpLoc t))
+                       | CHAR -> TmpIntExpr (TmpIntArg (TmpLoc t))
                        | BOOL -> TmpBoolExpr (TmpBoolArg (TmpLoc t))
                        | Pointer _ -> TmpPtrExpr (TmpPtrArg (TmpLoc t))
                        | _ -> assert(false)
@@ -90,6 +92,7 @@ let tmpToTypedExpr t exprType = match exprType with
 let sharedExprToTypedExpr exprType sharedExpr =
      match exprType with
          INT -> TmpIntExpr (TmpIntSharedExpr sharedExpr)
+       | CHAR -> TmpIntExpr (TmpIntSharedExpr sharedExpr)
        | BOOL -> TmpBoolExpr (TmpBoolSharedExpr sharedExpr)
        | Pointer _ -> TmpPtrExpr (TmpPtrSharedExpr sharedExpr)
        | _ -> assert(false)
@@ -129,6 +132,8 @@ let makeAccessInstr elemType resultTmp accessPtrExpr = match elemType with
                     BOOL -> TmpInfAddrMov(BIT32, TmpBoolExpr (TmpBoolSharedExpr
                                (TmpInfAddrDeref accessPtrExpr)), resultTmp)
                   | INT -> TmpInfAddrMov(BIT32, TmpIntExpr (TmpIntSharedExpr
+                               (TmpInfAddrDeref accessPtrExpr)), resultTmp)
+                  | CHAR -> TmpInfAddrMov(BIT8, TmpIntExpr (TmpIntSharedExpr
                                (TmpInfAddrDeref accessPtrExpr)), resultTmp)
                   | Pointer _ -> TmpInfAddrMov(BIT64, TmpPtrExpr (TmpPtrSharedExpr
                                (TmpInfAddrDeref accessPtrExpr)), resultTmp)
@@ -216,7 +221,9 @@ and handleMemForExpr = function
        let spaceForLength = 8 in
        let extraElemsForLength = (* how many extra elems do we need
                       to alloc to get 8 bytes for the length? *)
-         spaceForLength / (getSizeForType elemType) in
+         if not (getSizeForType elemType = 0) then
+            spaceForLength / (getSizeForType elemType)
+         else (* if you have an array of empty structs *) 0 in
        let (TmpIntExpr numElemsExpr, instrsForNumElems) =
           handleMemForExpr (TmpIntExpr numElems) in
       (* check that numElems is nonnegative. *)
@@ -249,6 +256,11 @@ and handleMemForExpr = function
                    @ storeFunCall::storeLengthInstr::[])
     | TmpBoolExpr (TmpBoolSharedExpr e) -> handleSharedExpr BOOL e
     | TmpIntExpr (TmpIntSharedExpr e) -> handleSharedExpr INT e
+    | TmpCharExpr (TmpIntSharedExpr e) -> handleSharedExpr CHAR e
+                     (* we only need to know that it's a char type for shared
+                        exps (specifically array accesses, so we can calculate the
+                        offset *)
+    | TmpCharExpr nonSharedExp -> handleMemForExpr (TmpIntExpr nonSharedExp)
     | TmpPtrExpr (TmpPtrSharedExpr e) -> handleSharedExpr (Pointer VOID) e
                       (* Note: we just need to know that it's a pointer,
                          we don't care what type. I'm putting VOID in
