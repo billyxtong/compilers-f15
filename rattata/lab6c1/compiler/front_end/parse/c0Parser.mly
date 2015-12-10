@@ -160,6 +160,7 @@ typedef :
 		                       ParseUtil.parsingTypedefMap $3 () in
 				       A.Typedef ($2, $3) }
   | TYPEDEF fdecl             { let A.FunDecl(retType, fName, params) = $2 in
+				let () = H.add ParseUtil.parsingTypedefMap fName () in
 				A.FuncTypedef (retType, fName, params) }
 
 sdecl :

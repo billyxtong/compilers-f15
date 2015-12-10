@@ -144,7 +144,7 @@ let globalDeclToString(g : globalDecl) =
           blockToString(stmts) ^ "}"
       | Typedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^ ";"
       | FuncTypedef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
-                   "(" ^ (concat ", " (List.map paramToString params)) ^ ");"
+                   "(" ^ (concat ", " (List.map paramToString ps)) ^ ");"
       | PreElabStructDecl(i) -> "struct " ^ identToString(i) ^ ";"
       | PreElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
                                    (concat "" (List.map fieldToString fs)) ^ "};"
@@ -245,7 +245,7 @@ let untypedPostElabGlobalDeclToString(g : untypedPostElabGlobalDecl) =
           untypedPostElabBlockToString(stmts) ^ "}"
       | UntypedPostElabTypedef(c, i) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^ ";"
       | UntypedPostElabFuncTypedef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
-                   "(" ^ (concat ", " (List.map paramToString params)) ^ ");"
+                   "(" ^ (concat ", " (List.map paramToString ps)) ^ ");"
       | UntypedPostElabStructDecl(i) -> "struct " ^ identToString(i) ^ ";"
       | UntypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n  " ^ 
                                    (concat "  " (List.map fieldToString fs)) ^ "};"
@@ -372,8 +372,8 @@ let typedPostElabGlobalDeclToString(decl : typedPostElabGlobalDecl) =
           c0typeToString(c) ^ identToString(i) ^ "(" ^ 
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           typedPostElabBlockToString(stmts) ^ "}"
-      | TypedPostElabFuncTypedef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
-                   "(" ^ (concat ", " (List.map paramToString params)) ^ ");"
+      | TypedPostElabFuncTypeDef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
+                   "(" ^ (concat ", " (List.map paramToString ps)) ^ ");"
       | TypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
                                    (concat "" (List.map fieldToString fs)) ^ "};"
 
