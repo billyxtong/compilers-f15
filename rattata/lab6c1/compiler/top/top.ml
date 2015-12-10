@@ -112,7 +112,6 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
       PrintASTs.typedPostElabASTToString(typedPostElabAst));
     if typecheck_only then exit 0;
     
-    
     (* convert Post-Elab AST to Infinte Addr, except for memory stuff *)
     say_if verbose (fun () -> "converting to infAddr, except memory stuff...");
     let infAddr = GeneralToInfAddr.toInfAddr typedPostElabAst in ();
