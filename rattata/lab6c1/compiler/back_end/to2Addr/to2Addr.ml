@@ -60,12 +60,17 @@ let instrTo2Addr paramToTmpMap = function
                        | None -> None) in
       Tmp2AddrFunCall (retSize, fName, newArgs, newDest)::[]
   | Tmp3AddrFunPtrCall (retSize, funPtr, args, dest) ->
-      (* same as for normal func calls *)
+      (* same as for normal func calls, but also move the funPtr into a new
+         thing first, because what if the funPtr is an argument to the caller?
+         Then it could be allocated RDI for example, but it would interfere
+         with its first arg, which also needs RDI *)
       let newArgs = List.map (trans_arg paramToTmpMap) args in
       let newDest = (match dest with
                          Some dest' -> Some (trans_loc paramToTmpMap dest')
                        | None -> None) in
-      Tmp2AddrFunPtrCall (retSize, funPtr, newArgs, newDest)::[]
+      let t = Tmp (Temp.create()) in
+      Tmp2AddrMov(BIT64, TmpLoc funPtr, TmpVar t)::
+      Tmp2AddrFunPtrCall (retSize, TmpVar t, newArgs, newDest)::[]
   | Tmp3AddrGetFunAddress (id, dest) -> Tmp2AddrGetFunAddress (id, dest)::[]
   | Tmp3AddrPtrBinop (op, arg1, arg2, dest) -> ptrBinopTo2Addr
        (trans_loc paramToTmpMap dest) (op, trans_arg paramToTmpMap arg1,

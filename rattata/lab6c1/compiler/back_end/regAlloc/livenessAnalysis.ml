@@ -169,6 +169,7 @@ let rec makeAllPairsInterfere graph tmpList1 tmpList2 =
          [] -> ()
        | t1::t1rest ->
             let () = L.iter (fun t -> G.addEdge graph(t, t1)) tmpList2 in
+
             makeAllPairsInterfere graph t1rest tmpList2        
 
 let getArgsThatAreTmps args =
@@ -183,12 +184,25 @@ let makeArgsInterferePerCall graph paramTmps = function
     Tmp2AddrFunCall (retSize, fName, args, dest) ->
         let argsThatAreTmps = getArgsThatAreTmps args in
         makeAllPairsInterfere graph paramTmps argsThatAreTmps
- |  _ -> ()
+  | _ -> ()
+
+
+(* not sure if I actually need to do this...maybe it's already taken care of *)
+let makeFunPtrsInferenceWithParams graph paramTmps = function
+    Tmp2AddrFunPtrCall (retSize, TmpVar (Tmp fPtr), args, dest) ->
+        makeAllPairsInterfere graph paramTmps [fPtr]
+  | Tmp2AddrFunPtrCall (retSize, TmpDeref (Tmp fPtr), args, dest) ->
+        makeAllPairsInterfere graph paramTmps [fPtr]
+  | _ -> ()
 
 (* any time we make a function call inside this function, those args interfere
    with the params of the caller *)
-let makeFuncArgsInterfereWithParams graph paramTmps instrs =
-    L.iter (makeArgsInterferePerCall graph paramTmps) instrs
+(* the tmp that holds the pointer for a function pointer infereres with all params *) 
+let handleOtherSpecialFunctionInteference graph paramTmps instrs =
+    let () = L.iter (makeArgsInterferePerCall graph paramTmps) instrs in
+    let () = L.iter (makeFunPtrsInferenceWithParams graph paramTmps) instrs in
+    ()
+    
 
 let drawGraph (temps : int list) (prog : tmp2AddrInstr array) predsPerLine
      paramTmps =
@@ -215,6 +229,6 @@ let analyzeLiveness (instrs : tmp2AddrInstr list) progTmps paramTmps =
   let lineToPredecessorsArray = A.make len [] in
   let () = findPredecessors lineToPredecessorsArray progArray 0 in
   let resultGraph = drawGraph progTmps progArray lineToPredecessorsArray paramTmps in
-  let () = makeFuncArgsInterfereWithParams resultGraph paramTmps instrs in
+  let () = handleOtherSpecialFunctionInteference resultGraph paramTmps instrs in
   (* let () = makeAllPairsInterfere resultGraph progTmps paramTmps in *)
   resultGraph
