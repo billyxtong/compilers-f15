@@ -1,0 +1,6 @@
+typedef bool cmp(int a, int b);
+
+int main(){
+  int cmp = 0;
+  return cmp;
+}
