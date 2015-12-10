@@ -15,7 +15,7 @@ let (structMap : (mytype Core.Std.String.Map.t) ref) =
   ref (Core.Std.String.Map.empty)
 
 let isValidVarDecl (identifier : ident) =
-  if sub identifier 0 1 = "\\" then true else false
+  if sub identifier 0 1 = "\\" then true else false                 
 
 let rec lowestTypedefType (typedefType) =
   match typedefType with
@@ -28,6 +28,19 @@ let rec lowestTypedefType (typedefType) =
       | Array(c) -> Array(lowestTypedefType c)
       | _ -> typedefType
 
+let rec addTypeToSharedExpr e = function
+    INT -> IntExpr (IntSharedExpr e)
+  | BOOL -> BoolExpr (BoolSharedExpr e)
+  | CHAR -> CharExpr (CharSharedExpr e)
+  | STRING -> StringExpr (StringSharedExpr e)
+  | Pointer _ -> PtrExpr (PtrSharedExpr e)
+  | VOID -> (ErrorMsg.error ("void ret type"); raise ErrorMsg.Error)
+  | Array _ -> PtrExpr (PtrSharedExpr e)
+  | FuncPrototype _ -> PtrExpr (PtrSharedExpr e)
+  | Poop -> PtrExpr (PtrSharedExpr e)
+  | TypedefType t -> addTypeToSharedExpr e (lowestTypedefType (TypedefType t))
+  | Struct _ -> PtrExpr (PtrSharedExpr e)                         
+
 let rec matchTypes (t1 : c0type) (t2 : c0type) =
   match (t1, t2) with
         (INT, INT) -> true
@@ -37,7 +50,7 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
       | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
       | (Array(c1), Array(c2)) -> matchTypes c1 c2
       | (Struct(i1), Struct(i2)) -> (i1 = i2)
-      | (FuncID(i1), FuncID(i2)) -> (i1 = i2)
+      (* | (FuncID(i1), FuncID(i2)) -> (i1 = i2) *)
       | (Poop, Poop) -> true
       | (Pointer(c), Poop) -> true
       | (Poop, Pointer(c)) -> true
@@ -150,9 +163,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | BOOL -> (BoolExpr(BoolSharedExpr(Ident(i))), actualType)
                     | CHAR -> (CharExpr(CharSharedExpr(Ident(i))), actualType)
                     | STRING -> (StringExpr(StringSharedExpr(Ident(i))), actualType)
-                    | FuncID(i) -> 
-                        (ErrorMsg.error ("can't reference a function without ptr\n");
-                            raise ErrorMsg.Error)
+                    (* | FuncID(i) ->  *)
+                    (*     (ErrorMsg.error ("can't reference a function without ptr\n"); *)
+                    (*         raise ErrorMsg.Error) *)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | Array(c) -> (PtrExpr(PtrSharedExpr(Ident(i))), actualType)
                     | _ -> (ErrorMsg.error ("can't reference a struct without ptr\n");
@@ -261,15 +274,17 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                    raise ErrorMsg.Error)) 
   | UntypedPostElabFunPtrCall(expr, argList) -> 
       let (typedExpr, exprType) = tc_expression varEnv expr in
-      let typedArgList = List.map (fun arg -> tc_expression varEng arg) argList in
+      let typedArgList = List.map (fun arg -> tc_expression varEnv arg) argList in
       let argTypes = List.map (fun (expression, expressionType) -> expressionType) typedArgList in
+      let typedArgs = List.map (fun (typedArg, _) -> typedArg) typedArgList in
       (match exprType with
-         FuncPrototype(ret,paramTypes) -> 
-           if matchTypes exprType ret && argsMatch paramTypes argTypes
+         FuncPrototype(retType,paramTypes) -> 
+           if matchTypes exprType retType && argsMatch paramTypes argTypes
            then
-             (FuncPointerDeref(typedExpr,typedArgList),ret)
-           else
-        |_ -> (ErrorMsg.error ("not right func ptr type\n");
+             addTypeToSharedExpr (FuncPointerDeref(typedExpr,typedArgs)) retType, retType
+           else (ErrorMsg.error ("ret or arg types don't match for func ptr\n");
+                   raise ErrorMsg.Error)
+        | _  -> (ErrorMsg.error ("not right func ptr type\n");
                    raise ErrorMsg.Error))
   | UntypedPostElabAddressOfFunction(ident) -> 
       (match M.find !functionMap ident with
@@ -277,7 +292,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                      raise ErrorMsg.Error)
        | Some(funcType, funcParams, isDefined, isExternal) -> 
            let fType = FuncPrototype(funcType, funcParams) in
-           (AddressOfFunction(ident), Pointer(fType)))
+           (addTypeToSharedExpr (AddressOfFunction(ident)) fType, Pointer(fType)))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
