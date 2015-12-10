@@ -293,13 +293,14 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
         | _  -> (ErrorMsg.error ("not right func ptr type: " ^
                                  PrintDatatypes.c0typeToString exprType ^ "\n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabAddressOfFunction(ident) -> 
-      (match M.find !functionMap ident with
+  | UntypedPostElabAddressOfFunction(fName) -> 
+      (match M.find !functionMap fName with
          None -> (ErrorMsg.error ("undeclared/undefined function\n");
                      raise ErrorMsg.Error)
        | Some(funcType, funcParams, isDefined, isExternal) -> 
            let fType = FuncPrototype(funcType, funcParams) in
-           (PtrExpr (AddressOfFunction ident), Pointer(fType)))
+           let newFName = (if isExternal then fName else "_c0_" ^ fName) in
+           (PtrExpr (AddressOfFunction newFName), Pointer(fType)))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in

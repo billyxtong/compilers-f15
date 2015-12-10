@@ -181,7 +181,7 @@ let assemInstrToString(instr : assemInstr) =
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
       | LABEL(l) -> labelToString(l) ^ ":"
       | CALL(i) -> "call " ^ identToString(i)
-      | GET_FUNC_ADDR (i, aLoc) -> "movq $" ^identToString i ^ " " ^
+      | GET_FUNC_ADDR (i, aLoc) -> "movq $" ^identToString i ^ ", " ^
                                    assemLocToString aLoc BIT64
       | FUN_PTR_CALL(aLoc) -> "call *" ^ assemLocToString aLoc BIT64
         (* Just gonna use eax for this, since we reserve it for divs/rets in general *)
