@@ -1,0 +1,16 @@
+//test error
+
+typedef int binop_fn(int x, int y);
+typedef int unop_fn(int x);
+typedef int binop_fn_2(int x, int y);
+
+int foo(int a, int b) { return a+b; }
+int bar(int x) {return x-1;}
+
+int main(){
+  binop_fn* f = &foo;
+  binop_fn_2* g = &foo;
+  unop_fn* h = &bar;
+  
+  return f == g ? 1 : 0;
+}

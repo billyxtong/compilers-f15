@@ -1,0 +1,10 @@
+//test error
+
+typedef int binop_fn(int x, int y);
+
+int binop_fn(int a, int b) { return a+b; }
+
+int main(){
+  binop_fn* f = &binop_fn;
+  return (*f)(4,5);
+}
