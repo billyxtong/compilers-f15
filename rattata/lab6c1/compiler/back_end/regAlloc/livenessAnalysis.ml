@@ -184,6 +184,9 @@ let makeArgsInterferePerCall graph paramTmps = function
     Tmp2AddrFunCall (retSize, fName, args, dest) ->
         let argsThatAreTmps = getArgsThatAreTmps args in
         makeAllPairsInterfere graph paramTmps argsThatAreTmps
+  | Tmp2AddrFunPtrCall (retSize, fPtr, args, dest) ->
+        let argsThatAreTmps = getArgsThatAreTmps args in
+        makeAllPairsInterfere graph paramTmps argsThatAreTmps
   | _ -> ()
 
 
