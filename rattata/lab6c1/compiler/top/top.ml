@@ -182,7 +182,11 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
 
     Out_channel.with_file afname
-      ~f:(fun afstream -> output_string afstream finalAssem)
+      ~f:(fun afstream -> output_string afstream finalAssem);
+    let filenameNoExt = Filename.chop_extension afname in
+    let exeFilename = filenameNoExt ^ ".exe" in
+    if exe then let _ = Sys.command("gcc -o " ^ exeFilename ^ " -m64 "
+                 ^ afname ^ " run411.c") in () else ()
 
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1
