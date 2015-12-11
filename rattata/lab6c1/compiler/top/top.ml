@@ -47,6 +47,8 @@ let spec =
   +> flag "--exe" no_arg ~doc: " Do linking as well and generate an executable"
 let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs unsafeForExperiments exe () =
   try
+    OptimizeFlags.onlyPushRegsOnce := true;
+    OptimizeFlags.numNonParamRegsToAlloc := 5;
     let () = if opt0 then OptimizeFlags.doRegAlloc := false in
     let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in
     let () = if opt2 then
