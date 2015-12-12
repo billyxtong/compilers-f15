@@ -287,7 +287,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
          (PtrExpr fPtr, (Pointer (FuncPrototype(retType,paramTypes)))) -> 
            if (* matchTypes exprType retType && *) argsMatch paramTypes argTypes
            then
-             addTypeToSharedExpr (FuncPointerDeref(fPtr,typedArgs)) retType, retType
+             (addTypeToSharedExpr (FuncPointerDeref(fPtr,typedArgs)) retType, retType)
            else (ErrorMsg.error ("ret or arg types don't match for func ptr\n");
                    raise ErrorMsg.Error)
         | _  -> (ErrorMsg.error ("not right func ptr type: " ^
