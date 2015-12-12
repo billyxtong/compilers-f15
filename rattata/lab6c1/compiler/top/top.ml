@@ -44,32 +44,29 @@ let spec =
   +> flag "--onlyPushOnce" no_arg ~doc: " Only push/pop register when calling a function (rather than both in the caller and callee). Exception is main, which also pushes when called"
   +> flag "-r" (optional string) ~doc: " How many extra general purpose regs to allocate"
   +> flag "--unsafeForExperiments" no_arg ~doc:" A separate unsafe flag for running experiments"
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs unsafeForExperiments () =
+  +> flag "--exe" no_arg ~doc: " Do linking as well and generate an executable"
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs unsafeForExperiments exe () =
   try
-    let () = OptimizeFlags.numNonParamRegsToAlloc := 0 in
-    (* let () = OptimizeFlags.onlyPushRegsOnce := true in *)
-    (* let () = OptimizeFlags.doInlining := true in *)
-    (* let () = OptimizeFlags.removeDeadCode := true in *)
-    (* let () = OptimizeFlags.doConstOpts := true in *)
-    let () = OptimizeFlags.safeMode := false in
-    (* let () = if opt0 then OptimizeFlags.doRegAlloc := false in *)
-    (* let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in *)
-    (* let () = if opt2 then *)
-    (*     ( *)
-    (*     (\* OptimizeFlags.doConstOpts := true; *\) *)
-    (*     (\* OptimizeFlags.doInlining := true; *\) *)
-    (*     (\* OptimizeFlags.removeDeadCode := true; *\) *)
-    (*     (\* OptimizeFlags.arrayStrengthReduction := true; *\) *)
-    (*     OptimizeFlags.numNonParamRegsToAlloc := 5; *)
+    OptimizeFlags.onlyPushRegsOnce := true;
+    OptimizeFlags.numNonParamRegsToAlloc := 5;
+    let () = if opt0 then OptimizeFlags.doRegAlloc := false in
+    let () = if opt1 then OptimizeFlags.numNonParamRegsToAlloc := 0 in
+    let () = if opt2 then
+        (
+        OptimizeFlags.doConstOpts := true;
+        OptimizeFlags.doInlining := true;
+        OptimizeFlags.removeDeadCode := true;
+        (* OptimizeFlags.arrayStrengthReduction := true; *)
+        OptimizeFlags.numNonParamRegsToAlloc := 5;
 
-    (*     (\* OptimizeFlags.onlyPushRegsOnce := true; *\) *)
+        OptimizeFlags.onlyPushRegsOnce := true;
 
-    (*     (\* the regAllocTieBreaking might do more harm than good *\) *)
-    (*     (\* OptimizeFlags.doRegAllocTieBreaking := true; *\) *)
-    (*     (\* the remove unneeded jumps doesn't seem to have any effect *\) *)
-    (*     (\* OptimizeFlags.removeUnneddedJumps := true; *\) *)
-    (*     ()) in *)
-    (* let () = if unsafe then OptimizeFlags.safeMode := false in *)
+        (* the regAllocTieBreaking might do more harm than good *)
+        (* OptimizeFlags.doRegAllocTieBreaking := true; *)
+        (* the remove unneeded jumps doesn't seem to have any effect *)
+        (* OptimizeFlags.removeUnneddedJumps := true; *)
+        ()) in
+    let () = if unsafe then OptimizeFlags.safeMode := false in
     let () = if unsafeForExperiments then (OptimizeFlags.safeMode := false) in
     let () = if doConstOpts then (OptimizeFlags.doConstOpts := true) in
     let () = if noRegAlloc then (OptimizeFlags.doRegAlloc := false) in
@@ -187,7 +184,11 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if verbose (fun () -> "Writing assembly to " ^ afname ^ " ...");
 
     Out_channel.with_file afname
-      ~f:(fun afstream -> output_string afstream finalAssem)
+      ~f:(fun afstream -> output_string afstream finalAssem);
+    let filenameNoExt = Filename.chop_extension afname in
+    let exeFilename = filenameNoExt ^ ".exe" in
+    if exe then let _ = Sys.command("gcc -o " ^ exeFilename ^ " -m64 "
+                 ^ afname ^ " run411.c") in () else ()
 
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1

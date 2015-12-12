@@ -1,0 +1,16 @@
+f (x)
+y = x alpha
+z = y alpha 
+z += 1 int
+
+varEnv
+  x is alpha
+  y is x
+  z is y
+
+stmtMap
+  z -> (z+=1, z=y)
+
+upadteTypeInfo var
+  fixStmts (find stmtMap var)
+  updateTypeInfo (find varEnv var)

@@ -168,8 +168,10 @@ and trans_exp retTmp retLabel idToTmpMap = function
     | A.StringExpr e ->  let (instrs, e') = trans_string_exp retTmp retLabel idToTmpMap e
                       in (instrs, TmpPtrExpr e')
     | A.VoidExpr _ -> assert(false)
-      
+
 (* Returns a list of tmpExprs, resulting from calling trans_exp on each of the args *)
+(* fName is an option: for func ptrs it will be None; just assume all args are 64-bit
+   (this shouldn't cause an issue, because they're all evaluated beforehand anyway *)
 and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
   (* Here's the deal: we have to make sure to evaluate the args from left to right.
      So we need to put them each into new tmps before we make the function call. *)
@@ -177,12 +179,14 @@ and trans_fun_args retTmp retLabel fName idToTmpMap exp_list =
                                     (fun _ -> Tmp (Temp.create()))) in
       let instr_and_e_list = List.map exp_list (trans_exp retTmp retLabel
                                                   idToTmpMap) in
-      let getSizeForArg = fun i -> getSizeForType
-          (try (H.find funParamsMap fName).(i)
+      let getSizeForArg = fun i -> (match fName with
+                      None -> BIT64
+                    | Some actualName -> getSizeForType
+                                           (try (H.find funParamsMap actualName).(i)
       (* VERY QUESTIONABLE: since we throw out function declarations, we
          don't have access to the param sizes of functions from header files.
          just going to assume they're 64-bit? *)
-           with Not_found -> (Pointer Poop)) in
+                                            with Not_found -> (Pointer Poop))) in
       let instrs = List.concat (List.mapi instr_and_e_list
         (fun i -> fun (instrs, e) -> instrs @
                          [TmpInfAddrMov(getSizeForArg i, e,
@@ -202,6 +206,7 @@ and trans_ptr_exp retTmp retLabel idToTmpMap = function
          let (instrs, TmpPtrExpr eInfAddr) = trans_shared_expr retTmp retLabel
         (* It doesn't matter what the type is a ptr to; just that it's a ptr *)
               (Pointer Poop) idToTmpMap e in (instrs, eInfAddr)
+     | A.AddressOfFunction fName -> ([], TmpInfAddrAddressOfFunction fName)
 
 (* All chars are treated exactly as ints starting in infAddr *)
 and trans_char_exp retTmp retLabel idToTmpMap = function
@@ -265,9 +270,17 @@ and trans_int_exp retTmp retLabel idToTmpMap = function
 
 and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
     A.FunCall (fName, argList) ->
-         let (instrs, argExps) = trans_fun_args retTmp retLabel fName
+         let (instrs, argExps) = trans_fun_args retTmp retLabel (Some fName)
              idToTmpMap argList in
          (instrs, addTypeToShared (TmpInfAddrFunCall(fName, argExps)) exprType)
+  | A.FuncPointerDeref (fPtr, args) ->
+         let (arg_instrs, argExps) = trans_fun_args retTmp retLabel None
+             idToTmpMap args in
+         let (fun_ptr_instrs, fPtrExp) =
+             trans_ptr_exp retTmp retLabel idToTmpMap fPtr in
+         (* fun ptr evaluated first *)
+         (fun_ptr_instrs @ arg_instrs,
+          addTypeToShared (TmpInfAddrFunPtrCall(fPtrExp, argExps)) exprType)
   | A.ArrayAccess (arrayExpr, idxExpr) ->
         (* evaluate the array first! Store the pointer to make sure it's
         evaluated first. *)
@@ -320,6 +333,7 @@ and trans_shared_expr retTmp retLabel exprType idToTmpMap = function
                            (c, astForIf, astForElse) in
       let result_exp = addTypeToTmp ternary_result_tmp exprType in
       (ternary_instrs, result_exp)
+      
       
 (* This returns a tmp t and a list of statements required to put
    e in t. What we do to handle short-circuit here is just say
@@ -612,7 +626,7 @@ and trans_stmts retTmp retLabel idToTmpMap = function
                                      [A.VoidFunCall("abort", [])])::[] in
         trans_stmts retTmp retLabel idToTmpMap callAbortAst
    | A.VoidFunCall (fName, argList)::stmts ->
-        let (instrs, argExps) = trans_fun_args retTmp retLabel fName
+        let (instrs, argExps) = trans_fun_args retTmp retLabel (Some fName)
                                 idToTmpMap argList in
         instrs @ TmpInfAddrVoidFunCall(fName, argExps)::[]
         @ trans_stmts retTmp retLabel idToTmpMap stmts

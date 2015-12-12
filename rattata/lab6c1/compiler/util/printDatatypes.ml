@@ -20,6 +20,8 @@ let rec c0typeToString (c : c0type) =
       | Array(c) -> c0typeToString(c) ^ "[]"
       | Struct(i) -> "struct " ^ identToString(i) ^ " "
       | Poop -> "nulltype"
+      | FuncPrototype (retType, argTypes) -> c0typeToString retType ^
+              "(" ^ concat ", " (List.map c0typeToString argTypes) ^ ")"
         
 let constToString (c : const) = string_of_int(c)
 
@@ -179,7 +181,7 @@ let assemInstrToString(instr : assemInstr) =
       | BOOL_INSTR(bInstr) -> boolInstrToString(bInstr)
       | LABEL(l) -> labelToString(l) ^ ":"
       | CALL(i) -> "call " ^ identToString(i)
-      | GET_FUNC_ADDR (i, aLoc) -> "movq $" ^identToString i ^ " " ^
+      | GET_FUNC_ADDR (i, aLoc) -> "movq $" ^identToString i ^ ", " ^
                                    assemLocToString aLoc BIT64
       | FUN_PTR_CALL(aLoc) -> "call *" ^ assemLocToString aLoc BIT64
         (* Just gonna use eax for this, since we reserve it for divs/rets in general *)

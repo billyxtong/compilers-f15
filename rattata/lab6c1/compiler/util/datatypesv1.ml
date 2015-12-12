@@ -4,7 +4,7 @@
 type c0type = INT | BOOL | VOID | CHAR | STRING | TypedefType of ident | Pointer of c0type
             | Array of c0type
             | Struct of ident
-            | FuncID of ident (* C1 convention for function pointers *)
+            (* | FuncID of ident (* C1 convention for function pointers *) *)
             | FuncPrototype of c0type * c0type list (* function return type and param types *)
             | Poop (* for null pointer polymorphism *)
 and ident = string

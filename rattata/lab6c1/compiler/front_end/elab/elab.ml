@@ -1,11 +1,11 @@
 open Ast
 
-let transformString (oldString : int list) (newString : int list) =
+let rec transformString (oldString : int list) (newString : int list) =
   match oldString with
     [] -> List.rev newString 
     |[c] -> transformString [] (c :: newString)
     |c1::c2::cs -> 
-        if (compare '\\' Char.chr(c1)) = 0
+        if (String.compare "\\" (String.make 1 (Char.chr c1))) = 0
         then 
           (match Char.chr c2 with
              't' -> transformString cs (9 :: newString) (* C0 ascii codes for these characters*)

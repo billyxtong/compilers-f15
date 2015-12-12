@@ -20,8 +20,7 @@ type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
               | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
-                    | FuncPointerDeref of typedPostElabExpr * typedPostElabExpr list (* L6: calling func ptr *)
-                    | AddressOfFunction of ident (* L6: address of operator for function names *)
+                    | FuncPointerDeref of ptrExpr * typedPostElabExpr list (* L6: calling func ptr *)
                     | FieldAccess of ident * ptrExpr * ident
                 (* FieldAccess here is an arrow! *)
                        (* first ident: type name of struct
@@ -51,6 +50,7 @@ and ptrExpr = Null
             | PtrSharedExpr of sharedTypeExpr
             | Alloc of c0type
             | AllocArray of c0type * intExpr
+            | AddressOfFunction of ident (* L6: address of operator for function names *)
 and intExpr = IntConst of const
             | IntSharedExpr of sharedTypeExpr
             | ASTBinop of intExpr * intBinop * intExpr

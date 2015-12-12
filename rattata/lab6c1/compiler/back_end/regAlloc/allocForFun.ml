@@ -86,7 +86,9 @@ let translateTmpArg tbl = function
                            with Not_found -> failwith "I don't think this can happen"
 
 let translateTmpLoc tbl = function
-    TmpVar t -> H.find tbl t
+    TmpVar t -> (try H.find tbl t with Not_found ->
+         print_string ("Nothing allocated for tmp: " ^ PrintDatatypes.tmpToString t
+                         ^ "\n"); assert(false))
   | TmpDeref t -> (match H.find tbl t with
                        Reg r -> RegDeref r
                      | MemAddr mem -> MemAddrDeref mem
@@ -236,6 +238,21 @@ let rec getTempSet instrList tempSet =
                  | Tmp2AddrFunCall(retSize, fName, args, Some (TmpDeref (Tmp dest))) ->
                                               (let () = H.replace tempSet dest () in
                                                              getTempSet instrs tempSet)
+                 | Tmp2AddrFunPtrCall(retSize, fName, args,
+                                      Some (TmpDeref (Tmp dest))) ->
+                                              (let () = H.replace tempSet dest () in
+                                                             getTempSet instrs tempSet)
+                 | Tmp2AddrFunPtrCall(retSize, fName, args,
+                                      Some (TmpVar (Tmp dest))) ->
+                                              (let () = H.replace tempSet dest () in
+                                                             getTempSet instrs tempSet)
+                 | Tmp2AddrGetFunAddress(fName, TmpVar (Tmp dest)) ->
+                              (let () = H.replace tempSet dest () in
+                               getTempSet instrs tempSet)
+                 | Tmp2AddrGetFunAddress(fName, TmpDeref (Tmp dest)) ->
+                              (let () = H.replace tempSet dest () in
+                               getTempSet instrs tempSet)
+
                  | _ -> getTempSet instrs tempSet)
 
 let getTempList instrList =
