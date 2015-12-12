@@ -20,7 +20,7 @@ let rec c0typeToString (c : c0type) =
       | Array(c) -> c0typeToString(c) ^ "[]"
       | Struct(i) -> "struct " ^ identToString(i) ^ " "
       | Poop -> "nulltype"
-      | FuncPrototype (retType, argTypes) -> c0typeToString retType ^
+      | FuncPrototype (name, retType, argTypes) -> c0typeToString retType ^
               "(" ^ concat ", " (List.map c0typeToString argTypes) ^ ")"
         
 let constToString (c : const) = string_of_int(c)
