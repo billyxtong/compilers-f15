@@ -1,9 +1,9 @@
 open Datatypesv1
-open Ast
+open TypeInfAst
 module H = Hashtbl
 module M = Core.Std.Map
 open String
-open PrintASTs
+open TypeInfPrintASTs
 open PrintDatatypes
 
 let alphaCount = ref 0

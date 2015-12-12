@@ -5,12 +5,12 @@
  *)
 
 open Ast
-module A = Ast
+module A = TypeInfAst
 open Datatypesv1
 module M = Core.Std.Map
 open String
 open PrintDatatypes
-open PrintASTs
+open TypeInfPrintASTs
 open TypeInfTCExprs
 
 let isAlpha t =

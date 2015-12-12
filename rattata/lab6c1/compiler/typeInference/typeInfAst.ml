@@ -102,7 +102,7 @@ and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabVoidReturn
                   | VoidFunCall of ident * typedPostElabExpr list
                   | JumpUncond of label
-and typedPostElabBlock = typedPostElabStmt list
+and typedPostElabBlock = typedPostElabStmt ref list
 type typedPostElabGlobalDecl =
     (* After typechecking, we can throw out function declarations and typedefs *)
     TypedPostElabFunDef of c0type * ident * param list * typedPostElabBlock
