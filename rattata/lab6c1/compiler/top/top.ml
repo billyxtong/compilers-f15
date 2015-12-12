@@ -187,8 +187,10 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
       ~f:(fun afstream -> output_string afstream finalAssem);
     let filenameNoExt = Filename.chop_extension afname in
     let exeFilename = filenameNoExt ^ ".exe" in
-    if exe then let _ = Sys.command("gcc -o " ^ exeFilename ^ " -m64 "
-                 ^ afname ^ " run411.c") in () else ()
+    let exeCommand = "gcc -o " ^ exeFilename ^ " -m64 "
+                 ^ afname ^ " run411.c" in
+    (* let () = print_string (exeCommand  ^ "\n") in *)
+    if exe then assert(Sys.command exeCommand = 0)  else ()
 
   with
     ErrorMsg.Error -> say "Compilation failed"; exit 1
