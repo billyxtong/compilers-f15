@@ -59,6 +59,9 @@ let handleMemMemInstr (instr: assemInstr) : assemInstr list =
                 but as well *)
              PTR_BINOP(op, src, AllocForFun.firstSpillReg)::
              MOV(BIT64, AssemLoc AllocForFun.firstSpillReg, dest)::[]
+      | FUN_PTR_CALL (MemAddr mem) ->
+             MOV(BIT64, AssemLoc (MemAddr mem), AllocForFun.firstSpillReg)::
+             FUN_PTR_CALL(AllocForFun.firstSpillReg)::[]
       | otherInstr -> [otherInstr]
 
 (* Everywhere where just the src is a MemAddrDeref, do:
