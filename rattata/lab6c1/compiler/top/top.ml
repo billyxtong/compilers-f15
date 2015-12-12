@@ -45,7 +45,8 @@ let spec =
   +> flag "-r" (optional string) ~doc: " How many extra general purpose regs to allocate"
   +> flag "--unsafeForExperiments" no_arg ~doc:" A separate unsafe flag for running experiments"
   +> flag "--exe" no_arg ~doc: " Do linking as well and generate an executable"
-let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs unsafeForExperiments exe () =
+  +> flag "--typeInference" no_arg ~doc: " Do not require type annotations and instead use type inference"
+let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedAST dump_infAddr dump_memInfAddr dump_assem typecheck_only dump_3Addr dump_ConstOps dump_Inlined dump_2Addr dump_NoDeadCode dump_NoMemMem dump_wonky dump_final dump_all opt0 opt1 opt2 unsafe killDeadCode noRegAlloc doConstOpts doInlining arrayStrengthReduction doTieBreaking removeJumps onlyPushOnce numRegs unsafeForExperiments exe typeInf () =
   try
     OptimizeFlags.onlyPushRegsOnce := true;
     OptimizeFlags.numNonParamRegsToAlloc := 5;
@@ -90,10 +91,35 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     | _ -> say "Error: more than one input file"; raise EXIT
     in
 
+    let typedAst = (if typeInf then
+    (* TYPE INFERENCE PARSE/TYPECHECK STUFF *)
     (* Parse *)
-    say_if verbose (fun () -> "Parsing... " ^ main_source);
+    (say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
-    let preElabOverallAst = Parse.parse main_source header_file in ();
+    let preElabOverallAst = TypeInfParse.parse main_source header_file in ();
+    say_if dump_ast (fun () -> TypeInfPrintASTS.preElabASTToString(preElabOverallAst));
+
+    (* Elaborate *)
+    say_if verbose (fun () -> "Elaborating... ");
+    let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
+    say_if dump_upeAST (fun () ->
+      TypeInfPrintASTS.untypedPostElabOverallASTToString(untypedPostElabOverallAst));
+
+    (* Typecheck *)
+    say_if verbose (fun () -> "Typechecking...");
+    let typedPostElabAst = TypeInfTypeChecker.typecheck untypedPostElabOverallAst in ();
+    say_if dump_typedAST (fun () ->
+      TypeInfPrintASTS.typedPostElabASTToString(typedPostElabAst));
+    if typecheck_only then exit 0;
+    typedPostElabAst)
+
+    else                   
+    (* NORMAL PARSE/TYPECHECK STUFF (NO TYPE INFERENCE *)
+    (* Parse *)
+    (say_if verbose (fun () -> "Parsing... " ^ main_source);
+    if dump_parsing then ignore (Parsing.set_trace true);
+    let parseFunc = (if typeInf then TypeInfParse.parse else Parse.parse) in
+    let preElabOverallAst = parseFunc main_source header_file in ();
     say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
 
     (* Elaborate *)
@@ -108,10 +134,12 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if dump_typedAST (fun () ->
       PrintASTs.typedPostElabASTToString(typedPostElabAst));
     if typecheck_only then exit 0;
-    
+    typedPostElabAst)) in
+
+    (* NOW THIS IS COMMON TO BOTH OF THEM *)
     (* convert Post-Elab AST to Infinte Addr, except for memory stuff *)
     say_if verbose (fun () -> "converting to infAddr, except memory stuff...");
-    let infAddr = GeneralToInfAddr.toInfAddr typedPostElabAst in ();
+    let infAddr = GeneralToInfAddr.toInfAddr typedAst in ();
     say_if dump_infAddr (fun () -> tmpInfAddrProgToString infAddr);
 
     (* convert memory stuff to Inf Addr *)
