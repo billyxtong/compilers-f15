@@ -6,6 +6,7 @@ type c0type = INT | BOOL | VOID | CHAR | STRING | TypedefType of ident | Pointer
             | Struct of ident
             | FuncPrototype of ident option * c0type * c0type list (* function return type and param types *)
             | Poop (* for null pointer polymorphism *)
+            | Alpha of int
 and ident = string
 (* we now have char consts, but we can represent them with ASCII *)
 type const = int

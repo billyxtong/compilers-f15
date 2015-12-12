@@ -1,4 +1,4 @@
-(* L4 Compiler
+(* L6 Compiler
  * Abstract Syntax Trees
  * Authors: Ben Plaut, William Tong
  * 
@@ -79,6 +79,7 @@ and intExpr = IntConst of const
                 | StringSharedExpr of sharedTypeExpr
  and charExpr = CharConst of const
               | CharSharedExpr of sharedTypeExpr
+ and alphaExpr = AlphaSharedExpr of sharedTypeExpr
 and typedPostElabLVal = TypedPostElabVarLVal of ident |
               TypedPostElabFieldLVal of ident * typedPostElabLVal * ident |
               TypedPostElabDerefLVal of typedPostElabLVal |
@@ -89,6 +90,7 @@ and typedPostElabExpr = IntExpr of intExpr
                        | PtrExpr of ptrExpr
                        | StringExpr of stringExpr
                        | CharExpr of charExpr
+                       | AlphaExpr of alphaExpr
 and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabAssignStmt of typedPostElabLVal *
                                           assignOp * typedPostElabExpr
@@ -97,20 +99,17 @@ and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabWhile of boolExpr * typedPostElabBlock
                   | TypedPostElabReturn of typedPostElabExpr
                   | TypedPostElabAssert of boolExpr
-                  | TypedPostElabVoidReturn (* takes no args *)
+                  | TypedPostElabVoidReturn
                   | VoidFunCall of ident * typedPostElabExpr list
                   | JumpUncond of label
-and typedPostElabBlock = typedPostElabStmt list
+and typedPostElabBlock = typedPostElabStmt ref list
 type typedPostElabGlobalDecl =
-    (* After typechecking, we can throw out declarations and typedefs *)
+    (* After typechecking, we can throw out function declarations and typedefs *)
     TypedPostElabFunDef of c0type * ident * param list * typedPostElabBlock
-  | TypedPostElabFuncTypeDef of c0type * ident * param list
-  | TypedPostElabStructDef of ident * field list (* new for L4 *)
+  | TypedPostElabStructDef of ident * field list
     (* we need to hang onto struct declarations for a bit *)
 type typedPostElabAST = typedPostElabGlobalDecl list      
-(* Note that typedAST doesn't have an "overall" version that contains
-   two asts. This is because we can combine the header ast and main ast
-   into one, after typechecking *)
+(* typedAST combines the header ast and main ast into one *)
 
  (* Untyped Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
@@ -125,7 +124,7 @@ type untypedPostElabLVal = UntypedPostElabVarLVal of ident |
               UntypedPostElabDerefLVal of untypedPostElabLVal |
               UntypedPostElabArrayAccessLVal of untypedPostElabLVal * untypedPostElabExpr
 and untypedPostElabExpr =
-     UntypedPostElabConstExpr of const * c0type (* now handles int, bool, char constants *)
+     UntypedPostElabConstExpr of const * c0type (* handles int, bool, char constants *)
    | UntypedPostElabStringConstExpr of stringConst
    | UntypedPostElabNullExpr
    | UntypedPostElabIdentExpr of ident
@@ -136,13 +135,13 @@ and untypedPostElabExpr =
                    untypedPostElabExpr * untypedPostElabExpr
    | UntypedPostElabFunCall of ident * untypedPostElabExpr list
    | UntypedPostElabFunPtrCall of untypedPostElabExpr * untypedPostElabExpr list (* L6: calling func ptr *)
-   | UntypedPostElabAddressOfFunction of ident (* L6: address of operator for function names *)
+   | UntypedPostElabAddressOfFunction of ident (* L6: address of operator (&) for function names *)
    | UntypedPostElabFieldAccessExpr of untypedPostElabExpr * ident
    | UntypedPostElabAlloc of c0type
    | UntypedPostElabDerefExpr of untypedPostElabExpr
    | UntypedPostElabArrayAlloc of c0type * untypedPostElabExpr
    | UntypedPostElabArrayAccessExpr of untypedPostElabExpr * untypedPostElabExpr
-type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
+type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type (* L6: type declaration is no longer necessary *)
       (* Decls are int x, AssignStmts are x = 4, InitDecls are int x = 4.
          We can't elaborate InitDecls to Decl + Assign for the following
          super annoying reason: if "f" is a function, then int f = f()
@@ -151,10 +150,9 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
          "int f; f = f()", then the var is in scope and it will
          throw an typechecking error *)
                          | UntypedPostElabInitDecl of ident * c0type
-                                       * untypedPostElabExpr
+                                       * untypedPostElabExpr (* L6: type declaration is no longer necessary *)
                          | UntypedPostElabAssignStmt of untypedPostElabLVal * 
                                               assignOp * untypedPostElabExpr
-                                      (* we're holding onto assignOps in L4 *)
                          | UntypedPostElabIf of untypedPostElabExpr * 
                                                 untypedPostElabBlock * 
                                                 untypedPostElabBlock
@@ -162,34 +160,34 @@ type untypedPostElabStmt = UntypedPostElabDecl of ident * c0type
                                                    untypedPostElabBlock *
                                                    untypedPostElabBlock
                          | UntypedPostElabReturn of untypedPostElabExpr
-                         | UntypedPostElabVoidReturn (* no args *)
+                         | UntypedPostElabVoidReturn
                          | UntypedPostElabAssert of untypedPostElabExpr
                          | UntypedPostElabExprStmt of untypedPostElabExpr
                          | UntypedPostElabBlock of untypedPostElabBlock
 and untypedPostElabBlock = untypedPostElabStmt list
                              
 type untypedPostElabGlobalDecl =
-      UntypedPostElabFunDecl of c0type * ident * param list
+      UntypedPostElabFunDecl of c0type * ident * param list (* L6: type declaration is no longer necessary *) 
     | UntypedPostElabFunDef of c0type * ident * param list *
-                               untypedPostElabBlock
+                               untypedPostElabBlock (* L6: type declaration is no longer necessary *)
     | UntypedPostElabTypedef of c0type * ident         
     | UntypedPostElabFuncTypedef of c0type * ident * param list
-    | UntypedPostElabStructDecl of ident (* new for L4 *)
-    | UntypedPostElabStructDef of ident * field list (* new for L4 *)
+    | UntypedPostElabStructDecl of ident
+    | UntypedPostElabStructDef of ident * field list
 type untypedPostElabAST = untypedPostElabGlobalDecl list
 type untypedPostElabOverallAST = untypedPostElabAST * untypedPostElabAST
 
 (* Pre-Elab AST *)
 
 type postOp = PLUSPLUS | MINUSMINUS    
-type preElabLVal = PreElabVarLVal of ident | (* when we're assigning to a var *)
+type preElabLVal = PreElabVarLVal of ident | (* assigning to a var *)
               PreElabFieldLVal of preElabLVal * ident |
-              (* (indirectly) handles both struct.fieldName and struct -> fieldName *)
-              PreElabDerefLVal of preElabLVal | (* handles ( *pointerName ) *)
-              PreElabArrayAccessLVal of preElabLVal * preElabExpr (* handles array[index] *)
+              (* assigning to struct.fieldName or struct -> fieldName *)
+              PreElabDerefLVal of preElabLVal | (* assigning to ( *pointerName ) *)
+              PreElabArrayAccessLVal of preElabLVal * preElabExpr (* assigning to array[index] *)
 and preElabExpr = PreElabConstExpr of const * c0type 
                  (* handles int, bool, char constants *)
-                 | PreElabStringConstExpr of stringConst (* L5: strings *)
+                 | PreElabStringConstExpr of stringConst (* string literals *)
                  | PreElabNullExpr
                  | PreElabIdentExpr of ident
                  | PreElabBinop of preElabExpr * generalBinop * preElabExpr
@@ -197,15 +195,15 @@ and preElabExpr = PreElabConstExpr of const * c0type
                  | PreElabTernary of preElabExpr * preElabExpr * preElabExpr
                  | PreElabFunCall of ident * preElabExpr list
                  | PreElabFunPtrCall of preElabExpr * preElabExpr list (* L6: calling a function pointer *)
-                 | PreElabAddressOfFunction of ident (* L6: address of operator for function names *)
+                 | PreElabAddressOfFunction of ident (* L6: address of operator (&) for function names *)
                  | PreElabFieldAccessExpr of preElabExpr * ident (* field access here is a dot *)
-                 | PreElabAlloc of c0type 
+                 | PreElabAlloc of c0type
                  | PreElabDerefExpr of preElabExpr
-                 | PreElabArrayAlloc of c0type * preElabExpr 
+                 | PreElabArrayAlloc of c0type * preElabExpr
                  | PreElabArrayAccessExpr of preElabExpr * preElabExpr
-type preElabDecl = NewVar of ident * c0type
-                 | Init of ident * c0type * preElabExpr
-type simpStmt = PreElabDecl of preElabDecl     
+type preElabDecl = NewVar of ident * c0type (* L6: type declaration is no longer necessary *)
+                 | Init of ident * c0type * preElabExpr (* L6: type declaration is no longer necessary *)
+type simpStmt = PreElabDecl of preElabDecl
               | SimpAssign of preElabLVal * assignOp * preElabExpr
               (* changed in L4: preElabLVal in place of ident, also we need the assignOp now *)
               | SimpStmtExpr of preElabExpr
@@ -221,11 +219,11 @@ type elseOpt = EmptyElse | PreElabElse of preElabStmt
                  | Control of control
                  | Block of block
  and block = preElabStmt list
-type globalDecl = FunDecl of c0type * ident * param list
-           | FunDef of c0type * ident * param list * block
+type globalDecl = FunDecl of c0type * ident * param list (* L6: type declaration is no longer necessary *)
+           | FunDef of c0type * ident * param list * block (* L6: type declaration is no longer necessary *)
            | Typedef of c0type * ident
            | FuncTypedef of c0type * ident * param list 
-           | PreElabStructDecl of ident (* new for L4 *)
-           | PreElabStructDef of ident * field list (* new for L4 *)
+           | PreElabStructDecl of ident
+           | PreElabStructDef of ident * field list
 type preElabAST = globalDecl list
-type preElabOverallAST = preElabAST * preElabAST    
+type preElabOverallAST = preElabAST * preElabAST

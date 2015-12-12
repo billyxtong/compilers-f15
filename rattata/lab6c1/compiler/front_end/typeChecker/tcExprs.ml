@@ -264,7 +264,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | CHAR -> (CharExpr(CharSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | STRING -> (StringExpr(StringSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | VOID -> (VoidExpr(VoidFunCall(newFuncName, typedArgs)), funcType)
-                    | FuncPrototype(t, ts) -> 
+                    | FuncPrototype(name, t, ts) -> 
                       (ErrorMsg.error ("functions can't return functions, only function pointers \n");
                          raise ErrorMsg.Error)
                     | Pointer(c) -> (PtrExpr(PtrSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
@@ -285,7 +285,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       let argTypes = List.map (fun (expression, expressionType) -> expressionType) typedArgList in
       let typedArgs = List.map (fun (typedArg, _) -> typedArg) typedArgList in
       (match (typedExpr, exprType) with
-         (PtrExpr fPtr, (Pointer (FuncPrototype(retType,paramTypes)))) -> 
+         (PtrExpr fPtr, (Pointer (FuncPrototype(name,retType,paramTypes)))) -> 
            if argsMatch paramTypes argTypes
            then
              (addTypeToSharedExpr (FuncPointerDeref(fPtr,typedArgs)) retType, retType)
