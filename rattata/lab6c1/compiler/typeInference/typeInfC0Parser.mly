@@ -81,6 +81,7 @@ let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *
 %token STRUCT TYPEDEF IF ELSE WHILE FOR CONTINUE BREAK
 %token ASSERT TRUE FALSE NULL ALLOC ALLOC_ARRAY
 %token BOOL VOID CHAR STRING
+%token <int> ALPHA       
 %token SEMI
 %token COMMA
 %token <Int32.t> DECCONST
@@ -151,9 +152,11 @@ gdecl :
 
 fdecl :
     c0type VAR_IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3) }
+    VAR_IDENT paramlist SEMI    { A.FunDecl (D.Alpha, $2, $3) }
 
 fdefn :
     c0type VAR_IDENT paramlist block { A.FunDef ($1, $2, $3, $4) }
+    VAR_IDENT paramlist block { A.FunDef (D.Alpha, $2, $3, $4) }
 
 typedef :
     TYPEDEF c0type VAR_IDENT SEMI    { let () = H.add
@@ -184,6 +187,7 @@ fieldlist :
 	    
 param :
     c0type VAR_IDENT            { ($1, $2) }
+    VAR_IDENT                   { (D.Alpha, $2) }
 
 paramlistfollow :
     /* empty */             { [] }
@@ -230,7 +234,8 @@ c0typeNotIdent :
  | BOOL 		         { D.BOOL }
  | VOID                          { D.VOID }
  | CHAR                          { D.CHAR }
- | STRING                        { D.STRING }				 
+ | STRING                        { D.STRING }
+ | ALPHA			 { D.ALPHA $1 }
  | c0type STAR                   { D.Pointer $1 }
  | STRUCT VAR_IDENT                  { D.Struct $2 }
    /* It's ok if the struct name type has been typedefed */
