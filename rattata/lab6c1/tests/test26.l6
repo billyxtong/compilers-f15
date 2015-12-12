@@ -1,3 +1,5 @@
+//test error
+
 struct foo {
   int tag;
   int data;

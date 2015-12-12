@@ -257,7 +257,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                let typedArgs = List.map (fun (typedArg, _) -> typedArg) typedArgList in
                let newFuncName = if isExternal then i else "_c0_" ^ i in
                (* internal functions must be called with prefix _c0_ *)
-               if (argsMatch argTypes funcParams) then
+               if (argsMatch funcParams argTypes) then
                (match funcType with
                       INT -> (IntExpr(IntSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
                     | BOOL -> (BoolExpr(BoolSharedExpr(FunCall(newFuncName, typedArgs))), funcType)
