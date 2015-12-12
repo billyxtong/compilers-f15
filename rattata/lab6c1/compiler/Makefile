@@ -35,6 +35,9 @@ clean:
 	@echo			# $(OCAMLBUILD) -clean needs a newline
 	rm -f bin/c0c
 
+test:
+	../grader/gradecompiler tests
+
 always:
 
 .PHONY: c0c debug native top clean always
