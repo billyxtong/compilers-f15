@@ -26,6 +26,8 @@ let getSizeForType = function
                      that the size will never be used in that case! *)
   | Array _ -> BIT64
   | Struct _ -> BIT64
+  | Alpha _ -> BIT64 (* questionable: anything polymorphic is treated as
+                        64-bit? *)
   | Poop -> assert(false)
   | TypedefType _ -> assert(false) (* should be stripped away in typecheck *)
     
@@ -36,6 +38,8 @@ let getSizeForAstExpr = function
   | A.StringExpr _ -> BIT64
   | A.CharExpr _ -> BIT8
   | A.VoidExpr _ -> assert(false)    
+  | A.AlphaExpr _ -> BIT64 (* questionable: anything polymorphic is treated as
+                        64-bit? *)
 
 let get_or_make_tmp id idToTmpMap = (match M.find idToTmpMap id with
               None -> Temp.create()
@@ -168,6 +172,10 @@ and trans_exp retTmp retLabel idToTmpMap = function
     | A.StringExpr e ->  let (instrs, e') = trans_string_exp retTmp retLabel idToTmpMap e
                       in (instrs, TmpPtrExpr e')
     | A.VoidExpr _ -> assert(false)
+    | A.AlphaExpr (A.AlphaSharedExpr e) ->
+         trans_exp retTmp retLabel idToTmpMap (A.PtrExpr (A.PtrSharedExpr e))
+                   (* questionable: treat anything polymorphic as 64bit? *)
+
 
 (* Returns a list of tmpExprs, resulting from calling trans_exp on each of the args *)
 (* fName is an option: for func ptrs it will be None; just assume all args are 64-bit
