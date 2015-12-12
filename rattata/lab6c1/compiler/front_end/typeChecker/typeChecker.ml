@@ -255,7 +255,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                       (None, None) ->             
                         let paramTypes = List.map (fun (t,i) -> lowestTypedefType t) params in
                         let () = typedefMap := M.add !typedefMap name 
-                            (FuncPrototype(lowestTypedefType retType, paramTypes)) in
+                            (FuncPrototype(Some name, lowestTypedefType retType, paramTypes)) in
                         tc_prog gdecls typedAST
                      | _ -> 
                         (ErrorMsg.error ("cannot shadow previously declared typedef/func names \n");
@@ -329,7 +329,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                     let newTypedAST = (TypedPostElabAssignStmt(TypedPostElabVarLVal(id), EQ, tcExpr)
                                     :: TypedPostElabDecl(id, actualDeclType)
                                     :: typedBlock) in
-                    if matchTypes exprType actualDeclType then
+                    if matchTypes actualDeclType exprType then
                       let newVarMap = M.add varMap id (actualDeclType, true) in 
                       tc_statements newVarMap 
                       stms funcRetType ret newTypedAST
@@ -358,7 +358,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
        (let (tcExpr, exprType) = tc_expression varMap e in
         let (typedLVal, lvalType) = tc_lval varMap lval in
-        if matchTypes exprType (lowestTypedefType lvalType ) && notAStruct exprType
+        if matchTypes (lowestTypedefType lvalType) exprType && notAStruct exprType
         then
           (match op with
                  EQ -> 
@@ -429,7 +429,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
          get to be treated as initialized...although those declared
          after don't *)
       let newVarMap = M.map varMap (fun (typee, _) -> (typee, true)) in
-      if matchTypes (lowestTypedefType exprType) funcRetType 
+      if matchTypes funcRetType (lowestTypedefType exprType) 
       then tc_statements newVarMap 
           stms funcRetType true ((TypedPostElabReturn(tcExpr)) :: typedBlock) 
       else (ErrorMsg.error ("return expr not same as func ret type\n");

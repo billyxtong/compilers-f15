@@ -55,12 +55,13 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
       | (Pointer(c1), Pointer(c2)) -> matchTypes c1 c2
       | (Array(c1), Array(c2)) -> matchTypes c1 c2
       | (Struct(i1), Struct(i2)) -> (i1 = i2)
-      (* | (FuncID(i1), FuncID(i2)) -> (i1 = i2) *)
       | (Poop, Poop) -> true
       | (Pointer(c), Poop) -> true
       | (Poop, Pointer(c)) -> true
-      | (FuncPrototype(retType1, argTypes1), FuncPrototype(retType2, argTypes2)) ->
-           matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2
+      | (FuncPrototype(Some name1, retType1, argTypes1), FuncPrototype(Some name2, retType2, argTypes2)) ->
+           name1 == name2 && matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2
+      | (FuncPrototype(Some name1, retType1, argTypes1), FuncPrototype(None, retType2, argTypes2)) ->
+          matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2 (* binop_fn* f = &foo; *)
       | _ -> false
 
 and argsMatch (argTypes : c0type list) (paramTypes : c0type list) =
@@ -285,7 +286,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       let typedArgs = List.map (fun (typedArg, _) -> typedArg) typedArgList in
       (match (typedExpr, exprType) with
          (PtrExpr fPtr, (Pointer (FuncPrototype(retType,paramTypes)))) -> 
-           if (* matchTypes exprType retType && *) argsMatch paramTypes argTypes
+           if argsMatch paramTypes argTypes
            then
              (addTypeToSharedExpr (FuncPointerDeref(fPtr,typedArgs)) retType, retType)
            else (ErrorMsg.error ("ret or arg types don't match for func ptr\n");
@@ -298,7 +299,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
          None -> (ErrorMsg.error ("undeclared/undefined function\n");
                      raise ErrorMsg.Error)
        | Some(funcType, funcParams, isDefined, isExternal) -> 
-           let fType = FuncPrototype(funcType, funcParams) in
+           let fType = FuncPrototype(None, funcType, funcParams) in
            let newFName = (if isExternal then fName else "_c0_" ^ fName) in
            (PtrExpr (AddressOfFunction newFName), Pointer(fType)))
   | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
