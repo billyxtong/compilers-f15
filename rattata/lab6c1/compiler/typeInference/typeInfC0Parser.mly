@@ -235,7 +235,7 @@ c0typeNotIdent :
  | VOID                          { D.VOID }
  | CHAR                          { D.CHAR }
  | STRING                        { D.STRING }
- | ALPHA			 { D.ALPHA $1 }
+ | ALPHA			 { D.Alpha $1 }
  | c0type STAR                   { D.Pointer $1 }
  | STRUCT VAR_IDENT                  { D.Struct $2 }
    /* It's ok if the struct name type has been typedefed */
