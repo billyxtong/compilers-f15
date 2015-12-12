@@ -14,7 +14,7 @@ let parse_file filename =
         let lexbuf = Lexing.from_channel chan in
         let _ = ErrorMsg.reset ()
         and _ = ParseState.setfile filename in
-        let ast = C0Parser.program C0Lexer.initial lexbuf in
+        let ast = TypeInfC0Parser.program C0Lexer.initial lexbuf in
         let _ = if !ErrorMsg.anyErrors then raise ErrorMsg.Error else () in
         ast)
 
