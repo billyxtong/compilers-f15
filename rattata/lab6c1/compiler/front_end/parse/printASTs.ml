@@ -372,8 +372,6 @@ let typedPostElabGlobalDeclToString(decl : typedPostElabGlobalDecl) =
           c0typeToString(c) ^ identToString(i) ^ "(" ^ 
           (concat ", " (List.map paramToString params)) ^ ") {\n" ^ 
           typedPostElabBlockToString(stmts) ^ "}"
-      | TypedPostElabFuncTypeDef(c,i,ps) -> "typedef " ^ c0typeToString(c) ^ identToString(i) ^
-                   "(" ^ (concat ", " (List.map paramToString ps)) ^ ");"
       | TypedPostElabStructDef(i, fs) -> "struct " ^ identToString(i) ^ "{\n" ^ 
                                    (concat "" (List.map fieldToString fs)) ^ "};"
 
