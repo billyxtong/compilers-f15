@@ -8,8 +8,7 @@
  *)
 
 
-module A = Ast
-module P = C0Parser
+module P = TypeInfC0Parser
 module H = Hashtbl
   
 let start = Lexing.lexeme_start
