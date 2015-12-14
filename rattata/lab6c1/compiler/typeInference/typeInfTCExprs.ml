@@ -1,9 +1,10 @@
 open Datatypesv1
 open TypeInfAst
 module H = Hashtbl
+module A = Ast  
 module M = Core.Std.Map
 open String
-open TypeInfPrintASTs
+open TypeInfPrintASTS
 open PrintDatatypes
 
 let alphaCount = ref 0
@@ -41,6 +42,7 @@ let rec addTypeToSharedExpr e = function
   | Poop -> PtrExpr (PtrSharedExpr e)
   | TypedefType t -> addTypeToSharedExpr e (lowestTypedefType (TypedefType t))
   | Struct _ -> PtrExpr (PtrSharedExpr e)
+  | Alpha n -> AlphaExpr (AlphaSharedExpr e)                  
 
 let notAStruct (t : c0type) =
   match lowestTypedefType t with
@@ -81,7 +83,7 @@ and matchFuncTypes (funcType1 : c0type) (funcType2 : c0type) =
   if (lowestTypedefType funcType1) = (lowestTypedefType funcType2)
   then true else false
 
-let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
+let rec matchParamListTypes (paramTypes : c0type list) (params : A.param list) =
   match (paramTypes, params) with
         ([], []) -> true
       | ([], p :: ps) -> false
@@ -93,7 +95,7 @@ let rec matchParamListTypes (paramTypes : c0type list) (params : param list) =
           then matchParamListTypes ps remainingParams else false
 
 
-let rec uniqueParamNames (params : param list) nameTable =
+let rec uniqueParamNames (params : A.param list) nameTable =
   match params with
         [] -> true
       | (datType, datName) :: ps ->
@@ -101,7 +103,7 @@ let rec uniqueParamNames (params : param list) nameTable =
                  (None, None) -> uniqueParamNames ps (M.add nameTable datName ())
                | _ -> false)
 
-let rec uniqueFieldNames (fields : field list) nameTable = 
+let rec uniqueFieldNames (fields : A.field list) nameTable = 
   match fields with
         [] -> true
       | (datType, datName) :: fs ->
@@ -134,7 +136,7 @@ let typeNotLarge (t : c0type) =
         Struct(_) -> false
       | _ -> true
 
-let rec areAnyFuncParamsStructs (l : param list) =
+let rec areAnyFuncParamsStructs (l : A.param list) =
   match l with
         [] -> false
       | (t, _) :: ps ->
@@ -380,7 +382,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                          | _ -> (PtrExpr(PtrSharedExpr(FieldAccess(structName, PtrSharedExpr(inner), fieldName))), fieldType))
                      | None -> 
                          (ErrorMsg.error ("struct " ^ structName ^
-                              " has no field with name "
+                              " has no A.field with name "
                               ^ fieldName ^ "\n"); raise ErrorMsg.Error))
                 | None -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                            raise ErrorMsg.Error)))

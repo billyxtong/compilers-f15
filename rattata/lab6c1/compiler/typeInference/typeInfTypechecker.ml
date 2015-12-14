@@ -510,7 +510,7 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
           (match tcExpr with
              VoidExpr(stmt) -> tc_statements fName varMap stms funcRetType ret (stmt :: typedBlock)
            | _ -> tc_statements fName varMap stms funcRetType ret 
-                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock)))
+                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock))))
        
 and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
   

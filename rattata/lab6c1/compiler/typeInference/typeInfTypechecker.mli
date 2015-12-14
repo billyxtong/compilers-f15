@@ -5,4 +5,4 @@
  *)
 
 (* prints error message and raises ErrorMsg.error if error found *)
-val typecheck : TypeInfAst.untypedPostElabOverallAST -> TypeInfAst.typedPostElabAST
+val typecheck : Ast.untypedPostElabOverallAST -> TypeInfAst.typedPostElabAST
