@@ -22,6 +22,7 @@ let rec c0typeToString (c : c0type) =
       | Poop -> "nulltype"
       | FuncPrototype (name, retType, argTypes) -> c0typeToString retType ^
               "(" ^ concat ", " (List.map c0typeToString argTypes) ^ ")"
+      | Alpha n -> "alpha" ^ string_of_int n ^ " "
         
 let constToString (c : const) = string_of_int(c)
 
