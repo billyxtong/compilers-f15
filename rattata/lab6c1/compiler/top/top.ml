@@ -97,17 +97,17 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     (say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
     let preElabOverallAst = TypeInfParse.parse main_source header_file in ();
-    say_if dump_ast (fun () -> TypeInfPrintASTS.preElabASTToString(preElabOverallAst));
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
 
     (* Elaborate *)
     say_if verbose (fun () -> "Elaborating... ");
     let untypedPostElabOverallAst = Elab.elaborateOverallAST preElabOverallAst in ();
     say_if dump_upeAST (fun () ->
-      TypeInfPrintASTS.untypedPostElabOverallASTToString(untypedPostElabOverallAst));
+      PrintASTs.untypedPostElabOverallASTToString(untypedPostElabOverallAst));
 
     (* Typecheck *)
     say_if verbose (fun () -> "Typechecking...");
-    let typedPostElabAst = TypeInfTypeChecker.typecheck untypedPostElabOverallAst in ();
+    let typedPostElabAst = TypeInfTypechecker.typecheck untypedPostElabOverallAst in ();
     say_if dump_typedAST (fun () ->
       TypeInfPrintASTS.typedPostElabASTToString(typedPostElabAst));
     if typecheck_only then exit 0;
@@ -118,8 +118,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     (* Parse *)
     (say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
-    let parseFunc = (if typeInf then TypeInfParse.parse else Parse.parse) in
-    let preElabOverallAst = parseFunc main_source header_file in ();
+    let preElabOverallAst = Parse.parse main_source header_file in ();
     say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
 
     (* Elaborate *)
