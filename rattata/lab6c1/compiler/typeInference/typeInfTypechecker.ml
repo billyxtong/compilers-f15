@@ -3,8 +3,8 @@
  * Authors: Ben Plaut, William Tong
  *)
 
-open Ast
-module A = TypeInfAst
+module A = Ast
+open TypeInfAst
 open Datatypesv1
 module M = Core.Std.Map
 open String
@@ -379,6 +379,7 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
                   tc_statements fName newVarMap stms funcRetType ret
                   (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr lvalType)::typedBlock))
            else if isAlpha lvalType && isAlpha exprType (* both sides have type alpha *)
+           then
              tc_statements fName newVarMap stms funcRetType ret
              ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
            else (* non-matching types *)
@@ -503,12 +504,11 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
   | A.UntypedPostElabExprStmt(e)::stms ->
       let (tcExpr, exprType) = tc_expression varMap e in
       (match exprType with
-            Struct(_) -> (ErrorMsg.error ("type can't be a struct\n");
+         Struct(_) -> (ErrorMsg.error ("type can't be a struct\n");
                           raise ErrorMsg.Error) 
-          | _ ->
-      (match tcExpr with
-             VoidExpr(stmt) -> 
-               tc_statements fName varMap stms funcRetType ret (stmt :: typedBlock)
+       | _ ->
+          (match tcExpr with
+             VoidExpr(stmt) -> tc_statements fName varMap stms funcRetType ret (stmt :: typedBlock)
            | _ -> tc_statements fName varMap stms funcRetType ret 
                   (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock)))
        

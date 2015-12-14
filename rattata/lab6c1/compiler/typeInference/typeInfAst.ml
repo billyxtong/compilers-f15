@@ -7,17 +7,12 @@
  *)
 
 open Datatypesv1
+open Ast
 
 (* Typed Post-Elab AST
    A restricted grammar from the Pre-Elab AST. See the elaboration
    file for more info. *)
-type stringConst = int list
-(* strings eventually become char arrays, and chars are represented by ints in ASCII *)
-type shiftOp = ASTrshift | ASTlshift
-type param = c0type * ident
-type field = c0type * ident (* for structs *)
-type assignOp = EQ | PLUSEQ | SUBEQ | MULEQ | DIVEQ | MODEQ
-              | AND_EQ | OR_EQ | XOR_EQ | LSHIFT_EQ | RSHIFT_EQ
+
 type sharedTypeExpr = Ternary of boolExpr * typedPostElabExpr * typedPostElabExpr
                     | FunCall of ident * typedPostElabExpr list
                     | FuncPointerDeref of ptrExpr * typedPostElabExpr list (* L6: calling func ptr *)
@@ -102,7 +97,7 @@ and typedPostElabStmt = TypedPostElabDecl of ident * c0type
                   | TypedPostElabVoidReturn
                   | VoidFunCall of ident * typedPostElabExpr list
                   | JumpUncond of label
-and typedPostElabBlock = typedPostElabStmt list
+and typedPostElabBlock = typedPostElabStmt ref list
 type typedPostElabGlobalDecl =
     (* After typechecking, we can throw out function declarations and typedefs *)
     TypedPostElabFunDef of c0type * ident * param list * typedPostElabBlock

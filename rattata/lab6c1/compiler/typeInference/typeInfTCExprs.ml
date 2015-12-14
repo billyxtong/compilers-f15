@@ -479,9 +479,16 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                      raise ErrorMsg.Error)
                   else (TypedPostElabVarLVal(id), typee))
            | None -> (* L6: with type inference, a variable doesn't need to be declared to be used *)
-               let () = alphaCount := !alphaCount + 1 in
-               let () = M.add varEnv id (Alpha(alphaCount), true) in
-               (TypedPostElabVarLVal(id), Alpha(alphaCount)))
+               if not isNested (* standalone variable on the LHS, such as x = _____ *)
+               then
+                 let () = alphaCount := !alphaCount + 1 in
+                 let () = M.add varEnv id (Alpha(alphaCount), true) in
+                 (TypedPostElabVarLVal(id), Alpha(alphaCount))
+               else 
+               (* the var lval is part of a struct field access, array access, or pointer dereference,
+                * but then it should've been initialized before use, so this is bad *)
+                 (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
+                  raise ErrorMsg.Error))
       | UntypedPostElabFieldLVal(untypedLVal,fieldName) ->
           let (typedLVal, lvalType) = tc_lval_helper varEnv isNested untypedLVal in
           (match lvalType with
