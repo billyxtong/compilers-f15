@@ -116,8 +116,8 @@ and typedPostElabStmtToString(s : typedPostElabStmt) =
       | VoidFunCall(func,args) -> 
           identToString(func) ^ "(" ^ (concat ", " (List.map typedPostElabExprToString args)) ^ ")"
 
-and typedPostElabBlockToString(stmts : typedPostElabStmt ref list) = 
-  concat "\n  " (List.map (fun stmt -> typedPostElabStmtToString !stmt) stmts) ^ "\n"
+and typedPostElabBlockToString(stmts : typedPostElabStmt list) = 
+  concat "\n  " (List.map (fun stmt -> typedPostElabStmtToString stmt) stmts) ^ "\n"
 
 let typedPostElabGlobalDeclToString(decl : typedPostElabGlobalDecl) =
   match decl with 

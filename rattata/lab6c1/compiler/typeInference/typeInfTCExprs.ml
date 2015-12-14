@@ -144,34 +144,34 @@ let rec areAnyFuncParamsStructs (l : A.param list) =
                  Struct(_) -> true
                | _ -> areAnyFuncParamsStructs ps)
 
-let applyTypeToAlphaExpr (AlphaSharedExpr(expr)) t =
+let applyTypeToAlphaExpr (AlphaExpr(AlphaSharedExpr(expr))) t =
   match expr with
     Ident(i) ->
       (match t with
-         INT -> IntSharedExpr(Ident(i))
-        |BOOL -> BoolSharedExpr(Ident(i))
-        |CHAR -> CharSharedExpr(Ident(i))
-        |STRING -> StringSharedExpr(Ident(i))
+         INT -> IntExpr(IntSharedExpr(Ident(i)))
+        |BOOL -> BoolExpr(BoolSharedExpr(Ident(i)))
+        |CHAR -> CharExpr(CharSharedExpr(Ident(i)))
+        |STRING -> StringExpr(StringSharedExpr(Ident(i)))
         |_ -> assert(false))
   | _ -> assert(false)
 
 
-let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
+let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
-    UntypedPostElabConstExpr (constant, typee) ->
+    A.UntypedPostElabConstExpr (constant, typee) ->
       (match typee with
              INT -> (IntExpr(IntConst(constant)), INT)
            | BOOL -> (BoolExpr(BoolConst(constant)), BOOL)
            | CHAR -> (CharExpr(CharConst(constant)), CHAR)
            | _ -> (ErrorMsg.error ("constants must be int, bool, or char\n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabStringConstExpr(str) -> 
+  | A.UntypedPostElabStringConstExpr(str) -> 
       if List.exists(fun c -> c = 0) str then
       (ErrorMsg.error ("null character cannot appear in strings\n");
         raise ErrorMsg.Error)
       else (StringExpr(StringConst(str)), STRING)
-  | UntypedPostElabNullExpr -> (PtrExpr(Null), Poop)
-  | UntypedPostElabIdentExpr(i : ident) ->
+  | A.UntypedPostElabNullExpr -> (PtrExpr(Null), Poop)
+  | A.UntypedPostElabIdentExpr(i : ident) ->
       (match M.find varEnv i with
              Some (typee, isInit) -> 
                if not isInit
@@ -192,7 +192,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                             raise ErrorMsg.Error))
            | None -> (ErrorMsg.error ("undeclared variable " ^ i ^ "\n");
                             raise ErrorMsg.Error))
-  | UntypedPostElabBinop (e1, op, e2) ->
+  | A.UntypedPostElabBinop (e1, op, e2) ->
       let (tcExpr1, type1) = tc_expression varEnv e1 in
       let (tcExpr2, type2) = tc_expression varEnv e2 in
       (match op with
@@ -254,14 +254,14 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                 | _ -> 
                   (ErrorMsg.error ("int binop expressions didn't typecheck \n");
                     raise ErrorMsg.Error)))
-  | UntypedPostElabNot(e' : untypedPostElabExpr) ->
+  | A.UntypedPostElabNot(e' : A.untypedPostElabExpr) ->
       let (tcExpr,t) = tc_expression varEnv e' in
       (match tcExpr with
              BoolExpr(exp1) -> (BoolExpr(LogNot(exp1)), BOOL)
            | AlphaExpr(exp1) -> assert(false)
            | _ -> (ErrorMsg.error ("not expression didn't typecheck \n");
                   raise ErrorMsg.Error))
-  | UntypedPostElabTernary(e1, e2, e3) ->
+  | A.UntypedPostElabTernary(e1, e2, e3) ->
       let (tcExpr1,type1) = tc_expression varEnv e1 in
       let (tcExpr2,type2) = tc_expression varEnv e2 in
       let (tcExpr3,type3) = tc_expression varEnv e3 in
@@ -269,10 +269,10 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
          BoolExpr(exp1) ->
            (match (tcExpr2, tcExpr3) with
               (IntExpr(_), IntExpr(_)) -> (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), INT)
-            | (IntExpr(_), AlphaExpr(exp3)) -> 
-                (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, IntExpr(applyTypeToAlphaExpr exp3 INT)))), INT)
-            | (AlphaExpr(exp2), IntExpr(_)) -> 
-                (IntExpr(IntSharedExpr(Ternary(exp1, IntExpr(applyTypeToAlphaExpr exp2 INT), tcExpr3))), INT)
+            | (IntExpr(_), AlphaExpr(_)) -> 
+                (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, applyTypeToAlphaExpr tcExpr3 INT))), INT)
+            | (AlphaExpr(_), IntExpr(_)) -> 
+                (IntExpr(IntSharedExpr(Ternary(exp1, applyTypeToAlphaExpr tcExpr2 INT, tcExpr3))), INT)
             | (BoolExpr(_), BoolExpr(_)) -> (BoolExpr(BoolSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), BOOL)
             | (BoolExpr(_), AlphaExpr(exp3)) -> assert(false) 
             | (AlphaExpr(exp2), BoolExpr(_)) -> assert(false) 
@@ -302,7 +302,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     raise ErrorMsg.Error))
        | _ -> (ErrorMsg.error ("ternary expression didn't typecheck \n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabFunCall(i, argList) -> 
+  | A.UntypedPostElabFunCall(i, argList) -> 
       (match (M.find varEnv i, M.find !functionMap i) with
              (Some _, _) -> (ErrorMsg.error ("cannot call this function while var with same name is in scope \n");
                              raise ErrorMsg.Error)
@@ -332,13 +332,13 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                          raise ErrorMsg.Error))
                else
                  (ErrorMsg.error ("parameters don't typecheck: " ^
-                     concat ", " (List.map PrintDatatypes.c0typeToString funcParams)
+                     (concat ", " (List.map PrintDatatypes.c0typeToString funcParams)) ^
                     " but expected " ^ concat ", "
                     (List.map PrintDatatypes.c0typeToString argTypes) ^ "\n");
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
                    raise ErrorMsg.Error)) 
-  | UntypedPostElabFunPtrCall(expr, argList) -> 
+  | A.UntypedPostElabFunPtrCall(expr, argList) -> 
       let (typedExpr, exprType) = tc_expression varEnv expr in
       let typedArgList = List.map (fun arg -> tc_expression varEnv arg) argList in
       let argTypes = List.map (fun (expression, expressionType) -> expressionType) typedArgList in
@@ -353,7 +353,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
         | _  -> (ErrorMsg.error ("not right func ptr type: " ^
                                  PrintDatatypes.c0typeToString exprType ^ "\n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabAddressOfFunction(fName) -> 
+  | A.UntypedPostElabAddressOfFunction(fName) -> 
       (match M.find !functionMap fName with
          None -> (ErrorMsg.error ("undeclared/undefined function\n");
                      raise ErrorMsg.Error)
@@ -361,7 +361,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
            let fType = FuncPrototype(None, funcType, funcParams) in
            let newFName = (if isExternal then fName else "_c0_" ^ fName) in
            (PtrExpr (AddressOfFunction newFName), Pointer(fType)))
-  | UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
+  | A.UntypedPostElabFieldAccessExpr(untypedExpr, fieldName) -> (* dots ONLY *)
       let (typedExp,typee) = tc_expression varEnv untypedExpr in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
@@ -387,8 +387,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                 | None -> (ErrorMsg.error ("no defined struct with name " ^ structName ^ "\n");
                            raise ErrorMsg.Error)))
         | _ -> (ErrorMsg.error ("bad expr on LHS, or LHS not a struct\n"); raise ErrorMsg.Error))
-  | UntypedPostElabAlloc(t : c0type) ->
-      match t with
+  | A.UntypedPostElabAlloc(t : c0type) ->
+      (match t with
         Alpha _ -> (ErrorMsg.error ("can't alloc alpha\n"); raise ErrorMsg.Error)
       | _ ->
           let baseType = lowestTypedefType t in
@@ -402,8 +402,8 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                       Some (_, true) -> (PtrExpr(Alloc(baseType)), Pointer(baseType))
                     | _ -> (ErrorMsg.error ("undefined struct\n");
                             raise ErrorMsg.Error))
-           | _ -> (PtrExpr(Alloc(baseType)), Pointer(baseType)))
-  | UntypedPostElabDerefExpr(e : untypedPostElabExpr) ->
+           | _ -> (PtrExpr(Alloc(baseType)), Pointer(baseType))))
+  | A.UntypedPostElabDerefExpr(e : A.untypedPostElabExpr) ->
       let (typedExp, typee) = tc_expression varEnv e in
       let actualType = lowestTypedefType typee in
       (match (typedExp, actualType) with
@@ -418,7 +418,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | _ -> (PtrExpr(PtrSharedExpr(Deref(p))), c))
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
-  | UntypedPostElabArrayAlloc(typee, e) ->
+  | A.UntypedPostElabArrayAlloc(typee, e) ->
       let baseType = lowestTypedefType typee in
       if (isNestedVoidPtr baseType) then
       (ErrorMsg.error ("can't alloc void\n");
@@ -440,7 +440,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                               IntExpr(i) -> (PtrExpr(AllocArray(baseType, i)), Array(baseType))
                             | _ -> (ErrorMsg.error ("can't allocate an array without an intexpr\n");
                                     raise ErrorMsg.Error)))
-  | UntypedPostElabArrayAccessExpr(e1, e2) ->
+  | A.UntypedPostElabArrayAccessExpr(e1, e2) ->
       let (typedExp1, type1) = tc_expression varEnv e1 in
       (match type1 with
              Array(arrayType) ->
@@ -462,9 +462,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                     | _ -> (ErrorMsg.error ("first expr not an array\n");
                             raise ErrorMsg.Error)))
 
-let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
+let rec tc_lval_helper varEnv isNested (lval : A.untypedPostElabLVal) =
   match lval with
-        UntypedPostElabVarLVal(id) ->
+        A.UntypedPostElabVarLVal(id) ->
           (match M.find varEnv id with (* is it declared? *)
              Some(typee, isInitialized) ->
                (if not isNested (* if it's not nested we do stuff *)
@@ -484,14 +484,13 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                if not isNested (* standalone variable on the LHS, such as x = _____ *)
                then
                  let () = alphaCount := !alphaCount + 1 in
-                 let () = M.add varEnv id (Alpha(alphaCount), true) in
-                 (TypedPostElabVarLVal(id), Alpha(alphaCount))
+                 (TypedPostElabVarLVal(id), Alpha(!alphaCount))
                else 
                (* the var lval is part of a struct field access, array access, or pointer dereference,
                 * but then it should've been initialized before use, so this is bad *)
                  (ErrorMsg.error ("uninitialized variable " ^ id ^ "\n");
                   raise ErrorMsg.Error))
-      | UntypedPostElabFieldLVal(untypedLVal,fieldName) ->
+      | A.UntypedPostElabFieldLVal(untypedLVal,fieldName) ->
           let (typedLVal, lvalType) = tc_lval_helper varEnv isNested untypedLVal in
           (match lvalType with
               Struct(structName) -> 
@@ -512,7 +511,7 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                           raise ErrorMsg.Error))
             | _ -> (ErrorMsg.error ("LHS lval isn't a struct\n");
                      raise ErrorMsg.Error))
-      | UntypedPostElabDerefLVal(untypedLVal) ->
+      | A.UntypedPostElabDerefLVal(untypedLVal) ->
           (match tc_lval_helper varEnv isNested untypedLVal with
                  (typedLVal, Pointer(c)) ->
                    if c = Poop
@@ -521,7 +520,7 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
                    else (TypedPostElabDerefLVal(typedLVal), c)
                | _ -> (ErrorMsg.error ("dereferencing a non-pointer\n");
                        raise ErrorMsg.Error))
-      | UntypedPostElabArrayAccessLVal(untypedLVal,exp) ->
+      | A.UntypedPostElabArrayAccessLVal(untypedLVal,exp) ->
           (match (tc_lval_helper varEnv isNested untypedLVal, tc_expression varEnv exp) with
                  ((typedLVal, Array(c)), (IntExpr(i), INT)) -> (TypedPostElabArrayAccessLVal(typedLVal, i), c)
                | _ -> (ErrorMsg.error ("array access lval didn't typecheck\n");
@@ -529,5 +528,5 @@ let rec tc_lval_helper varEnv isNested (lval : untypedPostElabLVal) =
 
 let tc_lval varEnv lval =
   match lval with
-        UntypedPostElabVarLVal(id) -> tc_lval_helper varEnv false lval
+        A.UntypedPostElabVarLVal(id) -> tc_lval_helper varEnv false lval
       | _ -> tc_lval_helper varEnv true lval

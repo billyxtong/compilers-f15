@@ -9,7 +9,7 @@ open Datatypesv1
 module M = Core.Std.Map
 open String
 open PrintDatatypes
-open TypeInfPrintASTs
+open TypeInfPrintASTS
 open TypeInfTCExprs
 
 let isAlpha t =
@@ -18,12 +18,12 @@ let isAlpha t =
    |_ -> false
 
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
-let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) = 
+let rec tc_header (header : A.untypedPostElabAST) (typedAST : typedPostElabAST) = 
   match header with
         [] -> typedAST
       | fdecl :: fdecls -> 
           (match fdecl with
-                 UntypedPostElabTypedef(t, i) -> 
+                 A.UntypedPostElabTypedef(t, i) -> 
                  if (isNestedVoidPtr t) then
                     (ErrorMsg.error ("can't typedef void or nested void ptr\n");
                                 raise ErrorMsg.Error)
@@ -35,7 +35,7 @@ let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) =
                             tc_header fdecls typedAST
                         | _ -> (ErrorMsg.error ("typedef name already used\n");
                                 raise ErrorMsg.Error))
-               | UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
+               | A.UntypedPostElabFunDecl(funcType, funcName, funcParams) ->
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
@@ -73,14 +73,14 @@ let rec tc_header (header : untypedPostElabAST) (typedAST : typedPostElabAST) =
                              (lowestTypedefType funcType, 
                              (List.map (fun (c, i) -> lowestTypedefType c) funcParams), true, true) in
                              tc_header fdecls typedAST))
-               | UntypedPostElabStructDecl(structName) ->
+               | A.UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
                           None -> 
                             let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
                             tc_header fdecls typedAST
                         | _ -> (ErrorMsg.error ("struct name already used\n");
                                 raise ErrorMsg.Error))
-               | UntypedPostElabStructDef(structName, fields) ->
+               | A.UntypedPostElabStructDef(structName, fields) ->
                    let nameTable = Core.Std.String.Map.empty in
                    if (not (uniqueFieldNames fields nameTable) || not (areStructFieldsWellDefined fields)) then 
                       (ErrorMsg.error ("bad field names/field is void or void ptr or undefined struct\n");
@@ -114,7 +114,7 @@ let rec init_func_env params =
         [] -> Core.Std.String.Map.empty
       | (typee, id)::ps ->  M.add (init_func_env ps) id (lowestTypedefType typee, true)
 
-let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
+let rec tc_prog (prog : A.untypedPostElabAST) (typedAST : typedPostElabAST) =
   match prog with
         [] -> if not (H.length declaredAndUsedButUndefinedFunctionTable = 0)
               then (ErrorMsg.error ("you got some used but undeclared functions\n");
@@ -130,7 +130,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 raise ErrorMsg.Error))
       | gdecl :: gdecls ->
           (match gdecl with
-                 UntypedPostElabFunDecl(funcType, funcName, funcParams) -> 
+                 A.UntypedPostElabFunDecl(funcType, funcName, funcParams) -> 
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
@@ -167,7 +167,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                             (List.map (fun (c, i) -> lowestTypedefType c) funcParams), 
                             false, false) in
                             tc_prog gdecls typedAST)
-               | UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) ->
+               | A.UntypedPostElabFunDef(funcType, funcName, funcParams, funcBody) ->
                    let nameTable = Core.Std.String.Map.empty in
                    if not (uniqueParamNames funcParams nameTable) then 
                       (ErrorMsg.error ("bad param names \n");
@@ -208,7 +208,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 let newFuncParams = List.map(fun (t,i) -> (lowestTypedefType t, i)) funcParams in
                                 (* Make sure the function returns! *)
                                 let (ret, _, typeCheckedBlock) = 
-                                  tc_statements funcVarMap 
+                                  tc_statements funcName funcVarMap 
                                   funcBody (lowestTypedefType fType) false [] in
                                  if ((not ret) && (not (funcType = VOID))) then
                                   (ErrorMsg.error ("non-void functions must return \n");
@@ -233,7 +233,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                  (* Make sure the function returns! *)
                                  let newFuncParams = List.map(fun (t,i) -> (lowestTypedefType t, i)) funcParams in
                                  let (ret, _, typeCheckedFuncBody) = 
-                                   tc_statements funcVarMap 
+                                   tc_statements funcName funcVarMap 
                                    funcBody (lowestTypedefType funcType) false [] in
                                  if ((not ret) && (not (funcType = VOID))) then
                                   (ErrorMsg.error ("non-void functions must return \n");
@@ -242,7 +242,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                                   let newFuncName = "_c0_" ^ funcName in
                                   tc_prog gdecls (TypedPostElabFunDef(lowestTypedefType funcType, newFuncName, 
                                   newFuncParams, List.rev typeCheckedFuncBody)::typedAST))))
-               | UntypedPostElabTypedef(typeDefType, typeDefName) -> 
+               | A.UntypedPostElabTypedef(typeDefType, typeDefName) -> 
                     if (isNestedVoidPtr typeDefType) then
                     (ErrorMsg.error ("can't typedef voids\n");
                      raise ErrorMsg.Error)
@@ -254,7 +254,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                             tc_prog gdecls typedAST
                         | _ -> (ErrorMsg.error ("cannot shadow previously declared typedef/func names \n");
                                 raise ErrorMsg.Error))
-               | UntypedPostElabFuncTypedef(retType, name, params) ->
+               | A.UntypedPostElabFuncTypedef(retType, name, params) ->
                    (match (M.find !typedefMap name, M.find !functionMap name) with
                       (None, None) ->             
                         let paramTypes = List.map (fun (t,i) -> lowestTypedefType t) params in
@@ -264,14 +264,14 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
                      | _ -> 
                         (ErrorMsg.error ("cannot shadow previously declared typedef/func names \n");
                           raise ErrorMsg.Error))
-               | UntypedPostElabStructDecl(structName) ->
+               | A.UntypedPostElabStructDecl(structName) ->
                    (match M.find !structMap structName with
                           None -> 
                             let () = structMap := M.add !structMap structName (ref Core.Std.String.Map.empty, false) in
                             tc_prog gdecls typedAST
                         | _ -> tc_prog gdecls typedAST) (* (ErrorMsg.error ("redeclaring struct " ^ structName ^ "\n");
                                 raise ErrorMsg.Error) *)
-               | UntypedPostElabStructDef(structName, fields) ->
+               | A.UntypedPostElabStructDef(structName, fields) ->
                    let nameTable = Core.Std.String.Map.empty in
                    if (not (uniqueFieldNames fields nameTable) || not (areStructFieldsWellDefined fields)) then 
                       (ErrorMsg.error ("bad field names/field is void or a struct that hasn't been defined \n");
@@ -300,7 +300,7 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
 
 (* varMap is the map of variables within the function body *) 
 (* funcRetType is the return type of the function *)         
-and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0type)
+and tc_statements (fName : ident) varMap (untypedBlock : A.untypedPostElabBlock) (funcRetType : c0type)
                           (ret : bool) (typedBlock : typedPostElabBlock) =
   match untypedBlock with
     [] -> (ret, varMap, typedBlock)
@@ -330,7 +330,7 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
             | _ -> 
               (match (M.find !typedefMap id, M.find varMap id) with
                  (None, None) -> 
-                    let newTypedAST = (TypedPostElabAssignStmt(TypedPostElabVarLVal(id), EQ, tcExpr)
+                    let newTypedAST = (TypedPostElabAssignStmt(TypedPostElabVarLVal(id), A.EQ, tcExpr)
                                     :: TypedPostElabDecl(id, actualDeclType)
                                     :: typedBlock) in
                     if matchTypes actualDeclType exprType then
@@ -368,16 +368,14 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
            then
              tc_statements fName newVarMap stms funcRetType ret
              ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-           else if isAlpha lvalType && not isAlpha exprType (* apply type of RHS to LHS *)
+           else if isAlpha lvalType && not (isAlpha exprType) (* apply type of RHS to LHS *)
            then 
              tc_statements fName newVarMap stms funcRetType ret
              ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::(TypedPostElabDecl(id, exprType))::typedBlock)
-           else if not isAlpha lvalType && isAlpha exprType (* apply type of LHS to RHS *)
+           else if not (isAlpha lvalType) && isAlpha exprType (* apply type of LHS to RHS *)
            then
-             (match tcExpr with
-                AlphaExpr(aExpr) ->
-                  tc_statements fName newVarMap stms funcRetType ret
-                  (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr lvalType)::typedBlock))
+             tc_statements fName newVarMap stms funcRetType ret
+             (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr tcExpr lvalType)::typedBlock)
            else if isAlpha lvalType && isAlpha exprType (* both sides have type alpha *)
            then
              tc_statements fName newVarMap stms funcRetType ret
@@ -385,22 +383,20 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
            else (* non-matching types *)
              (ErrorMsg.error ("types don't match\n"); raise ErrorMsg.Error)
        | _ -> (* LHS is a struct field access, array access, or pointer dereference *)
-           (match OP with
-              EQ -> 
+           (match op with
+              A.EQ -> 
                 if matchTypes (lowestTypedefType lvalType) exprType && notAStruct exprType
                 then
                   tc_statements fName varMap stms funcRetType ret 
                   (TypedPostElabAssignStmt(typedLVal, op, tcExpr)::typedBlock)
-                else if isAlpha lvalType && not isAlpha exprType (* apply type of RHS to LHS *)
+                else if isAlpha lvalType && not (isAlpha exprType) (* apply type of RHS to LHS *)
                 then 
                   tc_statements fName varMap stms funcRetType ret 
                   ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                else if not isAlpha lvalType && isAlpha exprType (* apply type of LHS to RHS *)
+                else if not (isAlpha lvalType) && isAlpha exprType (* apply type of LHS to RHS *)
                 then
-                  (match tcExpr with
-                     AlphaExpr(aExpr) -> 
-                        tc_statements fName varMap stms funcRetType ret 
-                        (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr lvalType)::typedBlock))
+                  tc_statements fName varMap stms funcRetType ret
+                  (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr tcExpr lvalType)::typedBlock)
                 else if isAlpha lvalType && isAlpha exprType (* both sides have type alpha *)
                 then
                   tc_statements fName varMap stms funcRetType ret 
@@ -410,26 +406,22 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
              | _ -> (* other assignOps only work with intExprs, therefore LHS and RHS must become intExprs *)
                  if matchTypes (lowestTypedefType lvalType) exprType && lvalType = INT
                  then 
-                   tc_statements fName newVarMap stms funcRetType ret 
+                   tc_statements fName varMap stms funcRetType ret 
                    (TypedPostElabAssignStmt(typedLVal, op, tcExpr)::typedBlock)
-                 else if isAlpha lvalType && not isAlpha exprType (* LHS must have type INT now *)
+                 else if isAlpha lvalType && not (isAlpha exprType) (* LHS must have type INT now *)
                  then 
                    tc_statements fName varMap stms funcRetType ret 
                    ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                 else if not isAlpha lvalType && isAlpha exprType (* RHS must have type INT now *)
+                 else if not (isAlpha lvalType) && isAlpha exprType (* RHS must have type INT now *)
                  then 
-                   (match tcExpr with
-                     AlphaExpr(aExpr) -> 
-                        tc_statements fName varMap stms funcRetType ret 
-                        (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr INT)::typedBlock))
+                   tc_statements fName varMap stms funcRetType ret
+                   (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr tcExpr INT)::typedBlock)
                  else if isAlpha lvalType && isAlpha exprType (* Both sides must have type INT now *)
                  then
-                   (match tcExpr with
-                      AlphaExpr(aExpr) ->  
-                        tc_statements fName varMap stms funcRetType ret 
-                        ((TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr INT))::typedBlock))
+                   tc_statements fName varMap stms funcRetType ret
+                   ((TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr tcExpr INT))::typedBlock)
                  else (* nonmatching types *)
-                   (ErrorMsg.error ("non-intExpr on either side of op\n"); raise ErrorMsg.Error))
+                   (ErrorMsg.error ("non-intExpr on either side of op\n"); raise ErrorMsg.Error)))
 
           
   | A.UntypedPostElabIf(e, block1, block2)::stms -> 
@@ -475,9 +467,9 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
         ((TypedPostElabReturn(tcExpr)) :: typedBlock) 
       else 
         let Some(fType, x, y, z) = M.find !functionMap fName in
-        if isAlpha fType && not isAlpha exprType 
+        if isAlpha fType && not (isAlpha exprType)
         then
-          let () = functionMap := M.add !functionMap (exprType,x,y,z) in
+          let () = functionMap := M.add !functionMap fName (exprType,x,y,z) in
           tc_statements fName newVarMap stms funcRetType true 
           ((TypedPostElabReturn(tcExpr)) :: typedBlock)
         else
@@ -510,9 +502,9 @@ and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (
           (match tcExpr with
              VoidExpr(stmt) -> tc_statements fName varMap stms funcRetType ret (stmt :: typedBlock)
            | _ -> tc_statements fName varMap stms funcRetType ret 
-                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock))))
+                  (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), A.EQ, tcExpr) :: typedBlock)))
        
-and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =
+and typecheck ((untypedProgAST, untypedHeaderAST) : A.untypedPostElabOverallAST) =
   
   let typedHeaderAST = tc_header untypedHeaderAST [] in
   (* the main function is considered to always be declared at the top of the main file!
