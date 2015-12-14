@@ -126,8 +126,9 @@ rule initial =
   | "bool"        { P.BOOL }
   | "string"      { P.STRING }
   | "char"        { P.CHAR }
-  | alpha as a    { P.ALPHA (Core.Std.Int.of_string
-                               (String.sub a 5 (String.length a - 5))) }
+  | alpha as a    { let alphaIndex = (Core.Std.Int.of_string
+                               (String.sub a 5 (String.length a - 5))) in
+                    let () = assert(alphaIndex >= 0) in P.ALPHA alphaIndex}
                      (* gets everything after the "alpha" *)
   | "void"        { P.VOID }
 

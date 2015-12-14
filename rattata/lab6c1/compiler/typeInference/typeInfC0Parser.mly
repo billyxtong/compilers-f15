@@ -76,7 +76,7 @@ let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *
     Char.to_int (String.get c 1) (* just use the ascii integer code *)
 
 let alphaIndex = ref 0		
-let newAlphaIndex () = alphaIndex := !alphaIndex + 1; !alphaIndex		
+let newAlphaIndex () = alphaIndex := !alphaIndex - 1; !alphaIndex		
 %}
 
 %token EOF
