@@ -74,7 +74,9 @@ let charStringToAscii c = (* because the char 'a' is actually the string "'a'" *
     then matchSpecialChar c else   
     let () = assert(String.get c 0 = '\'' && String.get c 2 = '\'') in
     Char.to_int (String.get c 1) (* just use the ascii integer code *)
-	       
+
+let alphaIndex = ref 0		
+let newAlphaIndex () = alphaIndex := !alphaIndex + 1; !alphaIndex		
 %}
 
 %token EOF
@@ -152,11 +154,11 @@ gdecl :
 
 fdecl :
     c0type VAR_IDENT paramlist SEMI    { A.FunDecl ($1, $2, $3) }
-    VAR_IDENT paramlist SEMI    { A.FunDecl (D.Alpha, $2, $3) }
+  | VAR_IDENT paramlist SEMI    { A.FunDecl (D.Alpha (newAlphaIndex ()), $1, $2) }
 
 fdefn :
     c0type VAR_IDENT paramlist block { A.FunDef ($1, $2, $3, $4) }
-    VAR_IDENT paramlist block { A.FunDef (D.Alpha, $2, $3, $4) }
+  | VAR_IDENT paramlist block { A.FunDef (D.Alpha (newAlphaIndex ()), $1, $2, $3) }
 
 typedef :
     TYPEDEF c0type VAR_IDENT SEMI    { let () = H.add
@@ -187,7 +189,7 @@ fieldlist :
 	    
 param :
     c0type VAR_IDENT            { ($1, $2) }
-    VAR_IDENT                   { (D.Alpha, $2) }
+  | VAR_IDENT                   { (D.Alpha (newAlphaIndex ()), $1) }
 
 paramlistfollow :
     /* empty */             { [] }

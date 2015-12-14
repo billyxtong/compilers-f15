@@ -126,7 +126,8 @@ rule initial =
   | "bool"        { P.BOOL }
   | "string"      { P.STRING }
   | "char"        { P.CHAR }
-  | alpha as a    { P.ALPHA (Int.of_string (String.sub a 5 (String.length a - 5))) }
+  | alpha as a    { P.ALPHA (Core.Std.Int.of_string
+                               (String.sub a 5 (String.length a - 5))) }
                      (* gets everything after the "alpha" *)
   | "void"        { P.VOID }
 
