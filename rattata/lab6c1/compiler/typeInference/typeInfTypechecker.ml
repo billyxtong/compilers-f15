@@ -17,6 +17,10 @@ let isAlpha t =
     Alpha _ -> true
    |_ -> false
 
+
+
+
+
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
 let rec tc_header (header : A.untypedPostElabAST) (typedAST : typedPostElabAST) = 
   match header with
@@ -518,6 +522,3 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : A.untypedPostElabOverallAST)
   let typedProgAST = tc_prog untypedProgAST [] in
   List.rev (typedProgAST @ typedHeaderAST)
 
-(* Note: please check all of the typing rules for structs, becayse they're
-   pretty complicated. Check out the lecture notes on structs, as well
-   as the handout. *)

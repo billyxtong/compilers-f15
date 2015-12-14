@@ -144,7 +144,7 @@ let rec areAnyFuncParamsStructs (l : A.param list) =
                  Struct(_) -> true
                | _ -> areAnyFuncParamsStructs ps)
 
-let applyTypeToAlphaExpr (AlphaExpr(AlphaSharedExpr(expr))) t =
+let rec applyTypeToAlphaExpr (AlphaExpr(AlphaSharedExpr(expr))) t =
   match expr with
     Ident(i) ->
       (match t with
@@ -153,8 +153,27 @@ let applyTypeToAlphaExpr (AlphaExpr(AlphaSharedExpr(expr))) t =
         |CHAR -> CharExpr(CharSharedExpr(Ident(i)))
         |STRING -> StringExpr(StringSharedExpr(Ident(i)))
         |_ -> assert(false))
-  | _ -> assert(false)
-
+  | FunCall(i,args) -> 
+      (match t with
+         INT -> IntExpr(IntSharedExpr(FunCall(i,args)))
+        |BOOL -> BoolExpr(BoolSharedExpr(FunCall(i,args)))
+        |CHAR -> CharExpr(CharSharedExpr(FunCall(i,args)))
+        |STRING -> StringExpr(StringSharedExpr(FunCall(i,args)))
+        |_ -> assert(false))
+  | Ternary(b,e1,e2) -> 
+      (match t with
+         INT -> IntExpr(IntSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
+        |BOOL -> BoolExpr(BoolSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
+        |CHAR -> CharExpr(CharSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
+        |STRING -> StringExpr(StringSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
+        |_ -> assert(false))
+  | _ -> assert(false) (* We should be allowing function pointer calls and derefs, 
+                          but our current constructors disallow this and I don't want to 
+                          worry about it yet. Field accesses should only have type Alpha _
+                          if two structs have the same field name and type and array 
+                          accesses if we don't know the type of the array beforehand. 
+                          Both of these would only happen if you pass the struct or array
+                          as a parameter to a function. *)
 
 let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
