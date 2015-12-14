@@ -1,7 +1,6 @@
 (* L6 Compiler
- * TypeChecker
+ * TypeChecker for Type Inference
  * Authors: Ben Plaut, William Tong
- * Handles undefined variables in unreachable code, significant simplifications
  *)
 
 open Ast
@@ -301,12 +300,12 @@ let rec tc_prog (prog : untypedPostElabAST) (typedAST : typedPostElabAST) =
 
 (* varMap is the map of variables within the function body *) 
 (* funcRetType is the return type of the function *)         
-and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0type)
+and tc_statements (fName : ident) varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0type)
                           (ret : bool) (typedBlock : typedPostElabBlock) =
   match untypedBlock with
     [] -> (ret, varMap, typedBlock)
   | A.UntypedPostElabBlock(blockStmts)::stmts ->
-      let (blockRet, blockVarMap, blockBlock) = tc_statements varMap blockStmts funcRetType ret [] in
+      let (blockRet, blockVarMap, blockBlock) = tc_statements fName varMap blockStmts funcRetType ret [] in
       let newRet = (ret || blockRet) in
       (* We have returned if we return otherwise, or if the block returns *)
       (* Declarations from the block don't count, but initializations do,
@@ -315,7 +314,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
             (match M.find blockVarMap id with
                 Some (typee, isInit) -> (typee, isInit)
               | None -> assert(false) (* everything in varMap should be in blockVarMap *)))) in
-      tc_statements newVarMap stmts funcRetType newRet (blockBlock @ typedBlock)
+      tc_statements fName newVarMap stmts funcRetType newRet (blockBlock @ typedBlock)
   | A.UntypedPostElabInitDecl(id, typee, e)::stms ->
       (* necessary for statements of the form "int f = f();" *)
        (let (tcExpr, exprType) = tc_expression varMap e in
@@ -336,8 +335,7 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                                     :: typedBlock) in
                     if matchTypes actualDeclType exprType then
                       let newVarMap = M.add varMap id (actualDeclType, true) in 
-                      tc_statements newVarMap 
-                      stms funcRetType ret newTypedAST
+                      tc_statements fName newVarMap stms funcRetType ret newTypedAST
                     else (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(actualDeclType) ^"\nRHS type: "
                                     ^ c0typeToString(exprType));
                           raise ErrorMsg.Error)
@@ -356,79 +354,106 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                       Struct(_) -> (ErrorMsg.error ("vars can't be structs\n");
                                     raise ErrorMsg.Error)
                     | _ -> let newVarMap = M.add varMap id (actualType, false) in 
-                 tc_statements newVarMap 
-                 stms funcRetType ret ((TypedPostElabDecl(id, actualType)) :: typedBlock)))
+                 tc_statements fName newVarMap stms funcRetType ret 
+                 ((TypedPostElabDecl(id, actualType)) :: typedBlock)))
            | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
                    raise ErrorMsg.Error))
   | A.UntypedPostElabAssignStmt(lval, op, e)::stms ->
-       (let (tcExpr, exprType) = tc_expression varMap e in
-        let (typedLVal, lvalType) = tc_lval varMap lval in
-        if matchTypes (lowestTypedefType lvalType) exprType && notAStruct exprType
-        then
-          (match op with
-                 EQ -> 
-                   (match typedLVal with
-                      (* we don't have to add lvals to our varMap unless they are vars *)
-                      TypedPostElabVarLVal(id) -> 
-                        let newVarMap = M.add varMap id (lvalType, true) in
-                        tc_statements newVarMap stms 
-                        funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                    | _ -> 
-                       tc_statements varMap stms 
-                       funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock))
-               | _ -> 
-                  (match typedLVal with
-                      TypedPostElabVarLVal(id) -> 
-                        (match M.find varMap id with
-                               Some(typee, isInit) -> 
-                                 if isInit && typee = INT
-                                 then 
-                                   tc_statements varMap stms 
-                                   funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                                 else if isAlpha t then  
-                                   
-                                   
-                                   
-                                   
-                                   
-                                   
-                                   
-                                   (ErrorMsg.error ("wrong type or lval uninitialized\n");
-                                       raise ErrorMsg.Error)
-                             | _ -> (ErrorMsg.error ("lval undeclared\n");
-                                     raise ErrorMsg.Error))
-                    | _ -> 
-                        if lvalType = INT
-                        then tc_statements varMap stms 
-                          funcRetType ret ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
-                        else (ErrorMsg.error ("can't use int assignOp on non-int expr\n");
-                              raise ErrorMsg.Error)))
-        else
-        (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(lvalType) ^ "\nRHS type: " ^ c0typeToString(exprType) ^ "\n");
-                               raise ErrorMsg.Error))
+      let (typedLVal, lvalType) = tc_lval varMap lval in
+      let (tcExpr, exprType) = tc_expression varMap e in
+      (match typedLVal with
+         TypedPostElabVarLVal(id) -> (* LHS is a variable *)
+           let newVarMap = M.add varMap id (lvalType, true) in
+           if matchTypes (lowestTypedefType lvalType) exprType && notAStruct exprType
+           then
+             tc_statements fName newVarMap stms funcRetType ret
+             ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+           else if isAlpha lvalType && not isAlpha exprType (* apply type of RHS to LHS *)
+           then 
+             tc_statements fName newVarMap stms funcRetType ret
+             ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::(TypedPostElabDecl(id, exprType))::typedBlock)
+           else if not isAlpha lvalType && isAlpha exprType (* apply type of LHS to RHS *)
+           then
+             (match tcExpr with
+                AlphaExpr(aExpr) ->
+                  tc_statements fName newVarMap stms funcRetType ret
+                  (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr lvalType)::typedBlock))
+           else if isAlpha lvalType && isAlpha exprType (* both sides have type alpha *)
+             tc_statements fName newVarMap stms funcRetType ret
+             ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+           else (* non-matching types *)
+             (ErrorMsg.error ("types don't match\n"); raise ErrorMsg.Error)
+       | _ -> (* LHS is a struct field access, array access, or pointer dereference *)
+           (match OP with
+              EQ -> 
+                if matchTypes (lowestTypedefType lvalType) exprType && notAStruct exprType
+                then
+                  tc_statements fName varMap stms funcRetType ret 
+                  (TypedPostElabAssignStmt(typedLVal, op, tcExpr)::typedBlock)
+                else if isAlpha lvalType && not isAlpha exprType (* apply type of RHS to LHS *)
+                then 
+                  tc_statements fName varMap stms funcRetType ret 
+                  ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+                else if not isAlpha lvalType && isAlpha exprType (* apply type of LHS to RHS *)
+                then
+                  (match tcExpr with
+                     AlphaExpr(aExpr) -> 
+                        tc_statements fName varMap stms funcRetType ret 
+                        (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr lvalType)::typedBlock))
+                else if isAlpha lvalType && isAlpha exprType (* both sides have type alpha *)
+                then
+                  tc_statements fName varMap stms funcRetType ret 
+                  ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+                else (* nonmatching types *)
+                  (ErrorMsg.error ("types don't match\n"); raise ErrorMsg.Error)
+             | _ -> (* other assignOps only work with intExprs, therefore LHS and RHS must become intExprs *)
+                 if matchTypes (lowestTypedefType lvalType) exprType && lvalType = INT
+                 then 
+                   tc_statements fName newVarMap stms funcRetType ret 
+                   (TypedPostElabAssignStmt(typedLVal, op, tcExpr)::typedBlock)
+                 else if isAlpha lvalType && not isAlpha exprType (* LHS must have type INT now *)
+                 then 
+                   tc_statements fName varMap stms funcRetType ret 
+                   ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
+                 else if not isAlpha lvalType && isAlpha exprType (* RHS must have type INT now *)
+                 then 
+                   (match tcExpr with
+                     AlphaExpr(aExpr) -> 
+                        tc_statements fName varMap stms funcRetType ret 
+                        (TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr INT)::typedBlock))
+                 else if isAlpha lvalType && isAlpha exprType (* Both sides must have type INT now *)
+                 then
+                   (match tcExpr with
+                      AlphaExpr(aExpr) ->  
+                        tc_statements fName varMap stms funcRetType ret 
+                        ((TypedPostElabAssignStmt(typedLVal, op, applyTypeToAlphaExpr aExpr INT))::typedBlock))
+                 else (* nonmatching types *)
+                   (ErrorMsg.error ("non-intExpr on either side of op\n"); raise ErrorMsg.Error))
+
+          
   | A.UntypedPostElabIf(e, block1, block2)::stms -> 
       let (tcExpr, _) = tc_expression varMap e in
       (match tcExpr with
              BoolExpr(exp1) -> 
-               let (ret1, varMap1, tcBlock1) = tc_statements varMap block1 funcRetType ret [] in
-               let (ret2, varMap2, tcBlock2) = tc_statements varMap block2 funcRetType ret [] in
+               let (ret1, varMap1, tcBlock1) = tc_statements fName varMap block1 funcRetType ret [] in
+               let (ret2, varMap2, tcBlock2) = tc_statements fName varMap block2 funcRetType ret [] in
                let newret = if ret then ret else (ret1 && ret2) in
                let newVarMap = M.mapi varMap (fun ~key:id -> (fun ~data:value ->
                                              (match (M.find varMap1 id, M.find varMap2 id) with
                                                     (Some (typee1, isInit1), Some (typee2, isInit2)) -> 
                                                                 (typee1, isInit1 && isInit2)
                                                   | (_, _) -> value))) in
-               tc_statements newVarMap stms funcRetType newret 
+               tc_statements fName newVarMap stms funcRetType newret 
                ((TypedPostElabIf(exp1, List.rev tcBlock1, List.rev tcBlock2)) :: typedBlock)
            | _ -> ErrorMsg.error ("if expression didn't typecheck\n");
                   raise ErrorMsg.Error)
   | A.UntypedPostElabWhile(e, block1, untypedInitBlock)::stms -> 
-      let (_, newVarMap2, tcBlock2) = tc_statements varMap untypedInitBlock funcRetType ret [] in
+      let (_, newVarMap2, tcBlock2) = tc_statements fName varMap untypedInitBlock funcRetType ret [] in
       let (tcExpr, _) = tc_expression newVarMap2 e in
       (match tcExpr with
              BoolExpr(exp1) ->                
-               let (_, _, tcBlock1) = tc_statements newVarMap2 block1 funcRetType ret [] in
-               tc_statements varMap stms funcRetType ret 
+               let (_, _, tcBlock1) = tc_statements fName newVarMap2 block1 funcRetType ret [] in
+               tc_statements fName varMap stms funcRetType ret 
                ((TypedPostElabWhile(exp1, List.rev tcBlock1)) :: (tcBlock2 @ typedBlock))
            | _ -> ErrorMsg.error ("while expression didn't typecheck\n");
                   raise ErrorMsg.Error)
@@ -444,24 +469,35 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
          after don't *)
       let newVarMap = M.map varMap (fun (typee, _) -> (typee, true)) in
       if matchTypes funcRetType (lowestTypedefType exprType) 
-      then tc_statements newVarMap 
-          stms funcRetType true ((TypedPostElabReturn(tcExpr)) :: typedBlock) 
-      else (ErrorMsg.error ("return expr not same as func ret type\n");
+      then 
+        tc_statements fName newVarMap stms funcRetType true 
+        ((TypedPostElabReturn(tcExpr)) :: typedBlock) 
+      else 
+        let Some(fType, x, y, z) = M.find !functionMap fName in
+        if isAlpha fType && not isAlpha exprType 
+        then
+          let () = functionMap := M.add !functionMap (exprType,x,y,z) in
+          tc_statements fName newVarMap stms funcRetType true 
+          ((TypedPostElabReturn(tcExpr)) :: typedBlock)
+        else
+          (ErrorMsg.error ("return expr not same as func ret type\n");
             raise ErrorMsg.Error)      
   | A.UntypedPostElabVoidReturn::stms ->
       (* Same as above, variables declared are treated as initalized in
          unreachable code... *)
       let newVarMap = M.map varMap (fun (typee, _) -> (typee, true)) in
       (match funcRetType with
-             VOID -> tc_statements newVarMap 
-                     stms funcRetType true (TypedPostElabVoidReturn :: typedBlock)
+             VOID -> 
+               tc_statements fName newVarMap stms funcRetType true 
+               (TypedPostElabVoidReturn :: typedBlock)
            | _ -> (ErrorMsg.error ("non-void function must return non-void value \n");
                   raise ErrorMsg.Error))
   | A.UntypedPostElabAssert(e)::stms ->
       let (tcExpr, _) = tc_expression varMap e in
       (match tcExpr with
-             BoolExpr(expr1) -> tc_statements varMap 
-                                stms funcRetType ret (TypedPostElabAssert(expr1) :: typedBlock)
+             BoolExpr(expr1) -> 
+               tc_statements fName varMap stms funcRetType ret 
+               (TypedPostElabAssert(expr1) :: typedBlock)
            | _ -> (ErrorMsg.error ("assert must have bool expr\n");
                   raise ErrorMsg.Error))
   | A.UntypedPostElabExprStmt(e)::stms ->
@@ -471,10 +507,9 @@ and tc_statements varMap (untypedBlock : untypedPostElabBlock) (funcRetType : c0
                           raise ErrorMsg.Error) 
           | _ ->
       (match tcExpr with
-             VoidExpr(stmt) -> tc_statements varMap 
-                               stms funcRetType ret (stmt :: typedBlock)
-           | _ -> tc_statements varMap 
-                  stms funcRetType ret 
+             VoidExpr(stmt) -> 
+               tc_statements fName varMap stms funcRetType ret (stmt :: typedBlock)
+           | _ -> tc_statements fName varMap stms funcRetType ret 
                   (TypedPostElabAssignStmt(TypedPostElabVarLVal(GenUnusedID.create()), EQ, tcExpr) :: typedBlock)))
        
 and typecheck ((untypedProgAST, untypedHeaderAST) : untypedPostElabOverallAST) =

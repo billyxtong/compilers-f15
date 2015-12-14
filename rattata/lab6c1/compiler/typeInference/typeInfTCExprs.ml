@@ -11,13 +11,12 @@ let alphaCount = ref 0
 let declaredAndUsedButUndefinedFunctionTable = H.create 5
 type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
 let functionMap = ref Core.Std.String.Map.empty
-let typedefMap = ref Core.Std.String.Map.empty 
-(* maps typedef'd function name types to their return type and arg types *)
+let typedefMap = ref Core.Std.String.Map.empty
 let (structMap : (mytype Core.Std.String.Map.t) ref) = 
   ref (Core.Std.String.Map.empty)
 
 let isValidVarDecl (identifier : ident) =
-  if sub identifier 0 1 = "\\" then true else false                 
+  if sub identifier 0 1 = "\\" then true else false 
 
 let rec lowestTypedefType (typedefType) =
   match typedefType with
@@ -41,7 +40,7 @@ let rec addTypeToSharedExpr e = function
   | FuncPrototype _ -> PtrExpr (PtrSharedExpr e)
   | Poop -> PtrExpr (PtrSharedExpr e)
   | TypedefType t -> addTypeToSharedExpr e (lowestTypedefType (TypedefType t))
-  | Struct _ -> PtrExpr (PtrSharedExpr e)                         
+  | Struct _ -> PtrExpr (PtrSharedExpr e)
 
 let notAStruct (t : c0type) =
   match lowestTypedefType t with
@@ -64,8 +63,8 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
            name1 == name2 && matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2
       | (FuncPrototype(Some name1, retType1, argTypes1), FuncPrototype(None, retType2, argTypes2)) ->
           matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2 (* binop_fn* f = &foo; *)
-      | (_, Alpha _) -> true
-      | (Alpha _, _) -> true
+      (*| (_, Alpha _) -> true
+      | (Alpha _, _) -> true *)
       | _ -> false
 
 and argsMatch (argTypes : c0type list) (paramTypes : c0type list) =
@@ -143,6 +142,18 @@ let rec areAnyFuncParamsStructs (l : param list) =
                  Struct(_) -> true
                | _ -> areAnyFuncParamsStructs ps)
 
+let applyTypeToAlphaExpr (AlphaSharedExpr(expr)) t =
+  match expr with
+    Ident(i) ->
+      (match t with
+         INT -> IntSharedExpr(Ident(i))
+        |BOOL -> BoolSharedExpr(Ident(i))
+        |CHAR -> CharSharedExpr(Ident(i))
+        |STRING -> StringSharedExpr(Ident(i))
+        |_ -> assert(false))
+  | _ -> assert(false)
+
+
 let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabExpr * c0type =
   match expression with
     UntypedPostElabConstExpr (constant, typee) ->
@@ -185,59 +196,59 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       (match op with
              GT -> (match (tcExpr1, tcExpr2) with
                           (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntGreaterThan(exp1, exp2)), BOOL)
-                        | (IntExpr(exp1), AlphaExpr(exp2)) -> ""
-                        | (AlphaExpr(exp1), IntExpr(exp2)) -> ""                      
+                        | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                        | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false) 
                         | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharGreaterThan(exp1, exp2)), BOOL)
-                        | (CharExpr(exp1), AlphaExpr(exp2)) -> ""
-                        | (AlphaExpr(exp1), CharExpr(exp2)) -> ""
-                        | (AlphaExpr(exp1), AlphaExpr(exp2)) -> ""
+                        | (CharExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                        | (AlphaExpr(exp1), CharExpr(exp2)) -> assert(false)
+                        | (AlphaExpr(exp1), AlphaExpr(exp2)) -> assert(false)
                         | _ -> (ErrorMsg.error ("greater than expression didn't typecheck \n");
                                raise ErrorMsg.Error))
            | LT -> (match (tcExpr1, tcExpr2) with
                           (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntLessThan(exp1, exp2)), BOOL)
-                        | (IntExpr(exp1), AlphaExpr(exp2)) -> ""
-                        | (AlphaExpr(exp1), IntExpr(exp2)) -> ""
+                        | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                        | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false)
                         | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharLessThan(exp1, exp2)), BOOL)
-                        | (CharExpr(exp1), AlphaExpr(exp2)) -> ""
-                        | (AlphaExpr(exp1), CharExpr(exp2)) -> ""
-                        | (AlphaExpr(exp1), AlphaExpr(exp2)) -> ""
+                        | (CharExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                        | (AlphaExpr(exp1), CharExpr(exp2)) -> assert(false)
+                        | (AlphaExpr(exp1), AlphaExpr(exp2)) -> assert(false)
                         | _ -> (ErrorMsg.error ("less than expression didn't typecheck \n");
                                raise ErrorMsg.Error))
            | DOUBLE_EQ ->
                (match (tcExpr1, tcExpr2) with
                   (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntEquals(exp1, exp2)), BOOL)
-                | (IntExpr(exp1), AlphaExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), IntExpr(exp2)) -> ""
+                | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false)
                 | (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(BoolEquals(exp1, exp2)), BOOL)
-                | (BoolExpr(exp1), AlphaExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), BoolExpr(exp2)) -> ""
+                | (BoolExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), BoolExpr(exp2)) -> assert(false)
                 | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharEquals(exp1, exp2)), BOOL)
-                | (CharExpr(exp1), AlphaExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), CharExpr(exp2)) -> ""
+                | (CharExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), CharExpr(exp2)) -> assert(false)
                 | (PtrExpr(exp1), PtrExpr(exp2)) -> 
                     if matchTypes type1 type2 && 
                        notAStruct type1 && notAStruct type2 then
                     (BoolExpr(PtrEquals(exp1, exp2)), BOOL)
                     else (ErrorMsg.error ("different typed ptrExprs\n");
                        raise ErrorMsg.Error)
-                | (PtrExpr(exp1), AlphaExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), PtrExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), AlphaExpr(exp2)) -> ""
+                | (PtrExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), PtrExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), AlphaExpr(exp2)) -> assert(false)
                 | _ -> 
                   (ErrorMsg.error ("double eq exprs didn't typecheck \n");
                      raise ErrorMsg.Error))
            | LOG_AND -> 
                (match (tcExpr1, tcExpr2) with
                   (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(LogAnd(exp1, exp2)), BOOL)
-                | (BoolExpr(exp1), AlphaExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), BoolExpr(exp2)) -> ""
+                | (BoolExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), BoolExpr(exp2)) -> assert(false)
                 | _ -> (ErrorMsg.error ("logical and exprs didn't typecheck \n");
                          raise ErrorMsg.Error))
            | IntBinop(intOp) -> 
                (match (tcExpr1, tcExpr2) with
                   (IntExpr(exp1), IntExpr(exp2)) -> (IntExpr(ASTBinop(exp1, intOp, exp2)), INT)
-                | (IntExpr(exp1), AlphaExpr(exp2)) -> ""
-                | (AlphaExpr(exp1), IntExpr(exp2)) -> ""
+                | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
+                | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false)
                 | _ -> 
                   (ErrorMsg.error ("int binop expressions didn't typecheck \n");
                     raise ErrorMsg.Error)))
@@ -245,7 +256,7 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
       let (tcExpr,t) = tc_expression varEnv e' in
       (match tcExpr with
              BoolExpr(exp1) -> (BoolExpr(LogNot(exp1)), BOOL)
-           | AlphaExpr(exp1) -> ""
+           | AlphaExpr(exp1) -> assert(false)
            | _ -> (ErrorMsg.error ("not expression didn't typecheck \n");
                   raise ErrorMsg.Error))
   | UntypedPostElabTernary(e1, e2, e3) ->
@@ -256,17 +267,19 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
          BoolExpr(exp1) ->
            (match (tcExpr2, tcExpr3) with
               (IntExpr(_), IntExpr(_)) -> (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), INT)
-            | (IntExpr(exp1), AlphaExpr(exp2)) -> ""
-            | (AlphaExpr(exp1), IntExpr(exp2)) -> ""
+            | (IntExpr(_), AlphaExpr(exp3)) -> 
+                (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, IntExpr(applyTypeToAlphaExpr exp3 INT)))), INT)
+            | (AlphaExpr(exp2), IntExpr(_)) -> 
+                (IntExpr(IntSharedExpr(Ternary(exp1, IntExpr(applyTypeToAlphaExpr exp2 INT), tcExpr3))), INT)
             | (BoolExpr(_), BoolExpr(_)) -> (BoolExpr(BoolSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), BOOL)
-            | (BoolExpr(exp1), AlphaExpr(exp2)) -> ""
-            | (AlphaExpr(exp1), BoolExpr(exp2)) -> ""
+            | (BoolExpr(_), AlphaExpr(exp3)) -> assert(false) 
+            | (AlphaExpr(exp2), BoolExpr(_)) -> assert(false) 
             | (CharExpr(_), CharExpr(_)) -> (CharExpr(CharSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), CHAR)
-            | (CharExpr(exp1), AlphaExpr(exp2)) -> ""
-            | (AlphaExpr(exp1), CharExpr(exp2)) -> ""
+            | (CharExpr(_), AlphaExpr(exp3)) -> assert(false)
+            | (AlphaExpr(exp2), CharExpr(_)) -> assert(false)
             | (StringExpr(_), StringExpr(_)) -> (StringExpr(StringSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), STRING)
-            | (StringExpr(exp1), AlphaExpr(exp2)) -> ""
-            | (AlphaExpr(exp1), StringExpr(exp2)) -> ""
+            | (StringExpr(_), AlphaExpr(exp3)) -> assert(false)
+            | (AlphaExpr(exp2), StringExpr(_)) -> assert(false)
             | (PtrExpr(_), PtrExpr(_)) ->
                 if matchTypes type2 type3 && typeNotLarge type2 && typeNotLarge type3
                 then
@@ -280,9 +293,9 @@ let rec tc_expression varEnv (expression : untypedPostElabExpr) : typedPostElabE
                 else
                   (ErrorMsg.error ("pointer exprs in ternary have diff. types\n");
                   raise ErrorMsg.Error)
-            | (PtrExpr(exp1), AlphaExpr(exp2)) -> ""
-            | (AlphaExpr(exp1), PtrExpr(exp2)) -> ""
-            | (AlphaExpr(exp1), AlphaExpr(exp2)) -> ""
+            | (PtrExpr(_), AlphaExpr(exp3)) -> assert(false)
+            | (AlphaExpr(exp2), PtrExpr(_)) -> assert(false)
+            | (AlphaExpr(exp2), AlphaExpr(exp3)) -> assert(false)
             | _ -> (ErrorMsg.error ("exprs in ternary have diff. types\n");
                     raise ErrorMsg.Error))
        | _ -> (ErrorMsg.error ("ternary expression didn't typecheck \n");
