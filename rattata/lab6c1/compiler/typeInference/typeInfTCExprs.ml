@@ -143,7 +143,7 @@ let rec areAnyFuncParamsStructs (l : A.param list) =
                  Struct(_) -> true
                | _ -> areAnyFuncParamsStructs ps)
 
-let rec applyTypeToAlphaSharedExpr(AlphaSharedExpr(expr)) t =
+let rec applyTypeToAlphaSharedExpr (AlphaSharedExpr(expr)) t =
   match expr with
     Ternary(b,e1,e2) -> Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)
   | _ -> expr
@@ -204,37 +204,51 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
       let (tcExpr1, type1) = tc_expression varEnv e1 in
       let (tcExpr2, type2) = tc_expression varEnv e2 in
       (match op with
-             GT -> (match (tcExpr1, tcExpr2) with
+             A.GT -> (match (tcExpr1, tcExpr2) with
                           (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntGreaterThan(exp1, exp2)), BOOL)
-                        | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                        | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false) 
+                        | (IntExpr(exp1), AlphaExpr(exp2)) -> 
+                            (BoolExpr(IntGreaterThan(exp1, IntSharedExpr(applyTypeToAlphaSharedExpr exp2 INT))), BOOL)
+                        | (AlphaExpr(exp1), IntExpr(exp2)) -> 
+                            (BoolExpr(IntGreaterThan(IntSharedExpr(applyTypeToAlphaSharedExpr exp1 INT), exp2)), BOOL)
                         | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharGreaterThan(exp1, exp2)), BOOL)
-                        | (CharExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                        | (AlphaExpr(exp1), CharExpr(exp2)) -> assert(false)
+                        | (CharExpr(exp1), AlphaExpr(exp2)) ->
+                            (BoolExpr(CharGreaterThan(exp1, CharSharedExpr(applyTypeToAlphaSharedExpr exp2 CHAR))), BOOL)
+                        | (AlphaExpr(exp1), CharExpr(exp2)) -> 
+                            (BoolExpr(CharGreaterThan(CharSharedExpr(applyTypeToAlphaSharedExpr exp1 CHAR), exp2)), BOOL)
                         | (AlphaExpr(exp1), AlphaExpr(exp2)) -> assert(false)
                         | _ -> (ErrorMsg.error ("greater than expression didn't typecheck \n");
                                raise ErrorMsg.Error))
-           | LT -> (match (tcExpr1, tcExpr2) with
+           | A.LT -> (match (tcExpr1, tcExpr2) with
                           (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntLessThan(exp1, exp2)), BOOL)
-                        | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                        | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false)
+                        | (IntExpr(exp1), AlphaExpr(exp2)) -> 
+                            (BoolExpr(IntLessThan(exp1, IntSharedExpr(applyTypeToAlphaSharedExpr exp2 INT))), BOOL)
+                        | (AlphaExpr(exp1), IntExpr(exp2)) -> 
+                            (BoolExpr(IntLessThan(IntSharedExpr(applyTypeToAlphaSharedExpr exp1 INT), exp2)), BOOL)
                         | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharLessThan(exp1, exp2)), BOOL)
-                        | (CharExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                        | (AlphaExpr(exp1), CharExpr(exp2)) -> assert(false)
+                        | (CharExpr(exp1), AlphaExpr(exp2)) -> 
+                            (BoolExpr(CharLessThan(exp1, CharSharedExpr(applyTypeToAlphaSharedExpr exp2 CHAR))), BOOL)
+                        | (AlphaExpr(exp1), CharExpr(exp2)) -> 
+                            (BoolExpr(CharLessThan(CharSharedExpr(applyTypeToAlphaSharedExpr exp1 CHAR), exp2)), BOOL)
                         | (AlphaExpr(exp1), AlphaExpr(exp2)) -> assert(false)
                         | _ -> (ErrorMsg.error ("less than expression didn't typecheck \n");
                                raise ErrorMsg.Error))
-           | DOUBLE_EQ ->
+           | A.DOUBLE_EQ ->
                (match (tcExpr1, tcExpr2) with
                   (IntExpr(exp1), IntExpr(exp2)) -> (BoolExpr(IntEquals(exp1, exp2)), BOOL)
-                | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false)
+                | (IntExpr(exp1), AlphaExpr(exp2)) -> 
+                    (BoolExpr(IntEquals(exp1, IntSharedExpr(applyTypeToAlphaSharedExpr exp2 INT))), BOOL)
+                | (AlphaExpr(exp1), IntExpr(exp2)) -> 
+                    (BoolExpr(IntEquals(IntSharedExpr(applyTypeToAlphaSharedExpr exp1 INT), exp2)), BOOL)
                 | (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(BoolEquals(exp1, exp2)), BOOL)
-                | (BoolExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                | (AlphaExpr(exp1), BoolExpr(exp2)) -> assert(false)
+                | (BoolExpr(exp1), AlphaExpr(exp2)) ->
+                    (BoolExpr(BoolEquals(exp1, BoolSharedExpr(applyTypeToAlphaSharedExpr exp2 BOOL))), BOOL)
+                | (AlphaExpr(exp1), BoolExpr(exp2)) -> 
+                    (BoolExpr(BoolEquals(BoolSharedExpr(applyTypeToAlphaSharedExpr exp1 BOOL), exp2)), BOOL)
                 | (CharExpr(exp1), CharExpr(exp2)) -> (BoolExpr(CharEquals(exp1, exp2)), BOOL)
-                | (CharExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                | (AlphaExpr(exp1), CharExpr(exp2)) -> assert(false)
+                | (CharExpr(exp1), AlphaExpr(exp2)) -> 
+                    (BoolExpr(CharEquals(exp1, CharSharedExpr(applyTypeToAlphaSharedExpr exp2 CHAR))), BOOL)
+                | (AlphaExpr(exp1), CharExpr(exp2)) ->
+                    (BoolExpr(CharEquals(CharSharedExpr(applyTypeToAlphaSharedExpr exp1 CHAR), exp2)), BOOL)
                 | (PtrExpr(exp1), PtrExpr(exp2)) -> 
                     if matchTypes type1 type2 && 
                        notAStruct type1 && notAStruct type2 then
@@ -247,18 +261,22 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
                 | _ -> 
                   (ErrorMsg.error ("double eq exprs didn't typecheck \n");
                      raise ErrorMsg.Error))
-           | LOG_AND -> 
+           | A.LOG_AND -> 
                (match (tcExpr1, tcExpr2) with
                   (BoolExpr(exp1), BoolExpr(exp2)) -> (BoolExpr(LogAnd(exp1, exp2)), BOOL)
-                | (BoolExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                | (AlphaExpr(exp1), BoolExpr(exp2)) -> assert(false)
+                | (BoolExpr(exp1), AlphaExpr(exp2)) -> 
+                    (BoolExpr(LogAnd(exp1, BoolSharedExpr(applyTypeToAlphaSharedExpr exp2 BOOL))), BOOL)
+                | (AlphaExpr(exp1), BoolExpr(exp2)) -> 
+                    (BoolExpr(LogAnd(BoolSharedExpr(applyTypeToAlphaSharedExpr exp1 BOOL), exp2)), BOOL)
                 | _ -> (ErrorMsg.error ("logical and exprs didn't typecheck \n");
                          raise ErrorMsg.Error))
-           | IntBinop(intOp) -> 
+           | A.IntBinop(intOp) -> 
                (match (tcExpr1, tcExpr2) with
                   (IntExpr(exp1), IntExpr(exp2)) -> (IntExpr(ASTBinop(exp1, intOp, exp2)), INT)
-                | (IntExpr(exp1), AlphaExpr(exp2)) -> assert(false)
-                | (AlphaExpr(exp1), IntExpr(exp2)) -> assert(false)
+                | (IntExpr(exp1), AlphaExpr(exp2)) -> 
+                    (IntExpr(ASTBinop(exp1, intOp, IntSharedExpr(applyTypeToAlphaSharedExpr exp2 INT))), INT)
+                | (AlphaExpr(exp1), IntExpr(exp2)) -> 
+                    (IntExpr(ASTBinop(IntSharedExpr(applyTypeToAlphaSharedExpr exp1 INT), intOp, exp2)), INT)
                 | _ -> 
                   (ErrorMsg.error ("int binop expressions didn't typecheck \n");
                     raise ErrorMsg.Error)))
@@ -266,7 +284,7 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
       let (tcExpr,t) = tc_expression varEnv e' in
       (match tcExpr with
              BoolExpr(exp1) -> (BoolExpr(LogNot(exp1)), BOOL)
-           | AlphaExpr(exp1) -> assert(false)
+           | AlphaExpr(exp1) -> (BoolExpr(LogNot(BoolSharedExpr(applyTypeToAlphaSharedExpr exp1 BOOL))), BOOL)
            | _ -> (ErrorMsg.error ("not expression didn't typecheck \n");
                   raise ErrorMsg.Error))
   | A.UntypedPostElabTernary(e1, e2, e3) ->
