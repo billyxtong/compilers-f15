@@ -22,7 +22,9 @@ Blah blah WE NEED TO DO THIS\\
 Since type inference will cause some tests to typecheck that previously would have thrown an error, it is disabled by default, and can be enabled with the compilation flag --typeInference (i.e. ./top.native --typeInference $<$filename$>$).\\
 
 \subsection{Strings and characters}
-String constants and characters are now included in the $exp$ type from the L4 grammar. String constants are defined as the following regexp: (``) + (any character that isn't double quotes $\cup \  \backslash")^*$ +("). Characters are defined as any OCaml character, plus several that don't appear in OCaml apparently, just as `$\backslash$ f'.
+String constants and characters are now included in the $exp$ type from the L4 grammar. String constants are defined as the following regexp: (``) + (any character that isn't double quotes $\cup \  \backslash")^*$ +("). Disallowing double quotes in the string body is necessary, or else the lexer may take the longest lex and intepret ``hello"; ``bye"; as a single string.
+
+Characters are defined as any OCaml character, plus several that don't appear in OCaml apparently, just as `$\backslash$ f'.
 
 The semantics for strings and characters are just as defined in the handout: characters can be compared by their ascii values with $<. >, ==$, etc, strings cannot be compared but are treated as a small type.
 
@@ -33,6 +35,8 @@ The addition of function pointers to the L5 grammar was straightforward. A new t
 The unary address-of operator $\&$ was also added, along with the new expression for a function pointer call.
 
 The main interesting thing about the semantics for function pointers is the requirement that comparison is done nominally, as it tested by our test ``test18.l6".
+
+BILLY TALK ABOUT FUNCTION POINTER TYPECHECKING SEMANTICS
 
 \subsection{Basic type inference}
 The addition of type inference to the L6 grammar was also straightforward. The main differences are that fdecls and fdefns not longer must begin with a type. So fdecls can also be of the form
@@ -60,19 +64,32 @@ main () \{\\
  \\
 is disallowed. 
 
-Note that type annotations are still allowed of course. We also made \textbf{alpha} a keyword, and included a new type \textbf{alpha}$<n>$, where $n$ is any positive integer (so \textbf{alpha1}, \textbf{alpha2}, etc). The alpha type simply implies no type information: it is equivalent to leaving off the annotation.\\
+Note that type annotations are still allowed of course. We also made \textbf{alpha} a keyword, and included a new type \textbf{alpha}$<n>$, where $n$ is any positive integer (so \textbf{alpha1}, \textbf{alpha2}, etc). The alpha type simply implies no type information: it is equivalent to leaving off the annotation. So ``alpha x = 0;" is equivalent to ``x = 0", except that the former still counts as a declaration, and redeclaring variables is still disallowed. So\\
+\\
+alpha1 x = 0;\\
+int x = 0;\\
+\\
+would not typecheck.
 
 There were other changes as well: BILLY DESCRIBE THESE
 
 \subsection{Partial type annotations}
 Also inspired by functional programming, we support ``partial type annotations". We define a partial type annotation to be an annotation which provides more information than just \textbf{alpha}, but does not fully specify the type. An example would be something like this:\\
 \\
-main () \{\\
 alpha1[] a = alloc$\_$array(int[], 5);\\
-return 0;\\
 \}\\
 \\
-The type annotation on a means that a is ``some type of array". The type of the right-hand-side is int[][], which is indeed a type of array, so this typechecks.\\
+The type annotation on a means that a is ``some type of array". The type of the right-hand-side is int[][], which is indeed a type of array, so this typechecks. On the other hand, the following would not typecheck:\\
+\\
+alpha1[] a = 0;\\
+\\
+Since 0 is an int, which is not any type of array.
+
+One subtlety of the alpha type is that it does not specify a size, so example 1 is disallowed. Example 2 is allowed however, since the size of alpha1[] is known.\\
+\\
+(example 1) alpha1[] a = alloc$\_$array(alpha1, 3);\\
+(example 2) alpha1[][] a = alloc$\_$array(alpha1[], 3);\\
+\\
 
 \subsection{Polymorphism}
 In order to make type inference more interesting, we decided to support some amount of polymorphism, specifically allowing polymorphic functions. For example, the function\\
@@ -86,25 +103,38 @@ p = alloc(int);\\
 return f(*p) + *f(p);\\
 \}\\
 \\
-Unfortunately, there are many subtleties to the these semantics that we did not have time to
-implement. For example, alloc(alpha) should be disallowed, since the size of alpha is unknown, but alloc(alpha []) should be allowed. We imagine there are quite a few other such edge cases.
-
-We also decided to completely ignore type inference for structs, because for something like:\\
-\\
-struct s1 \{x;\}\\
-\\
-The size of x is needed at compile time. Even if you require type annotations on fields, we were not sure how to deal with the following:\\
+We also decided to completely ignore type inference for structs, because for something like ``struct s1 \{x;\}", since the size of x is needed at compile time. Even if you require type annotations on fields, we were not sure how to deal with the following:\\
 \\
 struct s1 \{int x; int y;\}\\
-\\
 struct s2 \{int y;\}\\
-\\
 f(s) \{return s$\to$y;\}\\
 \\
-Since it is now impossible to compute the field offset of y at compile time. There are even more issues with structs beyond these, but these were enough to deter us from even attempting to handle structs.\\
-\\
+Since it is now impossible to compute the field offset of y at compile time. There are even more issues with structs beyond these, but these were enough to deter us from even attempting to handle structs.
 
 \section{Compilation}
+\subsection{Strings and characters}
+For strings and characters, we had to add new type-expressions to our intermediate languages and ASTs: a CharExpr type and a StringExpr type. This was straightforward, as we had already gone through the process of adding BoolExpr and PtrExpr types.
+
+Using the regexp described previously, we convert string constants in the input file into a character list immediately during lexing. The regexp with which we defined string constants pretty much handled all of the challenges of strings, so parsing was straightforward.
+
+At runtime, we represent string constants as a dynamically allocated array of characters. So s = "abc" becomes\\
+\\
+s = alloc$\_$array(char, 3);\\
+s[0] = 'a';\\
+s[1] = 'b';\\
+s[2] = 'c';\\
+\\
+We realize that this is more costly than representing strings are text in the compiled binary as suggested in the handout, but this way we were able to reduce strings to a problem we had already solved, and we wanted more time to play around with type inference. As a result, we had no StringExpr in our intermediate languages; only in our ASTs.
+
+After typechecking, characters are treated identically to integers except with regards to size.
+
+\subsection{Function pointers}
+We felt that typechecking was the most difficult part, because after typechecking we were able to represent function pointer calls very similarly to normal function calls. One tricky bug was that in liveness, the temp holding the function pointer cannot be allocated one of the argument registers being used for that call, but otherwise post-typechecking compilation of function pointers was relatively straightforward.\\ 
+
+BILLY TALK ABOUT HOW WE DO TYPECHECKING FOR FUNCTION POINTERS
+
+\subsection{Type inference}
+BILLY EXPLAIN EVERYTHING ABOUT HOW WE IMPLEMENT TYPE INFERENCE
 
 \section{Examples}
 
