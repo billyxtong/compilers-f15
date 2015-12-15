@@ -163,8 +163,72 @@ In order to propagate the type information upwards, we make several changes. Fir
 We implement a new type of expression called an "AlphaExpr", which is reserved for expressions whose types we are not yet able to infer from the given rules, as well as add "Alpha" to c0type. In allowing type inference, our old expressions must take alphaExprs in all places they would normally require otherwise. 
 
 \section{Examples}
+\subsection{Chars and Strings}
+//return -1\\
+int main()\{\\
+  char c0 = (true ? 'a' : 'b');\\
+  string s0 = (false ? "hello" : "goodbye");\\
+  char* c1 = alloc(char);\\
+  *c1 = c0;\\
+  char[] c2 = alloc\_array(char, 2);\\
+  c2[0] = *c1;\\
+  c2[1] = '\0';\\
+  string s1 = string\_from\_chararray(c2);\\
+  string* s2 = alloc(string);\\
+  *s2 = s1;\\
+  return string\_compare(s0,*s2);\\
+\}\\
 
-Already included above? I can come up with specific examples here if you want.
+In this function, we see that chars and strings have been added to our other expressions, and that the library functions for strings are considered part of the header file. c0 is assigned value 'a', s0 is assigned value "goodbye", and pointers work as expected.
+
+\subsection{Function Pointers}
+//test return 1
+
+typedef bool cmp(int* p, int* q);
+
+bool is_sorted(cmp* pred, int*[] A, int lower, int upper)
+{
+  for (int i = lower; i < upper-1; i++) {
+        if (!(*pred)(A[i], A[i+1])) /* call function ’pred’ */
+            return false;
+              
+  }
+    return true;
+
+}
+
+bool leq(int* x, int* y){
+    return *x <= *y;
+
+}
+
+int main() {
+    int n = 10;
+      int*[] A = alloc_array(int*, n);
+      for (int i = 0; i < n; i++) {
+            int* p = alloc(int); *p = i;
+                A[i] = p;
+                  
+      }
+        return is_sorted(&leq, A, 0, n) ? 1 : 0;
+
+}
+
+In this test case, we see every aspect of function pointers tested. First, we typedef the function pointer type "cmp". Then, we define a function that uses a cmp* in the expected way. We then define a function that follows the prototype for cmp, and then in main pass that function using the address-of operator to is\_sorted. 
+
+\subsection{Type Inference}
+
+f(x){ return x; }
+
+int main() {
+  int* x = f(alloc(int));
+  *x = f(22);
+  return *f(x) + f(*x);
+}
+
+Here we see our first example of a polymorphic function. Clearly, f is of type alpha even after typechecking, so it should behave appropriately. In main, we allocate an int pointer x, have it point to the value 22, and return the expression shown correctly, which is pretty cool.
+
+
 
 \section{Analysis}
 
