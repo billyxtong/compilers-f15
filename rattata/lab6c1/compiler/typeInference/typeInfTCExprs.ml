@@ -14,7 +14,8 @@ type mytype = ((c0type Core.Std.String.Map.t) ref)* bool
 let functionMap = ref Core.Std.String.Map.empty
 let typedefMap = ref Core.Std.String.Map.empty
 let (structMap : (mytype Core.Std.String.Map.t) ref) = 
-  ref (Core.Std.String.Map.empty)
+  ref (Core.Std.String.Map.empty) 
+
 
 let isValidVarDecl (identifier : ident) =
   if sub identifier 0 1 = "\\" then true else false 
@@ -42,7 +43,7 @@ let rec addTypeToSharedExpr e = function
   | Poop -> PtrExpr (PtrSharedExpr e)
   | TypedefType t -> addTypeToSharedExpr e (lowestTypedefType (TypedefType t))
   | Struct _ -> PtrExpr (PtrSharedExpr e)
-  | Alpha n -> AlphaExpr (AlphaSharedExpr e)                  
+  | Alpha n -> AlphaExpr (AlphaSharedExpr e)
 
 let notAStruct (t : c0type) =
   match lowestTypedefType t with
@@ -65,8 +66,6 @@ let rec matchTypes (t1 : c0type) (t2 : c0type) =
            name1 == name2 && matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2
       | (FuncPrototype(Some name1, retType1, argTypes1), FuncPrototype(None, retType2, argTypes2)) ->
           matchFuncTypes retType1 retType2 && argsMatch argTypes1 argTypes2 (* binop_fn* f = &foo; *)
-      (*| (_, Alpha _) -> true
-      | (Alpha _, _) -> true *)
       | _ -> false
 
 and argsMatch (argTypes : c0type list) (paramTypes : c0type list) =
@@ -144,30 +143,20 @@ let rec areAnyFuncParamsStructs (l : A.param list) =
                  Struct(_) -> true
                | _ -> areAnyFuncParamsStructs ps)
 
-let rec applyTypeToAlphaExpr (AlphaExpr(AlphaSharedExpr(expr))) t =
+let rec applyTypeToAlphaSharedExpr(AlphaSharedExpr(expr)) t =
   match expr with
-    Ident(i) ->
-      (match t with
-         INT -> IntExpr(IntSharedExpr(Ident(i)))
-        |BOOL -> BoolExpr(BoolSharedExpr(Ident(i)))
-        |CHAR -> CharExpr(CharSharedExpr(Ident(i)))
-        |STRING -> StringExpr(StringSharedExpr(Ident(i)))
-        |_ -> assert(false))
-  | FunCall(i,args) -> 
-      (match t with
-         INT -> IntExpr(IntSharedExpr(FunCall(i,args)))
-        |BOOL -> BoolExpr(BoolSharedExpr(FunCall(i,args)))
-        |CHAR -> CharExpr(CharSharedExpr(FunCall(i,args)))
-        |STRING -> StringExpr(StringSharedExpr(FunCall(i,args)))
-        |_ -> assert(false))
-  | Ternary(b,e1,e2) -> 
-      (match t with
-         INT -> IntExpr(IntSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
-        |BOOL -> BoolExpr(BoolSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
-        |CHAR -> CharExpr(CharSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
-        |STRING -> StringExpr(StringSharedExpr(Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)))
-        |_ -> assert(false))
-  | _ -> assert(false) (* We should be allowing function pointer calls and derefs, 
+    Ternary(b,e1,e2) -> Ternary(b, applyTypeToAlphaExpr e1 t, applyTypeToAlphaExpr e2 t)
+  | _ -> expr
+
+and applyTypeToAlphaExpr (AlphaExpr(inner)) t =
+  let typeCheckedSharedExpr = applyTypeToAlphaSharedExpr inner t in
+  match t with
+    INT -> IntExpr(IntSharedExpr(typeCheckedSharedExpr))
+  | BOOL -> BoolExpr(BoolSharedExpr(typeCheckedSharedExpr))
+  | CHAR -> CharExpr(CharSharedExpr(typeCheckedSharedExpr))
+  | STRING -> StringExpr(StringSharedExpr(typeCheckedSharedExpr))
+  | _ -> assert(false)
+     (* We should be allowing function pointer calls and derefs, 
                           but our current constructors disallow this and I don't want to 
                           worry about it yet. Field accesses should only have type Alpha _
                           if two structs have the same field name and type and array 
@@ -287,21 +276,25 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
       (match tcExpr1 with
          BoolExpr(exp1) ->
            (match (tcExpr2, tcExpr3) with
-              (IntExpr(_), IntExpr(_)) -> (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), INT)
-            | (IntExpr(_), AlphaExpr(_)) -> 
+              (IntExpr _, IntExpr _) -> 
+                (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), INT)
+            | (IntExpr _, AlphaExpr _) -> 
                 (IntExpr(IntSharedExpr(Ternary(exp1, tcExpr2, applyTypeToAlphaExpr tcExpr3 INT))), INT)
-            | (AlphaExpr(_), IntExpr(_)) -> 
+            | (AlphaExpr _, IntExpr _) -> 
                 (IntExpr(IntSharedExpr(Ternary(exp1, applyTypeToAlphaExpr tcExpr2 INT, tcExpr3))), INT)
-            | (BoolExpr(_), BoolExpr(_)) -> (BoolExpr(BoolSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), BOOL)
-            | (BoolExpr(_), AlphaExpr(exp3)) -> assert(false) 
-            | (AlphaExpr(exp2), BoolExpr(_)) -> assert(false) 
-            | (CharExpr(_), CharExpr(_)) -> (CharExpr(CharSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), CHAR)
-            | (CharExpr(_), AlphaExpr(exp3)) -> assert(false)
-            | (AlphaExpr(exp2), CharExpr(_)) -> assert(false)
-            | (StringExpr(_), StringExpr(_)) -> (StringExpr(StringSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), STRING)
-            | (StringExpr(_), AlphaExpr(exp3)) -> assert(false)
-            | (AlphaExpr(exp2), StringExpr(_)) -> assert(false)
-            | (PtrExpr(_), PtrExpr(_)) ->
+            | (BoolExpr _, BoolExpr _) -> 
+                (BoolExpr(BoolSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), BOOL)
+            | (BoolExpr _, AlphaExpr _) -> assert(false) 
+            | (AlphaExpr _, BoolExpr _) -> assert(false) 
+            | (CharExpr _, CharExpr _) -> 
+                (CharExpr(CharSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), CHAR)
+            | (CharExpr _, AlphaExpr _) -> assert(false)
+            | (AlphaExpr _, CharExpr _) -> assert(false)
+            | (StringExpr _, StringExpr _) -> 
+                (StringExpr(StringSharedExpr(Ternary(exp1, tcExpr2, tcExpr3))), STRING)
+            | (StringExpr _, AlphaExpr _) -> assert(false)
+            | (AlphaExpr _, StringExpr _) -> assert(false)
+            | (PtrExpr _, PtrExpr _) ->
                 if matchTypes type2 type3 && typeNotLarge type2 && typeNotLarge type3
                 then
                   if not (type2 = Poop) (* if types match and first isn't NULL, use first *)

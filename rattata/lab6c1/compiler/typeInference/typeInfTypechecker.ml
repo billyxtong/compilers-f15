@@ -178,7 +178,7 @@ let rec tc_prog (prog : A.untypedPostElabAST) (typedAST : typedPostElabAST) =
                                 raise ErrorMsg.Error)
                    else
                    if List.exists (fun (typee, id) -> typee = VOID) funcParams then
-                      (ErrorMsg.error ("can't have void or structs as param types \n");
+                      (ErrorMsg.error ("can't have void as param types \n");
                                 raise ErrorMsg.Error)
                    else
                    if areAnyFuncParamsStructs funcParams
@@ -373,8 +373,9 @@ and tc_statements (fName : ident) varMap (untypedBlock : A.untypedPostElabBlock)
              tc_statements fName newVarMap stms funcRetType ret
              ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::typedBlock)
            else if isAlpha lvalType && not (isAlpha exprType) (* apply type of RHS to LHS *)
-           then 
-             tc_statements fName newVarMap stms funcRetType ret
+           then
+             let newerVarMap = M.add varMap id (exprType, true) in 
+             tc_statements fName newerVarMap stms funcRetType ret
              ((TypedPostElabAssignStmt(typedLVal, op, tcExpr))::(TypedPostElabDecl(id, exprType))::typedBlock)
            else if not (isAlpha lvalType) && isAlpha exprType (* apply type of LHS to RHS *)
            then
@@ -521,4 +522,95 @@ and typecheck ((untypedProgAST, untypedHeaderAST) : A.untypedPostElabOverallAST)
   (* type is INT, no params, isDefined = false, isExternal = false *)
   let typedProgAST = tc_prog untypedProgAST [] in
   List.rev (typedProgAST @ typedHeaderAST)
+
+
+let rec changeIntInner inner =
+  match inner with
+    IntConst(c) -> A.IntConst(c)
+   |IntSharedExpr(s) -> A.IntSharedExpr(changeSharedExpr s)
+   |ASTBinop(i1,op,i2) -> A.ASTBinop(changeIntInner i1, op, changeIntInner i2)
+   |BaseCaseShift(i1,op,i2) -> A.BaseCaseShift(changeIntInner i1, op, changeIntInner i2)
+
+and changeBoolInner inner =
+  match inner with
+    BoolConst(c) -> A.BoolConst(c)
+   |BoolSharedExpr(s) -> A.BoolSharedExpr(changeSharedExpr s)
+   |IntGreaterThan(i1,i2) -> A.IntGreaterThan(changeIntInner i1, changeIntInner i2)
+   |IntLessThan(i1,i2) -> A.IntLessThan(changeIntInner i1, changeIntInner i2)
+   |CharGreaterThan(i1,i2) -> A.CharGreaterThan(changeCharInner i1, changeCharInner i2)
+   |CharLessThan(i1,i2) -> A.CharLessThan(changeCharInner i1, changeCharInner i2)
+   |IntEquals(i1,i2) -> A.IntEquals(changeIntInner i1, changeIntInner i2)
+   |BoolEquals(i1,i2) -> A.BoolEquals(changeBoolInner i1, changeBoolInner i2)
+   |CharEquals(i1,i2) -> A.CharEquals(changeCharInner i1, changeCharInner i2)
+   |PtrEquals(i1,i2) -> A.PtrEquals(changePtrInner i1, changePtrInner i2)
+   |LogNot(b) -> A.LogNot(changeBoolInner b)
+   |LogAnd(b1, b2) -> A.LogAnd(changeBoolInner b1, changeBoolInner b2)
+
+and changeCharInner inner =
+  match inner with
+    CharConst(c) -> A.CharConst(c)
+   |CharSharedExpr(s) -> A.CharSharedExpr(changeSharedExpr s)
+
+and changeStringInner inner =
+  match inner with
+    StringConst(c) -> A.StringConst(c)
+   |StringSharedExpr(s) -> A.StringSharedExpr(changeSharedExpr s)
+
+and changePtrInner inner =
+  match inner with
+    Null -> A.Null
+   |PtrSharedExpr(s) -> A.PtrSharedExpr(changeSharedExpr s)
+   |Alloc(c) -> A.Alloc c
+   |AllocArray(c,i) -> A.AllocArray(c,changeIntInner i)
+   |AddressOfFunction(i) -> A.AddressOfFunction(i)
+
+and changeAlphaInner (AlphaSharedExpr(s)) = A.AlphaSharedExpr(changeSharedExpr s)
+
+and changeSharedExpr s =
+  match s with
+    Ternary(b,e1,e2)->A.Ternary(changeBoolInner b, changeExpr e1, changeExpr e2)
+   |FunCall(i,exprs)->A.FunCall(i, List.map changeExpr exprs)
+   |FuncPointerDeref(p,exprs)->A.FuncPointerDeref(changePtrInner p, List.map changeExpr exprs)
+   |FieldAccess(id1,p,id2)->A.FieldAccess(id1, changePtrInner p, id2)
+   |ArrayAccess(p,i)->A.ArrayAccess(changePtrInner p, changeIntInner i)
+   |Deref(p)->A.Deref(changePtrInner p)
+   |Ident(i)->A.Ident(i)
+
+and changeExpr expr =
+  match expr with
+    IntExpr(inner) -> A.IntExpr(changeIntInner inner)
+   |BoolExpr(inner) -> A.BoolExpr(changeBoolInner inner) 
+   |CharExpr(inner) -> A.CharExpr(changeCharInner inner) 
+   |StringExpr(inner) -> A.StringExpr(changeStringInner inner) 
+   |VoidExpr(inner) -> A.VoidExpr(changeStmt inner) 
+   |PtrExpr(inner) -> A.PtrExpr(changePtrInner inner) 
+   |AlphaExpr(inner) -> A.AlphaExpr(changeAlphaInner inner) 
+
+and changeLVal lval =
+  match lval with
+    TypedPostElabVarLVal(i) -> A.TypedPostElabVarLVal(i)
+   |TypedPostElabFieldLVal(id1, lv, id2) -> A.TypedPostElabFieldLVal(id1, changeLVal lv, id2)
+   |TypedPostElabDerefLVal(lv) -> A.TypedPostElabDerefLVal(changeLVal lv)
+   |TypedPostElabArrayAccessLVal(lv,i) -> A.TypedPostElabArrayAccessLVal(changeLVal lv, changeIntInner i)
+
+and changeStmt stmt =
+  match stmt with
+         TypedPostElabDecl(i,t) -> A.TypedPostElabDecl(i,t)
+       | TypedPostElabAssignStmt(lval,op,expr)-> 
+           A.TypedPostElabAssignStmt(changeLVal lval, op, changeExpr expr)
+       | TypedPostElabIf(b,block1,block2) -> 
+           A.TypedPostElabIf(changeBoolInner b, List.map changeStmt block1, List.map changeStmt block2) 
+       | TypedPostElabWhile(b,blk) -> A.TypedPostElabWhile(changeBoolInner b, List.map changeStmt blk)
+       | TypedPostElabReturn(expr) -> A.TypedPostElabReturn(changeExpr expr)
+       | TypedPostElabAssert(expr) -> A.TypedPostElabAssert(changeBoolInner expr)
+       | TypedPostElabVoidReturn -> A.TypedPostElabVoidReturn
+       | VoidFunCall(i,exprs) -> A.VoidFunCall(i,List.map changeExpr exprs)
+       | JumpUncond(l) -> A.JumpUncond(l)
+
+let changeDecl decl =
+  match decl with
+     TypedPostElabStructDef(i,fs) -> A.TypedPostElabStructDef(i,fs)
+    |TypedPostElabFunDef(t,i,ps,stmts) -> A.TypedPostElabFunDef(t,i,ps,List.map changeStmt stmts)
+
+let changeAst decls = List.map changeDecl decls
 

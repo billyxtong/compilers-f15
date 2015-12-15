@@ -111,7 +111,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     say_if dump_typedAST (fun () ->
       TypeInfPrintASTS.typedPostElabASTToString(typedPostElabAst));
     if typecheck_only then exit 0;
-    typedPostElabAst)
+    TypeInfTypechecker.changeAst typedPostElabAst)
 
     else                   
     (* NORMAL PARSE/TYPECHECK STUFF (NO TYPE INFERENCE *)

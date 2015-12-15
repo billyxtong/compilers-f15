@@ -6,3 +6,4 @@
 
 (* prints error message and raises ErrorMsg.error if error found *)
 val typecheck : Ast.untypedPostElabOverallAST -> TypeInfAst.typedPostElabAST
+val changeAst : TypeInfAst.typedPostElabAST -> Ast.typedPostElabAST
