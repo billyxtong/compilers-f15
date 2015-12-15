@@ -12,15 +12,6 @@ open PrintDatatypes
 open TypeInfPrintASTS
 open TypeInfTCExprs
 
-let isAlpha t =
-  match t with
-    Alpha _ -> true
-   |_ -> false
-
-
-
-
-
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
 let rec tc_header (header : A.untypedPostElabAST) (typedAST : typedPostElabAST) = 
   match header with
@@ -199,10 +190,11 @@ let rec tc_prog (prog : A.untypedPostElabAST) (typedAST : typedPostElabAST) =
                             then (ErrorMsg.error ("trying to define predefined/ external function \n");
                                  raise ErrorMsg.Error)
                             else
-                              if not ((matchFuncTypes fType funcType) && 
-                                      (matchParamListTypes paramTypes funcParams))
+                              if (not (matchFuncTypes fType funcType) ||  
+                                 not (matchParamListTypes paramTypes funcParams)) && not (isAlpha funcType)
                               then
-                                (ErrorMsg.error ("trying to define func with wrong func type/param types \n");
+                                (ErrorMsg.error ("func type in map: " ^ c0typeToString fType ^ 
+                                "\nfunc type in def: " ^ c0typeToString funcType ^ "\n");
                                    raise ErrorMsg.Error)
                               else
                                 let () = H.remove declaredAndUsedButUndefinedFunctionTable funcName in
@@ -337,10 +329,14 @@ and tc_statements (fName : ident) varMap (untypedBlock : A.untypedPostElabBlock)
                     let newTypedAST = (TypedPostElabAssignStmt(TypedPostElabVarLVal(id), A.EQ, tcExpr)
                                     :: TypedPostElabDecl(id, actualDeclType)
                                     :: typedBlock) in
-                    if matchTypes actualDeclType exprType then
-                      let newVarMap = M.add varMap id (actualDeclType, true) in 
+                    let newVarMap = M.add varMap id (actualDeclType, true) in
+                    if matchTypes actualDeclType exprType then 
                       tc_statements fName newVarMap stms funcRetType ret newTypedAST
-                    else (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(actualDeclType) ^"\nRHS type: "
+                    else if not (isAlpha actualDeclType) && isAlpha exprType
+                    then 
+                      tc_statements fName newVarMap stms funcRetType ret newTypedAST
+                    else                  
+                      (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(actualDeclType) ^"\nRHS type: "
                                     ^ c0typeToString(exprType));
                           raise ErrorMsg.Error)
                | _ -> (ErrorMsg.error ("var names can't shadow func/typedef/declared var names\n");
@@ -477,8 +473,13 @@ and tc_statements (fName : ident) varMap (untypedBlock : A.untypedPostElabBlock)
           let () = functionMap := M.add !functionMap fName (exprType,x,y,z) in
           tc_statements fName newVarMap stms funcRetType true 
           ((TypedPostElabReturn(tcExpr)) :: typedBlock)
+        else if isAlpha fType && isAlpha exprType 
+        then 
+          tc_statements fName newVarMap stms funcRetType true 
+          ((TypedPostElabReturn(tcExpr)) :: typedBlock)
         else
-          (ErrorMsg.error ("return expr not same as func ret type\n");
+          (ErrorMsg.error ("return expr type: " ^ c0typeToString exprType ^ 
+            ", func ret type: " ^ c0typeToString funcRetType ^ "\n");
             raise ErrorMsg.Error)      
   | A.UntypedPostElabVoidReturn::stms ->
       (* Same as above, variables declared are treated as initalized in

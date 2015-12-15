@@ -16,6 +16,10 @@ let typedefMap = ref Core.Std.String.Map.empty
 let (structMap : (mytype Core.Std.String.Map.t) ref) = 
   ref (Core.Std.String.Map.empty) 
 
+let isAlpha t =
+  match t with
+    Alpha _ -> true
+   |_ -> false
 
 let isValidVarDecl (identifier : ident) =
   if sub identifier 0 1 = "\\" then true else false 
@@ -76,7 +80,10 @@ and argsMatch (argTypes : c0type list) (paramTypes : c0type list) =
       | (arg :: args, p :: ps) ->
           if matchTypes arg p
           then argsMatch args ps
-          else false
+          else 
+            if isAlpha arg || isAlpha p
+            then argsMatch args ps
+            else false
 
 and matchFuncTypes (funcType1 : c0type) (funcType2 : c0type) =
   if (lowestTypedefType funcType1) = (lowestTypedefType funcType2)
@@ -277,8 +284,11 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
                     (IntExpr(ASTBinop(exp1, intOp, IntSharedExpr(applyTypeToAlphaSharedExpr exp2 INT))), INT)
                 | (AlphaExpr(exp1), IntExpr(exp2)) -> 
                     (IntExpr(ASTBinop(IntSharedExpr(applyTypeToAlphaSharedExpr exp1 INT), intOp, exp2)), INT)
+                | (AlphaExpr(exp1), AlphaExpr(exp2)) ->
+                    (IntExpr(ASTBinop(IntSharedExpr(applyTypeToAlphaSharedExpr exp1 INT), intOp,
+                                      IntSharedExpr(applyTypeToAlphaSharedExpr exp2 INT))), INT)
                 | _ -> 
-                  (ErrorMsg.error ("int binop expressions didn't typecheck \n");
+                  (ErrorMsg.error ("LHS type: " ^ c0typeToString type1 ^ ", RHS type: " ^ c0typeToString type2 ^ " \n");
                     raise ErrorMsg.Error)))
   | A.UntypedPostElabNot(e' : A.untypedPostElabExpr) ->
       let (tcExpr,t) = tc_expression varEnv e' in
@@ -363,7 +373,7 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
                else
                  (ErrorMsg.error ("parameters don't typecheck: " ^
                      (concat ", " (List.map PrintDatatypes.c0typeToString funcParams)) ^
-                    " but expected " ^ concat ", "
+                    " but got " ^ concat ", "
                     (List.map PrintDatatypes.c0typeToString argTypes) ^ "\n");
                      raise ErrorMsg.Error)
            | _ -> (ErrorMsg.error ("function " ^ i ^ " doesn't exist \n");
@@ -446,6 +456,8 @@ let rec tc_expression varEnv (expression : A.untypedPostElabExpr) : typedPostEla
                     | CHAR -> (CharExpr(CharSharedExpr(Deref(p))), c)
                     | STRING -> (StringExpr(StringSharedExpr(Deref(p))), c)
                     | _ -> (PtrExpr(PtrSharedExpr(Deref(p))), c))
+           | (AlphaExpr(AlphaSharedExpr(s)), Alpha(count)) -> 
+               (AlphaExpr(AlphaSharedExpr(Deref(PtrSharedExpr(s)))), Alpha(count+1))
            | _ -> (ErrorMsg.error ("trying to dereference non-pointer expr\n");
                    raise ErrorMsg.Error))
   | A.UntypedPostElabArrayAlloc(typee, e) ->

@@ -119,7 +119,7 @@ let main files header_file verbose dump_parsing dump_ast dump_upeAST dump_typedA
     (say_if verbose (fun () -> "Parsing... " ^ main_source);
     if dump_parsing then ignore (Parsing.set_trace true);
     let preElabOverallAst = Parse.parse main_source header_file in ();
-    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst));
+    say_if dump_ast (fun () -> PrintASTs.preElabASTToString(preElabOverallAst)); 
 
     (* Elaborate *)
     say_if verbose (fun () -> "Elaborating... ");
