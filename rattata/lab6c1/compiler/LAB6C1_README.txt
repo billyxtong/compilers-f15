@@ -23,7 +23,7 @@ and the address-of operator "&".
 Finally, for type inference, we had to modify some datatypes as well as 
 create a new version of the typechecker for the new type inference rules.
 These are included in the directory "compiler/typeInference". In order to
-turn type inference on and off, we included a new flag "--typeInf" that
+turn type inference on and off, we included a new flag "--typeInference" that
 we can apply to our compiler.
 
 New relevant datatypes for L5 can be viewed in util/datatypesv1.ml and 
@@ -34,8 +34,17 @@ Compiler flow:
 
 Steps 1-5 are in the directory "front_end/", and 6-9 are in "back_end/".
 
-1. Lexing:
-2. Parsing:
+1. Lexing: The file c0Lexer.mll in front_end/parse had to change a bit for
+strings. We handled escape sequences explicitly, and we defined the regexp
+for a string to be (double quotes) followed by (anything that is not double
+quotes, unless it's \") followed by (double quotes). Lexing function
+pointers was straightforward.
+
+2. Parsing: Parsing remained largely the same, since strings were handled
+in lexing. For type inference, we had to change function declarations
+to not require types beforehand. The other type of type inference (variable
+declarations without types) can simply be treated as simple assignments,
+and so did not require changes the parser.
 
 3. Elaboration: Elaboration remained mostly the same from L4, with new
 transformations needed for chars and strings. We handled escape sequences
@@ -53,9 +62,16 @@ applied new rules. Once finished, we transformed the
 typeInfAst.typedPostElabAST back into a Ast.typedPostElabAST (so top.ml
 would work).
 
-5. Convert to infinite address code:
-6. Convert to 3 address code:
-7. Convert to 2 address code:
-8. Register allocation and liveness analysis:
-9. Assembly:
+5. Convert to infinite address code: Strings are represented at runtime
+as an array of characters created by allocating dynamic memory. Although
+this can be more costly, it allowed us to reduce it to a problem that
+we already solved.
+
+The rest of the steps remained largely the same. Function pointer calls
+are handled very similarly to normal function calls, requiring only
+small adjustments to the code.
+6. Convert to 3 address code
+7. Convert to 2 address code
+8. Register allocation and liveness analysis
+9. Assembly
 
