@@ -1,0 +1,10 @@
+//test error
+//tests alpha annotations (partial type annotations)
+
+int main () {
+   alpha1 x = 0; //ok
+   alpha2[] y = alloc_array(int[], 4);//also ok
+   alpha3[] z = 0; //fail: 0 isn't any type of array
+   return 0;
+   }
+

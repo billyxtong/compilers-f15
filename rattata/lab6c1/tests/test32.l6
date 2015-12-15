@@ -1,0 +1,10 @@
+//test return 0
+//tests alpha annotations (partial type annotations). See
+//test31.l6 for an invalid partial type annotation.
+
+int main () {
+   alpha1 x = 0; //ok
+   alpha2[] y = alloc_array(int[], 4);//also ok, RHS is int[][]
+   return 0;
+   }
+

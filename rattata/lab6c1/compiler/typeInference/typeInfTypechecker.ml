@@ -12,6 +12,16 @@ open PrintDatatypes
 open TypeInfPrintASTS
 open TypeInfTCExprs
 
+(* i.e. alpha contains int, but alpha also contains alpha[], and
+   alpha[] contains int [][] *)
+let rec areCompatibleTypes type1 type2 =
+    match (type1, type2) with
+        (Alpha _, _) -> true
+      | (_, Alpha _) -> true
+      | (Pointer p1, Pointer p2) -> areCompatibleTypes p1 p2
+      | (Array a1, Array a2) -> areCompatibleTypes a1 a2
+      | (_, _) -> type1 = type2                                  
+
 (* funcName -> (funcType, list of types of funcParams, isDefined, isExternal) *)
 let rec tc_header (header : A.untypedPostElabAST) (typedAST : typedPostElabAST) = 
   match header with
@@ -332,10 +342,12 @@ and tc_statements (fName : ident) varMap (untypedBlock : A.untypedPostElabBlock)
                     let newVarMap = M.add varMap id (actualDeclType, true) in
                     if matchTypes actualDeclType exprType then 
                       tc_statements fName newVarMap stms funcRetType ret newTypedAST
-                    else if not (isAlpha actualDeclType) && isAlpha exprType
+                    else if areCompatibleTypes actualDeclType exprType
+                        (* Ben added...they don't have to be equal, just compatible.
+                           Like alpha[] and int [] [] are ok *)
                     then 
                       tc_statements fName newVarMap stms funcRetType ret newTypedAST
-                    else                  
+                    else
                       (ErrorMsg.error ("\nLHS type: " ^ c0typeToString(actualDeclType) ^"\nRHS type: "
                                     ^ c0typeToString(exprType));
                           raise ErrorMsg.Error)
