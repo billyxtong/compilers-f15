@@ -16,7 +16,9 @@
 
 \section{Introduction}
 
-Blah blah WE NEED TO DO THIS\\
+Our chosen L6 project was "C0 and Beyond", or C1. We extended the compiler from L4 in several ways. First, we implemented a compiler for the L5 language by implementing chars and strings as they are implemented in C0. Second, we implemented function pointers. Finally, as "something extra" we wrote new extensions to our compiler that allowed type inference, allowing type declarations to be foregone in assignments and function declarations/definitions, but not struct field declarations.
+
+For our end result, we have a working compiler for L5 and function pointers, and some but not all aspects of L6 (type inference).
 \section{Language Extensions}
 
 Since type inference will cause some tests to typecheck that previously would have thrown an error, it is disabled by default, and can be enabled with the compilation flag --typeInference (i.e. ./top.native --typeInference $<$filename$>$).\\
@@ -35,8 +37,6 @@ The addition of function pointers to the L5 grammar was straightforward. A new t
 The unary address-of operator $\&$ was also added, along with the new expression for a function pointer call.
 
 The main interesting thing about the semantics for function pointers is the requirement that comparison is done nominally, as it tested by our test ``test18.l6".
-
-BILLY TALK ABOUT FUNCTION POINTER TYPECHECKING SEMANTICS
 
 \subsection{Basic type inference}
 The addition of type inference to the L6 grammar was also straightforward. The main differences are that fdecls and fdefns not longer must begin with a type. So fdecls can also be of the form
@@ -71,7 +71,21 @@ int x = 0;\\
 \\
 would not typecheck.
 
-There were other changes as well: BILLY DESCRIBE THESE
+There were other changes as well. We can infer the types of variables if they are used in expressions that only take certain types. For example, in the code below,
+\\
+f(x) { \\
+  y = x + 1; \\
+  return y; \\
+} \\
+\\
+when we first parse f, we know neither its type nor the type of x. However, in the statement ``y = x + 1", we see that x must in fact be an integer. We propagate this information upwards, so the typechecked function definition becomes
+\\
+int f(int x) { \\
+  int y = x + 1; \\
+  return y; \\
+} \\
+\\
+Our typechecker does this for all similar expressions that ``force" alpha expressions to have a type.
 
 \subsection{Partial type annotations}
 Also inspired by functional programming, we support ``partial type annotations". We define a partial type annotation to be an annotation which provides more information than just \textbf{alpha}, but does not fully specify the type. An example would be something like this:\\
@@ -131,8 +145,7 @@ After typechecking, characters are treated identically to integers except with r
 \subsection{Function pointers}
 We felt that typechecking was the most difficult part, because after typechecking we were able to represent function pointer calls very similarly to normal function calls. One tricky bug was that in liveness, the temp holding the function pointer cannot be allocated one of the argument registers being used for that call, but otherwise post-typechecking compilation of function pointers was relatively straightforward.\\ 
 
-BILLY TALK ABOUT HOW WE DO TYPECHECKING FOR FUNCTION POINTERS
-
+In typechecking, we check to make sure dereferenced function pointers first are declared, receive the correct number and types of parameters, and cannot be compared with other function pointers unless they are of the exact same type. The "address-of" operator can only precede the name of an existing function.
 \subsection{Type inference}
 BILLY EXPLAIN EVERYTHING ABOUT HOW WE IMPLEMENT TYPE INFERENCE
 
