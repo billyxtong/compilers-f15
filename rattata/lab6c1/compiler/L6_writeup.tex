@@ -147,13 +147,24 @@ We felt that typechecking was the most difficult part, because after typecheckin
 
 In typechecking, we check to make sure dereferenced function pointers first are declared, receive the correct number and types of parameters, and cannot be compared with other function pointers unless they are of the exact same type. The "address-of" operator can only precede the name of an existing function.
 \subsection{Type inference}
-BILLY EXPLAIN EVERYTHING ABOUT HOW WE IMPLEMENT TYPE INFERENCE
+We envision several changes to our typedPostElabAST type in order to accommodate type inference. First, we consider the changes that must be made to allow type information to be propagated backwards through a program. Oftentimes, we will have or a variable whose type is initially "alpha", either declared or passed in as a parameter. However, later in the program, it may be used in an expression that can only have a single type, for example:
+f(x,y) {\\
+  w = x;
+  z = y;
+  return true ? x + 1 : y; \\
+} \\
+Here we see that upon reaching the return statement, x and y can only be ints. Therefore, z and w must be ints. However, they've already been declared as "alphas" because x and y are initially only known to be "alphas". In order to propagate the type information upwards, we make several changes. First, we turn our typedPostElabBlock type from a "typedPostElabStmt list" to a "typedPostElabStmt ref list". Next, we make two new maps: one mapping alpha vars to their declarations in the program, and one mapping alpha vars to statements in which they are used on the RHS. We add to these tables as necessary, and change them when new type information becomes available. This makes updating the typedAST retroactively not only possible, but easy. Finally, we only allow an alpha variable to take the type of the first case in which its type is inferred. Therefore, were we to add a line "z = true" between "z = y" and the return statement, the function would no longer typecheck because y would be inferred to have type "bool".
+
+We implement a new type of expression called an "AlphaExpr", which is reserved for expressions whose types we are not yet able to infer from the given rules, as well as add "Alpha" to c0type. In allowing type inference, our old expressions must take alphaExprs in all places they would normally require otherwise. 
 
 \section{Examples}
 
+Already included above? I can come up with specific examples here if you want.
+
 \section{Analysis}
 
-
+Our compiler works according to spec for L5 and function pointers, but does not perform completely according to plan for type inference. The maps were difficult to implement, and propagating type information upwards is therefore a non-working feature. Currently, type inference is limited to in-line inference from compound expressions (ternaries, binops, etc). Future extensions would be to get the maps working. 
+ 
 \end{document}
 
 
