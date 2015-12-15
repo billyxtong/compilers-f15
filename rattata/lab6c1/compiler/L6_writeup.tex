@@ -1,0 +1,117 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amsfonts}
+\usepackage{gensymb}
+
+
+\title{15-411: L6 Written Report}
+\author{Manganese}
+\date{December 14, 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Blah blah WE NEED TO DO THIS\\
+\section{Language Extensions}
+
+Since type inference will cause some tests to typecheck that previously would have thrown an error, it is disabled by default, and can be enabled with the compilation flag --typeInference (i.e. ./top.native --typeInference $<$filename$>$).\\
+
+\subsection{Strings and characters}
+String constants and characters are now included in the $exp$ type from the L4 grammar. String constants are defined as the following regexp: (``) + (any character that isn't double quotes $\cup \  \backslash")^*$ +("). Characters are defined as any OCaml character, plus several that don't appear in OCaml apparently, just as `$\backslash$ f'.
+
+The semantics for strings and characters are just as defined in the handout: characters can be compared by their ascii values with $<. >, ==$, etc, strings cannot be compared but are treated as a small type.
+
+\subsection{Function pointers}
+The addition of function pointers to the L5 grammar was straightforward. A new type of gdecl (global declaration) was added with the form \begin{align*}
+\textbf{typedef} \ \textrm{fdecl}
+\end{align*}
+The unary address-of operator $\&$ was also added, along with the new expression for a function pointer call.
+
+The main interesting thing about the semantics for function pointers is the requirement that comparison is done nominally, as it tested by our test ``test18.l6".
+
+\subsection{Basic type inference}
+The addition of type inference to the L6 grammar was also straightforward. The main differences are that fdecls and fdefns not longer must begin with a type. So fdecls can also be of the form
+\begin{align*}
+\textbf{ident} \ \textrm{param-list};
+\end{align*}
+and fdefns can be also be of the form
+\begin{align*}
+\textbf{ident} \ \textrm{param-list} \ \textrm{block}
+\end{align*}
+Similarly, params no longer must begin a type. So params can also simply be an \textbf{ident}.
+
+The semantics also required significant changes. On the more basic side, variables no longer must be declared before they are defined (although they must still be initialized). So something like\\
+\\
+main () \{\\
+ x = 0;\\
+ return x;\}\\
+ \\
+is ok now; the type of main is inferred to be int, and the type of x is inferred to be int. We also still only allow a variable to have single type in a given scope, so\\
+\\
+main () \{\\
+ x= true;\\
+ x = 0;\\
+ return x;\}\\
+ \\
+is disallowed. 
+
+Note that type annotations are still allowed of course. We also made \textbf{alpha} a keyword, and included a new type \textbf{alpha}$<n>$, where $n$ is any positive integer (so \textbf{alpha1}, \textbf{alpha2}, etc). The alpha type simply implies no type information: it is equivalent to leaving off the annotation.\\
+
+There were other changes as well: BILLY DESCRIBE THESE
+
+\subsection{Partial type annotations}
+Also inspired by functional programming, we support ``partial type annotations". We define a partial type annotation to be an annotation which provides more information than just \textbf{alpha}, but does not fully specify the type. An example would be something like this:\\
+\\
+main () \{\\
+alpha1[] a = alloc$\_$array(int[], 5);\\
+return 0;\\
+\}\\
+\\
+The type annotation on a means that a is ``some type of array". The type of the right-hand-side is int[][], which is indeed a type of array, so this typechecks.\\
+
+\subsection{Polymorphism}
+In order to make type inference more interesting, we decided to support some amount of polymorphism, specifically allowing polymorphic functions. For example, the function\\
+\\
+f(x) \{ return x; \}\\
+\\
+has type alpha1 $\to$ alpha1. Thus it can be called with any type as argument, so the following typechecks:\\
+\\
+main () \{\\
+p = alloc(int);\\
+return f(*p) + *f(p);\\
+\}\\
+\\
+Unfortunately, there are many subtleties to the these semantics that we did not have time to
+implement. For example, alloc(alpha) should be disallowed, since the size of alpha is unknown, but alloc(alpha []) should be allowed. We imagine there are quite a few other such edge cases.
+
+We also decided to completely ignore type inference for structs, because for something like:\\
+\\
+struct s1 \{x;\}\\
+\\
+The size of x is needed at compile time. Even if you require type annotations on fields, we were not sure how to deal with the following:\\
+\\
+struct s1 \{int x; int y;\}\\
+\\
+struct s2 \{int y;\}\\
+\\
+f(s) \{return s$\to$y;\}\\
+\\
+Since it is now impossible to compute the field offset of y at compile time. There are even more issues with structs beyond these, but these were enough to deter us from even attempting to handle structs.\\
+\\
+
+\section{Compilation}
+
+\section{Examples}
+
+\section{Analysis}
+
+
+\end{document}
+
+
+
