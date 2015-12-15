@@ -16,12 +16,14 @@
 
 \section{Introduction}
 
-Our chosen L6 project was "C0 and Beyond", or C1. We extended the compiler from L4 in several ways. First, we implemented a compiler for the L5 language by implementing chars and strings as they are implemented in C0. Second, we implemented function pointers. Finally, as "something extra" we wrote new extensions to our compiler that allowed type inference, allowing type declarations to be foregone in assignments and function declarations/definitions, but not struct field declarations.
+Our chosen L6 project was "C0 and Beyond", or C1. We extended the compiler from L4 in several ways. First, we implemented a compiler for the L5 language by implementing chars and strings as they are implemented in C0. Second, we implemented function pointers. Finally, as ``something extra" we wrote new extensions to our compiler that allowed type inference, allowing type declarations to be foregone in assignments and function declarations/definitions, but not struct field declarations.
 
-For our end result, we have a working compiler for L5 and function pointers, and some but not all aspects of L6 (type inference).
+For our end result, we have a working compiler for L5 and function pointers, and some but not all aspects of ype inference.
+
+
+Since type inference will cause some tests to typecheck that previously would have thrown an error, it is disabled by default, and can be enabled with the compilation flag -{}-typeInference (i.e. ./top.native  -{}-typeInference $<$filename$>$).
 \section{Language Extensions}
 
-Since type inference will cause some tests to typecheck that previously would have thrown an error, it is disabled by default, and can be enabled with the compilation flag --typeInference (i.e. ./top.native --typeInference $<$filename$>$).\\
 
 \subsection{Strings and characters}
 String constants and characters are now included in the $exp$ type from the L4 grammar. String constants are defined as the following regexp: (``) + (any character that isn't double quotes $\cup \  \backslash")^*$ +("). Disallowing double quotes in the string body is necessary, or else the lexer may take the longest lex and intepret ``hello"; ``bye"; as a single string.
@@ -71,14 +73,14 @@ int x = 0;\\
 \\
 would not typecheck.
 
-There were other changes as well. We can infer the types of variables if they are used in expressions that only take certain types. For example, in the code below,
+There were other changes as well. We can infer the types of variables if they are used in expressions that only take certain types. For example, in the code below,\\
 \\
 f(x) { \\
   y = x + 1; \\
   return y; \\
 } \\
 \\
-when we first parse f, we know neither its type nor the type of x. However, in the statement ``y = x + 1", we see that x must in fact be an integer. We propagate this information upwards, so the typechecked function definition becomes
+when we first parse f, we know neither its type nor the type of x. However, in the statement ``y = x + 1", we see that x must in fact be an integer. We propagate this information upwards, so the typechecked function definition becomes\\
 \\
 int f(int x) { \\
   int y = x + 1; \\
@@ -91,7 +93,6 @@ Our typechecker does this for all similar expressions that ``force" alpha expres
 Also inspired by functional programming, we support ``partial type annotations". We define a partial type annotation to be an annotation which provides more information than just \textbf{alpha}, but does not fully specify the type. An example would be something like this:\\
 \\
 alpha1[] a = alloc$\_$array(int[], 5);\\
-\}\\
 \\
 The type annotation on a means that a is ``some type of array". The type of the right-hand-side is int[][], which is indeed a type of array, so this typechecks. On the other hand, the following would not typecheck:\\
 \\
@@ -102,8 +103,7 @@ Since 0 is an int, which is not any type of array.
 One subtlety of the alpha type is that it does not specify a size, so example 1 is disallowed. Example 2 is allowed however, since the size of alpha1[] is known.\\
 \\
 (example 1) alpha1[] a = alloc$\_$array(alpha1, 3);\\
-(example 2) alpha1[][] a = alloc$\_$array(alpha1[], 3);\\
-\\
+(example 2) alpha1[][] a = alloc$\_$array(alpha1[], 3);
 
 \subsection{Polymorphism}
 In order to make type inference more interesting, we decided to support some amount of polymorphism, specifically allowing polymorphic functions. For example, the function\\
@@ -146,14 +146,19 @@ After typechecking, characters are treated identically to integers except with r
 We felt that typechecking was the most difficult part, because after typechecking we were able to represent function pointer calls very similarly to normal function calls. One tricky bug was that in liveness, the temp holding the function pointer cannot be allocated one of the argument registers being used for that call, but otherwise post-typechecking compilation of function pointers was relatively straightforward.\\ 
 
 In typechecking, we check to make sure dereferenced function pointers first are declared, receive the correct number and types of parameters, and cannot be compared with other function pointers unless they are of the exact same type. The "address-of" operator can only precede the name of an existing function.
+
 \subsection{Type inference}
-We envision several changes to our typedPostElabAST type in order to accommodate type inference. First, we consider the changes that must be made to allow type information to be propagated backwards through a program. Oftentimes, we will have or a variable whose type is initially "alpha", either declared or passed in as a parameter. However, later in the program, it may be used in an expression that can only have a single type, for example:
-f(x,y) {\\
-  w = x;
-  z = y;
+We envision several changes to our typedPostElabAST type in order to accommodate type inference. First, we consider the changes that must be made to allow type information to be propagated backwards through a program. Oftentimes, we will have or a variable whose type is initially "alpha", either declared or passed in as a parameter. However, later in the program, it may be used in an expression that can only have a single type, for example:\\
+\\
+f(x,y) \{\\
+  w = x;\\
+  z = y;\\
   return true ? x + 1 : y; \\
-} \\
-Here we see that upon reaching the return statement, x and y can only be ints. Therefore, z and w must be ints. However, they've already been declared as "alphas" because x and y are initially only known to be "alphas". In order to propagate the type information upwards, we make several changes. First, we turn our typedPostElabBlock type from a "typedPostElabStmt list" to a "typedPostElabStmt ref list". Next, we make two new maps: one mapping alpha vars to their declarations in the program, and one mapping alpha vars to statements in which they are used on the RHS. We add to these tables as necessary, and change them when new type information becomes available. This makes updating the typedAST retroactively not only possible, but easy. Finally, we only allow an alpha variable to take the type of the first case in which its type is inferred. Therefore, were we to add a line "z = true" between "z = y" and the return statement, the function would no longer typecheck because y would be inferred to have type "bool".
+\} \\
+\\
+Here we see that upon reaching the return statement, x and y can only be ints. Therefore, z and w must be ints. However, they've already been declared as "alphas" because x and y are initially only known to be "alphas". 
+
+In order to propagate the type information upwards, we make several changes. First, we turn our typedPostElabBlock type from a "typedPostElabStmt list" to a "typedPostElabStmt ref list". Next, we make two new maps: one mapping alpha vars to their declarations in the program, and one mapping alpha vars to statements in which they are used on the RHS. We add to these tables as necessary, and change them when new type information becomes available. This makes updating the typedAST retroactively not only possible, but easy. Finally, we only allow an alpha variable to take the type of the first case in which its type is inferred. Therefore, were we to add a line "z = true" between "z = y" and the return statement, the function would no longer typecheck because y would be inferred to have type "bool".
 
 We implement a new type of expression called an "AlphaExpr", which is reserved for expressions whose types we are not yet able to infer from the given rules, as well as add "Alpha" to c0type. In allowing type inference, our old expressions must take alphaExprs in all places they would normally require otherwise. 
 
@@ -163,7 +168,9 @@ Already included above? I can come up with specific examples here if you want.
 
 \section{Analysis}
 
-Our compiler works according to spec for L5 and function pointers, but does not perform completely according to plan for type inference. The maps were difficult to implement, and propagating type information upwards is therefore a non-working feature. Currently, type inference is limited to in-line inference from compound expressions (ternaries, binops, etc). Future extensions would be to get the maps working. 
+Our compiler works according to spec for L5 and function pointers, but does not perform completely according to plan for type inference. The maps were difficult to implement, and propagating type information upwards is therefore a non-working feature. In addition to basic type inference, we were able to implement basic polymorphism as we planned (see test25.l6), as well as partial type annotations (see test31.l6 and test32.l6).
+
+ Future extensions would be to get the maps working. 
  
 \end{document}
 
