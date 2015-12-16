@@ -62,6 +62,10 @@ applied new rules. Once finished, we transformed the
 typeInfAst.typedPostElabAST back into a Ast.typedPostElabAST (so top.ml
 would work).
 
+Other changes include the need to accept the AlphaExpr datatype in basically
+every expression, and the need to propagate type information forward AND
+backward. However, this last feature does not quite work.
+
 5. Convert to infinite address code: Strings are represented at runtime
 as an array of characters created by allocating dynamic memory. Although
 this can be more costly, it allowed us to reduce it to a problem that
