@@ -16,7 +16,7 @@
 
 \section{Introduction}
 
-Our chosen L6 project was "C0 and Beyond", or C1. We extended the compiler from L4 in several ways. First, we implemented a compiler for the L5 language by implementing chars and strings as they are implemented in C0. Second, we implemented function pointers. Finally, as ``something extra" we wrote new extensions to our compiler that allowed type inference, allowing type declarations to be foregone in assignments and function declarations/definitions, but not struct field declarations.
+Our chosen L6 project was ``C0 and Beyond", or C1. We extended the compiler from L4 in several ways. First, we implemented a compiler for the L5 language by implementing chars and strings as they are implemented in C0. Second, we implemented function pointers. Finally, as ``something extra" we wrote new extensions to our compiler that allowed type inference, allowing type declarations to be foregone in assignments and function declarations/definitions, but not struct field declarations.
 
 For our end result, we have a working compiler for L5 and function pointers, and some but not all aspects of ype inference.
 
@@ -75,17 +75,17 @@ would not typecheck.
 
 There were other changes as well. We can infer the types of variables if they are used in expressions that only take certain types. For example, in the code below,\\
 \\
-f(x) { \\
+f(x) \{ \\
   y = x + 1; \\
   return y; \\
-} \\
+\} \\
 \\
 when we first parse f, we know neither its type nor the type of x. However, in the statement ``y = x + 1", we see that x must in fact be an integer. We propagate this information upwards, so the typechecked function definition becomes\\
 \\
-int f(int x) { \\
+int f(int x) \{ \\
   int y = x + 1; \\
   return y; \\
-} \\
+\} \\
 \\
 Our typechecker does this for all similar expressions that ``force" alpha expressions to have a type.
 
@@ -131,12 +131,12 @@ For strings and characters, we had to add new type-expressions to our intermedia
 
 Using the regexp described previously, we convert string constants in the input file into a character list immediately during lexing. The regexp with which we defined string constants pretty much handled all of the challenges of strings, so parsing was straightforward.
 
-At runtime, we represent string constants as a dynamically allocated array of characters. So s = "abc" becomes\\
+At runtime, we represent string constants as a dynamically allocated array of characters. So s = ``abc" becomes\\
 \\
 s = alloc$\_$array(char, 3);\\
-s[0] = 'a';\\
-s[1] = 'b';\\
-s[2] = 'c';\\
+s[0] = `a';\\
+s[1] = `b';\\
+s[2] = `c';\\
 \\
 We realize that this is more costly than representing strings are text in the compiled binary as suggested in the handout, but this way we were able to reduce strings to a problem we had already solved, and we wanted more time to play around with type inference. As a result, we had no StringExpr in our intermediate languages; only in our ASTs.
 
@@ -145,10 +145,10 @@ After typechecking, characters are treated identically to integers except with r
 \subsection{Function pointers}
 We felt that typechecking was the most difficult part, because after typechecking we were able to represent function pointer calls very similarly to normal function calls. One tricky bug was that in liveness, the temp holding the function pointer cannot be allocated one of the argument registers being used for that call, but otherwise post-typechecking compilation of function pointers was relatively straightforward.\\ 
 
-In typechecking, we check to make sure dereferenced function pointers first are declared, receive the correct number and types of parameters, and cannot be compared with other function pointers unless they are of the exact same type. The "address-of" operator can only precede the name of an existing function.
+In typechecking, we check to make sure dereferenced function pointers first are declared, receive the correct number and types of parameters, and cannot be compared with other function pointers unless they are of the exact same type. The ``address-of" operator can only precede the name of an existing function.
 
 \subsection{Type inference}
-We envision several changes to our typedPostElabAST type in order to accommodate type inference. First, we consider the changes that must be made to allow type information to be propagated backwards through a program. Oftentimes, we will have or a variable whose type is initially "alpha", either declared or passed in as a parameter. However, later in the program, it may be used in an expression that can only have a single type, for example:\\
+We envision several changes to our typedPostElabAST type in order to accommodate type inference. First, we consider the changes that must be made to allow type information to be propagated backwards through a program. Oftentimes, we will have or a variable whose type is initially ``alpha", either declared or passed in as a parameter. However, later in the program, it may be used in an expression that can only have a single type, for example:\\
 \\
 f(x,y) \{\\
   w = x;\\
@@ -156,55 +156,53 @@ f(x,y) \{\\
   return true ? x + 1 : y; \\
 \} \\
 \\
-Here we see that upon reaching the return statement, x and y can only be ints. Therefore, z and w must be ints. However, they've already been declared as "alphas" because x and y are initially only known to be "alphas". 
+Here we see that upon reaching the return statement, x and y can only be ints. Therefore, z and w must be ints. However, they've already been declared as "alphas" because x and y are initially only known to be ``alphas". 
 
-In order to propagate the type information upwards, we make several changes. First, we turn our typedPostElabBlock type from a "typedPostElabStmt list" to a "typedPostElabStmt ref list". Next, we make two new maps: one mapping alpha vars to their declarations in the program, and one mapping alpha vars to statements in which they are used on the RHS. We add to these tables as necessary, and change them when new type information becomes available. This makes updating the typedAST retroactively not only possible, but easy. Finally, we only allow an alpha variable to take the type of the first case in which its type is inferred. Therefore, were we to add a line "z = true" between "z = y" and the return statement, the function would no longer typecheck because y would be inferred to have type "bool".
+In order to propagate the type information upwards, we make several changes. First, we turn our typedPostElabBlock type from a ``typedPostElabStmt list" to a ``typedPostElabStmt ref list". Next, we make two new maps: one mapping alpha vars to their declarations in the program, and one mapping alpha vars to statements in which they are used on the RHS. We add to these tables as necessary, and change them when new type information becomes available. This makes updating the typedAST retroactively not only possible, but easy. Finally, we only allow an alpha variable to take the type of the first case in which its type is inferred. Therefore, were we to add a line ``z = true" between ``z = y" and the return statement, the function would no longer typecheck because y would be inferred to have type "bool".
 
-We implement a new type of expression called an "AlphaExpr", which is reserved for expressions whose types we are not yet able to infer from the given rules, as well as add "Alpha" to c0type. In allowing type inference, our old expressions must take alphaExprs in all places they would normally require otherwise. 
+We implement a new type of expression called an ``AlphaExpr", which is reserved for expressions whose types we are not yet able to infer from the given rules, as well as add ``Alpha" to c0type. In allowing type inference, our old expressions must take alphaExprs in all places they would normally require otherwise. 
 
 \section{Examples}
 \subsection{Chars and Strings}
 //return -1\\
 int main()\{\\
-  char c0 = (true ? 'a' : 'b');\\
-  string s0 = (false ? "hello" : "goodbye");\\
+  char c0 = (true ? `a' : `b');\\
+  string s0 = (false ? ``hello" : ``goodbye");\\
   char* c1 = alloc(char);\\
   *c1 = c0;\\
   char[] c2 = alloc\_array(char, 2);\\
   c2[0] = *c1;\\
-  c2[1] = '\0';\\
+  c2[1] = `\0';\\
   string s1 = string\_from\_chararray(c2);\\
   string* s2 = alloc(string);\\
   *s2 = s1;\\
   return string\_compare(s0,*s2);\\
 \}\\
 
-In this function, we see that chars and strings have been added to our other expressions, and that the library functions for strings are considered part of the header file. c0 is assigned value 'a', s0 is assigned value "goodbye", and pointers work as expected.
+In this function, we see that chars and strings have been added to our other expressions, and that the library functions for strings are considered part of the header file. c0 is assigned value `a', s0 is assigned value ``goodbye", and pointers work as expected.
 
 \subsection{Function Pointers}
 //test return 1\\
 typedef bool cmp(int* p, int* q);\\
-bool is\_sorted(cmp* pred, int*[] A, int lower, int upper)\\
-\{
-  for (int i = lower; i < upper-1; i++) \{\\
-    if (!(*pred)(A[i], A[i+1])) /* call function ’pred’ */\\
-      return false;\\        
-  \}\\
+bool is\_sorted(cmp* pred, int*[] A, int lower, int upper)\{\\
+  for (int i = lower; i $<$ upper-1; i++) \{\\
+    if (!(*pred)(A[i], A[i+1])) /* call function `pred’ */\\
+      return false;\}\\
   return true;\\
 \}\\
-
+\\
 bool leq(int* x, int* y)\{\\
-  return *x <= *y;\\
-\\}
-
+  return *x $<=$ *y;\\
+\}
+\\
 int main() \{\\
   int n = 10;\\
   int*[] A = alloc\_array(int*, n);\\
-  for (int i = 0; i < n; i++) \{\\
+  for (int i = 0; i $<$ n; i++) \{\\
      int* p = alloc(int); *p = i;\\
      A[i] = p;                \\
   \}\\
-  return is\_sorted(&leq, A, 0, n) ? 1 : 0;\\
+  return is\_sorted($\&$leq, A, 0, n) ? 1 : 0;\\
 \}\\
 
 In this test case, we see every aspect of function pointers tested. First, we typedef the function pointer type "cmp". Then, we define a function that uses a cmp* in the expected way. We then define a function that follows the prototype for cmp, and then in main pass that function using the address-of operator to is\_sorted. 
@@ -212,7 +210,7 @@ In this test case, we see every aspect of function pointers tested. First, we ty
 \subsection{Type Inference}
 
 f(x)\{ return x; \}\\
-
+\\
 int main() \{\\
   int* x = f(alloc(int));\\
   *x = f(22);\\
@@ -222,7 +220,7 @@ int main() \{\\
 Here we see our first example of a polymorphic function. Clearly, f is of type alpha even after typechecking, so it should behave appropriately. In main, we allocate an int pointer x, have it point to the value 22, and return the expression shown correctly, which is pretty cool.
 
 In the following example, we see how type information gets propagated forward:
-
+\\
 //test return 0\\
 \\
 int main()\{\\
@@ -231,7 +229,7 @@ int main()\{\\
   y = a;\\
   return y;\\
 \}\\
-
+\\
 First we declare and initialize z. Then, when initializing a without a type annotation, we nevertheless know a is an int because we've already set z to be an int in our variable map. Thus a is changed in our variable map from type alpha to type int. Same goes for y, which is then returned.
 
 \section{Analysis}
