@@ -182,59 +182,63 @@ int main()\{\\
 In this function, we see that chars and strings have been added to our other expressions, and that the library functions for strings are considered part of the header file. c0 is assigned value 'a', s0 is assigned value "goodbye", and pointers work as expected.
 
 \subsection{Function Pointers}
-//test return 1
+//test return 1\\
+typedef bool cmp(int* p, int* q);\\
+bool is\_sorted(cmp* pred, int*[] A, int lower, int upper)\\
+\{
+  for (int i = lower; i < upper-1; i++) \{\\
+    if (!(*pred)(A[i], A[i+1])) /* call function ’pred’ */\\
+      return false;\\        
+  \}\\
+  return true;\\
+\}\\
 
-typedef bool cmp(int* p, int* q);
+bool leq(int* x, int* y)\{\\
+  return *x <= *y;\\
+\\}
 
-bool is_sorted(cmp* pred, int*[] A, int lower, int upper)
-{
-  for (int i = lower; i < upper-1; i++) {
-        if (!(*pred)(A[i], A[i+1])) /* call function ’pred’ */
-            return false;
-              
-  }
-    return true;
-
-}
-
-bool leq(int* x, int* y){
-    return *x <= *y;
-
-}
-
-int main() {
-    int n = 10;
-      int*[] A = alloc_array(int*, n);
-      for (int i = 0; i < n; i++) {
-            int* p = alloc(int); *p = i;
-                A[i] = p;
-                  
-      }
-        return is_sorted(&leq, A, 0, n) ? 1 : 0;
-
-}
+int main() \{\\
+  int n = 10;\\
+  int*[] A = alloc\_array(int*, n);\\
+  for (int i = 0; i < n; i++) \{\\
+     int* p = alloc(int); *p = i;\\
+     A[i] = p;                \\
+  \}\\
+  return is\_sorted(&leq, A, 0, n) ? 1 : 0;\\
+\}\\
 
 In this test case, we see every aspect of function pointers tested. First, we typedef the function pointer type "cmp". Then, we define a function that uses a cmp* in the expected way. We then define a function that follows the prototype for cmp, and then in main pass that function using the address-of operator to is\_sorted. 
 
 \subsection{Type Inference}
 
-f(x){ return x; }
+f(x)\{ return x; \}\\
 
-int main() {
-  int* x = f(alloc(int));
-  *x = f(22);
-  return *f(x) + f(*x);
-}
+int main() \{\\
+  int* x = f(alloc(int));\\
+  *x = f(22);\\
+  return *f(x) + f(*x);\\
+\}\\
 
 Here we see our first example of a polymorphic function. Clearly, f is of type alpha even after typechecking, so it should behave appropriately. In main, we allocate an int pointer x, have it point to the value 22, and return the expression shown correctly, which is pretty cool.
 
+In the following example, we see how type information gets propagated forward:
 
+//test return 0\\
+\\
+int main()\{\\
+  int z = 1;\\
+  a = z;\\
+  y = a;\\
+  return y;\\
+\}\\
+
+First we declare and initialize z. Then, when initializing a without a type annotation, we nevertheless know a is an int because we've already set z to be an int in our variable map. Thus a is changed in our variable map from type alpha to type int. Same goes for y, which is then returned.
 
 \section{Analysis}
 
 Our compiler works according to spec for L5 and function pointers, but does not perform completely according to plan for type inference. The maps were difficult to implement, and propagating type information upwards is therefore a non-working feature. In addition to basic type inference, we were able to implement basic polymorphism as we planned (see test25.l6), as well as partial type annotations (see test31.l6 and test32.l6).
 
- Future extensions would be to get the maps working. 
+Future extensions would be to get the maps working. In order to do so, we would have to figure out an efficient way to find all the vars of type alpha being used in a statement so we can add these statements to the required maps. 
  
 \end{document}
 
